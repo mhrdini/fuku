@@ -1,5 +1,6 @@
 {
   "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -7,6 +8,11 @@
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "db:migrate:dev": {
+      "cache": false,
+      "persistent": true,
+      "interactive": true
+    },
+    "db:migrate:dev:auto": {
       "cache": false,
       "persistent": true
     },
@@ -27,6 +33,8 @@
       "dependsOn": ["^generate"],
       "cache": false
     },
-    "lint": {}
+    "lint": {
+      "dependsOn": ["^lint"]
+    }
   }
 }
