@@ -24,6 +24,7 @@
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
     "@fuku/config-typescript": "workspace:*",
+    "@types/node": "^20.19.23",
     "eslint": "^9.38.0",
     "prisma": "latest",
     "rimraf": "^5.0.5",
