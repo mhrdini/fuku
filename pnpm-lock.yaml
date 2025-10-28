@@ -157,6 +157,9 @@ importers:
       '@fuku/config-typescript':
         specifier: workspace:*
         version: link:../../configs/typescript
+      '@types/node':
+        specifier: ^20.19.23
+        version: 20.19.23
       eslint:
         specifier: ^9.38.0
         version: 9.38.0(jiti@2.6.1)
