@@ -36,5 +36,6 @@ yarn-error.log*
 # turbo
 .turbo
 
-/dist
-packages/database/src/seed.development.ts
+dist/
+
+.vscode/

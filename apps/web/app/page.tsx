@@ -1,6 +1,6 @@
 import { prisma } from '@fuku/database'
 
-export default async function IndexPage() {
+const IndexPage = async () => {
   const users = await prisma.user.findMany()
 
   return (
@@ -10,3 +10,5 @@ export default async function IndexPage() {
     </div>
   )
 }
+
+export default IndexPage
