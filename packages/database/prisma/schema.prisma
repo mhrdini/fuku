@@ -11,48 +11,76 @@ generator client {
   output   = "../generated/client"
 }
 
-enum EmploymentType {
-  FULL_TIME
-  PART_TIME
-}
-
-enum LeaveType {
-  PAID
-  UNPAID
+enum UserRole {
+  ADMIN
+  STAFF
 }
 
 model User {
-  id            String    @id @default(uuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
+  id           String      @id @default(uuid())
+  name         String?
+  email        String      @unique
+  password     String
+  role         UserRole    @default(STAFF)
+  teamMemberId String?     @unique
+  teamMember   TeamMember? @relation(name: "TeamMemberToUser", fields: [teamMemberId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user")
+}
+
+enum TeamRole {
+  MANAGER
+  FULL_TIME
+  PART_TIME
+
+  @@map("team_role")
+}
+
+model TeamRoleHourlyRate {
+  id   String   @id @default(uuid())
+  role TeamRole @unique
+  rate Float
+
+  @@map("team_role_hourly_rates")
 }
 
 model TeamMember {
-  id            String          @id @default(uuid())
-  color         String?
-  familyName    String
-  givenNames    String
-  type          EmploymentType
-  dayAssignment DayAssignment[]
+  id             String           @id @default(uuid())
+  familyName     String
+  givenNames     String
+  role           TeamRole
+  rateMultiplier Float            @default(1.0)
+  dayAssignment  DayAssignment[]
+  Unavailability Unavailability[]
+  color          String?
+  User           User?            @relation("TeamMemberToUser")
+
+  @@map("team_member")
 }
 
 model Location {
   id      String            @id @default(uuid())
-  color   String?
-  name    String
+  name    String            @unique
   address String?
   shift   ShiftAssignment[]
+  color   String?
+
+  @@map("location")
 }
 
 model ShiftType {
   id          String            @id @default(uuid())
-  color       String?
-  name        String
+  name        String            @unique
   description String?
   startTime   DateTime
   endTime     DateTime
   shift       ShiftAssignment[]
+  color       String?
+
+  @@map("shift_type")
 }
 
 model DayAssignment {
@@ -62,27 +90,54 @@ model DayAssignment {
   teamMemberId String
   teamMember   TeamMember @relation(fields: [teamMemberId], references: [id])
 
-  shift ShiftAssignment? @relation("DayAssignmentToShift")
-  leave LeaveAssignment? @relation("DayAssignmentToLeave")
+  shiftAssignment ShiftAssignment? @relation("DayAssignmentToShift")
+  leaveAssignment LeaveAssignment? @relation("DayAssignmentToLeave")
 
   @@unique([teamMemberId, date])
+  @@map("day_assignment")
 }
 
 model ShiftAssignment {
   id              String        @id @default(uuid())
-  startTime       DateTime
-  endTime         DateTime
   locationId      String
   shiftTypeId     String
   location        Location?     @relation(fields: [locationId], references: [id])
   shiftType       ShiftType?    @relation(fields: [shiftTypeId], references: [id])
   dayAssignmentId String        @unique
   dayAssignment   DayAssignment @relation(name: "DayAssignmentToShift", fields: [dayAssignmentId], references: [id])
+  workHour        WorkHour?     @relation(name: "ShiftAssignmentToWorkHour")
+
+  @@map("shift_assignment")
+}
+
+model WorkHour {
+  id                String          @id @default(uuid())
+  shiftAssignmentId String          @unique
+  shiftAssignment   ShiftAssignment @relation(name: "ShiftAssignmentToWorkHour", fields: [shiftAssignmentId], references: [id])
+  actualStart       DateTime
+  actualEnd         DateTime
+  rateMultiplier    Float           @default(1.0)
+  breakMinutes      Int             @default(60)
+  calculatedHours   Float?          @default(0)
+
+  @@map("work_hour")
 }
 
 model LeaveAssignment {
   id              String        @id @default(uuid())
-  leaveType       LeaveType
+  paid            Boolean
   dayAssignmentId String        @unique
   dayAssignment   DayAssignment @relation(name: "DayAssignmentToLeave", fields: [dayAssignmentId], references: [id])
+
+  @@map("leave_assignment")
+}
+
+model Unavailability {
+  id           String     @id @default(uuid())
+  teamMemberId String
+  teamMember   TeamMember @relation(fields: [teamMemberId], references: [id])
+  date         DateTime
+  reason       String?
+
+  @@map("unavailability")
 }
