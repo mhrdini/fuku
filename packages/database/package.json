@@ -1,5 +1,5 @@
 {
-  "name": "@repo/database",
+  "name": "@fuku/database",
   "version": "1.0.0",
   "exports": {
     ".": "./src/client.ts"
@@ -22,9 +22,9 @@
     "@prisma/client": "latest"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
-    "eslint": "^8.57.0",
+    "@fuku/config-eslint": "workspace:*",
+    "@fuku/config-typescript": "workspace:*",
+    "eslint": "^9.38.0",
     "prisma": "latest",
     "rimraf": "^5.0.5",
     "tsup": "^8.0.2",

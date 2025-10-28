@@ -1,5 +1,5 @@
 {
-  "name": "@repo/typescript-config",
+  "name": "@fuku/config-typescript",
   "version": "0.0.0",
   "private": true,
   "publishConfig": {
