@@ -1,11 +1,9 @@
 {
-  "name": "@fuku/config-typescript",
+  "name": "@fuku/auth",
   "version": "0.0.0",
-  "private": true,
-  "publishConfig": {
-    "access": "public"
-  },
   "devDependencies": {
+    "@fuku/config-eslint": "workspace:*",
+    "@fuku/config-typescript": "workspace:*",
     "@fuku/config-prettier": "workspace:*",
     "prettier": "catalog:"
   },
