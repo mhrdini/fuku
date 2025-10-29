@@ -11,22 +11,33 @@
   "dependencies": {
     "@fuku/database": "workspace:*",
     "@fuku/ui": "workspace:*",
+    "@tanstack/react-query": "catalog:",
+    "@trpc/client": "catalog:",
+    "@trpc/next": "catalog:",
+    "@trpc/react-query": "catalog:",
+    "@trpc/server": "catalog:",
+    "@trpc/tanstack-react-query": "catalog:",
     "next": "^14.1.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19",
+    "superjson": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
     "@fuku/config-tailwind": "workspace:*",
     "@fuku/config-typescript": "workspace:*",
-    "@tailwindcss/postcss": "^4.1.16",
-    "@types/node": "^20.11.24",
-    "@types/react": "^18.2.61",
-    "@types/react-dom": "^18.2.19",
-    "autoprefixer": "^10.4.21",
-    "eslint": "^9.38.0",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.16",
-    "typescript": "5.5.4"
-  }
+    "@fuku/config-prettier": "workspace:*",
+    "@tailwindcss/postcss": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:react19",
+    "@types/react-dom": "catalog:react19",
+    "autoprefixer": "catalog:",
+    "eslint": "catalog:",
+    "postcss": "catalog:",
+    "prettier": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  },
+  "prettier": "@fuku/config-prettier"
 }

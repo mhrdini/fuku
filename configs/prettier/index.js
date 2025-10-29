@@ -1,10 +1,11 @@
-// .prettierrc.cjs
-/** @typedef {import("prettier").Config} PrettierConfig */
-/** @typedef {import("prettier-plugin-tailwindcss").PluginOptions} TailwindConfig */
-/** @typedef {import("@ianvs/prettier-plugin-sort-imports").PluginConfig} SortImportsConfig */
-/** @type {PrettierConfig | TailwindConfig | SortImportsConfig} */
+/**
+ * @typedef {import("prettier").Config} PrettierConfig
+ * @typedef {import("prettier-plugin-tailwindcss").PluginOptions} TailwindConfig
+ * @typedef {import("@ianvs/prettier-plugin-sort-imports").PluginConfig} SortImportsConfig
+ * @type {PrettierConfig | TailwindConfig | SortImportsConfig}
+ */
 
-module.exports = {
+const config = {
   plugins: [
     'prettier-plugin-tailwindcss',
     '@ianvs/prettier-plugin-sort-imports',
@@ -38,3 +39,5 @@ module.exports = {
   endOfLine: 'auto',
   jsxSingleQuote: true,
 }
+
+export default config

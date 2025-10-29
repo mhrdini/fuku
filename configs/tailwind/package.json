@@ -8,5 +8,10 @@
   },
   "dependencies": {
     "tailwindcss": "^4.1.16"
-  }
+  },
+  "devDependencies": {
+    "@fuku/config-prettier": "workspace:*",
+    "prettier": "catalog:"
+  },
+  "prettier": "@fuku/config-prettier"
 }

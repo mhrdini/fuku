@@ -1,0 +1,18 @@
+{
+  "name": "@fuku/api",
+  "version": "0.0.0",
+  "dependencies": {
+    "@fuku/database": "workspace:*",
+    "@trpc/server": "catalog:",
+    "superjson": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@fuku/config-eslint": "workspace:*",
+    "@fuku/config-typescript": "workspace:*",
+    "typescript": "catalog:",
+    "@fuku/config-prettier": "workspace:*",
+    "prettier": "catalog:"
+  },
+  "prettier": "@fuku/config-prettier"
+}

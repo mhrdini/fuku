@@ -12,18 +12,21 @@
     "dev:components": "tsc --watch"
   },
   "peerDependencies": {
-    "react": "^18.2.0"
+    "react": "catalog:react19"
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
     "@fuku/config-tailwind": "workspace:*",
     "@fuku/config-typescript": "workspace:*",
     "@tailwindcss/cli": "^4.1.16",
-    "@tailwindcss/postcss": "^4.1.16",
-    "@types/react": "^18.3.26",
-    "autoprefixer": "^10.4.21",
-    "eslint": "^9.38.0",
-    "tailwindcss": "^4.1.16",
-    "typescript": "^5.9.3"
-  }
+    "@tailwindcss/postcss": "catalog:",
+    "@types/react": "catalog:react19",
+    "autoprefixer": "catalog:",
+    "eslint": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "@fuku/config-prettier": "workspace:*",
+    "prettier": "catalog:"
+  },
+  "prettier": "@fuku/config-prettier"
 }
