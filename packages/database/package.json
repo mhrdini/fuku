@@ -10,6 +10,7 @@
     "db:migrate:dev:auto": "prisma migrate dev --name auto",
     "db:push": "prisma db push",
     "db:seed": "tsx src/seed.ts",
+    "db:seed:dev": "tsx src/seed.development.ts",
     "dev": "tsup src/* --watch",
     "format": "prisma format",
     "generate": "prisma generate",
