@@ -1,6 +1,7 @@
 {
   "extends": "@fuku/config-typescript/nextjs.json",
   "compilerOptions": {
+    "strict": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./app/*"],

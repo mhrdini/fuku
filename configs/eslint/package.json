@@ -9,9 +9,9 @@
     "./react": "./react.mjs"
   },
   "devDependencies": {
-    "@eslint/js": "^9.38.0",
+    "@eslint/js": "catalog:",
     "@next/eslint-plugin-next": "^15.5.2",
-    "eslint": "^9.38.0",
+    "eslint": "catalog:",
     "eslint-config-expo": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
@@ -21,7 +21,10 @@
     "eslint-plugin-turbo": "^2.5.6",
     "eslint-plugin-unused-imports": "^4.2.0",
     "globals": "^16.4.0",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.42.0"
-  }
+    "typescript": "catalog:",
+    "typescript-eslint": "^8.42.0",
+    "@fuku/config-prettier": "workspace:*",
+    "prettier": "catalog:"
+  },
+  "prettier": "@fuku/config-prettier"
 }
