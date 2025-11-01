@@ -1,0 +1,5 @@
+{
+  "extends": "@fuku/config-typescript/compiled.json",
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

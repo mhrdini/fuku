@@ -28,6 +28,10 @@
     "db:seed:dev": {
       "cache": false
     },
+    "db:reset": {
+      "cache": false,
+      "persistent": true
+    },
     "dev": {
       "cache": false,
       "persistent": true

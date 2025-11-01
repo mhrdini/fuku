@@ -1,4 +1,4 @@
-import { prisma } from './client'
+import { db } from './client'
 
 // ---------------------
 // Seed Data
@@ -71,7 +71,7 @@ export const SHIFT_TYPES = [
 // ---------------------
 async function main() {
   for (const shiftType of SHIFT_TYPES) {
-    await prisma.shiftType.upsert({
+    await db.shiftType.upsert({
       where: { name: shiftType.name },
       update: {},
       create: shiftType,
@@ -88,5 +88,5 @@ main()
     process.exit(1)
   })
   .finally(async () => {
-    await prisma.$disconnect()
+    await db.$disconnect()
   })

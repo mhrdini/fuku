@@ -1,8 +1,14 @@
 {
   "name": "@fuku/api",
   "version": "0.0.0",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    }
+  },
   "dependencies": {
-    "@fuku/database": "workspace:*",
+    "@fuku/auth": "workspace:*",
+    "@fuku/db": "workspace:*",
     "@trpc/server": "catalog:",
     "superjson": "catalog:",
     "zod": "catalog:"

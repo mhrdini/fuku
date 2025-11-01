@@ -1,8 +1,11 @@
 {
-  "name": "@fuku/database",
+  "name": "@fuku/db",
   "version": "1.0.0",
   "exports": {
     ".": "./src/client.ts"
+  },
+  "prisma": {
+    "schema": "./prisma"
   },
   "scripts": {
     "db:migrate:deploy": "prisma migrate deploy",
@@ -11,6 +14,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx src/seed.ts",
     "db:seed:dev": "tsx src/seed.development.ts",
+    "db:reset": "prisma migrate reset",
     "dev": "tsup src/* --watch",
     "format": "prisma format",
     "generate": "prisma generate",

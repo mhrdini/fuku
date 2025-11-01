@@ -10,7 +10,7 @@ This turborepo includes the following packages/apps:
 
 - `web`: a [Next.js](https://nextjs.org/) app
 - `@fuku/config-eslint`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@fuku/database`: [Prisma ORM](https://prisma.io/) to manage & access your database
+- `@fuku/db`: [Prisma ORM](https://prisma.io/) to manage & access your database
 - `@fuku/config-typescript`: `tsconfig.json`s used throughout the monorepo
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).

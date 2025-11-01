@@ -1,0 +1,85 @@
+// --------------------------------
+// Reference models
+// --------------------------------
+model Location {
+  id               String            @id @default(uuid())
+  name             String            @unique
+  address          String?
+  shiftAssignments ShiftAssignment[]
+  color            String?
+
+  @@map("location")
+}
+
+model ShiftType {
+  id               String            @id @default(uuid())
+  name             String            @unique
+  description      String?
+  startTime        DateTime          @map("start_time")
+  endTime          DateTime          @map("end_time")
+  shiftAssignments ShiftAssignment[]
+  color            String?
+
+  @@map("shift_type")
+}
+
+// --------------------------------
+// Assignment models
+// --------------------------------
+
+model DayAssignment {
+  id   String   @id @default(uuid())
+  date DateTime
+
+  teamMemberId String     @map("team_member_id")
+  teamMember   TeamMember @relation(fields: [teamMemberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  shiftAssignment ShiftAssignment? @relation("DayAssignmentToShift")
+  leaveAssignment LeaveAssignment? @relation("DayAssignmentToLeave")
+
+  @@unique([teamMemberId, date])
+  @@index([date])
+  @@map("day_assignment")
+}
+
+model ShiftAssignment {
+  id              String        @id @default(uuid())
+  locationId      String        @map("location_id")
+  shiftTypeId     String        @map("shift_type_id")
+  location        Location      @relation(fields: [locationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  shiftType       ShiftType     @relation(fields: [shiftTypeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  dayAssignmentId String        @unique @map("day_assignment_id")
+  dayAssignment   DayAssignment @relation("DayAssignmentToShift", fields: [dayAssignmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workHour        WorkHour?     @relation("ShiftAssignmentToWorkHour")
+
+  @@index([locationId])
+  @@index([shiftTypeId])
+  @@index([locationId, shiftTypeId])
+  @@map("shift_assignment")
+}
+
+model LeaveAssignment {
+  id              String        @id @default(uuid())
+  paid            Boolean
+  dayAssignmentId String        @unique @map("day_assignment_id")
+  dayAssignment   DayAssignment @relation("DayAssignmentToLeave", fields: [dayAssignmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("leave_assignment")
+}
+
+// --------------------------------
+// Scheduling constraint models
+// --------------------------------
+
+model Unavailability {
+  id           String     @id @default(uuid())
+  teamMemberId String     @map("team_member_id")
+  teamMember   TeamMember @relation(fields: [teamMemberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  date         DateTime
+  reason       String?
+
+  @@unique([teamMemberId, date])
+  @@index([teamMemberId])
+  @@index([date])
+  @@map("unavailability")
+}

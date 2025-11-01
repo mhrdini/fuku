@@ -1,13 +1,14 @@
-/**
- * @type {import('next').NextConfig}
- */
+const path = require('path')
+/** @type {import('next').NextConfig} */
 module.exports = {
   transpilePackages: [
+    '@fuku/api',
+    '@fuku/auth',
+    '@fuku/db',
     '@fuku/ui',
     '@fuku/config-eslint',
     '@fuku/config-tailwind',
     '@fuku/config-typescript',
-    '@fuku/database',
   ],
   reactStrictMode: true,
 }

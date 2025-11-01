@@ -5,10 +5,6 @@
   },
   "packageManager": "pnpm@10.12.4",
   "private": true,
-  "prisma": {
-    "schema": "packages/database/prisma/schema.prisma",
-    "seed": "tsx packages/database/src/seed.ts"
-  },
   "scripts": {
     "build": "turbo run build",
     "db:migrate:deploy": "turbo run db:migrate:deploy",
@@ -17,6 +13,7 @@
     "db:push": "turbo run db:push",
     "db:seed": "turbo run db:seed",
     "db:seed:dev": "turbo run db:seed:dev",
+    "db:reset": "turbo run db:reset",
     "up:dev": "docker compose -f docker-compose.development.yml --env-file .env.development up -d",
     "down:dev": "docker compose -f docker-compose.development.yml --env-file .env.development down",
     "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' +",
