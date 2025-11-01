@@ -4,6 +4,9 @@
   "exports": {
     ".": {
       "default": "./src/index.ts"
+    },
+    "./schemas": {
+      "default": "./src/schemas/index.ts"
     }
   },
   "dependencies": {
