@@ -98,7 +98,7 @@ bun run db:migrate:dev
 
 </details>
 
-You’ll be prompted to name the migration. Once you provide a name, Prisma will create and apply the migration to your database.
+You'll be prompted to name the migration. Once you provide a name, Prisma will create and apply the migration to your database.
 
 > Note: The `db:migrate:dev` script (located in [packages/database/package.json](/packages/database/package.json)) uses [Prisma Migrate](https://www.prisma.io/migrate) under the hood.
 
