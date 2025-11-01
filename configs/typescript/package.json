@@ -2,12 +2,7 @@
   "name": "@fuku/config-typescript",
   "version": "0.0.0",
   "private": true,
-  "publishConfig": {
-    "access": "public"
-  },
-  "devDependencies": {
-    "@fuku/config-prettier": "workspace:*",
-    "prettier": "catalog:"
-  },
-  "prettier": "@fuku/config-prettier"
+  "files": [
+    "*.json"
+  ]
 }

@@ -1,6 +1,14 @@
 {
   "name": "@fuku/auth",
   "version": "0.0.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@fuku/db": "workspace:*",
+    "better-auth": "catalog:",
+    "zod": "catalog:"
+  },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
     "@fuku/config-typescript": "workspace:*",
