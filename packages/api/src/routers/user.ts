@@ -1,7 +1,7 @@
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
 import { z } from 'zod/v4'
 
-import { publicProcedure } from '../../trpc'
+import { publicProcedure } from '../trpc'
 
 export const userRouter = {
   byId: publicProcedure
