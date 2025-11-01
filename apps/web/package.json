@@ -9,7 +9,9 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
-    "@fuku/database": "workspace:*",
+    "@fuku/api": "workspace:*",
+    "@fuku/auth": "workspace:*",
+    "@fuku/db": "workspace:*",
     "@fuku/ui": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "@trpc/client": "catalog:",
@@ -17,7 +19,8 @@
     "@trpc/react-query": "catalog:",
     "@trpc/server": "catalog:",
     "@trpc/tanstack-react-query": "catalog:",
-    "next": "^14.1.1",
+    "better-auth": "catalog:",
+    "next": "latest",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
     "superjson": "catalog:",
