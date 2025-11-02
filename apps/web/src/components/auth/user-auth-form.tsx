@@ -8,8 +8,22 @@ import {
   registerSchema,
   RegisterSchema,
 } from '@fuku/api/schemas'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+  Input,
+} from '@fuku/ui/components'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 
 import { authClient } from '~/auth/client'
 
@@ -35,6 +49,14 @@ export function UserAuthForm({
     resolver: zodResolver(isRegister ? registerSchema : loginSchema),
   })
 
+  const onLoginPromptClick = () => {
+    router.push('/login')
+  }
+
+  const onRegisterPromptClick = () => {
+    router.push('/register')
+  }
+
   const onSubmit = async (data: UserAuthSchema) => {
     if (isRegister) {
       await authClient.signUp.email(data as RegisterSchema, {
@@ -59,19 +81,114 @@ export function UserAuthForm({
 
   return (
     <div className={className} {...props}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        {isRegister && (
-          <>
-            <label>Name</label>
-            <input {...form.register('name')} />
-          </>
-        )}
-        <label>Email</label>
-        <input type='email' {...form.register('email')} />
-        <label>Password</label>
-        <input type='password' {...form.register('password')} />
-        <button type='submit'>{isRegister ? 'Register' : 'Login'}</button>
-      </form>
+      <Card className='border-none w-full sm:max-w-md'>
+        <CardHeader>
+          <CardTitle>{isRegister ? 'Create Account' : 'Login'}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form id='form-user-auth' onSubmit={form.handleSubmit(onSubmit)}>
+            <FieldSet>
+              <FieldGroup>
+                {isRegister && (
+                  <Controller
+                    name='name'
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor='form-user-auth-name'>
+                          Name
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          id='form-user-auth-name'
+                          aria-invalid={fieldState.invalid}
+                          placeholder='Name'
+                          autoComplete='off'
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                )}
+                <Controller
+                  name='email'
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor='form-user-auth-email'>
+                        Email
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id='form-user-auth-email'
+                        type='email'
+                        aria-invalid={fieldState.invalid}
+                        placeholder='Email'
+                        autoComplete='off'
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name='password'
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor='form-user-auth-password'>
+                        Password
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id='form-user-auth-password'
+                        type='password'
+                        aria-invalid={fieldState.invalid}
+                        placeholder='Password'
+                        autoComplete='off'
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <FieldError errors={[form.formState.errors.root]} />
+              </FieldGroup>
+            </FieldSet>
+          </form>
+        </CardContent>
+        <CardFooter>
+          <Field orientation='responsive'>
+            <Button type='submit' form='form-user-auth'>
+              {isRegister ? 'Sign Up' : 'Log In'}
+            </Button>
+            {isRegister && (
+              <Button
+                type='button'
+                onClick={onLoginPromptClick}
+                variant='link'
+                className='underline'
+              >
+                Already have an account?
+              </Button>
+            )}
+            {!isRegister && (
+              <Button
+                type='button'
+                onClick={onRegisterPromptClick}
+                variant='secondary'
+                className='underline'
+              >
+                Create an account
+              </Button>
+            )}
+          </Field>
+        </CardFooter>
+      </Card>
     </div>
   )
 }
