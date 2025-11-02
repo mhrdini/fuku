@@ -1,11 +1,13 @@
 {
-  "extends": "@fuku/config-typescript/react.json",
+  "extends": "@fuku/config-typescript/compiled.json",
   "compilerOptions": {
+    "outDir": "dist",
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@ui/*": ["./src/*"]
+      "@fuku/ui/*": ["./src/*"]
     }
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"]
 }

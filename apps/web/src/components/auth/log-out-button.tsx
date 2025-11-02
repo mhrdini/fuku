@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { Button } from '@fuku/ui/components'
 
 import { authClient } from '~/auth/client'
 
@@ -12,8 +13,8 @@ export function LogOutButton() {
   }
 
   return (
-    <button onClick={handleLogOut} className='btn btn-secondary'>
+    <Button onClick={handleLogOut} className='btn btn-secondary'>
       Log Out
-    </button>
+    </Button>
   )
 }

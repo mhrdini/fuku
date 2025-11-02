@@ -12,11 +12,8 @@ export default async function RegisterPage() {
   }
 
   return (
-    <div>
-      <div>Register Page</div>
-      <Suspense>
-        <UserAuthForm register />
-      </Suspense>
-    </div>
+    <Suspense>
+      <UserAuthForm register />
+    </Suspense>
   )
 }
