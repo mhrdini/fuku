@@ -2,20 +2,35 @@
   "name": "@fuku/ui",
   "version": "0.0.0",
   "exports": {
+    "./components": "./src/components/index.ts",
+    "./lib/*": "./src/lib/*.ts",
     "./styles.css": "./dist/index.css",
     "./*": "./dist/*.js"
   },
   "scripts": {
+    "ui": "pnpm dlx shadcn@latest",
     "build:styles": "tailwindcss -i ./src/styles.css -o ./dist/index.css",
     "build:components": "tsc",
     "dev:styles": "tailwindcss -i ./src/styles.css -o ./dist/index.css --watch",
-    "dev:components": "tsc --watch"
+    "dev:components": "tsc --watch",
+    "gen:components": "barrelsby --directory  ./src/components/ --output ./src/components/index.ts --delete"
+  },
+  "dependencies": {
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-separator": "^1.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "lucide-react": "catalog:",
+    "tailwind-merge": "catalog:",
+    "tw-animate-css": "catalog:"
   },
   "peerDependencies": {
     "react": "catalog:react19"
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
+    "@fuku/config-prettier": "workspace:*",
     "@fuku/config-tailwind": "workspace:*",
     "@fuku/config-typescript": "workspace:*",
     "@tailwindcss/cli": "^4.1.16",
@@ -23,10 +38,9 @@
     "@types/react": "catalog:react19",
     "autoprefixer": "catalog:",
     "eslint": "catalog:",
+    "prettier": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:",
-    "@fuku/config-prettier": "workspace:*",
-    "prettier": "catalog:"
+    "typescript": "catalog:"
   },
   "prettier": "@fuku/config-prettier"
 }
