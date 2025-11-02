@@ -31,15 +31,33 @@ export const passwordSchema = z
   })
 
 export const registerSchema = z.object({
-  name: nameSchema,
-  email: emailSchema,
-  username: usernameSchema,
-  password: passwordSchema,
+  name: z
+    .string()
+    .min(1, {
+      error: 'invalid_name',
+    })
+    .max(100, { error: 'invalid_name' }),
+  email: z.email({ error: 'invalid_email' }),
+  password: z
+    .string()
+    .min(8, {
+      error: 'invalid_password_length',
+    })
+    .max(20, {
+      error: 'invalid_password_length',
+    }),
 })
 
 export const loginSchema = z.object({
-  username: usernameSchema,
-  password: passwordSchema,
+  email: z.email({ error: 'invalid_email' }),
+  password: z
+    .string()
+    .min(8, {
+      error: 'invalid_password_length',
+    })
+    .max(20, {
+      error: 'invalid_password_length',
+    }),
   rememberMe: z.boolean().optional(),
 })
 

@@ -58,7 +58,7 @@ export function UserAuthForm({
     router.push('/register')
   }
 
-  const onSubmit = async (data: UserAuthSchemaType) => {
+  const onSubmit = async (data: UserAuthSchema) => {
     if (isRegister) {
       await authClient.signUp.email(data as RegisterSchemaType, {
         onError: ctx => {
@@ -114,18 +114,19 @@ export function UserAuthForm({
                   />
                 )}
                 <Controller
-                  name='username'
+                  name='email'
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor='form-user-auth-username'>
-                        Username
+                      <FieldLabel htmlFor='form-user-auth-email'>
+                        Email
                       </FieldLabel>
                       <Input
                         {...field}
-                        id='form-user-auth-username'
+                        id='form-user-auth-email'
+                        type='email'
                         aria-invalid={fieldState.invalid}
-                        placeholder='Username'
+                        placeholder='Email'
                         autoComplete='off'
                       />
                       {fieldState.invalid && (
@@ -134,30 +135,6 @@ export function UserAuthForm({
                     </Field>
                   )}
                 />
-                {isRegister && (
-                  <Controller
-                    name='email'
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor='form-user-auth-email'>
-                          Email
-                        </FieldLabel>
-                        <Input
-                          {...field}
-                          id='form-user-auth-email'
-                          type='email'
-                          aria-invalid={fieldState.invalid}
-                          placeholder='Email'
-                          autoComplete='off'
-                        />
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                )}
                 <Controller
                   name='password'
                   control={form.control}
