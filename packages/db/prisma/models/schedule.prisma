@@ -2,9 +2,12 @@
 // Reference models
 // --------------------------------
 model Location {
-  id               String            @id @default(uuid())
-  name             String            @unique
-  address          String?
+  id      String  @id @default(uuid())
+  name    String  @unique
+  address String?
+
+  teamId           String
+  team             Team              @relation(fields: [teamId], references: [id])
   shiftAssignments ShiftAssignment[]
   color            String?
 

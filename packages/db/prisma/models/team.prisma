@@ -1,32 +1,69 @@
-model TeamRole {
+model Team {
   id          String  @id @default(uuid())
   name        String  @unique
   description String?
-  defaultRate Float   @map("default_rate")
 
+  teamMembers TeamMember[]
+  adminUsers  User[]       @relation("UserTeams")
+  payGrades   PayGrade[]
+  locations   Location[]
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
+  archivedAt DateTime? @map("archived_at")
+
+  @@map("team")
+}
+
+model PayGrade {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  baseRate    Float   @map("base_rate")
+
+  teamId      String
+  team        Team         @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   teamMembers TeamMember[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@map("team_role")
+  @@unique([teamId, name])
+  @@map("pay_grade")
+}
+
+enum TeamMemberRole {
+  ADMIN
+  STAFF
 }
 
 model TeamMember {
-  id               String           @id @default(uuid())
-  familyName       String           @map("family_name")
-  givenNames       String           @map("given_names")
-  teamRoleId       String           @map("team_role_id")
-  teamRole         TeamRole         @relation(fields: [teamRoleId], references: [id])
-  rateMultiplier   Float            @default(1.0) @map("rate_multiplier")
+  id     String  @id @default(uuid())
+  userId String? @map("user_id")
+  user   User?   @relation("UserMemberships", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  familyName String @map("family_name")
+  givenNames String @map("given_names")
+
+  teamId String
+  Team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  payGradeId String?   @map("pay_grade_id")
+  payGrade   PayGrade? @relation(fields: [payGradeId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  teamMemberRole TeamMemberRole @default(STAFF) @map("team_member_role")
+
+  rateMultiplier Float @default(1.0) @map("rate_multiplier")
+
   dayAssignments   DayAssignment[]
   unavailabilities Unavailability[]
   color            String?
-  user             User?            @relation("TeamMemberToUser")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
+  archivedAt DateTime? @map("archived_at")
 
-  @@index([teamRoleId])
+  @@index([teamId])
+  @@index([payGradeId])
   @@map("team_member")
 }
