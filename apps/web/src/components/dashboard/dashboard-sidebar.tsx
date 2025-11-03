@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Collapsible,
@@ -57,6 +57,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
                             <SidebarMenuButton>
                               <menu.icon />
                               <span>{menu.label}</span>
+                              <ChevronRight className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
                             </SidebarMenuButton>
                           </CollapsibleTrigger>
                           <CollapsibleContent>
@@ -91,7 +92,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
                           </SidebarMenuButton>
                           <CollapsibleTrigger
                             asChild
-                            className='transition-transform data-[state=open]:rotate-90'
+                            className='transition-transform group-data-[state=open]/collapsible:rotate-90'
                           >
                             <SidebarMenuAction>
                               <ChevronRight className='' />
