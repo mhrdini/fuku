@@ -8,14 +8,12 @@ model Team {
   adminUsers  User[]       @relation("UserTeams")
   payGrades   PayGrade[]
   locations   Location[]
-  shiftTypes  ShiftType[]
 
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-  deletedById String?   @map("deleted_by_id")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @default(now()) @updatedAt
+  archivedAt DateTime?   @map("archived_at")
+  shiftTypes ShiftType[]
 
-  @@index([deletedAt])
   @@map("team")
 }
 
@@ -29,8 +27,8 @@ model PayGrade {
   team        Team         @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   teamMembers TeamMember[]
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([teamId, name])
   @@map("pay_grade")
@@ -50,7 +48,7 @@ model TeamMember {
   givenNames String @map("given_names")
 
   teamId String
-  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   payGradeId String?   @map("pay_grade_id")
   payGrade   PayGrade? @relation(fields: [payGradeId], references: [id], onDelete: SetNull, onUpdate: Cascade)
@@ -63,13 +61,11 @@ model TeamMember {
   unavailabilities Unavailability[]
   color            String?
 
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-  deletedById String?   @map("deleted_by_id")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
+  archivedAt DateTime? @map("archived_at")
 
   @@index([teamId])
   @@index([payGradeId])
-  @@index([deletedAt])
   @@map("team_member")
 }

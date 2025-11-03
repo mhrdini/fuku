@@ -6,7 +6,7 @@ model Location {
   name    String  @unique
   address String?
 
-  teamId           String            @map("team_id")
+  teamId           String
   team             Team              @relation(fields: [teamId], references: [id])
   shiftAssignments ShiftAssignment[]
   color            String?           @default("#000000")
