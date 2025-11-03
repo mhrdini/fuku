@@ -1,4 +1,10 @@
-import { createAuthClient } from 'better-auth/react' // make sure to import from better-auth/react
+import type { Auth } from '@fuku/auth'
+import {
+  inferAdditionalFields,
+  usernameClient,
+} from 'better-auth/client/plugins'
+import { createAuthClient } from 'better-auth/react'
 
-type AuthClient = ReturnType<typeof createAuthClient>
-export const authClient: AuthClient = createAuthClient()
+export const authClient = createAuthClient({
+  plugins: [inferAdditionalFields<Auth>(), usernameClient()],
+})
