@@ -1,6 +1,11 @@
-import { Cog, LucideIcon, UserCircle2, Users } from 'lucide-react'
-
-import { useDashboardStore } from '~/store/dashboard'
+import {
+  Cog,
+  LayoutGrid,
+  LucideIcon,
+  Plus,
+  UserCircle2,
+  Users,
+} from 'lucide-react'
 
 export type Group = {
   label: string
@@ -22,31 +27,44 @@ export type Submenu = {
   icon?: LucideIcon
 }
 
-export const useMenu = (): Group[] => {
-  const { currentTeamSlug } = useDashboardStore()
-
-  return !currentTeamSlug
-    ? []
-    : [
+export const getMenu = (): Group[] => {
+  return [
+    {
+      label: '',
+      menus: [
         {
-          label: 'Teams',
-          menus: [
+          href: '/',
+          label: 'Dashboard',
+          icon: LayoutGrid,
+        },
+      ],
+    },
+    {
+      label: 'Team',
+      menus: [
+        {
+          href: '/team',
+          label: 'Team Overview',
+          icon: Users,
+        },
+        {
+          href: '/team/members',
+          label: 'Members',
+          icon: UserCircle2,
+          submenus: [
             {
-              href: `/team/${currentTeamSlug}`,
-              label: 'Overview',
-              icon: Users,
-            },
-            {
-              href: `/team/${currentTeamSlug}/members`,
-              label: 'Members',
-              icon: UserCircle2,
-            },
-            {
-              href: `/team/${currentTeamSlug}/settings`,
-              label: 'Settings',
-              icon: Cog,
+              href: '/team/invite',
+              label: 'Invite Members',
+              icon: Plus,
             },
           ],
         },
-      ]
+        {
+          href: '/team/settings',
+          label: 'Team Settings',
+          icon: Cog,
+        },
+      ],
+    },
+  ]
 }

@@ -1,8 +1,6 @@
 import '~/globals.css'
 
 import { Geist, M_PLUS_1 } from 'next/font/google'
-import { Toaster } from '@fuku/ui/components'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import { TRPCReactProvider } from '~/trpc/client'
 
@@ -35,11 +33,7 @@ const RootLayout = ({
       className={`${geist.variable} ${mPlus.variable}  antialiased`}
     >
       <body className='font-sans'>
-        <TRPCReactProvider>
-          {children}
-          <ReactQueryDevtools initialIsOpen={false} />
-          <Toaster />
-        </TRPCReactProvider>
+        <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
     </html>
   )

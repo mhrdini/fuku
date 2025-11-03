@@ -1,14 +1,8 @@
-import { redirect } from 'next/navigation'
 import { SidebarProvider } from '@fuku/ui/components'
 
-import { getSession } from '~/auth/server'
-import { DashboardContentLayout } from '~/components/dashboard/content-layout'
-import { DashboardHeader } from '~/components/dashboard/header'
-import { DashboardSidebar } from '~/components/dashboard/sidebar'
-import { DialogManager } from '~/components/providers/dialog-manager'
-import { SessionProvider } from '~/components/providers/session-provider'
-import { SheetManager } from '~/components/providers/sheet-manager'
-import { HydrateClient, prefetch, trpc } from '~/trpc/server'
+import { DashboardHeader } from '~/components/dashboard/dashboard-header'
+import { DashboardSidebar } from '~/components/dashboard/dashboard-sidebar'
+import { HydrateClient } from '~/trpc/server'
 
 export default async function DashboardLayout({
   children,
@@ -18,30 +12,19 @@ export default async function DashboardLayout({
   params: Promise<{ username: string }>
 }) {
   const { username } = await params
-  const session = await getSession()
-
-  if (!session || session.user.username !== username) {
-    redirect('/login')
-  } else {
-    prefetch(trpc.user.getByUsername.queryOptions({ username }))
-    prefetch(trpc.team.getAllOwned.queryOptions())
-  }
-
   return (
     <div className='min-h-screen w-full'>
-      <SessionProvider session={session}>
-        <HydrateClient>
-          <SheetManager />
-          <DialogManager />
-          <SidebarProvider>
-            <DashboardSidebar username={username} />
-            <div className='flex flex-1 flex-col'>
-              <DashboardHeader />
-              <DashboardContentLayout>{children}</DashboardContentLayout>
-            </div>
-          </SidebarProvider>
-        </HydrateClient>
-      </SessionProvider>
+      <HydrateClient>
+        <SidebarProvider>
+          <DashboardSidebar username={username} />
+          <div className='flex flex-1 flex-col'>
+            <DashboardHeader />
+            <main className='mx-auto size-full max-w-7xl flex-1 px-4 py-6 sm:px-6'>
+              {children}
+            </main>
+          </div>
+        </SidebarProvider>
+      </HydrateClient>
     </div>
   )
 }

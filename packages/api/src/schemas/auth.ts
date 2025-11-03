@@ -1,12 +1,5 @@
 import { z } from 'zod/v4'
 
-export const nameSchema = z
-  .string()
-  .min(1, {
-    error: 'invalid_name',
-  })
-  .max(100, { error: 'invalid_name' })
-
 export const usernameSchema = z
   .string()
   .min(3, {
@@ -19,17 +12,6 @@ export const usernameSchema = z
     error: 'invalid_username_characters',
   })
 
-export const emailSchema = z.email({ error: 'invalid_email' })
-
-export const passwordSchema = z
-  .string()
-  .min(8, {
-    error: 'invalid_password_length',
-  })
-  .max(20, {
-    error: 'invalid_password_length',
-  })
-
 export const registerSchema = z.object({
   name: z
     .string()
@@ -37,6 +19,7 @@ export const registerSchema = z.object({
       error: 'invalid_name',
     })
     .max(100, { error: 'invalid_name' }),
+  username: usernameSchema,
   email: z.email({ error: 'invalid_email' }),
   password: z
     .string()
@@ -49,7 +32,7 @@ export const registerSchema = z.object({
 })
 
 export const loginSchema = z.object({
-  email: z.email({ error: 'invalid_email' }),
+  username: usernameSchema,
   password: z
     .string()
     .min(8, {
