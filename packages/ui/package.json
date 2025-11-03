@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "exports": {
     "./components": "./src/components/index.ts",
+    "./hooks/*": "./src/hooks/*.ts",
     "./lib/*": "./src/lib/*.ts",
     "./styles.css": "./dist/index.css",
     "./*": "./dist/*.js"
@@ -13,12 +14,17 @@
     "build:components": "tsc",
     "dev:styles": "tailwindcss -i ./src/styles.css -o ./dist/index.css --watch",
     "dev:components": "tsc --watch",
+    "gen:all": "pnpm run gen:components",
     "gen:components": "barrelsby --directory  ./src/components/ --output ./src/components/index.ts --delete"
   },
   "dependencies": {
+    "@radix-ui/react-collapsible": "^1.1.12",
+    "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-navigation-menu": "^1.2.14",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-tooltip": "^1.2.8",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "lucide-react": "catalog:",
@@ -31,7 +37,6 @@
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
     "@fuku/config-prettier": "workspace:*",
-    "@fuku/config-tailwind": "workspace:*",
     "@fuku/config-typescript": "workspace:*",
     "@tailwindcss/cli": "^4.1.16",
     "@tailwindcss/postcss": "catalog:",
