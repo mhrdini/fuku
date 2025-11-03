@@ -1,7 +1,8 @@
 {
   "extends": "@fuku/config-typescript/nextjs.json",
   "compilerOptions": {
-    "strictNullChecks": true,
+    "declaration": false,
+    "declarationMap": false,
     "baseUrl": "./src",
     "paths": {
       "~/*": ["./*"],

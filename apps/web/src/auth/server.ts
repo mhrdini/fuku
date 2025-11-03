@@ -2,7 +2,7 @@ import 'server-only'
 
 import { cache } from 'react'
 import { headers } from 'next/headers'
-import { initAuth } from '@fuku/auth'
+import { initAuth, Session } from '@fuku/auth'
 import { nextCookies } from 'better-auth/next-js'
 
 const baseUrl =
@@ -16,8 +16,8 @@ export const auth = initAuth({
   extraPlugins: [nextCookies()],
 })
 
-export const getSession = cache(async () =>
-  auth.api.getSession({
+export const getSession = cache(async (): Promise<Session | null> => {
+  return auth.api.getSession({
     headers: await headers(),
-  }),
-)
+  })
+})

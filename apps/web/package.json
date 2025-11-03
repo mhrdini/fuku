@@ -21,6 +21,7 @@
     "@trpc/server": "catalog:",
     "@trpc/tanstack-react-query": "catalog:",
     "better-auth": "catalog:",
+    "lucide-react": "catalog:",
     "next": "latest",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
@@ -31,7 +32,6 @@
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
     "@fuku/config-prettier": "workspace:*",
-    "@fuku/config-tailwind": "workspace:*",
     "@fuku/config-typescript": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
     "@types/node": "catalog:",
