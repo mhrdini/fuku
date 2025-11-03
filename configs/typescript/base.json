@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["DOM", "ES2017"],
+    "target": "esnext",
+    "lib": ["DOM", "ESNext"],
     "composite": false,
     "declaration": true,
     "declarationMap": true,

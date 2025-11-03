@@ -7,7 +7,6 @@ module.exports = {
     '@fuku/db',
     '@fuku/ui',
     '@fuku/config-eslint',
-    '@fuku/config-tailwind',
     '@fuku/config-typescript',
   ],
   reactStrictMode: true,
