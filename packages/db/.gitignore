@@ -6,6 +6,6 @@ generated
 .env.test
 .env.*.local
 
-/dist
+dist/
 
 seed.*.ts

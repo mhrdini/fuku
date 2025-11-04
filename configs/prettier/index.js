@@ -29,6 +29,7 @@ const config = {
   ],
   importOrderParserPlugins: ['typescript', 'jsx', 'decorators-legacy'],
   importOrderTypeScriptVersion: '4.4.0',
+  ignore: ['generated/**', 'dist/**', 'node_modules/**'],
 
   tabWidth: 2,
   semi: false,
