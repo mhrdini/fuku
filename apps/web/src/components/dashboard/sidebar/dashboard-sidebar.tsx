@@ -28,15 +28,9 @@ import {
   Skeleton,
 } from '@fuku/ui/components'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import {
-  ChevronRight,
-  ChevronsUpDown,
-  Dot,
-  Plus,
-  Users2,
-} from 'lucide-react'
+import { ChevronRight, ChevronsUpDown, Dot, Plus, Users2 } from 'lucide-react'
 
-import { useMenu } from '~/lib/use-menu'
+import { useMenu } from '~/lib/menu'
 import { useDashboardStore } from '~/store/dashboard'
 import { useTRPC } from '~/trpc/client'
 

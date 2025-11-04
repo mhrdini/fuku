@@ -1,0 +1,11 @@
+{
+  "mode": "minimal",
+  "pureModels": false,
+  "zodImportTarget": "v4",
+  "variants": {
+    "pure": { "enabled": false },
+    "input": { "enabled": false },
+    "result": { "enabled": true }
+  },
+  "emit": { "pureModels": false }
+}

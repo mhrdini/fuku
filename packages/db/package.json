@@ -2,7 +2,8 @@
   "name": "@fuku/db",
   "version": "1.0.0",
   "exports": {
-    ".": "./src/client.ts"
+    ".": "./src/client.ts",
+    "./schemas": "./generated/schemas/index.ts"
   },
   "prisma": {
     "schema": "./prisma"
@@ -15,7 +16,7 @@
     "db:seed": "tsx src/seed.ts",
     "db:seed:dev": "tsx src/seed.development.ts",
     "db:reset": "prisma migrate reset",
-    "dev": "tsup src/* --watch",
+    "dev": "tsup",
     "format": "prisma format",
     "generate": "prisma generate",
     "lint": "eslint . --max-warnings 0",
@@ -24,7 +25,8 @@
     "studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "latest"
+    "@prisma/client": "latest",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
@@ -32,6 +34,7 @@
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "prisma": "latest",
+    "prisma-zod-generator": "^1.31.2",
     "rimraf": "^5.0.5",
     "tsup": "^8.0.2",
     "tsx": "catalog:",

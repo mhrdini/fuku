@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation'
 import { SidebarProvider } from '@fuku/ui/components'
 
 import { getSession } from '~/auth/server'
-import { DashboardHeader } from '~/components/dashboard/dashboard-header'
+import { DashboardContentLayout } from '~/components/dashboard/content-layout'
+import { DashboardHeader } from '~/components/dashboard/header'
 import { DashboardSidebar } from '~/components/dashboard/sidebar/dashboard-sidebar'
 import { HydrateClient, prefetch, trpc } from '~/trpc/server'
 
@@ -30,9 +31,7 @@ export default async function DashboardLayout({
           <DashboardSidebar username={username} />
           <div className='flex flex-1 flex-col'>
             <DashboardHeader />
-            <main className='x-auto size-full max-w-7xl flex-1 px-14 py-6'>
-              <div className='space-y-4'>{children}</div>
-            </main>
+            <DashboardContentLayout>{children}</DashboardContentLayout>
           </div>
         </SidebarProvider>
       </HydrateClient>

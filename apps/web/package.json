@@ -15,6 +15,7 @@
     "@fuku/ui": "workspace:*",
     "@hookform/resolvers": "catalog:",
     "@tanstack/react-query": "catalog:",
+    "@tanstack/react-table": "catalog:",
     "@trpc/client": "catalog:",
     "@trpc/next": "catalog:",
     "@trpc/react-query": "catalog:",

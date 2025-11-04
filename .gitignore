@@ -39,3 +39,4 @@ yarn-error.log*
 dist/
 
 .vscode/
+packages/db/dist

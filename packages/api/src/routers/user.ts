@@ -53,11 +53,6 @@ export const userRouter = {
       include: { team: true, payGrade: true },
     })
 
-    return memberships.map(member => ({
-      ...member,
-      effectiveRate: member.payGrade
-        ? member.payGrade.baseRate * member.rateMultiplier
-        : null,
-    }))
+    return memberships
   }),
 } satisfies TRPCRouterRecord

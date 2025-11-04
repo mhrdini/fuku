@@ -34,12 +34,7 @@ export const teamMemberRouter = {
         })
       }
 
-      return {
-        ...member,
-        effectiveRate: member.payGrade
-          ? member.payGrade.baseRate * member.rateMultiplier
-          : null,
-      }
+      return member
     }),
   create: protectedProcedure
     .input(teamMemberSchema)
