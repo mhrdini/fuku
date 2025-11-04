@@ -1,15 +1,18 @@
 'use client'
 
+import { useParams } from 'next/navigation'
 import { Card, CardContent, CardHeader } from '@fuku/ui/components'
 import { useSuspenseQuery } from '@tanstack/react-query'
 
 import { useTRPC } from '~/trpc/client'
 
-export default function UserDashboard({ username }: { username: string }) {
+export default function UserDashboard() {
+  const params = useParams()
+  const username = params?.username as string
   const trpc = useTRPC()
 
   const { data: user } = useSuspenseQuery(
-    trpc.user.byUsername.queryOptions({ username }),
+    trpc.user.getByUsername.queryOptions({ username }),
   )
 
   return (
