@@ -11,7 +11,7 @@ interface WelcomeProps {
 export const Welcome = ({ userId }: WelcomeProps) => {
   const trpc = useTRPC()
   const { data: user } = useSuspenseQuery(
-    trpc.user.byId.queryOptions({ id: userId }),
+    trpc.user.getById.queryOptions({ id: userId }),
   )
 
   return <div>Welcome, {user.name}!</div>
