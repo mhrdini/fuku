@@ -23,7 +23,7 @@ export const config = [
     },
   },
   {
-    ignores: ['dist/**'],
+    ignores: ['dist/**', 'node_modules/**', 'generated/**'],
   },
   {
     languageOptions: {

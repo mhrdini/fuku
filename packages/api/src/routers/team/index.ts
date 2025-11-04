@@ -82,7 +82,7 @@ export const teamRouter = {
 
     return teams
   }),
-  getTeamMembers: protectedProcedure
+  getTeamMembersByTeamId: protectedProcedure
     .input(z.object({ teamId: z.string() }))
     .query(async ({ input, ctx }) => {
       const isAdmin = await ctx.db.team.count({
@@ -108,12 +108,46 @@ export const teamRouter = {
         },
       })
 
-      return members.map(member => ({
-        ...member,
-        effectiveRate: member.payGrade
-          ? member.payGrade.baseRate * member.rateMultiplier
-          : null,
-      }))
+      return members
+    }),
+  getTeamMembersBySlug: protectedProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const isAdmin = await ctx.db.team.count({
+        where: {
+          slug: input.slug,
+          deletedAt: null,
+          adminUsers: { some: { id: ctx.session.user.id } },
+        },
+      })
+
+      if (!isAdmin) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: `You do not have permission to view members of this team`,
+        })
+      }
+
+      const team = await ctx.db.team.findFirst({
+        where: { slug: input.slug, deletedAt: null },
+      })
+
+      if (!team) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: `No team with slug '${input.slug}' found`,
+        })
+      }
+
+      const members = await ctx.db.teamMember.findMany({
+        where: { teamId: team.id, deletedAt: null },
+        include: {
+          user: { select: { id: true, name: true, username: true } },
+          payGrade: { select: { id: true, name: true, baseRate: true } },
+        },
+      })
+
+      return members
     }),
 
   create: protectedProcedure
