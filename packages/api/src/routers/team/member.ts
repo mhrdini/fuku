@@ -1,9 +1,19 @@
 import { TeamMemberRole } from '@fuku/db'
-import { TeamMemberSchema } from '@fuku/db/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
 import z from 'zod/v4'
 
 import { protectedProcedure } from '../../trpc'
+
+const teamMemberSchema = z.object({
+  teamId: z.string(),
+  familyName: z.string(),
+  givenNames: z.string(),
+  role: z.enum(TeamMemberRole).optional(),
+  payGradeId: z.string().optional(),
+  rateMultiplier: z.number().optional(),
+  color: z.string().optional(),
+  userId: z.string().optional(),
+})
 
 export const teamMemberRouter = {
   getById: protectedProcedure
@@ -11,107 +21,42 @@ export const teamMemberRouter = {
     .query(async ({ input, ctx }) => {
       const member = await ctx.db.teamMember.findUnique({
         where: { id: input.id },
-        include: { user: true, payGrade: true },
+        include: {
+          user: { select: { id: true, name: true, username: true } },
+          payGrade: true,
+        },
       })
 
-      if (!member)
+      if (!member) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: `No team member with id '${input.id}'`,
         })
-
-      return member
-    }),
-
-  getAllByTeam: protectedProcedure
-    .input(
-      z.object({
-        teamId: z.string(),
-        limit: z.number().optional(),
-      }),
-    )
-    .query(async ({ input, ctx }) => {
-      // Fetch members
-      const members = await ctx.db.teamMember.findMany({
-        where: { teamId: input.teamId, deletedAt: null },
-        include: { user: true, payGrade: true },
-        ...(input.limit && { take: input.limit }),
-        orderBy: [
-          { payGrade: { name: 'asc' } },
-          { createdAt: 'asc' },
-          { givenNames: 'asc' },
-          { familyName: 'asc' },
-        ],
-      })
-
-      return members
-    }),
-
-  create: protectedProcedure
-    .input(
-      TeamMemberSchema.omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-        deletedById: true,
-      }).extend({
-        username: z.string().optional(),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      const { username, ...data } = input
-
-      let userId: string | null = null
-      if (username) {
-        const user = await ctx.db.user.findUnique({
-          where: { username },
-        })
-        if (!user) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: `No user found with username "${username}"`,
-          })
-        }
-        userId = user.id
       }
 
+      return {
+        ...member,
+        effectiveRate: member.payGrade
+          ? member.payGrade.baseRate * member.rateMultiplier
+          : null,
+      }
+    }),
+  create: protectedProcedure
+    .input(teamMemberSchema)
+    .mutation(async ({ input, ctx }) => {
       const newMember = await ctx.db.teamMember.create({
-        data: {
-          ...data,
-          userId,
-        },
+        data: input,
       })
+
       return newMember
     }),
-
   update: protectedProcedure
-    .input(
-      TeamMemberSchema.partial().extend({
-        id: z.string(),
-        username: z.string().optional(),
-      }),
-    )
+    .input(teamMemberSchema.extend({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const { id, username, ...data } = input
-
+      const { id, ...data } = input
       const currentUserId = ctx.session.user.id
 
-      let userId: string | null = null
-      if (username) {
-        const user = await ctx.db.user.findUnique({
-          where: { username },
-        })
-        if (!user) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: `No user found with  "${username}"`,
-          })
-        }
-        userId = user.id
-      }
-
-      const updated = await ctx.db.teamMember.update({
+      const member = await ctx.db.teamMember.findFirst({
         where: {
           id,
           deletedAt: null,
@@ -120,97 +65,38 @@ export const teamMemberRouter = {
             adminUsers: { some: { id: currentUserId } },
           },
         },
-        data: {
-          ...data,
-          userId,
-        },
       })
 
-      if (!updated)
+      if (!member) {
         throw new TRPCError({
           code: 'FORBIDDEN',
           message:
             'Cannot edit this team member (not found, deleted, or insufficient permissions)',
         })
+      }
 
-      return updated
+      return ctx.db.teamMember.update({
+        where: { id },
+        data,
+      })
     }),
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const { id } = input
-      const currentUserId = ctx.session.user.id
-
-      const member = await ctx.db.teamMember.findFirst({
-        where: {
-          id,
-          deletedAt: null,
-          team: {
-            deletedAt: null,
-            adminUsers: { some: { id: currentUserId } },
-          },
-        },
-      })
-
-      if (!member)
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message:
-            'Cannot delete this team member (not found, already deleted, or insufficient permissions)',
-        })
-
-      if (member.teamMemberRole === TeamMemberRole.ADMIN) {
-        const activeAdminCount = await ctx.db.teamMember.count({
-          where: {
-            teamId: member.teamId,
-            teamMemberRole: TeamMemberRole.ADMIN,
-            deletedAt: null,
-          },
-        })
-
-        if (activeAdminCount <= 1) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message:
-              'Cannot delete the last admin member of the team. Assign another member as admin first.',
-          })
-        }
-      }
-
-      const deleted = await ctx.db.teamMember.update({
-        where: { id },
+      const deletedMember = await ctx.db.teamMember.update({
+        where: { id: input.id },
         data: {
           deletedAt: new Date(),
-          deletedById: currentUserId,
+          deletedById: ctx.session.user.id,
         },
       })
 
-      return deleted
+      return deletedMember
     }),
   restore: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const currentUserId = ctx.session.user.id
-
-      const member = await ctx.db.teamMember.findFirst({
-        where: {
-          id: input.id,
-          deletedAt: { not: null },
-          team: {
-            deletedAt: null,
-            adminUsers: { some: { id: currentUserId } },
-          },
-        },
-      })
-
-      if (!member)
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message:
-            'Cannot restore this team member (not found, not deleted, or insufficient permissions)',
-        })
-
-      const restored = await ctx.db.teamMember.update({
+      const restoredMember = await ctx.db.teamMember.update({
         where: { id: input.id },
         data: {
           deletedAt: null,
@@ -218,6 +104,6 @@ export const teamMemberRouter = {
         },
       })
 
-      return restored
+      return restoredMember
     }),
 } satisfies TRPCRouterRecord

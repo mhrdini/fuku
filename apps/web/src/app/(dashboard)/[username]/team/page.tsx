@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation'
+
 export default function TeamPage() {
-  return <div></div>
+  redirect('/')
 }

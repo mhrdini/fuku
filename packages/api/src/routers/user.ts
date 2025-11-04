@@ -4,23 +4,25 @@ import z from 'zod/v4'
 import { protectedProcedure } from '../trpc'
 
 export const userRouter = {
-  byId: protectedProcedure
+  getById: protectedProcedure
     .input(
       z.object({
         id: z.string(),
       }),
     )
     .query(async ({ input, ctx }) => {
-      const user = await ctx.db.user.findUnique({ where: { id: input.id } })
-      if (!user)
+      const user = await ctx.db.user.findUnique({
+        where: { id: input.id },
+      })
+      if (!user) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: `No user with id '${id}'`,
+          message: `No user with id '${input.id}'`,
         })
       }
       return user
     }),
-  byUsername: protectedProcedure
+  getByUsername: protectedProcedure
     .input(
       z.object({
         username: z.string(),
@@ -64,9 +66,19 @@ export const userRouter = {
   getMyMemberships: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id
     const memberships = await ctx.db.teamMember.findMany({
-      where: { userId, deletedAt: null, team: { deletedAt: null } },
+      where: {
+        userId,
+        deletedAt: null,
+        team: { deletedAt: null },
+      },
       include: { team: true, payGrade: true },
     })
-    return memberships
+
+    return memberships.map(member => ({
+      ...member,
+      effectiveRate: member.payGrade
+        ? member.payGrade.baseRate * member.rateMultiplier
+        : null,
+    }))
   }),
 } satisfies TRPCRouterRecord

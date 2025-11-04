@@ -2,24 +2,24 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 type DashboardStore = {
-  currentTeamId: string | null
+  currentUsername: string | null
+  setCurrentUsername: (username: string | null) => void
   currentTeamSlug: string | null
-  setCurrentTeam: ({ id, slug }: { id?: string; slug?: string }) => void
+  setCurrentTeamSlug: (id: string | null) => void
 }
 
 export const useDashboardStore = create(
   persist<DashboardStore>(
     set => ({
-      currentTeamId: null,
+      currentUsername: null,
+      setCurrentUsername: (username: string | null) =>
+        set({ currentUsername: username }),
       currentTeamSlug: null,
-      setCurrentTeam: ({ id, slug }) =>
-        set({
-          ...(id ? { currentTeamId: id } : {}),
-          ...(slug ? { currentTeamSlug: slug } : {}),
-        }),
+      setCurrentTeamSlug: (teamSlug: string | null) =>
+        set({ currentTeamSlug: teamSlug }),
     }),
     {
-      name: 'dashboard',
+      name: 'team',
       storage: createJSONStorage(() => localStorage),
     },
   ),
