@@ -10,3 +10,7 @@ generator client {
   provider = "prisma-client-js"
   output   = "../generated/client"
 }
+
+generator zod {
+  provider = "prisma-zod-generator"
+}
