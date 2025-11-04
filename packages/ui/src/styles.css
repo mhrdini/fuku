@@ -1,6 +1,8 @@
 /* Component-level styles for the UI package */
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@source './';
+@source '../../../apps/web/src';
 
 @custom-variant dark (&:is(.dark *));
 
