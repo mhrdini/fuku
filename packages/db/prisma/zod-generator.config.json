@@ -1,25 +1,11 @@
 {
   "mode": "minimal",
-  "pureModels": true,
-  "pureModelsIncludeRelations": true,
-  "pureModelsExcludeCircularRelations": true,
-  "globalExclusions": {
-    "input": ["id", "createdAt", "updatedAt"],
-    "result": [],
-    "pure": ["password", "hashedPassword"]
-  },
+  "pureModels": false,
+  "zodImportTarget": "v4",
   "variants": {
-    "pure": {
-      "enabled": true,
-      "suffix": ".model"
-    },
-    "input": {
-      "enabled": true,
-      "suffix": ".input"
-    },
-    "result": {
-      "enabled": true,
-      "suffix": ".output"
-    }
-  }
+    "pure": { "enabled": false },
+    "input": { "enabled": false },
+    "result": { "enabled": true }
+  },
+  "emit": { "pureModels": false }
 }
