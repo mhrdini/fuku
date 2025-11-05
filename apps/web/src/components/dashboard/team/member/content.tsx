@@ -2,9 +2,9 @@
 
 import type { ColumnDef } from '@tanstack/react-table'
 import {
-  PayGradeResultSchema,
-  TeamMemberResultSchema,
-  UserResultSchema,
+  PayGradeModelSchema,
+  TeamMemberModelSchema,
+  UserModelSchema,
 } from '@fuku/db/schemas'
 import { useQuery } from '@tanstack/react-query'
 import z from 'zod/v4'
@@ -15,19 +15,19 @@ import { useDashboardStore } from '~/store/dashboard'
 import { useTRPC } from '~/trpc/client'
 import { ContentSkeleton } from '../../content-skeleton'
 
-const UserSchema = UserResultSchema.pick({
+const UserSchema = UserModelSchema.pick({
   id: true,
   name: true,
   username: true,
 }).nullable()
 
-const PayGradeSchema = PayGradeResultSchema.pick({
+const PayGradeSchema = PayGradeModelSchema.pick({
   id: true,
   name: true,
   baseRate: true,
 }).nullable()
 
-const TeamMemberSchema = TeamMemberResultSchema.omit({
+const TeamMemberSchema = TeamMemberModelSchema.omit({
   payGrade: true,
   user: true,
   dayAssignments: true,

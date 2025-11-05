@@ -1,3 +1,7 @@
+import {
+  TeamCreateInputObjectZodSchema,
+  TeamUpdateInputObjectZodSchema,
+} from '@fuku/db/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
 import { customAlphabet } from 'nanoid'
 import { z } from 'zod/v4'
@@ -10,6 +14,12 @@ export const teamRouter = {
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
+      if (!input.id)
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Team ID is required',
+        })
+
       const team = await ctx.db.team.findFirst({
         where: {
           id: input.id,
@@ -28,12 +38,11 @@ export const teamRouter = {
         },
       })
 
-      if (!team) {
+      if (!team)
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: `No team with id '${input.id}' found or you do not have permission to view it`,
         })
-      }
 
       return team
     }),
@@ -59,15 +68,15 @@ export const teamRouter = {
         },
       })
 
-      if (!team) {
+      if (!team)
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: `No team with slug '${input.slug}' found or you do not have permission to view it`,
         })
-      }
 
       return team
     }),
+
   getAllOwned: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id
     const teams = await ctx.db.team.findMany({
@@ -151,7 +160,7 @@ export const teamRouter = {
     }),
 
   create: protectedProcedure
-    .input(z.object({ name: z.string(), description: z.string().optional() }))
+    .input(TeamCreateInputObjectZodSchema.omit({ slug: true }))
     .mutation(async ({ input, ctx }) => {
       let slug: string
       while (true) {
@@ -181,16 +190,9 @@ export const teamRouter = {
     }),
 
   update: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        name: z.string().optional(),
-        description: z.string().optional(),
-      }),
-    )
+    .input(TeamUpdateInputObjectZodSchema.extend({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const { id, name, description } = input
-
+      const { id, ...data } = input
       const updatedCount = await ctx.db.team.updateMany({
         where: {
           id,
@@ -198,8 +200,7 @@ export const teamRouter = {
           adminUsers: { some: { id: ctx.session.user.id } },
         },
         data: {
-          ...(name && { name }),
-          ...(description !== undefined && { description }),
+          ...data,
           updatedAt: new Date(),
         },
       })
