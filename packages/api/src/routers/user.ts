@@ -1,58 +1,52 @@
+import { UserWhereUniqueInputObjectSchema } from '@fuku/db/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
-import { z } from 'zod/v4'
 
 import { protectedProcedure } from '../trpc'
 
 export const userRouter = {
   getById: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-      }),
-    )
+    .input(UserWhereUniqueInputObjectSchema)
     .query(async ({ input, ctx }) => {
-      const user = await ctx.db.user.findUnique({
-        where: { id: input.id },
-      })
-      if (!user) {
+      if (!input.id)
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'ID is required' })
+
+      const user = await ctx.db.user.findUnique({ where: { id: input.id } })
+      if (!user)
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: `No user with id '${input.id}'`,
         })
-      }
+
       return user
     }),
+
   getByUsername: protectedProcedure
-    .input(
-      z.object({
-        username: z.string(),
-      }),
-    )
+    .input(UserWhereUniqueInputObjectSchema)
     .query(async ({ input, ctx }) => {
-      const { username } = input
+      if (!input.username)
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Username is required',
+        })
+
       const user = await ctx.db.user.findUnique({
-        where: { username },
+        where: { username: input.username },
       })
-      if (!user) {
+      if (!user)
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: `No user with username '${username}'`,
+          message: `No user with username '${input.username}'`,
         })
-      }
+
       return user
     }),
 
   getMyMemberships: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id
     const memberships = await ctx.db.teamMember.findMany({
-      where: {
-        userId,
-        deletedAt: null,
-        team: { deletedAt: null },
-      },
+      where: { userId, deletedAt: null, team: { deletedAt: null } },
       include: { team: true, payGrade: true },
     })
-
     return memberships
   }),
 } satisfies TRPCRouterRecord
