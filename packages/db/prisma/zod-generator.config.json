@@ -1,11 +1,13 @@
 {
-  "mode": "minimal",
-  "pureModels": false,
-  "zodImportTarget": "v4",
-  "variants": {
-    "pure": { "enabled": false },
-    "input": { "enabled": false },
-    "result": { "enabled": true }
+  "mode": "custom",
+  "globalExclusions": {
+    "input": ["id", "createdAt", "updatedAt"],
+    "result": [],
+    "pure": ["password", "hashedPassword"]
   },
-  "emit": { "pureModels": false }
+  "variants": {
+    "pure": { "enabled": true, "suffix": ".model" },
+    "input": { "enabled": true, "suffix": ".input" },
+    "result": { "enabled": true, "suffix": ".output" }
+  }
 }
