@@ -82,6 +82,9 @@ export default function TeamMembersContent() {
     () => [
       {
         accessorKey: 'fullName',
+        meta: {
+          label: 'Full Name',
+        },
         header: ({ column }) => {
           return (
             <Button
@@ -96,10 +99,11 @@ export default function TeamMembersContent() {
             </Button>
           )
         },
+        enableHiding: false,
       },
       {
         accessorKey: 'payGradeName',
-        header: 'Pay Grade',
+        meta: { label: 'Pay Grade' },
         cell: info => (
           <Badge variant='outline'>{info.getValue<string>()}</Badge>
         ),
@@ -107,16 +111,16 @@ export default function TeamMembersContent() {
       },
       {
         accessorKey: 'baseRate',
-        header: 'Base Rate',
+        meta: { label: 'Base Rate' },
       },
       {
         accessorKey: 'rateMultiplier',
-        header: 'Rate Multiplier',
+        meta: { label: 'Rate Multiplier' },
         cell: info => info.getValue<number>().toFixed(2),
       },
       {
         accessorKey: 'effectiveRate',
-        header: 'Effective Rate',
+        meta: { label: 'Effective Rate' },
         cell: info =>
           info.getValue<number>() != null
             ? `${info.getValue<number>()}`
