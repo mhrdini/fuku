@@ -1,57 +1,71 @@
 'use client'
 
-import type { ColumnDef } from '@tanstack/react-table'
+import { useMemo } from 'react'
 import {
-  PayGradeModelSchema,
-  TeamMemberModelSchema,
-  UserModelSchema,
+  PayGradeOutputSchema,
+  TeamMemberOutputSchema,
+  UserOutputSchema,
 } from '@fuku/db/schemas'
+import {
+  Badge,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from '@fuku/ui/components'
 import { useQuery } from '@tanstack/react-query'
+import { ColumnDef } from '@tanstack/react-table'
+import { ArrowUpDown } from 'lucide-react'
 import z from 'zod/v4'
 
-import { DataTable } from '~/components/ui/data-table'
-import { zodToColumns } from '~/lib/column'
+import { getHiddenColumns } from '~/lib/table'
 import { useDashboardStore } from '~/store/dashboard'
 import { useTRPC } from '~/trpc/client'
 import { ContentSkeleton } from '../../content-skeleton'
+import { MembersDataTableSection } from './members-data-table-section'
 
-const UserSchema = UserModelSchema.pick({
-  id: true,
-  name: true,
-  username: true,
-}).nullable()
-
-const PayGradeSchema = PayGradeModelSchema.pick({
-  id: true,
-  name: true,
-  baseRate: true,
-}).nullable()
-
-const TeamMemberSchema = TeamMemberModelSchema.omit({
-  payGrade: true,
-  user: true,
+// Extend the output schema with included relations
+// from the procedure and also with UI-specific fields
+export const TeamMemberSchema = TeamMemberOutputSchema.omit({
   dayAssignments: true,
   unavailabilities: true,
   team: true,
 }).extend({
-  payGrade: PayGradeSchema,
-  user: UserSchema,
+  // Included relations
+  user: UserOutputSchema.pick({
+    id: true,
+    email: true,
+    username: true,
+  }).nullable(),
+  payGrade: PayGradeOutputSchema.pick({
+    id: true,
+    name: true,
+    baseRate: true,
+  }).nullable(),
+})
+export const TeamMemberUISchema = TeamMemberSchema.extend({
+  // UI-specific fields
+  fullName: z.string(),
+  payGradeName: z.string(),
+  baseRate: z.number().nullable(),
+  effectiveRate: z.number().nullable(),
+  username: z.string().nullable(),
 })
 
-const TeamMemberColumnSchema = z
-  .object({
-    name: z.string(),
-    effectiveRate: z.number().nullable(),
-    color: z.string().nullable(),
-    username: z.string().nullable(),
-  })
-  .strict()
+export type TeamMemberUI = z.infer<typeof TeamMemberUISchema>
 
-type TeamMemberColumnType = z.infer<typeof TeamMemberColumnSchema>
+export const toTeamMemberUI = (
+  m: z.infer<typeof TeamMemberSchema>,
+): TeamMemberUI => ({
+  ...m,
+  fullName: `${m.givenNames} ${m.familyName}`,
+  payGradeName: m.payGrade?.name ?? 'No Pay Grade',
+  baseRate: m.payGrade?.baseRate ?? null,
+  effectiveRate: m.payGrade ? m.payGrade.baseRate * m.rateMultiplier : null,
+  username: m.user ? m.user.username : null,
+})
 
-const columns: ColumnDef<TeamMemberColumnType>[] = zodToColumns(
-  TeamMemberColumnSchema,
-)
+const defaultVisibleColumns = ['fullName', 'payGradeName']
 
 export default function TeamMembersContent() {
   const trpc = useTRPC()
@@ -64,28 +78,65 @@ export default function TeamMembersContent() {
     enabled: !!currentTeamSlug,
   })
 
-  function mapTeamMember(
-    teamMember: z.infer<typeof TeamMemberSchema>,
-    payGrade: z.infer<typeof PayGradeSchema>,
-    user: z.infer<typeof UserSchema> | null,
-  ): TeamMemberColumnType {
-    return {
-      name: `${teamMember.givenNames} ${teamMember.familyName}`,
-      effectiveRate: payGrade
-        ? payGrade.baseRate * teamMember.rateMultiplier
-        : null,
-      color: teamMember.color,
-      username: user?.username ?? null,
-    }
-  }
+  const columns = useMemo<ColumnDef<TeamMemberUI, any>[]>(
+    () => [
+      {
+        accessorKey: 'fullName',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant='ghost'
+              className='-ml-3'
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === 'asc')
+              }
+            >
+              Email
+              <ArrowUpDown />
+            </Button>
+          )
+        },
+      },
+      {
+        accessorKey: 'payGradeName',
+        header: 'Pay Grade',
+        cell: info => (
+          <Badge variant='outline'>{info.getValue<string>()}</Badge>
+        ),
+        filterFn: 'arrIncludesSome',
+      },
+      {
+        accessorKey: 'baseRate',
+        header: 'Base Rate',
+      },
+      {
+        accessorKey: 'rateMultiplier',
+        header: 'Rate Multiplier',
+        cell: info => info.getValue<number>().toFixed(2),
+      },
+      {
+        accessorKey: 'effectiveRate',
+        header: 'Effective Rate',
+        cell: info =>
+          info.getValue<number>() != null
+            ? `${info.getValue<number>()}`
+            : 'N/A',
+      },
+    ],
+    [],
+  )
 
   const teamMembersTableSection = (
-    <DataTable
-      columns={columns}
-      data={
-        members ? members.map(m => mapTeamMember(m, m.payGrade, m.user)) : []
-      }
-    />
+    <Dialog>
+      <MembersDataTableSection
+        columns={columns}
+        data={members ? members.map(toTeamMemberUI) : []}
+        defaultHiddenColumns={getHiddenColumns(defaultVisibleColumns, columns)}
+      />
+      <DialogContent>
+        <DialogTitle>Add Team Member</DialogTitle>
+      </DialogContent>
+    </Dialog>
   )
 
   return isPending ? (

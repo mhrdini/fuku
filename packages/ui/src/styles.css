@@ -128,4 +128,10 @@
   [role='button']:not(:disabled) {
     cursor: pointer;
   }
+
+  [role='checkbox'][data-state='checked']:not(:disabled)
+    [data-slot='checkbox-indicator']
+    svg {
+    @apply !text-primary-foreground;
+  }
 }
