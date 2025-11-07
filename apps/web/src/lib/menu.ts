@@ -1,4 +1,4 @@
-import { Cog, LucideIcon, Plus, UserCircle2, Users } from 'lucide-react'
+import { Cog, LucideIcon, UserCircle2, Users } from 'lucide-react'
 
 import { useDashboardStore } from '~/store/dashboard'
 
@@ -40,13 +40,6 @@ export const useMenu = (): Group[] => {
               href: `/team/${currentTeamSlug}/members`,
               label: 'Members',
               icon: UserCircle2,
-              submenus: [
-                {
-                  href: `/team/${currentTeamSlug}/invite`,
-                  label: 'Invite Members',
-                  icon: Plus,
-                },
-              ],
             },
             {
               href: `/team/${currentTeamSlug}/settings`,
