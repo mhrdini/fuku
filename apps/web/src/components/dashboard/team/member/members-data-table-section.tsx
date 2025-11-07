@@ -39,6 +39,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  RowData,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
@@ -59,6 +60,12 @@ const PayGradeSchema = PayGradeOutputSchema.omit({
   teamMembers: true,
 })
 type PayGradeType = z.infer<typeof PayGradeSchema>
+
+declare module '@tanstack/react-table' {
+  interface ColumnMeta<TData extends RowData, TValue> {
+    label: string
+  }
+}
 
 export function MembersDataTableSection<TData, TValue>({
   columns,
@@ -220,7 +227,7 @@ export function MembersDataTableSection<TData, TValue>({
                   checked={column.getIsVisible()}
                   onCheckedChange={value => column.toggleVisibility(!!value)}
                 >
-                  {column.columnDef.header as string}
+                  {column.columnDef.meta?.label as string}
                 </DropdownMenuCheckboxItem>
               )
             })}
@@ -252,7 +259,7 @@ export function MembersDataTableSection<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
+                            header.column.columnDef.meta?.label,
                             header.getContext(),
                           )}
                     </TableHead>
