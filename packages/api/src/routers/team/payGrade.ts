@@ -3,21 +3,23 @@ import z from 'zod/v4'
 import { protectedProcedure } from '../../trpc'
 
 export const payGradeRouter = {
-  getAllByTeam: protectedProcedure
-    .input(
-      z.object({
-        teamId: z.string(),
-        limit: z.number().optional(),
-      }),
-    )
+  getAllByTeamId: protectedProcedure
+    .input(z.object({ teamId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const payGrades = await ctx.db.payGrade.findMany({
+        where: { teamId: input.teamId },
+      })
+      return payGrades
+    }),
+  getAllByTeamSlug: protectedProcedure
+    .input(z.object({ teamSlug: z.string() }))
     .query(async ({ input, ctx }) => {
       const payGrades = await ctx.db.payGrade.findMany({
         where: {
           team: {
-            id: input.teamId,
+            slug: input.teamSlug,
           },
         },
-        ...(input.limit && { take: input.limit }),
       })
       return payGrades
     }),
