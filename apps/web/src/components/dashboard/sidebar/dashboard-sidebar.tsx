@@ -40,13 +40,13 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
   const { data: teams, isPending: isLoadingTeams } = useSuspenseQuery(
     trpc.team.getAllOwned.queryOptions(),
   )
-  const { currentTeamSlug, setCurrentTeamSlug } = useDashboardStore()
+  const { currentTeamSlug, setCurrentTeam } = useDashboardStore()
 
   useEffect(() => {
     if (teams?.length && !currentTeamSlug) {
-      setCurrentTeamSlug(teams[0].slug)
+      setCurrentTeam({ id: teams[0].id, slug: teams[0].slug })
     }
-  }, [teams, currentTeamSlug, setCurrentTeamSlug])
+  }, [teams, currentTeamSlug, setCurrentTeam])
 
   const router = useRouter()
   const groups = useMenu()

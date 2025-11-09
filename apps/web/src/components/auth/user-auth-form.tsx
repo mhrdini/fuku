@@ -58,7 +58,7 @@ export function UserAuthForm({
     router.push('/register')
   }
 
-  const onSubmit = async (data: UserAuthSchema) => {
+  const onSubmit = async (data: UserAuthSchemaType) => {
     if (isRegister) {
       await authClient.signUp.email(data as RegisterSchemaType, {
         onError: ctx => {
@@ -69,7 +69,7 @@ export function UserAuthForm({
         },
       })
     } else {
-      await authClient.signIn.username(data as LoginSchema, {
+      await authClient.signIn.username(data as LoginSchemaType, {
         onError: ctx => {
           form.setError('root', { message: ctx.error.message })
         },
