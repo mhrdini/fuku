@@ -1,13 +1,30 @@
 {
-  "mode": "custom",
+  "mode": "minimal",
   "globalExclusions": {
     "input": ["id", "createdAt", "updatedAt"],
     "result": [],
     "pure": ["password", "hashedPassword"]
   },
   "variants": {
-    "pure": { "enabled": true, "suffix": ".model" },
-    "input": { "enabled": true, "suffix": ".input" },
-    "result": { "enabled": true, "suffix": ".output" }
+    "pure": {
+      "enabled": true,
+      "suffix": ".model"
+    },
+    "input": {
+      "enabled": true,
+      "suffix": ".input"
+    },
+    "result": {
+      "enabled": true,
+      "suffix": ".output"
+    },
+    "crud": {
+      "enabled": true,
+      "suffix": ".crud"
+    },
+    "enum": {
+      "enabled": true,
+      "suffix": ".enum"
+    }
   }
 }

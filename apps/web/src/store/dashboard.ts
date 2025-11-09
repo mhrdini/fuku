@@ -4,8 +4,9 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 type DashboardStore = {
   currentUsername: string | null
   setCurrentUsername: (username: string | null) => void
+  currentTeamId: string | null
   currentTeamSlug: string | null
-  setCurrentTeamSlug: (id: string | null) => void
+  setCurrentTeam: ({ id, slug }: { id?: string; slug?: string }) => void
 }
 
 export const useDashboardStore = create(
@@ -14,9 +15,13 @@ export const useDashboardStore = create(
       currentUsername: null,
       setCurrentUsername: (username: string | null) =>
         set({ currentUsername: username }),
+      currentTeamId: null,
       currentTeamSlug: null,
-      setCurrentTeamSlug: (teamSlug: string | null) =>
-        set({ currentTeamSlug: teamSlug }),
+      setCurrentTeam: ({ id, slug }) =>
+        set({
+          ...(id ? { currentTeamId: id } : {}),
+          ...(slug ? { currentTeamSlug: slug } : {}),
+        }),
     }),
     {
       name: 'team',

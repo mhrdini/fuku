@@ -1,5 +1,5 @@
 import {
-  TeamCreateInputObjectZodSchema,
+  TeamInputSchema,
   TeamUpdateInputObjectZodSchema,
 } from '@fuku/db/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
@@ -115,6 +115,12 @@ export const teamRouter = {
           user: { select: { id: true, name: true, username: true } },
           payGrade: { select: { id: true, name: true, baseRate: true } },
         },
+        orderBy: [
+          { payGrade: { name: 'asc' } },
+          { createdAt: 'asc' },
+          { givenNames: 'asc' },
+          { familyName: 'asc' },
+        ],
       })
 
       return members
@@ -154,13 +160,19 @@ export const teamRouter = {
           user: { select: { id: true, email: true, username: true } },
           payGrade: { select: { id: true, name: true, baseRate: true } },
         },
+        orderBy: [
+          { payGrade: { name: 'asc' } },
+          { createdAt: 'asc' },
+          { givenNames: 'asc' },
+          { familyName: 'asc' },
+        ],
       })
 
       return members
     }),
 
   create: protectedProcedure
-    .input(TeamCreateInputObjectZodSchema.omit({ slug: true }))
+    .input(TeamInputSchema.pick({ name: true, description: true }))
     .mutation(async ({ input, ctx }) => {
       let slug: string
       while (true) {
@@ -180,10 +192,6 @@ export const teamRouter = {
           name: input.name,
           description: input.description,
           adminUsers: { connect: { id: ctx.session.user.id } },
-        },
-        include: {
-          teamMembers: true,
-          payGrades: true,
         },
       })
       return newTeam

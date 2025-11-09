@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   loginSchema,
-  LoginSchema,
+  LoginSchemaType,
   registerSchema,
-  RegisterSchema,
+  RegisterSchemaType,
 } from '@fuku/api/schemas'
 import {
   Button,
@@ -31,7 +31,7 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
   register?: boolean
 }
 
-type UserAuthSchema = LoginSchema | RegisterSchema
+type UserAuthSchemaType = LoginSchemaType | RegisterSchemaType
 
 export function UserAuthForm({
   className,
@@ -40,7 +40,7 @@ export function UserAuthForm({
 }: UserAuthFormProps) {
   const [isRegister] = useState<boolean>(register || false)
   const router = useRouter()
-  const form = useForm<UserAuthSchema>({
+  const form = useForm<UserAuthSchemaType>({
     defaultValues: {
       name: '',
       username: '',
@@ -58,9 +58,9 @@ export function UserAuthForm({
     router.push('/register')
   }
 
-  const onSubmit = async (data: UserAuthSchema) => {
+  const onSubmit = async (data: UserAuthSchemaType) => {
     if (isRegister) {
-      await authClient.signUp.email(data as RegisterSchema, {
+      await authClient.signUp.email(data as RegisterSchemaType, {
         onError: ctx => {
           form.setError('root', { message: ctx.error.message })
         },
@@ -69,7 +69,7 @@ export function UserAuthForm({
         },
       })
     } else {
-      await authClient.signIn.username(data as LoginSchema, {
+      await authClient.signIn.username(data as LoginSchemaType, {
         onError: ctx => {
           form.setError('root', { message: ctx.error.message })
         },
