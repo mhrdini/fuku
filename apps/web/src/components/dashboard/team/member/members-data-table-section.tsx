@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { PayGradeOutputSchema } from '@fuku/db/schemas'
+import { Suspense, useState } from 'react'
 import {
   Badge,
   Button,
@@ -29,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from '@fuku/ui/components'
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import {
   Column,
   ColumnDef,
@@ -44,22 +43,10 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { ChevronDown, Columns2, Plus, PlusCircle } from 'lucide-react'
-import z from 'zod/v4'
 
 import { useDashboardStore } from '~/store/dashboard'
 import { useTRPC } from '~/trpc/client'
-
-interface MembersDataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-  defaultHiddenColumns?: string[]
-}
-
-const PayGradeSchema = PayGradeOutputSchema.omit({
-  team: true,
-  teamMembers: true,
-})
-type PayGradeType = z.infer<typeof PayGradeSchema>
+import { TeamMemberUI } from './content'
 
 declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {
@@ -67,42 +54,41 @@ declare module '@tanstack/react-table' {
   }
 }
 
-export function MembersDataTableSection<TData, TValue>({
-  columns,
+interface MembersDataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[]
+  data: TData[]
+  defaultHiddenColumns?: string[]
+}
+
+export function MembersDataTableSection({
   data,
-  defaultHiddenColumns = [],
-}: MembersDataTableProps<TData, TValue>) {
+  columns,
+  defaultHiddenColumns,
+}: MembersDataTableProps<TeamMemberUI, any>) {
   const trpc = useTRPC()
   const { currentTeamSlug } = useDashboardStore()
 
-  const { data: payGrades, isPending: isLoadingPayGrades } = useQuery({
-    ...trpc.payGrade.getAllByTeamSlug.queryOptions({
+  const { data: payGrades } = useSuspenseQuery(
+    trpc.payGrade.getAllByTeamSlug.queryOptions({
       teamSlug: currentTeamSlug!,
     }),
-    enabled: !!currentTeamSlug,
-  })
+  )
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const [payGradeOpen, setPayGradeOpen] = useState(false)
-  const [payGradeValues, setPayGradeValues] = useState(
-    payGrades
-      ? payGrades.reduce<Record<string, boolean>>((acc, pg) => {
-          acc[pg.name] = false
-          return acc
-        }, {})
-      : {},
-  )
 
   const table = useReactTable({
     data,
     columns,
-    enableHiding: true,
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    enableSortingRemoval: true,
+    enableMultiSort: true,
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    enableHiding: true,
     state: {
       sorting,
       columnFilters,
@@ -128,8 +114,8 @@ export function MembersDataTableSection<TData, TValue>({
       ? filterValue.filter(v => v !== value)
       : [...filterValue, value]
 
-    column.setFilterValue(newValues.length ? newValues : undefined)
     // undefined clears the filter
+    column.setFilterValue(newValues.length ? newValues : undefined)
   }
 
   const tableFilters = (
@@ -143,11 +129,19 @@ export function MembersDataTableSection<TData, TValue>({
           >
             <PlusCircle />
             Pay Grade
-            <Separator orientation='vertical' />
-            <Badge variant='outline'>
-              {(table.getColumn('payGradeName')?.getFilterValue() as string[])
-                ?.length ?? 0}
-            </Badge>
+            {(table.getColumn('payGradeName')?.getFilterValue() as string[])
+              ?.length > 0 && (
+              <>
+                <Separator orientation='vertical' />
+                <Badge variant='outline'>
+                  {(
+                    table
+                      .getColumn('payGradeName')
+                      ?.getFilterValue() as string[]
+                  )?.length || 0}
+                </Badge>
+              </>
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent align='start' className='p-0'>
@@ -156,10 +150,8 @@ export function MembersDataTableSection<TData, TValue>({
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                {isLoadingPayGrades ? (
-                  <Skeleton />
-                ) : (
-                  payGrades!.map(pg => (
+                <Suspense fallback={<Skeleton className='h-8 w-full' />}>
+                  {payGrades!.map(pg => (
                     <CommandItem
                       key={pg.id}
                       value={pg.name}
@@ -183,8 +175,8 @@ export function MembersDataTableSection<TData, TValue>({
                         </Label>
                       </div>
                     </CommandItem>
-                  ))
-                )}
+                  ))}
+                </Suspense>
               </CommandGroup>
               <CommandSeparator />
               <CommandGroup>
@@ -259,7 +251,8 @@ export function MembersDataTableSection<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.meta?.label,
+                            header.column.columnDef.meta?.label ??
+                              header.column.columnDef.header,
                             header.getContext(),
                           )}
                     </TableHead>

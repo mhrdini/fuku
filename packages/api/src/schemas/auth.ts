@@ -43,5 +43,5 @@ export const loginSchema = z.object({
   rememberMe: z.boolean().optional(),
 })
 
-export type RegisterSchema = z.infer<typeof registerSchema>
-export type LoginSchema = z.infer<typeof loginSchema>
+export type RegisterSchemaType = z.infer<typeof registerSchema>
+export type LoginSchemaType = z.infer<typeof loginSchema>
