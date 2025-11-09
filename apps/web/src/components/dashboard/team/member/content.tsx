@@ -6,13 +6,7 @@ import {
   TeamMemberOutputSchema,
   UserOutputSchema,
 } from '@fuku/db/schemas'
-import {
-  Badge,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@fuku/ui/components'
+import { Badge, Button, Dialog } from '@fuku/ui/components'
 import { useQuery } from '@tanstack/react-query'
 import { ColumnDef } from '@tanstack/react-table'
 import { ArrowUpDown } from 'lucide-react'
@@ -22,8 +16,10 @@ import { getHiddenColumns } from '~/lib/table'
 import { useDashboardStore } from '~/store/dashboard'
 import { useTRPC } from '~/trpc/client'
 import { ContentSkeleton } from '../../content-skeleton'
+import { AddMemberFormDialog } from './add-member-form-dialog'
 import { MembersDataTableSection } from './members-data-table-section'
 
+// --- For data table rows ---
 // Extend the output schema with included relations
 // from the procedure and also with UI-specific fields
 export const TeamMemberSchema = TeamMemberOutputSchema.omit({
@@ -43,6 +39,9 @@ export const TeamMemberSchema = TeamMemberOutputSchema.omit({
     baseRate: true,
   }).nullable(),
 })
+
+export type TeamMember = z.infer<typeof TeamMemberSchema>
+
 export const TeamMemberUISchema = TeamMemberSchema.extend({
   // UI-specific fields
   fullName: z.string(),
@@ -82,32 +81,39 @@ export default function TeamMembersContent() {
     () => [
       {
         accessorKey: 'fullName',
-        meta: {
-          label: 'Full Name',
-        },
+        enableHiding: false,
+        // don't include meta label to use custom header
         header: ({ column }) => {
           return (
             <Button
               variant='ghost'
               className='-ml-3'
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === 'asc')
-              }
+              onClick={() => column.toggleSorting()}
             >
-              Email
+              Name
               <ArrowUpDown />
             </Button>
           )
         },
-        enableHiding: false,
       },
       {
         accessorKey: 'payGradeName',
-        meta: { label: 'Pay Grade' },
+        filterFn: 'arrIncludesSome',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant='ghost'
+              className='-ml-3'
+              onClick={() => column.toggleSorting()}
+            >
+              Pay Grade
+              <ArrowUpDown />
+            </Button>
+          )
+        },
         cell: info => (
           <Badge variant='outline'>{info.getValue<string>()}</Badge>
         ),
-        filterFn: 'arrIncludesSome',
       },
       {
         accessorKey: 'baseRate',
@@ -130,16 +136,18 @@ export default function TeamMembersContent() {
     [],
   )
 
+  const defaultHiddenColumns = useMemo(() => {
+    return getHiddenColumns(defaultVisibleColumns, columns)
+  }, [columns])
+
   const teamMembersTableSection = (
     <Dialog>
       <MembersDataTableSection
         columns={columns}
         data={members ? members.map(toTeamMemberUI) : []}
-        defaultHiddenColumns={getHiddenColumns(defaultVisibleColumns, columns)}
+        defaultHiddenColumns={defaultHiddenColumns}
       />
-      <DialogContent>
-        <DialogTitle>Add Team Member</DialogTitle>
-      </DialogContent>
+      <AddMemberFormDialog />
     </Dialog>
   )
 
