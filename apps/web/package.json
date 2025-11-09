@@ -26,7 +26,7 @@
     "next": "latest",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
-    "react-hook-form": "^7.66.0",
+    "react-hook-form": "catalog:",
     "sonner": "catalog:",
     "superjson": "catalog:",
     "zod": "catalog:",
