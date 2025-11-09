@@ -27,6 +27,7 @@
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
     "react-hook-form": "catalog:",
+    "sonner": "catalog:",
     "superjson": "catalog:",
     "zod": "catalog:",
     "zustand": "catalog:"

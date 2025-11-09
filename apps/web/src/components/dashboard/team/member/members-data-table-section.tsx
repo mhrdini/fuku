@@ -10,7 +10,6 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-  DialogTrigger,
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
@@ -45,7 +44,9 @@ import {
 import { ChevronDown, Columns2, Plus, PlusCircle } from 'lucide-react'
 
 import { useDashboardStore } from '~/store/dashboard'
+import { useTeamMemberStore } from '~/store/member'
 import { useTRPC } from '~/trpc/client'
+import { AddMemberFormDialog } from './add-member-form-dialog'
 import { TeamMemberUI } from './content'
 
 declare module '@tanstack/react-table' {
@@ -78,6 +79,11 @@ export function MembersDataTableSection({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const [payGradeOpen, setPayGradeOpen] = useState(false)
+  const { addDialogOpen, setAddDialogOpen } = useTeamMemberStore()
+
+  const onAddMemberClick = () => {
+    setAddDialogOpen(true)
+  }
 
   const table = useReactTable({
     data,
@@ -108,7 +114,7 @@ export function MembersDataTableSection({
     getPaginationRowModel: getPaginationRowModel(),
   })
 
-  const toggle = (column: Column<any, unknown>, value: string) => {
+  const toggleFilter = (column: Column<any, unknown>, value: string) => {
     const filterValue = (column.getFilterValue() as string[]) ?? []
     const newValues = filterValue.includes(value)
       ? filterValue.filter(v => v !== value)
@@ -156,7 +162,7 @@ export function MembersDataTableSection({
                       key={pg.id}
                       value={pg.name}
                       onSelect={value =>
-                        toggle(table.getColumn('payGradeName')!, value)
+                        toggleFilter(table.getColumn('payGradeName')!, value)
                       }
                       asChild
                     >
@@ -225,12 +231,10 @@ export function MembersDataTableSection({
             })}
         </DropdownMenuContent>
       </DropdownMenu>
-      <DialogTrigger asChild>
-        <Button variant='outline'>
-          <Plus />
-          <span className='hidden lg:inline'>Add Member</span>
-        </Button>
-      </DialogTrigger>
+      <Button variant='outline' onClick={onAddMemberClick}>
+        <Plus />
+        <span className='hidden lg:inline'>Add Member</span>
+      </Button>
     </>
   )
 
@@ -239,6 +243,10 @@ export function MembersDataTableSection({
       <div className='flex items-center py-4'>
         {tableFilters}
         <div className='ml-auto flex gap-2'>{tableActions}</div>
+        <AddMemberFormDialog
+          open={addDialogOpen}
+          onOpenChange={setAddDialogOpen}
+        />
       </div>
       <div className='overflow-hidden rounded-md border'>
         <Table>
