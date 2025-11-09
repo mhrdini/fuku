@@ -1,5 +1,5 @@
 import {
-  TeamMemberCreateInputObjectSchema,
+  TeamMemberCreateOneZodSchema,
   TeamMemberUpdateInputObjectZodSchema,
 } from '@fuku/db/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
@@ -26,16 +26,14 @@ export const teamMemberRouter = {
     }),
 
   create: protectedProcedure
-    .input(TeamMemberCreateInputObjectSchema)
+    .input(TeamMemberCreateOneZodSchema.shape.data)
     .mutation(async ({ input, ctx }) => {
       const newMember = await ctx.db.teamMember.create({ data: input })
       return newMember
     }),
 
   update: protectedProcedure
-    .input(
-      TeamMemberUpdateInputObjectZodSchema.and(z.object({ id: z.string() })),
-    )
+    .input(TeamMemberUpdateInputObjectZodSchema.extend({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const { id, ...data } = input
       const currentUserId = ctx.session.user.id
