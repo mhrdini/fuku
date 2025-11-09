@@ -24,7 +24,7 @@ export const useDashboardStore = create(
         }),
     }),
     {
-      name: 'team',
+      name: 'dashboard',
       storage: createJSONStorage(() => localStorage),
     },
   ),

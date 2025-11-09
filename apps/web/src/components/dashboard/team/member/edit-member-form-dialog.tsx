@@ -1,10 +1,8 @@
 'use client'
 
-import { TeamMemberRole } from '@fuku/db'
-import { TeamMemberInputSchema } from '@fuku/db/schemas'
+import { TeamMemberSchema } from '@fuku/db/schemas'
 import {
   Button,
-  Command,
   CommandEmpty,
   CommandGroup,
   CommandItem,
@@ -14,7 +12,6 @@ import {
   DialogContent,
   DialogTitle,
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -23,92 +20,75 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Spinner,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, ChevronDown } from 'lucide-react'
+import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
+import { Check, ChevronDown, Command } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import z from 'zod/v4'
 
 import { useDashboardStore } from '~/store/dashboard'
 import { useTeamMemberStore } from '~/store/member'
 import { useTRPC } from '~/trpc/client'
 
-const TeamMemberCreateFormSchema = TeamMemberInputSchema.extend({
-  givenNames: z.string().min(1, { error: 'invalid_given_names' }),
-  familyName: z.string().min(1, { error: 'invalid_family_name' }),
-  payGradeId: z.string({ error: 'invalid_pay_grade_id' }),
-  rateMultiplier: z
-    .number({ error: 'invalid_rate_multiplier' })
-    .min(0, { error: 'invalid_rate_multiplier_negative' }),
-}).omit({
-  unavailabilities: true,
-  dayAssignments: true,
+const TeamMemberEditFormSchema = TeamMemberSchema.extend({
+  teamMemberRole: TeamMemberSchema.shape.teamMemberRole.unwrap(),
+  rateMultiplier: TeamMemberSchema.shape.rateMultiplier.unwrap(),
 })
 
-type TeamMemberCreateFormType = z.infer<typeof TeamMemberCreateFormSchema>
+type TeamMemberEditFormType = z.output<typeof TeamMemberEditFormSchema>
 
-interface AddMemberFormDialogProps {
+interface EditMemberFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export const AddMemberFormDialog = ({
+export const EditMemberFormDialog = ({
   open,
   onOpenChange,
-}: AddMemberFormDialogProps) => {
-  const queryClient = useQueryClient()
-
-  const { currentTeamId, currentTeamSlug } = useDashboardStore()
-  const { payGradeOpen, setPayGradeOpen } = useTeamMemberStore()
-
-  const form = useForm<TeamMemberCreateFormType>({
-    defaultValues: {
-      givenNames: '',
-      familyName: '',
-      teamId: currentTeamId || '',
-      rateMultiplier: 1,
-      teamMemberRole: TeamMemberRole.STAFF,
-    },
-    resolver: zodResolver(TeamMemberCreateFormSchema),
-  })
+}: EditMemberFormDialogProps) => {
+  const { currentTeamSlug } = useDashboardStore()
+  const { currentTeamMemberId, payGradeOpen, setPayGradeOpen } =
+    useTeamMemberStore()
 
   const trpc = useTRPC()
-
-  const { data: payGrades } = useQuery({
-    ...trpc.payGrade.getAllByTeamSlug.queryOptions({
+  const { data: teamMember } = useSuspenseQuery(
+    trpc.teamMember.getById.queryOptions({
+      id: currentTeamMemberId!,
+    }),
+  )
+  const { data: payGrades } = useSuspenseQuery(
+    trpc.payGrade.getAllByTeamSlug.queryOptions({
       teamSlug: currentTeamSlug!,
     }),
-    enabled: !!currentTeamSlug,
+  )
+
+  // Show spinner while loading
+  if (!teamMember || !payGrades) return <Spinner />
+
+  const form = useForm<TeamMemberEditFormType>({
+    defaultValues: TeamMemberEditFormSchema.parse(teamMember),
+    resolver: zodResolver(TeamMemberEditFormSchema),
   })
 
-  const { mutateAsync: addMember } = useMutation({
-    ...trpc.teamMember.create.mutationOptions(),
-    onSuccess: data => {
-      queryClient.invalidateQueries({
-        queryKey: trpc.team.getTeamMembersBySlug.queryKey(),
-      })
-      toast(
-        `${data.givenNames} ${data.familyName} has been created successfully.`,
-      )
-    },
+  const { mutateAsync: editMember } = useMutation({
+    ...trpc.teamMember.update.mutationOptions(),
     onError: error => {
-      console.error('Error creating team member:', error)
+      console.error('Error updating team member:', error)
     },
   })
 
-  const onSubmit = async (data: TeamMemberCreateFormType) => {
-    await addMember(data)
+  const onSubmit = async (data: TeamMemberEditFormType) => {
+    await editMember(data)
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogTitle>New Team Member</DialogTitle>
-        <FieldDescription>Add a new member to your team.</FieldDescription>
-        <form id='form-add-member' onSubmit={form.handleSubmit(onSubmit)}>
+        <DialogTitle>Edit Team Member</DialogTitle>
+        <form id='form-edit-member' onSubmit={form.handleSubmit(onSubmit)}>
           <FieldSet>
             <FieldGroup>
               <Controller
@@ -116,12 +96,12 @@ export const AddMemberFormDialog = ({
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor='form-add-member-given-names'>
+                    <FieldLabel htmlFor='form-edit-member-given-names'>
                       Given Name(s)
                     </FieldLabel>
                     <Input
                       {...field}
-                      id='form-add-member-given-names'
+                      id='form-edit-member-given-names'
                       aria-invalid={fieldState.invalid}
                       placeholder='Given Name(s)'
                       autoComplete='off'
@@ -137,12 +117,12 @@ export const AddMemberFormDialog = ({
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor='form-add-member-family-name'>
+                    <FieldLabel htmlFor='form-edit-member-family-name'>
                       Last Name
                     </FieldLabel>
                     <Input
                       {...field}
-                      id='form-add-member-family-name'
+                      id='form-edit-member-family-name'
                       aria-invalid={fieldState.invalid}
                       placeholder='Last Name'
                       autoComplete='off'
@@ -163,7 +143,7 @@ export const AddMemberFormDialog = ({
                       data-invalid={fieldState.invalid}
                       className='col-span-2 sm:col-span-2'
                     >
-                      <FieldLabel htmlFor='form-add-member-pay-grade-id'>
+                      <FieldLabel htmlFor='form-edit-member-pay-grade-id'>
                         Pay Grade
                       </FieldLabel>
                       <Popover
@@ -172,7 +152,7 @@ export const AddMemberFormDialog = ({
                       >
                         <PopoverTrigger asChild>
                           <Button
-                            id='form-add-member-pay-grade-id'
+                            id='form-edit-member-pay-grade-id'
                             variant='outline'
                             role='combobox'
                             className='justify-between'
@@ -221,11 +201,11 @@ export const AddMemberFormDialog = ({
                   )}
                 />
                 <Field className='col-span-1'>
-                  <FieldLabel htmlFor='form-add-member-base-rate'>
+                  <FieldLabel htmlFor='form-edit-member-base-rate'>
                     Base Rate
                   </FieldLabel>
                   <Button
-                    id='form-add-member-base-rate'
+                    id='form-edit-member-base-rate'
                     variant='outline'
                     disabled
                     className='text-justify items-start justify-start disabled:opacity-100'
@@ -245,12 +225,12 @@ export const AddMemberFormDialog = ({
                       data-invalid={fieldState.invalid}
                       className='col-span-1'
                     >
-                      <FieldLabel htmlFor='form-add-member-rate-multiplier'>
+                      <FieldLabel htmlFor='form-edit-member-rate-multiplier'>
                         Multiplier
                       </FieldLabel>
                       <Input
                         {...field}
-                        id='form-add-member-rate-multiplier'
+                        id='form-edit-member-rate-multiplier'
                         type='number'
                         step='0.01'
                         min='0'
@@ -274,8 +254,8 @@ export const AddMemberFormDialog = ({
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button type='submit' form='form-add-member'>
-                  Create
+                <Button type='submit' form='form-edit-member'>
+                  Confirm
                 </Button>
               </Field>
             </FieldGroup>

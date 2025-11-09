@@ -1,6 +1,7 @@
 import '~/globals.css'
 
 import { Geist, M_PLUS_1 } from 'next/font/google'
+import { Toaster } from '@fuku/ui/components'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import { TRPCReactProvider } from '~/trpc/client'
@@ -37,6 +38,7 @@ const RootLayout = ({
         <TRPCReactProvider>
           {children}
           <ReactQueryDevtools initialIsOpen={false} />
+          <Toaster />
         </TRPCReactProvider>
       </body>
     </html>

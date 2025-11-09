@@ -1,23 +1,32 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import {
   PayGradeOutputSchema,
   TeamMemberOutputSchema,
   UserOutputSchema,
 } from '@fuku/db/schemas'
-import { Badge, Button, Dialog } from '@fuku/ui/components'
+import {
+  Badge,
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@fuku/ui/components'
 import { useQuery } from '@tanstack/react-query'
 import { ColumnDef } from '@tanstack/react-table'
-import { ArrowUpDown } from 'lucide-react'
+import { ArrowUpDown, MoreHorizontal } from 'lucide-react'
 import z from 'zod/v4'
 
 import { getHiddenColumns } from '~/lib/table'
 import { useDashboardStore } from '~/store/dashboard'
+import { useTeamMemberStore } from '~/store/member'
 import { useTRPC } from '~/trpc/client'
 import { ContentSkeleton } from '../../content-skeleton'
-import { AddMemberFormDialog } from './add-member-form-dialog'
 import { MembersDataTableSection } from './members-data-table-section'
+import { RemoveMemberAlertDialog } from './remove-member-alert-dialog'
 
 // --- For data table rows ---
 // Extend the output schema with included relations
@@ -69,6 +78,13 @@ const defaultVisibleColumns = ['fullName', 'payGradeName']
 export default function TeamMembersContent() {
   const trpc = useTRPC()
   const { currentTeamSlug } = useDashboardStore()
+  const {
+    editDialogOpen,
+    setEditDialogOpen,
+    deleteDialogOpen,
+    setDeleteDialogOpen,
+    setCurrentTeamMemberId,
+  } = useTeamMemberStore()
 
   const { data: members, isPending } = useQuery({
     ...trpc.team.getTeamMembersBySlug.queryOptions({
@@ -76,6 +92,16 @@ export default function TeamMembersContent() {
     }),
     enabled: !!currentTeamSlug,
   })
+
+  const onEditMemberClick = useCallback((id: string) => {
+    setEditDialogOpen(true)
+    setCurrentTeamMemberId(id)
+  }, [])
+
+  const onRemoveMemberClick = useCallback((id: string) => {
+    setDeleteDialogOpen(true)
+    setCurrentTeamMemberId(id)
+  }, [])
 
   const columns = useMemo<ColumnDef<TeamMemberUI, any>[]>(
     () => [
@@ -132,6 +158,41 @@ export default function TeamMembersContent() {
             ? `${info.getValue<number>()}`
             : 'N/A',
       },
+      {
+        id: 'actions',
+        enableHiding: false,
+        cell: ({ row }) => {
+          const teamMember = row.original
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='ghost' className='h-8 w-8 p-0'>
+                  <span className='sr-only'>Open menu</span>
+                  <MoreHorizontal />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end'>
+                <DropdownMenuItem
+                  onClick={() => {
+                    onEditMemberClick(teamMember.id)
+                  }}
+                >
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant='destructive'
+                  onClick={() => {
+                    onRemoveMemberClick(teamMember.id)
+                  }}
+                >
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )
+        },
+      },
     ],
     [],
   )
@@ -141,14 +202,21 @@ export default function TeamMembersContent() {
   }, [columns])
 
   const teamMembersTableSection = (
-    <Dialog>
+    <>
       <MembersDataTableSection
         columns={columns}
         data={members ? members.map(toTeamMemberUI) : []}
         defaultHiddenColumns={defaultHiddenColumns}
       />
-      <AddMemberFormDialog />
-    </Dialog>
+      {/* <EditMemberFormDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      /> */}
+      <RemoveMemberAlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+      />
+    </>
   )
 
   return isPending ? (
