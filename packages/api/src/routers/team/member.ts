@@ -1,5 +1,6 @@
 import {
   TeamMemberCreateOneZodSchema,
+  TeamMemberSchema,
   TeamMemberUpdateInputObjectZodSchema,
 } from '@fuku/db/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
@@ -22,7 +23,7 @@ export const teamMemberRouter = {
           message: `No team member with id '${input.id}'`,
         })
 
-      return member
+      return TeamMemberSchema.parse(member)
     }),
 
   create: protectedProcedure
