@@ -1,5 +1,5 @@
 // --- For data table rows ---
-// Extend the schema with included relations
+// Extend the  schema with included relations
 
 import {
   DayAssignmentSchema,
@@ -24,17 +24,7 @@ export const TeamMemberSchema = TeamMemberZodSchema.extend({
 
 export type TeamMemberType = z.infer<typeof TeamMemberSchema>
 
-export const TeamMemberLightweightSchema = TeamMemberSchema.omit({
-  team: true,
-  unavailabilities: true,
-  dayAssignments: true,
-})
-
-export const TeamMemberUISchema = TeamMemberSchema.omit({
-  team: true,
-  unavailabilities: true,
-  dayAssignments: true,
-}).extend({
+export const TeamMemberUISchema = TeamMemberSchema.extend({
   // UI-specific fields
   fullName: z.string(),
   payGradeName: z.string(),
@@ -46,7 +36,7 @@ export const TeamMemberUISchema = TeamMemberSchema.omit({
 export type TeamMemberUI = z.infer<typeof TeamMemberUISchema>
 
 export const toTeamMemberUI = (
-  m: z.infer<typeof TeamMemberLightweightSchema>,
+  m: z.infer<typeof TeamMemberSchema>,
 ): TeamMemberUI => ({
   ...m,
   fullName: `${m.givenNames} ${m.familyName}`,

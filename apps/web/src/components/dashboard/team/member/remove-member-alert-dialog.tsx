@@ -69,7 +69,7 @@ export const RemoveMemberAlertDialog = ({
     },
   })
 
-  const onDelete = async () => {
+  const onRemove = async () => {
     if (!currentTeamMemberId) return
     await removeMember({ id: currentTeamMemberId })
   }
@@ -95,10 +95,10 @@ export const RemoveMemberAlertDialog = ({
             <AlertDialogAction asChild>
               <Button
                 variant='destructive'
-                onClick={onDelete}
+                onClick={onRemove}
                 className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
               >
-                Delete
+                Remove
               </Button>
             </AlertDialogAction>
           </AlertDialogFooter>
