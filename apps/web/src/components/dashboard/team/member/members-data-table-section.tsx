@@ -41,7 +41,13 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { ChevronDown, Columns2, Plus, PlusCircle } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  PlusCircle,
+  Settings2,
+} from 'lucide-react'
 
 import { TeamMemberUI } from '~/lib/member'
 import { useDashboardStore } from '~/store/dashboard'
@@ -207,10 +213,8 @@ export function MembersDataTableSection({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant='outline'>
-            <Columns2 />
-            <span className='hidden lg:inline'>Customize Columns</span>
-            <span className='lg:hidden'>Columns</span>
-            <ChevronDown />
+            <Settings2 />
+            <span className='hidden md:inline-flex'>View</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
@@ -259,8 +263,7 @@ export function MembersDataTableSection({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.meta?.label ??
-                              header.column.columnDef.header,
+                            header.column.columnDef.header,
                             header.getContext(),
                           )}
                     </TableHead>
@@ -303,18 +306,20 @@ export function MembersDataTableSection({
         <Button
           variant='outline'
           size='sm'
+          aria-description='Go to previous page'
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          Previous
+          <ChevronLeft />
         </Button>
         <Button
           variant='outline'
           size='sm'
+          aria-description='Go to next page'
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          Next
+          <ChevronRight />
         </Button>
       </div>
     </div>
