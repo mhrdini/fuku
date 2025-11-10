@@ -8,8 +8,8 @@ type TeamMemberStore = {
   setAddDialogOpen: (open: boolean) => void
   editDialogOpen: boolean
   setEditDialogOpen: (open: boolean) => void
-  deleteDialogOpen: boolean
-  setDeleteDialogOpen: (open: boolean) => void
+  removeDialogOpen: boolean
+  setRemoveDialogOpen: (open: boolean) => void
   currentTeamMemberId: string | null
   setCurrentTeamMemberId: (id: string | null) => void
 }
@@ -23,8 +23,8 @@ export const useTeamMemberStore = create(
       setAddDialogOpen: (open: boolean) => set({ addDialogOpen: open }),
       editDialogOpen: false,
       setEditDialogOpen: (open: boolean) => set({ editDialogOpen: open }),
-      deleteDialogOpen: false,
-      setDeleteDialogOpen: (open: boolean) => set({ deleteDialogOpen: open }),
+      removeDialogOpen: false,
+      setRemoveDialogOpen: (open: boolean) => set({ removeDialogOpen: open }),
       currentTeamMemberId: null,
       setCurrentTeamMemberId: (id: string | null) =>
         set({ currentTeamMemberId: id }),

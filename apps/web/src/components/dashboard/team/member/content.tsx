@@ -2,11 +2,6 @@
 
 import { useCallback, useMemo } from 'react'
 import {
-  PayGradeOutputSchema,
-  TeamMemberOutputSchema,
-  UserOutputSchema,
-} from '@fuku/db/schemas'
-import {
   Badge,
   Button,
   DropdownMenu,
@@ -16,64 +11,30 @@ import {
   DropdownMenuTrigger,
 } from '@fuku/ui/components'
 import { useQuery } from '@tanstack/react-query'
-import { ColumnDef } from '@tanstack/react-table'
-import { ArrowUpDown, MoreHorizontal } from 'lucide-react'
-import z from 'zod/v4'
+import { Column, ColumnDef } from '@tanstack/react-table'
+import { ArrowDown, ArrowUp, ArrowUpDown, Ellipsis } from 'lucide-react'
 
+import { TeamMemberUI, toTeamMemberUI } from '~/lib/member'
 import { getHiddenColumns } from '~/lib/table'
 import { useDashboardStore } from '~/store/dashboard'
 import { useTeamMemberStore } from '~/store/member'
 import { useTRPC } from '~/trpc/client'
 import { ContentSkeleton } from '../../content-skeleton'
+import { EditMemberFormDialog } from './edit-member-form-dialog'
 import { MembersDataTableSection } from './members-data-table-section'
 import { RemoveMemberAlertDialog } from './remove-member-alert-dialog'
 
-// --- For data table rows ---
-// Extend the output schema with included relations
-// from the procedure and also with UI-specific fields
-export const TeamMemberSchema = TeamMemberOutputSchema.omit({
-  dayAssignments: true,
-  unavailabilities: true,
-  team: true,
-}).extend({
-  // Included relations
-  user: UserOutputSchema.pick({
-    id: true,
-    email: true,
-    username: true,
-  }).nullable(),
-  payGrade: PayGradeOutputSchema.pick({
-    id: true,
-    name: true,
-    baseRate: true,
-  }).nullable(),
-})
-
-export type TeamMember = z.infer<typeof TeamMemberSchema>
-
-export const TeamMemberUISchema = TeamMemberSchema.extend({
-  // UI-specific fields
-  fullName: z.string(),
-  payGradeName: z.string(),
-  baseRate: z.number().nullable(),
-  effectiveRate: z.number().nullable(),
-  username: z.string().nullable(),
-})
-
-export type TeamMemberUI = z.infer<typeof TeamMemberUISchema>
-
-export const toTeamMemberUI = (
-  m: z.infer<typeof TeamMemberSchema>,
-): TeamMemberUI => ({
-  ...m,
-  fullName: `${m.givenNames} ${m.familyName}`,
-  payGradeName: m.payGrade?.name ?? 'No Pay Grade',
-  baseRate: m.payGrade?.baseRate ?? null,
-  effectiveRate: m.payGrade ? m.payGrade.baseRate * m.rateMultiplier : null,
-  username: m.user ? m.user.username : null,
-})
-
 const defaultVisibleColumns = ['fullName', 'payGradeName']
+
+const getMultiSortIcon = (column: Column<any, any>) => {
+  return column.getIsSorted() === 'asc' ? (
+    <ArrowUp />
+  ) : column.getIsSorted() === 'desc' ? (
+    <ArrowDown />
+  ) : (
+    <ArrowUpDown />
+  )
+}
 
 export default function TeamMembersContent() {
   const trpc = useTRPC()
@@ -81,8 +42,8 @@ export default function TeamMembersContent() {
   const {
     editDialogOpen,
     setEditDialogOpen,
-    deleteDialogOpen,
-    setDeleteDialogOpen,
+    removeDialogOpen,
+    setRemoveDialogOpen,
     setCurrentTeamMemberId,
   } = useTeamMemberStore()
 
@@ -99,7 +60,7 @@ export default function TeamMembersContent() {
   }, [])
 
   const onRemoveMemberClick = useCallback((id: string) => {
-    setDeleteDialogOpen(true)
+    setRemoveDialogOpen(true)
     setCurrentTeamMemberId(id)
   }, [])
 
@@ -117,7 +78,7 @@ export default function TeamMembersContent() {
               onClick={() => column.toggleSorting()}
             >
               Name
-              <ArrowUpDown />
+              {getMultiSortIcon(column)}
             </Button>
           )
         },
@@ -133,7 +94,7 @@ export default function TeamMembersContent() {
               onClick={() => column.toggleSorting()}
             >
               Pay Grade
-              <ArrowUpDown />
+              {getMultiSortIcon(column)}
             </Button>
           )
         },
@@ -166,9 +127,12 @@ export default function TeamMembersContent() {
           return (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant='ghost' className='h-8 w-8 p-0'>
+                <Button
+                  variant='ghost'
+                  className='size-8 p-0 absolute  top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2'
+                >
                   <span className='sr-only'>Open menu</span>
-                  <MoreHorizontal />
+                  <Ellipsis />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align='end'>
@@ -186,7 +150,7 @@ export default function TeamMembersContent() {
                     onRemoveMemberClick(teamMember.id)
                   }}
                 >
-                  Delete
+                  Remove
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -208,13 +172,13 @@ export default function TeamMembersContent() {
         data={members ? members.map(toTeamMemberUI) : []}
         defaultHiddenColumns={defaultHiddenColumns}
       />
-      {/* <EditMemberFormDialog
+      <EditMemberFormDialog
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
-      /> */}
+      />
       <RemoveMemberAlertDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
+        open={removeDialogOpen}
+        onOpenChange={setRemoveDialogOpen}
       />
     </>
   )

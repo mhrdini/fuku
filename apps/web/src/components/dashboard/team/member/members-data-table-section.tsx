@@ -43,11 +43,11 @@ import {
 } from '@tanstack/react-table'
 import { ChevronDown, Columns2, Plus, PlusCircle } from 'lucide-react'
 
+import { TeamMemberUI } from '~/lib/member'
 import { useDashboardStore } from '~/store/dashboard'
 import { useTeamMemberStore } from '~/store/member'
 import { useTRPC } from '~/trpc/client'
 import { AddMemberFormDialog } from './add-member-form-dialog'
-import { TeamMemberUI } from './content'
 
 declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {
@@ -277,7 +277,7 @@ export function MembersDataTableSection({
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className='relative'>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
