@@ -86,16 +86,19 @@ export const AddMemberFormDialog = ({
 
   const { mutateAsync: addMember } = useMutation({
     ...trpc.teamMember.create.mutationOptions(),
+    onError: error => {
+      toast.error(
+        `Error creating ${form.getFieldState('givenNames')} ${form.getFieldState('familyName')}: ${error.data?.code || error.message}`,
+      )
+    },
     onSuccess: data => {
+      onOpenChange(false)
       queryClient.invalidateQueries({
         queryKey: trpc.team.getTeamMembersBySlug.queryKey(),
       })
       toast(
         `${data.givenNames} ${data.familyName} has been created successfully.`,
       )
-    },
-    onError: error => {
-      console.error('Error creating team member:', error)
     },
   })
 
@@ -184,7 +187,7 @@ export const AddMemberFormDialog = ({
                             <ChevronDown className='opacity-50' />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className='p-0'>
+                        <PopoverContent className='p-0' align='start'>
                           <Command>
                             <CommandList>
                               <CommandEmpty>No pay grade found.</CommandEmpty>
@@ -194,7 +197,15 @@ export const AddMemberFormDialog = ({
                                     key={pg.id}
                                     value={pg.id}
                                     onSelect={currentValue => {
-                                      form.setValue('payGradeId', currentValue)
+                                      form.setValue(
+                                        'payGradeId',
+                                        currentValue,
+                                        {
+                                          shouldValidate: true,
+                                          shouldTouch: true,
+                                          shouldDirty: true,
+                                        },
+                                      )
                                       setPayGradeOpen(false)
                                     }}
                                   >
