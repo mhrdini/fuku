@@ -9,9 +9,6 @@ catalogs:
     '@eslint/js':
       specifier: ^9.38.0
       version: 9.38.0
-    '@hookform/resolvers':
-      specifier: ^5.2.2
-      version: 5.2.2
     '@tailwindcss/postcss':
       specifier: ^4.1.16
       version: 4.1.16
@@ -69,9 +66,6 @@ catalogs:
     prettier:
       specifier: ^3.6.2
       version: 3.6.2
-    react-hook-form:
-      specifier: ^7.66.0
-      version: 7.66.0
     sonner:
       specifier: ^2.0.7
       version: 2.0.7
@@ -182,7 +176,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       '@hookform/resolvers':
-        specifier: 'catalog:'
+        specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.66.0(react@19.1.1))
       '@tanstack/react-query':
         specifier: 'catalog:'
@@ -221,7 +215,7 @@ importers:
         specifier: catalog:react19
         version: 19.1.1(react@19.1.1)
       react-hook-form:
-        specifier: 'catalog:'
+        specifier: ^7.66.0
         version: 7.66.0(react@19.1.1)
       sonner:
         specifier: 'catalog:'
@@ -698,9 +692,6 @@ packages:
 
   '@emnapi/core@1.6.0':
     resolution: {integrity: sha512-zq/ay+9fNIJJtJiZxdTnXS20PllcYMX3OE23ESc4HK/bdYu3cOWYVhsOhVnXALfU/uqJIxn5NBPd9z4v+SfoSg==}
-
-  '@emnapi/runtime@1.6.0':
-    resolution: {integrity: sha512-obtUmAHTMjll499P+D9A3axeJFlhdjOWdKUNs/U6QIGT7V5RjcUW1xToAzjvmgTSQhDbYn/NwfTRoJcQ2rNBxA==}
 
   '@emnapi/runtime@1.7.0':
     resolution: {integrity: sha512-oAYoQnCYaQZKVS53Fq23ceWMRxq5EhQsE0x0RdQ55jT7wagMu5k+fS39v1fiSLrtrLQlXwVINenqhLMtTrV/1Q==}
@@ -5507,11 +5498,6 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@emnapi/runtime@1.6.0':
-    dependencies:
-      tslib: 2.8.1
-    optional: true
-
   '@emnapi/runtime@1.7.0':
     dependencies:
       tslib: 2.8.1
@@ -5895,7 +5881,7 @@ snapshots:
   '@napi-rs/wasm-runtime@0.2.12':
     dependencies:
       '@emnapi/core': 1.6.0
-      '@emnapi/runtime': 1.6.0
+      '@emnapi/runtime': 1.7.0
       '@tybys/wasm-util': 0.10.1
     optional: true
 

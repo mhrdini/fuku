@@ -1,15 +1,12 @@
-import { UserWhereUniqueInputObjectSchema } from '@fuku/db/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
+import z from 'zod/v4'
 
 import { protectedProcedure } from '../trpc'
 
 export const userRouter = {
   getById: protectedProcedure
-    .input(UserWhereUniqueInputObjectSchema)
+    .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      if (!input.id)
-        throw new TRPCError({ code: 'BAD_REQUEST', message: 'ID is required' })
-
       const user = await ctx.db.user.findUnique({ where: { id: input.id } })
       if (!user)
         throw new TRPCError({
@@ -21,7 +18,7 @@ export const userRouter = {
     }),
 
   getByUsername: protectedProcedure
-    .input(UserWhereUniqueInputObjectSchema)
+    .input(z.object({ username: z.string() }))
     .query(async ({ input, ctx }) => {
       if (!input.username)
         throw new TRPCError({

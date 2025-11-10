@@ -1,5 +1,8 @@
 {
   "mode": "minimal",
+  "pureModels": true,
+  "pureModelsIncludeRelations": true,
+  "pureModelsExcludeCircularRelations": true,
   "globalExclusions": {
     "input": ["id", "createdAt", "updatedAt"],
     "result": [],
@@ -17,14 +20,6 @@
     "result": {
       "enabled": true,
       "suffix": ".output"
-    },
-    "crud": {
-      "enabled": true,
-      "suffix": ".crud"
-    },
-    "enum": {
-      "enabled": true,
-      "suffix": ".enum"
     }
   }
 }

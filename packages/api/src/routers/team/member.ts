@@ -1,8 +1,4 @@
-import {
-  TeamMemberCreateOneZodSchema,
-  TeamMemberSchema,
-  TeamMemberUpdateInputObjectZodSchema,
-} from '@fuku/db/schemas'
+import { TeamMemberSchema } from '@fuku/db/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
 import z from 'zod/v4'
 
@@ -23,20 +19,29 @@ export const teamMemberRouter = {
           message: `No team member with id '${input.id}'`,
         })
 
-      return TeamMemberSchema.parse(member)
+      return member
     }),
 
   create: protectedProcedure
-    .input(TeamMemberCreateOneZodSchema.shape.data)
+    .input(
+      TeamMemberSchema.omit({
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+        deletedById: true,
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       const newMember = await ctx.db.teamMember.create({ data: input })
       return newMember
     }),
 
   update: protectedProcedure
-    .input(TeamMemberUpdateInputObjectZodSchema.extend({ id: z.string() }))
+    .input(TeamMemberSchema.partial().extend({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const { id, ...data } = input
+
       const currentUserId = ctx.session.user.id
 
       const member = await ctx.db.teamMember.findFirst({

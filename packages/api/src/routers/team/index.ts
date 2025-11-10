@@ -112,8 +112,8 @@ export const teamRouter = {
       const members = await ctx.db.teamMember.findMany({
         where: { teamId: input.teamId, deletedAt: null },
         include: {
-          user: { select: { id: true, name: true, username: true } },
-          payGrade: { select: { id: true, name: true, baseRate: true } },
+          user: true,
+          payGrade: true,
         },
         orderBy: [
           { payGrade: { name: 'asc' } },
