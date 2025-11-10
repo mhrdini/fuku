@@ -19,9 +19,11 @@ import {
   DialogContent,
   DialogTitle,
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
+  FieldSeparator,
   FieldSet,
   Input,
   Popover,
@@ -42,8 +44,10 @@ import { useDashboardStore } from '~/store/dashboard'
 import { useTeamMemberStore } from '~/store/member'
 import { useTRPC } from '~/trpc/client'
 
-const TeamMemberEditFormSchema = TeamMemberSchema
-type TeamMemberEditFormType = z.infer<typeof TeamMemberSchema>
+const TeamMemberEditFormSchema = TeamMemberSchema.extend({
+  username: z.string().optional(),
+})
+type TeamMemberEditFormType = z.infer<typeof TeamMemberEditFormSchema>
 
 interface EditMemberFormDialogProps {
   open: boolean
@@ -75,20 +79,25 @@ export const EditMemberFormDialog = ({
   })
 
   const form = useForm<TeamMemberEditFormType>({
-    defaultValues: teamMember,
+    defaultValues: {
+      ...teamMember,
+      username: teamMember?.user?.username || '',
+    },
     resolver: zodResolver(TeamMemberEditFormSchema),
   })
 
   useEffect(() => {
     if (teamMemberFetched && teamMember) {
-      form.reset(teamMember)
+      form.reset({ ...teamMember, username: teamMember.user?.username || '' })
     }
   }, [teamMemberFetched, teamMember])
 
   const { mutateAsync: editMember } = useMutation({
     ...trpc.teamMember.update.mutationOptions(),
     onError: error => {
-      toast.error(`Error updating: ${error.data?.code || error.message}`)
+      toast.error(
+        `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+      )
     },
     onSuccess: data => {
       onOpenChange(false)
@@ -106,7 +115,11 @@ export const EditMemberFormDialog = ({
       form.setError('root', { message: 'There are no changes to save.' })
       return
     }
-    await editMember(data)
+    try {
+      await editMember(data)
+    } catch {
+      // Handled in onError
+    }
   }
 
   const onError = (errors: any) => {
@@ -313,6 +326,28 @@ export const EditMemberFormDialog = ({
                         )}
                       />
                     </div>
+                    <FieldSeparator />
+                    <Controller
+                      name='username'
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field>
+                          <FieldLabel htmlFor='form-edit-member-username'>
+                            Linked Account
+                          </FieldLabel>
+                          <Input
+                            {...field}
+                            id='form-edit-member-username'
+                            aria-invalid={fieldState.invalid}
+                            placeholder='Username (optional)'
+                          />
+                          <FieldDescription>
+                            Link this member to an existing user account.
+                          </FieldDescription>
+                        </Field>
+                      )}
+                    />
+
                     <Field orientation='responsive'>
                       <FieldError errors={[form.formState.errors.root]} />
                       {form.formState.isDirty ? (
