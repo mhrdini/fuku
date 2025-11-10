@@ -18,6 +18,7 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
+  FieldSeparator,
   FieldSet,
   Input,
   Popover,
@@ -43,6 +44,7 @@ const TeamMemberCreateFormSchema = TeamMemberInputSchema.extend({
   rateMultiplier: z
     .number({ error: 'invalid_rate_multiplier' })
     .min(0, { error: 'invalid_rate_multiplier_negative' }),
+  username: z.string().optional(),
 }).omit({
   unavailabilities: true,
   dayAssignments: true,
@@ -71,6 +73,7 @@ export const AddMemberFormDialog = ({
       teamId: currentTeamId || '',
       rateMultiplier: 1,
       teamMemberRole: TeamMemberRole.STAFF,
+      username: '',
     },
     resolver: zodResolver(TeamMemberCreateFormSchema),
   })
@@ -88,7 +91,7 @@ export const AddMemberFormDialog = ({
     ...trpc.teamMember.create.mutationOptions(),
     onError: error => {
       toast.error(
-        `Error creating ${form.getFieldState('givenNames')} ${form.getFieldState('familyName')}: ${error.data?.code || error.message}`,
+        `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
       )
     },
     onSuccess: data => {
@@ -103,7 +106,11 @@ export const AddMemberFormDialog = ({
   })
 
   const onSubmit = async (data: TeamMemberCreateFormType) => {
-    await addMember(data)
+    try {
+      await addMember(data)
+    } catch {
+      // Handled in onError
+    }
   }
 
   return (
@@ -279,6 +286,27 @@ export const AddMemberFormDialog = ({
                   )}
                 />
               </div>
+              <FieldSeparator />
+              <Controller
+                name='username'
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor='form-add-member-username'>
+                      Linked Account
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id='form-add-member-username'
+                      aria-invalid={fieldState.invalid}
+                      placeholder='Username (optional)'
+                    />
+                    <FieldDescription>
+                      Link this member to an existing user account.
+                    </FieldDescription>
+                  </Field>
+                )}
+              />
               <Field orientation='responsive'>
                 <DialogClose asChild>
                   <Button variant='outline' className='ml-auto'>

@@ -69,7 +69,9 @@ export default function TeamMembersContent() {
       {
         accessorKey: 'fullName',
         enableHiding: false,
-        // don't include meta label to use custom header
+        meta: {
+          label: 'Name',
+        },
         header: ({ column }) => {
           return (
             <Button
@@ -86,6 +88,9 @@ export default function TeamMembersContent() {
       {
         accessorKey: 'payGradeName',
         filterFn: 'arrIncludesSome',
+        meta: {
+          label: 'Pay Grade',
+        },
         header: ({ column }) => {
           return (
             <Button
@@ -105,15 +110,18 @@ export default function TeamMembersContent() {
       {
         accessorKey: 'baseRate',
         meta: { label: 'Base Rate' },
+        header: ({ column }) => column.columnDef.meta?.label,
       },
       {
         accessorKey: 'rateMultiplier',
         meta: { label: 'Rate Multiplier' },
+        header: ({ column }) => column.columnDef.meta?.label,
         cell: info => info.getValue<number>().toFixed(2),
       },
       {
         accessorKey: 'effectiveRate',
         meta: { label: 'Effective Rate' },
+        header: ({ column }) => column.columnDef.meta?.label,
         cell: info =>
           info.getValue<number>() != null
             ? `${info.getValue<number>()}`
