@@ -40,7 +40,9 @@ export const RemoveMemberAlertDialog = ({
   const { mutateAsync: removeMember } = useMutation({
     ...trpc.teamMember.delete.mutationOptions(),
     onError: error => {
-      toast.error(`${error.message}`)
+      toast.error(
+        `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+      )
     },
     onSuccess: data => {
       queryClient.invalidateQueries({
