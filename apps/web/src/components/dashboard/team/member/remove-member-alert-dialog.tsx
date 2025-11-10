@@ -37,19 +37,11 @@ export const RemoveMemberAlertDialog = ({
     enabled: !!currentTeamMemberId,
   })
 
-  const { mutateAsync: restoreMember } = useMutation({
-    ...trpc.teamMember.restore.mutationOptions(),
-    onSuccess: data => {
-      queryClient.invalidateQueries({
-        queryKey: trpc.team.getTeamMembersBySlug.queryKey(),
-      })
-      toast.success(
-        `Undo remove ${data.givenNames} ${data.familyName} successful.`,
-      )
-    },
-  })
   const { mutateAsync: removeMember } = useMutation({
     ...trpc.teamMember.delete.mutationOptions(),
+    onError: error => {
+      toast.error(`${error.message}`)
+    },
     onSuccess: data => {
       queryClient.invalidateQueries({
         queryKey: trpc.team.getTeamMembersBySlug.queryKey(),
@@ -69,9 +61,28 @@ export const RemoveMemberAlertDialog = ({
     },
   })
 
+  const { mutateAsync: restoreMember } = useMutation({
+    ...trpc.teamMember.restore.mutationOptions(),
+    onError: error => {
+      toast.error(`${error.message}`)
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({
+        queryKey: trpc.team.getTeamMembersBySlug.queryKey(),
+      })
+      toast.success(
+        `Undo remove ${data.givenNames} ${data.familyName} successful.`,
+      )
+    },
+  })
+
   const onRemove = async () => {
     if (!currentTeamMemberId) return
-    await removeMember({ id: currentTeamMemberId })
+    try {
+      await removeMember({ id: currentTeamMemberId })
+    } catch {
+      // Handled in onError
+    }
   }
 
   return (

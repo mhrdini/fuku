@@ -1,3 +1,4 @@
+import { TeamMemberRole } from '@fuku/db'
 import { TeamMemberSchema } from '@fuku/db/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
 import z from 'zod/v4'
@@ -87,6 +88,24 @@ export const teamMemberRouter = {
           message:
             'Cannot delete this team member (not found, already deleted, or insufficient permissions)',
         })
+
+      if (member.teamMemberRole === TeamMemberRole.ADMIN) {
+        const activeAdminCount = await ctx.db.teamMember.count({
+          where: {
+            teamId: member.teamId,
+            teamMemberRole: TeamMemberRole.ADMIN,
+            deletedAt: null,
+          },
+        })
+
+        if (activeAdminCount <= 1) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message:
+              'Cannot delete the last admin member of the team. Assign another admin first.',
+          })
+        }
+      }
 
       const deleted = await ctx.db.teamMember.update({
         where: { id },
