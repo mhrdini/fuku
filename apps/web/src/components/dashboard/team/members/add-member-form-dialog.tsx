@@ -81,7 +81,7 @@ export const AddMemberFormDialog = ({
   const trpc = useTRPC()
 
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.getAllByTeamSlug.queryOptions({
+    ...trpc.payGrade.getAllByTeam.queryOptions({
       teamSlug: currentTeamSlug!,
     }),
     enabled: !!currentTeamSlug,
@@ -97,7 +97,7 @@ export const AddMemberFormDialog = ({
     onSuccess: data => {
       onOpenChange(false)
       queryClient.invalidateQueries({
-        queryKey: trpc.team.getTeamMembersBySlug.queryKey(),
+        queryKey: trpc.teamMember.getAllByTeam.queryKey(),
       })
       toast(
         `${data.givenNames} ${data.familyName} has been created successfully.`,

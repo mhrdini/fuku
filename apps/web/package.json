@@ -44,6 +44,7 @@
     "autoprefixer": "catalog:",
     "eslint": "catalog:",
     "postcss": "catalog:",
+    "postcss-nesting": "catalog:",
     "prettier": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:"

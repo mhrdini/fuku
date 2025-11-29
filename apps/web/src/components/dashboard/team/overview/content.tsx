@@ -17,6 +17,7 @@ import { Users } from 'lucide-react'
 import { ContentSkeleton } from '~/components/dashboard/content-skeleton'
 import { useDashboardStore } from '~/store/dashboard'
 import { useTRPC } from '~/trpc/client'
+import { SummarySection } from './summary-section'
 
 export default function TeamOverviewContent() {
   const trpc = useTRPC()
@@ -31,9 +32,9 @@ export default function TeamOverviewContent() {
   })
 
   const renderTeamContent = () => (
-    <>
-      <h1 className='text-xl font-semibold'>Overview</h1>
-    </>
+    <div className='flex flex-col gap-2'>
+      <SummarySection />
+    </div>
   )
 
   const renderEmptyContent = () => (

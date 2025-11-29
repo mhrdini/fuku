@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
+import { useParams } from 'next/navigation'
 import {
   Badge,
   Button,
@@ -16,7 +17,6 @@ import { ArrowDown, ArrowUp, ArrowUpDown, Ellipsis } from 'lucide-react'
 
 import { TeamMemberUI, toTeamMemberUI } from '~/lib/member'
 import { getHiddenColumns } from '~/lib/table'
-import { useDashboardStore } from '~/store/dashboard'
 import { useTeamMemberStore } from '~/store/member'
 import { useTRPC } from '~/trpc/client'
 import { ContentSkeleton } from '../../content-skeleton'
@@ -38,7 +38,8 @@ const getMultiSortIcon = (column: Column<any, any>) => {
 
 export default function TeamMembersContent() {
   const trpc = useTRPC()
-  const { currentTeamSlug } = useDashboardStore()
+  const params = useParams()
+  const currentTeamSlug = params.slug as string
   const {
     editDialogOpen,
     setEditDialogOpen,
@@ -48,8 +49,8 @@ export default function TeamMembersContent() {
   } = useTeamMemberStore()
 
   const { data: members, isPending } = useQuery({
-    ...trpc.team.getTeamMembersBySlug.queryOptions({
-      slug: currentTeamSlug!,
+    ...trpc.teamMember.getAllByTeam.queryOptions({
+      teamSlug: currentTeamSlug!,
     }),
     enabled: !!currentTeamSlug,
   })
@@ -130,6 +131,11 @@ export default function TeamMembersContent() {
       {
         id: 'actions',
         enableHiding: false,
+        header: () => (
+          <div className='w-[32px]'>
+            <span className='sr-only'>Actions</span>
+          </div>
+        ),
         cell: ({ row }) => {
           const teamMember = row.original
           return (
@@ -137,7 +143,7 @@ export default function TeamMembersContent() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant='ghost'
-                  className='size-8 p-0 absolute  top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2'
+                  className='size-8 p-0 absolute top-1/2 right-2 -translate-y-1/2'
                 >
                   <span className='sr-only'>Open menu</span>
                   <Ellipsis />
@@ -191,12 +197,5 @@ export default function TeamMembersContent() {
     </>
   )
 
-  return isPending ? (
-    <ContentSkeleton />
-  ) : (
-    <>
-      <h1 className='text-xl font-semibold'>Team Members</h1>
-      {teamMembersTableSection}
-    </>
-  )
+  return isPending ? <ContentSkeleton /> : <>{teamMembersTableSection}</>
 }
