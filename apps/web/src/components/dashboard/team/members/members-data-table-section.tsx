@@ -76,7 +76,7 @@ export function MembersDataTableSection({
   const { currentTeamSlug } = useDashboardStore()
 
   const { data: payGrades } = useSuspenseQuery(
-    trpc.payGrade.getAllByTeamSlug.queryOptions({
+    trpc.payGrade.getAllByTeam.queryOptions({
       teamSlug: currentTeamSlug!,
     }),
   )
@@ -145,7 +145,7 @@ export function MembersDataTableSection({
               ?.length > 0 && (
               <>
                 <Separator orientation='vertical' />
-                <Badge variant='outline'>
+                <Badge>
                   {(
                     table
                       .getColumn('payGradeName')
@@ -243,8 +243,8 @@ export function MembersDataTableSection({
   )
 
   return (
-    <div>
-      <div className='flex items-center py-4'>
+    <div className='flex flex-col gap-4'>
+      <div className='flex items-center'>
         {tableFilters}
         <div className='ml-auto flex gap-2'>{tableActions}</div>
         <AddMemberFormDialog
@@ -302,7 +302,7 @@ export function MembersDataTableSection({
           </TableBody>
         </Table>
       </div>
-      <div className='flex items-center justify-end space-x-2 py-4'>
+      <div className='flex items-center justify-end space-x-2'>
         <Button
           variant='outline'
           size='sm'

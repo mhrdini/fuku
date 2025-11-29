@@ -1,8 +1,9 @@
+import type { TRPCRouterRecord } from '@trpc/server'
 import z from 'zod/v4'
 
 import { protectedProcedure } from '../../trpc'
 
-export const payGradeRouter = {
+export const shiftTypeRouter = {
   getAllByTeam: protectedProcedure
     .input(
       z
@@ -16,7 +17,7 @@ export const payGradeRouter = {
         }),
     )
     .query(async ({ input, ctx }) => {
-      const payGrades = await ctx.db.payGrade.findMany({
+      const shiftTypes = await ctx.db.shiftType.findMany({
         where: {
           team: {
             ...(input.teamId ? { id: input.teamId } : {}),
@@ -25,6 +26,6 @@ export const payGradeRouter = {
         },
         ...(input.limit && { take: input.limit }),
       })
-      return payGrades
+      return shiftTypes
     }),
-}
+} satisfies TRPCRouterRecord

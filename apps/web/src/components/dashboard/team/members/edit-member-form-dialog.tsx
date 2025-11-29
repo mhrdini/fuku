@@ -64,6 +64,7 @@ export const EditMemberFormDialog = ({
   const { currentTeamMemberId, payGradeOpen, setPayGradeOpen } =
     useTeamMemberStore()
   const trpc = useTRPC()
+
   const { data: teamMember, isSuccess: teamMemberFetched } = useQuery({
     ...trpc.teamMember.getById.queryOptions({
       id: currentTeamMemberId!,
@@ -72,7 +73,7 @@ export const EditMemberFormDialog = ({
   })
 
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.getAllByTeamSlug.queryOptions({
+    ...trpc.payGrade.getAllByTeam.queryOptions({
       teamSlug: currentTeamSlug!,
     }),
     enabled: !!currentTeamSlug,
@@ -102,7 +103,7 @@ export const EditMemberFormDialog = ({
     onSuccess: data => {
       onOpenChange(false)
       queryClient.invalidateQueries({
-        queryKey: trpc.team.getTeamMembersBySlug.queryKey(),
+        queryKey: trpc.teamMember.getAllByTeam.queryKey(),
       })
       toast.success(
         `${data.givenNames} ${data.familyName} updated successfully.`,
@@ -136,7 +137,10 @@ export const EditMemberFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <AlertDialog>
         {!teamMember || !payGrades ? (
-          <Spinner />
+          <DialogContent>
+            <DialogTitle>Edit Team Member</DialogTitle>
+            <Spinner />
+          </DialogContent>
         ) : (
           <>
             <DialogContent>

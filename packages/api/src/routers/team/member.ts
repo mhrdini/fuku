@@ -23,6 +23,35 @@ export const teamMemberRouter = {
       return member
     }),
 
+  getAllByTeam: protectedProcedure
+    .input(
+      z
+        .object({
+          teamId: z.string().optional(),
+          teamSlug: z.string().optional(),
+          limit: z.number().optional(),
+        })
+        .refine(data => data.teamId || data.teamSlug, {
+          message: 'Either teamId or teamSlug must be provided',
+        }),
+    )
+    .query(async ({ input, ctx }) => {
+      // Fetch members
+      const members = await ctx.db.teamMember.findMany({
+        where: { teamId: input.teamId, deletedAt: null },
+        include: { user: true, payGrade: true },
+        ...(input.limit && { take: input.limit }),
+        orderBy: [
+          { payGrade: { name: 'asc' } },
+          { createdAt: 'asc' },
+          { givenNames: 'asc' },
+          { familyName: 'asc' },
+        ],
+      })
+
+      return members
+    }),
+
   create: protectedProcedure
     .input(
       TeamMemberSchema.omit({

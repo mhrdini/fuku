@@ -1,13 +1,14 @@
 model Team {
   id          String  @id @default(uuid())
   slug        String  @unique
-  name        String  @unique
+  name        String
   description String?
 
   teamMembers TeamMember[]
   adminUsers  User[]       @relation("UserTeams")
   payGrades   PayGrade[]
   locations   Location[]
+  shiftTypes  ShiftType[]
 
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")

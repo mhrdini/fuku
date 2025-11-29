@@ -10,22 +10,24 @@
   },
   "scripts": {
     "db:migrate:deploy": "prisma migrate deploy",
-    "db:migrate:dev": "prisma migrate dev",
-    "db:migrate:dev:auto": "prisma migrate dev --name auto",
-    "db:push": "prisma db push",
+    "db:migrate:dev": "prisma migrate dev --skip-generate",
+    "db:migrate:dev:auto": "prisma migrate dev --name auto --skip-generate",
+    "db:push": "prisma db push --skip-generate",
     "db:seed": "tsx src/seed.ts",
     "db:seed:dev": "tsx src/seed.development.ts",
-    "db:reset": "prisma migrate reset",
+    "db:reset": "prisma migrate reset --skip-generate",
     "dev": "tsup",
     "format": "prisma format",
-    "generate": "prisma generate",
+    "gen:all": "prisma generate",
+    "gen:client": "prisma generate",
+    "gen:schemas": "prisma generate --generator prisma-zod-generator",
     "lint": "eslint . --max-warnings 0",
-    "prebuild": "npm run generate",
-    "predev": "npm run generate",
+    "prebuild": "npm run gen:all",
+    "predev": "npm run gen:all",
     "studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "latest",
+    "@prisma/client": "6.19.0",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -33,10 +35,10 @@
     "@fuku/config-typescript": "workspace:*",
     "@types/node": "catalog:",
     "eslint": "catalog:",
-    "prisma": "latest",
-    "prisma-zod-generator": "^1.31.2",
+    "prisma": "6.19.0",
+    "prisma-zod-generator": "1.31.2",
     "rimraf": "^5.0.5",
-    "tsup": "^8.0.2",
+    "tsup": "^8.5.1",
     "tsx": "catalog:",
     "typescript": "catalog:"
   }

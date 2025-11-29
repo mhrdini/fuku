@@ -46,7 +46,7 @@ export const RemoveMemberAlertDialog = ({
     },
     onSuccess: data => {
       queryClient.invalidateQueries({
-        queryKey: trpc.team.getTeamMembersBySlug.queryKey(),
+        queryKey: trpc.teamMember.getAllByTeam.queryKey(),
       })
       const toastId = toast(
         `${data.givenNames} ${data.familyName} has been removed.`,
@@ -70,7 +70,7 @@ export const RemoveMemberAlertDialog = ({
     },
     onSuccess: data => {
       queryClient.invalidateQueries({
-        queryKey: trpc.team.getTeamMembersBySlug.queryKey(),
+        queryKey: trpc.teamMember.getAllByTeam.queryKey(),
       })
       toast.success(
         `Undo remove ${data.givenNames} ${data.familyName} successful.`,
@@ -90,7 +90,10 @@ export const RemoveMemberAlertDialog = ({
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       {!teamMember ? (
-        <Spinner />
+        <AlertDialogContent>
+          <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
+          <Spinner />
+        </AlertDialogContent>
       ) : (
         <AlertDialogContent>
           <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
