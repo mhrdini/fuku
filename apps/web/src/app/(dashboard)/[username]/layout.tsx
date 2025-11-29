@@ -4,7 +4,8 @@ import { SidebarProvider } from '@fuku/ui/components'
 import { getSession } from '~/auth/server'
 import { DashboardContentLayout } from '~/components/dashboard/content-layout'
 import { DashboardHeader } from '~/components/dashboard/header'
-import { DashboardSidebar } from '~/components/dashboard/sidebar/dashboard-sidebar'
+import { DashboardSidebar } from '~/components/dashboard/sidebar'
+import { SheetManager } from '~/components/providers/sheet-manager'
 import { HydrateClient, prefetch, trpc } from '~/trpc/server'
 
 export default async function DashboardLayout({
@@ -27,6 +28,7 @@ export default async function DashboardLayout({
   return (
     <div className='min-h-screen w-full'>
       <HydrateClient>
+        <SheetManager />
         <SidebarProvider>
           <DashboardSidebar username={username} />
           <div className='flex flex-1 flex-col'>

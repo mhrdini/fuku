@@ -4,3 +4,9 @@
 @theme inline {
   --font-sans: var(--font-geist);
 }
+
+main.dashboard {
+  h2 {
+    @apply text-xl font-semibold;
+  }
+}
