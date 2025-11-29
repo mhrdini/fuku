@@ -6,7 +6,7 @@ model Location {
   name    String  @unique
   address String?
 
-  teamId           String
+  teamId           String            @map("team_id")
   team             Team              @relation(fields: [teamId], references: [id])
   shiftAssignments ShiftAssignment[]
   color            String?
@@ -22,6 +22,8 @@ model ShiftType {
   endTime          DateTime          @map("end_time")
   shiftAssignments ShiftAssignment[]
   color            String?
+  teamId           String            @map("team_id")
+  team             Team              @relation(fields: [teamId], references: [id])
 
   @@map("shift_type")
 }
