@@ -22,14 +22,13 @@ import {
   Trash,
 } from 'lucide-react'
 
+import { DialogId } from '~/lib/dialog'
 import { TeamMemberUI, toTeamMemberUI } from '~/lib/member'
 import { getHiddenColumns } from '~/lib/table'
-import { useTeamMemberStore } from '~/store/member'
+import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 import { ContentSkeleton } from '../../content-skeleton'
-import { EditMemberFormDialog } from './edit-member-form-dialog'
 import { MembersDataTableSection } from './members-data-table-section'
-import { RemoveMemberAlertDialog } from './remove-member-alert-dialog'
 
 const defaultVisibleColumns = ['fullName', 'payGradeName']
 
@@ -47,13 +46,8 @@ export default function TeamMembersContent() {
   const trpc = useTRPC()
   const params = useParams()
   const currentTeamSlug = params.slug as string
-  const {
-    editDialogOpen,
-    setEditDialogOpen,
-    removeDialogOpen,
-    setRemoveDialogOpen,
-    setCurrentTeamMemberId,
-  } = useTeamMemberStore()
+
+  const { openDialog, openAlertDialog } = useDialogStore()
 
   const { data: members, isPending } = useQuery({
     ...trpc.teamMember.getAllByTeam.queryOptions({
@@ -63,13 +57,17 @@ export default function TeamMembersContent() {
   })
 
   const onEditMemberClick = useCallback((id: string) => {
-    setEditDialogOpen(true)
-    setCurrentTeamMemberId(id)
+    openDialog({
+      id: DialogId.EDIT_TEAM_MEMBER,
+      editingId: id,
+    })
   }, [])
 
   const onRemoveMemberClick = useCallback((id: string) => {
-    setRemoveDialogOpen(true)
-    setCurrentTeamMemberId(id)
+    openAlertDialog({
+      id: DialogId.REMOVE_TEAM_MEMBER,
+      editingId: id,
+    })
   }, [])
 
   const columns = useMemo<ColumnDef<TeamMemberUI, any>[]>(
@@ -192,14 +190,6 @@ export default function TeamMembersContent() {
         columns={columns}
         data={members ? members.map(toTeamMemberUI) : []}
         defaultHiddenColumns={defaultHiddenColumns}
-      />
-      <EditMemberFormDialog
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-      />
-      <RemoveMemberAlertDialog
-        open={removeDialogOpen}
-        onOpenChange={setRemoveDialogOpen}
       />
     </>
   )

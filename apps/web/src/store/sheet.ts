@@ -2,16 +2,19 @@ import { create } from 'zustand'
 
 import { SheetId } from '~/lib/sheet'
 
-type SheetStore = {
+type SheetOptions = {
   id: SheetId | null
-  openSheet: (id: SheetId) => void
+  editingId?: string | null
+}
+
+type SheetStore = SheetOptions & {
+  openSheet: (options: SheetOptions) => void
   closeSheet: () => void
-  editingId: string | null
 }
 
 export const useSheetStore = create<SheetStore>(set => ({
   id: null,
-  openSheet: id => set({ id }),
-  closeSheet: () => set({ id: null }),
   editingId: null,
+  openSheet: ({ id }) => set({ id }),
+  closeSheet: () => set({ id: null }),
 }))
