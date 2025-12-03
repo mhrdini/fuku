@@ -22,13 +22,11 @@ import { SummarySection } from './summary-section'
 export default function TeamOverviewContent() {
   const trpc = useTRPC()
 
-  const { currentTeamSlug } = useDashboardStore()
+  const { currentTeamId } = useDashboardStore()
 
   const { data: team, isPending } = useQuery({
-    ...trpc.team.getBySlug.queryOptions({
-      slug: currentTeamSlug!,
-    }),
-    enabled: !!currentTeamSlug,
+    ...trpc.team.getAllOwned.queryOptions(),
+    select: teams => teams.find(team => team.id === currentTeamId),
   })
 
   const renderTeamContent = () => (

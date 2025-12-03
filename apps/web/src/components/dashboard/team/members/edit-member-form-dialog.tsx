@@ -43,7 +43,8 @@ const TeamMemberEditFormSchema = TeamMemberSchema.extend({
 type TeamMemberEditFormType = z.infer<typeof TeamMemberEditFormSchema>
 
 export const EditMemberFormDialog = () => {
-  const { currentTeamSlug } = useDashboardStore()
+  const { currentTeamId } = useDashboardStore()
+
   const { editingId: currentTeamMemberId, closeDialog } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
 
@@ -56,7 +57,7 @@ export const EditMemberFormDialog = () => {
     isSuccess: teamMemberFetched,
   } = useQuery({
     ...trpc.teamMember.getAllByTeam.queryOptions({
-      teamSlug: currentTeamSlug!,
+      teamId: currentTeamId!,
     }),
     select: members =>
       members.find(member => member.id === currentTeamMemberId),
@@ -64,9 +65,9 @@ export const EditMemberFormDialog = () => {
 
   const { data: payGrades } = useQuery({
     ...trpc.payGrade.getAllByTeam.queryOptions({
-      teamSlug: currentTeamSlug!,
+      teamId: currentTeamId!,
     }),
-    enabled: !!currentTeamSlug,
+    enabled: !!currentTeamId,
   })
 
   const form = useForm<TeamMemberEditFormType>({
@@ -103,7 +104,9 @@ export const EditMemberFormDialog = () => {
     onSuccess: data => {
       closeDialog()
       queryClient.invalidateQueries({
-        queryKey: trpc.teamMember.getAllByTeam.queryKey(),
+        ...trpc.location.getAllByTeam.queryOptions({
+          teamId: currentTeamId!,
+        }),
       })
       toast.success(`${data.givenNames} ${data.familyName} has been updated.`)
     },

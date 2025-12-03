@@ -25,15 +25,10 @@ export const teamMemberRouter = {
 
   getAllByTeam: protectedProcedure
     .input(
-      z
-        .object({
-          teamId: z.string().optional(),
-          teamSlug: z.string().optional(),
-          limit: z.number().optional(),
-        })
-        .refine(data => data.teamId || data.teamSlug, {
-          message: 'Either teamId or teamSlug must be provided',
-        }),
+      z.object({
+        teamId: z.string().optional(),
+        limit: z.number().optional(),
+      }),
     )
     .query(async ({ input, ctx }) => {
       // Fetch members
