@@ -3,6 +3,11 @@
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Table,
   TableBody,
   TableCell,
@@ -17,9 +22,12 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import { Ellipsis, Plus, Trash } from 'lucide-react'
 
 import { EditableCell } from '~/components/ui/editable-cell'
 import { LocationUI } from '~/lib/location'
+import { SheetId } from '~/lib/sheet'
+import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
 export const TeamLocationsContent = () => {
@@ -49,7 +57,58 @@ export const TeamLocationsContent = () => {
     },
   })
 
+  const { mutateAsync: removeLocation } = useMutation({
+    ...trpc.location.delete.mutationOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: trpc.location.getAllByTeam.queryKey(),
+      })
+    },
+  })
+
+  const onRemoveLocation = async (id: string) => {
+    await removeLocation({ id })
+  }
+
+  const { openSheet } = useSheetStore()
+
+  const onNewLocationButtonClick = () => {
+    openSheet(SheetId.ADD_LOCATION)
+  }
+
   const columns: ColumnDef<LocationUI, any>[] = [
+    {
+      id: 'actions',
+      enableHiding: false,
+      header: () => (
+        <div>
+          <span className='sr-only'>Actions</span>
+        </div>
+      ),
+      cell: ({ row }) => {
+        const location = row.original
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='ghost' className='size-8 -mx-1 -my-1'>
+                <span className='sr-only'>Open menu</span>
+                <Ellipsis />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='start'>
+              <DropdownMenuItem
+                variant='destructive'
+                onClick={() => {
+                  onRemoveLocation(location.id)
+                }}
+              >
+                <Trash /> Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
     {
       accessorKey: 'name',
       header: 'Location Name',
@@ -89,47 +148,67 @@ export const TeamLocationsContent = () => {
   })
 
   return (
-    <div className='overflow-hidden rounded-md border'>
-      <Table className='table-fixed'>
-        <TableHeader>
-          {table.getHeaderGroups().map(headerGroup => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map(row => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && 'selected'}
-              >
-                {row.getVisibleCells().map(cell => (
-                  <TableCell key={cell.id} className='relative'>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+    <div className='flex flex-col gap-2'>
+      <div className='overflow-hidden rounded-md border'>
+        <Table className='w-full table-auto border-collapse'>
+          <TableHeader>
+            {table.getHeaderGroups().map(headerGroup => (
+              <TableRow className='h-5' key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <TableHead
+                    className='first:w-0 first:whitespace-nowrap'
+                    key={header.id}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className='h-24 text-center'>
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map(row => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                >
+                  {row.getVisibleCells().map(cell => (
+                    <TableCell key={cell.id} className='relative first:w-0'>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className='h-24 text-center'
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className='flex items-center'>
+        <Button
+          variant='ghost'
+          className='text-muted-foreground'
+          onClick={onNewLocationButtonClick}
+        >
+          <Plus /> New location
+        </Button>
+      </div>
     </div>
   )
 }
