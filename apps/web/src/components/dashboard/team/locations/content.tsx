@@ -73,7 +73,7 @@ export const TeamLocationsContent = () => {
   const { openSheet } = useSheetStore()
 
   const onNewLocationButtonClick = () => {
-    openSheet(SheetId.ADD_LOCATION)
+    openSheet({ id: SheetId.ADD_LOCATION })
   }
 
   const columns: ColumnDef<LocationUI, any>[] = [
@@ -149,16 +149,13 @@ export const TeamLocationsContent = () => {
 
   return (
     <div className='flex flex-col gap-2'>
-      <div className='overflow-hidden rounded-md border'>
-        <Table className='w-full table-auto border-collapse'>
+      <div className='table-container'>
+        <Table className='table'>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow className='h-5' key={headerGroup.id}>
                 {headerGroup.headers.map(header => (
-                  <TableHead
-                    className='first:w-0 first:whitespace-nowrap'
-                    key={header.id}
-                  >
+                  <TableHead className='table-head' key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -178,7 +175,7 @@ export const TeamLocationsContent = () => {
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id} className='relative first:w-0'>
+                    <TableCell key={cell.id} className='table-cell'>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -200,7 +197,7 @@ export const TeamLocationsContent = () => {
           </TableBody>
         </Table>
       </div>
-      <div className='flex items-center'>
+      <div className='table-footer'>
         <Button
           variant='ghost'
           className='text-muted-foreground'

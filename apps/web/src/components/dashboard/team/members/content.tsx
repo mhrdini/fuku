@@ -73,6 +73,46 @@ export default function TeamMembersContent() {
   const columns = useMemo<ColumnDef<TeamMemberUI, any>[]>(
     () => [
       {
+        id: 'actions',
+        enableHiding: false,
+        header: () => (
+          <div>
+            <span className='sr-only'>Actions</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const teamMember = row.original
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='ghost' className='size-8 -mx-1 -my-1'>
+                  <span className='sr-only'>Open menu</span>
+                  <Ellipsis />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='start'>
+                <DropdownMenuItem
+                  onClick={() => {
+                    onEditMemberClick(teamMember.id)
+                  }}
+                >
+                  <Pencil /> Edit
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant='destructive'
+                  onClick={() => {
+                    onRemoveMemberClick(teamMember.id)
+                  }}
+                >
+                  <Trash /> Remove
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )
+        },
+      },
+      {
         accessorKey: 'fullName',
         enableHiding: false,
         meta: {
@@ -132,49 +172,6 @@ export default function TeamMembersContent() {
           info.getValue<number>() != null
             ? `${info.getValue<number>()}`
             : 'N/A',
-      },
-      {
-        id: 'actions',
-        enableHiding: false,
-        header: () => (
-          <div className='w-[32px]'>
-            <span className='sr-only'>Actions</span>
-          </div>
-        ),
-        cell: ({ row }) => {
-          const teamMember = row.original
-          return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant='ghost'
-                  className='size-8 p-0 absolute top-1/2 right-2 -translate-y-1/2'
-                >
-                  <span className='sr-only'>Open menu</span>
-                  <Ellipsis />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='end'>
-                <DropdownMenuItem
-                  onClick={() => {
-                    onEditMemberClick(teamMember.id)
-                  }}
-                >
-                  <Pencil /> Edit
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  variant='destructive'
-                  onClick={() => {
-                    onRemoveMemberClick(teamMember.id)
-                  }}
-                >
-                  <Trash /> Remove
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )
-        },
       },
     ],
     [],
