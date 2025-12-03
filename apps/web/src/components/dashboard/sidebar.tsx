@@ -40,8 +40,8 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
   const { data: teams, isPending: isLoadingTeams } = useSuspenseQuery(
     trpc.team.getAllOwned.queryOptions(),
   )
-  const { currentTeamSlug, setCurrentTeam } = useDashboardStore()
 
+  const { currentTeamSlug, setCurrentTeam } = useDashboardStore()
   useEffect(() => {
     if (teams?.length && !currentTeamSlug) {
       setCurrentTeam({ id: teams[0].id, slug: teams[0].slug })
@@ -96,6 +96,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
         className='w-[var(--radix-dropdown-menu-trigger-width)]'
         side='bottom'
       >
+        {/* // TODO: Use setCurrentTeam to update team ID and slug when changing teams                                                          */}
         {teams.slice(1).map(team => (
           <DropdownMenuItem>
             <span>{team.name}</span>

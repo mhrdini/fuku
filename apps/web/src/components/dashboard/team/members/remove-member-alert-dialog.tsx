@@ -72,9 +72,7 @@ export const RemoveMemberAlertDialog = ({
       queryClient.invalidateQueries({
         queryKey: trpc.teamMember.getAllByTeam.queryKey(),
       })
-      toast.success(
-        `Undo remove ${data.givenNames} ${data.familyName} successful.`,
-      )
+      toast.success(`${data.givenNames} ${data.familyName} has been restored.`)
     },
   })
 
