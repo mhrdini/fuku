@@ -67,7 +67,9 @@ export const AddLocationFormSheet = () => {
     onSuccess: data => {
       closeSheet()
       queryClient.invalidateQueries({
-        queryKey: trpc.location.getAllByTeam.queryKey(),
+        ...trpc.location.getAllByTeam.queryOptions({
+          teamId: currentTeamId!,
+        }),
       })
       toast.success(`${data.name} has been added.`)
     },

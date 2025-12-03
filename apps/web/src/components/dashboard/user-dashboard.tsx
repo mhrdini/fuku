@@ -1,6 +1,5 @@
 'use client'
 
-import { useParams } from 'next/navigation'
 import { Card, CardContent, CardHeader } from '@fuku/ui/components'
 import { useSuspenseQuery } from '@tanstack/react-query'
 

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useParams } from 'next/navigation'
 import {
   Button,
   DropdownMenu,
@@ -25,16 +24,18 @@ import {
 import { Ellipsis, Plus, Trash } from 'lucide-react'
 
 import { EditableCell } from '~/components/ui/editable-cell'
+import { DialogId } from '~/lib/dialog'
 import { LocationUI } from '~/lib/location'
 import { SheetId } from '~/lib/sheet'
+import { useDashboardStore } from '~/store/dashboard'
+import { useDialogStore } from '~/store/dialog'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
 export const TeamLocationsContent = () => {
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-  const params = useParams()
-  const currentTeamSlug = params.slug as string
+  const { currentTeamId } = useDashboardStore()
 
   const [editingCell, setEditingCell] = useState<{
     rowId: string
@@ -43,35 +44,31 @@ export const TeamLocationsContent = () => {
 
   const { data } = useQuery({
     ...trpc.location.getAllByTeam.queryOptions({
-      teamSlug: currentTeamSlug!,
+      teamId: currentTeamId!,
     }),
-    enabled: !!currentTeamSlug,
+    enabled: !!currentTeamId,
   })
 
   const { mutateAsync: updateLocation, isPending: isUpdating } = useMutation({
     ...trpc.location.update.mutationOptions(),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: trpc.location.getAllByTeam.queryKey(),
+        ...trpc.location.getAllByTeam.queryOptions({
+          teamId: currentTeamId!,
+        }),
       })
     },
   })
 
-  const { mutateAsync: removeLocation } = useMutation({
-    ...trpc.location.delete.mutationOptions(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: trpc.location.getAllByTeam.queryKey(),
-      })
-    },
-  })
-
+  const { openAlertDialog } = useDialogStore()
   const onRemoveLocation = async (id: string) => {
-    await removeLocation({ id })
+    openAlertDialog({
+      id: DialogId.REMOVE_LOCATION,
+      editingId: id,
+    })
   }
 
   const { openSheet } = useSheetStore()
-
   const onNewLocationButtonClick = () => {
     openSheet({ id: SheetId.ADD_LOCATION })
   }

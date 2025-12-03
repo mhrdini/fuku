@@ -41,12 +41,12 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
     trpc.team.getAllOwned.queryOptions(),
   )
 
-  const { currentTeamSlug, setCurrentTeam } = useDashboardStore()
+  const { currentTeamId, setCurrentTeam } = useDashboardStore()
   useEffect(() => {
-    if (teams?.length && !currentTeamSlug) {
+    if (teams?.length && !currentTeamId) {
       setCurrentTeam({ id: teams[0].id, slug: teams[0].slug })
     }
-  }, [teams, currentTeamSlug, setCurrentTeam])
+  }, [teams, currentTeamId, setCurrentTeam])
 
   const router = useRouter()
   const groups = useMenu()
@@ -125,7 +125,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
       </SidebarHeader>
       <SidebarContent>
         {teams.length > 0 &&
-          currentTeamSlug &&
+          currentTeamId &&
           groups.map(group => (
             <SidebarGroup key={group.label}>
               {group.label && (

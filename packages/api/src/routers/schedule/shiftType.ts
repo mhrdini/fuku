@@ -6,22 +6,16 @@ import { protectedProcedure } from '../../trpc'
 export const shiftTypeRouter = {
   getAllByTeam: protectedProcedure
     .input(
-      z
-        .object({
-          teamId: z.string().optional(),
-          teamSlug: z.string().optional(),
-          limit: z.number().optional(),
-        })
-        .refine(data => data.teamId || data.teamSlug, {
-          message: 'Either teamId or teamSlug must be provided',
-        }),
+      z.object({
+        teamId: z.string(),
+        limit: z.number().optional(),
+      }),
     )
     .query(async ({ input, ctx }) => {
       const shiftTypes = await ctx.db.shiftType.findMany({
         where: {
           team: {
-            ...(input.teamId ? { id: input.teamId } : {}),
-            ...(input.teamSlug ? { slug: input.teamSlug } : {}),
+            id: input.teamId,
           },
         },
         ...(input.limit && { take: input.limit }),

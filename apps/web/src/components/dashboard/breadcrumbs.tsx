@@ -15,7 +15,6 @@ import {
 import { cn } from '@fuku/ui/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 
-import { useDashboardStore } from '~/store/dashboard'
 import { useTRPC } from '~/trpc/client'
 
 const MAX_VISIBLE = 3
@@ -24,7 +23,7 @@ const MAX_TRAILING = 1
 export function Breadcrumbs() {
   const params = useParams()
   const username = params?.username as string
-  const { currentTeamSlug } = useDashboardStore()
+  const currentTeamSlug = params?.slug as string
 
   const trpc = useTRPC()
 

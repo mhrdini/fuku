@@ -16,24 +16,24 @@ import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 
-export const RemoveMemberAlertDialog = () => {
+export const RemoveLocationAlertDialog = () => {
   const queryClient = useQueryClient()
 
   const { currentTeamId } = useDashboardStore()
 
-  const { editingId: currentTeamMemberId } = useDialogStore()
+  const { editingId: currentLocationId } = useDialogStore()
 
   const trpc = useTRPC()
-  const { data: teamMember, isPending: isLoadingTeamMember } = useQuery({
-    ...trpc.teamMember.getAllByTeam.queryOptions({
+  const { data: location, isPending: isLoadingLocation } = useQuery({
+    ...trpc.location.getAllByTeam.queryOptions({
       teamId: currentTeamId!,
     }),
-    select: members =>
-      members.find(member => member.id === currentTeamMemberId),
+    select: locations =>
+      locations.find(location => location.id === currentLocationId),
   })
 
-  const { mutateAsync: removeMember, isPending } = useMutation({
-    ...trpc.teamMember.delete.mutationOptions(),
+  const { mutateAsync: removeLocation, isPending } = useMutation({
+    ...trpc.location.delete.mutationOptions(),
     onError: error => {
       toast.error(
         `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
@@ -45,23 +45,20 @@ export const RemoveMemberAlertDialog = () => {
           teamId: currentTeamId!,
         }),
       })
-      const toastId = toast(
-        `${data.givenNames} ${data.familyName} has been removed.`,
-        {
-          action: {
-            label: 'Undo',
-            onClick: async () => {
-              await restoreMember({ id: data.id })
-              toast.dismiss(toastId)
-            },
+      const toastId = toast(`${data.name} has been removed.`, {
+        action: {
+          label: 'Undo',
+          onClick: async () => {
+            await restoreLocation({ id: data.id })
+            toast.dismiss(toastId)
           },
         },
-      )
+      })
     },
   })
 
-  const { mutateAsync: restoreMember } = useMutation({
-    ...trpc.teamMember.restore.mutationOptions(),
+  const { mutateAsync: restoreLocation } = useMutation({
+    ...trpc.location.restore.mutationOptions(),
     onError: error => {
       toast.error(`${error.message}`)
     },
@@ -71,14 +68,14 @@ export const RemoveMemberAlertDialog = () => {
           teamId: currentTeamId!,
         }),
       })
-      toast.success(`${data.givenNames} ${data.familyName} has been restored.`)
+      toast.success(`${data.name} has been restored.`)
     },
   })
 
   const onRemove = async () => {
-    if (!currentTeamMemberId) return
+    if (!currentLocationId) return
     try {
-      await removeMember({ id: currentTeamMemberId })
+      await removeLocation({ id: currentLocationId })
     } catch {
       // Handled in onError
     }
@@ -86,19 +83,19 @@ export const RemoveMemberAlertDialog = () => {
 
   return (
     <>
-      <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
+      <AlertDialogTitle>Remove Location</AlertDialogTitle>
       <AlertDialogDescription>
         Are you sure you want to remove{' '}
-        {isLoadingTeamMember ? (
+        {isLoadingLocation ? (
           <Skeleton className='inline-block h-4 w-10' />
         ) : (
-          <span className='font-semibold'>
-            {teamMember?.givenNames} {teamMember?.familyName}
-          </span>
+          <span className='font-semibold'>{location?.name}</span>
         )}
         ?
         <br />
-        <span className='font-semibold'>This action cannot be undone.</span>
+        <span className='font-semibold'>
+          You can restore it after deletion.
+        </span>
       </AlertDialogDescription>
       <AlertDialogFooter>
         <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -106,7 +103,7 @@ export const RemoveMemberAlertDialog = () => {
           <Button
             variant='destructive'
             onClick={onRemove}
-            disabled={isLoadingTeamMember || isPending}
+            disabled={isLoadingLocation || isPending}
             className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
           >
             Remove
