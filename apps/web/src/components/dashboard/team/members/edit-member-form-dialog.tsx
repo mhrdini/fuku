@@ -105,9 +105,7 @@ export const EditMemberFormDialog = ({
       queryClient.invalidateQueries({
         queryKey: trpc.teamMember.getAllByTeam.queryKey(),
       })
-      toast.success(
-        `${data.givenNames} ${data.familyName} updated successfully.`,
-      )
+      toast.success(`${data.givenNames} ${data.familyName} has been updated.`)
     },
   })
 

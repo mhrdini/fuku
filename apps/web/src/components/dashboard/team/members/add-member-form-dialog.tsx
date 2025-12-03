@@ -61,8 +61,6 @@ export const AddMemberFormDialog = ({
   open,
   onOpenChange,
 }: AddMemberFormDialogProps) => {
-  const queryClient = useQueryClient()
-
   const { currentTeamId, currentTeamSlug } = useDashboardStore()
   const { payGradeOpen, setPayGradeOpen } = useTeamMemberStore()
 
@@ -78,6 +76,7 @@ export const AddMemberFormDialog = ({
     resolver: zodResolver(TeamMemberCreateFormSchema),
   })
 
+  const queryClient = useQueryClient()
   const trpc = useTRPC()
 
   const { data: payGrades } = useQuery({
@@ -99,8 +98,8 @@ export const AddMemberFormDialog = ({
       queryClient.invalidateQueries({
         queryKey: trpc.teamMember.getAllByTeam.queryKey(),
       })
-      toast(
-        `${data.givenNames} ${data.familyName} has been created successfully.`,
+      toast.success(
+        `${data.givenNames} ${data.familyName} has been added to the team.`,
       )
     },
   })
@@ -109,7 +108,7 @@ export const AddMemberFormDialog = ({
     try {
       await addMember(data)
     } catch {
-      // Handled in onError
+      // handled in onError
     }
   }
 

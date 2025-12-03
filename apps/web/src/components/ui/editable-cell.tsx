@@ -61,10 +61,10 @@ function EditableCellInner<
 
   // TODO: Implement optimistic update to stop split second flicker when saving
   return (
-    <div className='flex w-full h-5 items-center'>
+    <div className='relative h-5 w-full min-w-0 overflow-hidden flex items-center'>
       {isEditing ? (
         <Input
-          className='w-full h-full text-sm p-0 m-0 border-none rounded-none focus-visible:ring-0 shadow-none'
+          className='absolute inset-0 w-full h-full min-w-0 leading-none text-sm p-0 m-0 border-none rounded-none focus-visible:ring-0 shadow-none'
           value={String(value ?? '')}
           autoFocus
           onChange={e => setValue(e.target.value as unknown as ValueType)}
@@ -72,7 +72,7 @@ function EditableCellInner<
         />
       ) : (
         <div
-          className='cursor-text text-sm  w-full h-full flex items-center truncate'
+          className='cursor-text text-sm w-full h-full truncate block'
           onClick={e => {
             e.stopPropagation()
             setEditingCell({ rowId: row.id, columnKey: columnName as string })

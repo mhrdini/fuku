@@ -28,6 +28,26 @@ export const locationRouter = {
       })
       return locations
     }),
+  create: protectedProcedure
+    .input(
+      z.object({
+        teamId: z.string(),
+        name: z.string(),
+        address: z.string().nullable().optional(),
+        color: z.string().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const newLocation = await ctx.db.location.create({
+        data: {
+          teamId: input.teamId,
+          name: input.name,
+          address: input.address,
+          color: input.color,
+        },
+      })
+      return newLocation
+    }),
   update: protectedProcedure
     .input(
       z.object({
@@ -46,5 +66,37 @@ export const locationRouter = {
         },
       })
       return updatedLocation
+    }),
+  delete: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      await ctx.db.location.update({
+        where: { id: input.id },
+        data: {
+          deletedAt: new Date(),
+          deletedById: ctx.session.user.id,
+        },
+      })
+      return { success: true }
+    }),
+  restore: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      await ctx.db.location.update({
+        where: { id: input.id },
+        data: {
+          deletedAt: null,
+          deletedById: null,
+        },
+      })
+      return { success: true }
     }),
 } satisfies TRPCRouterRecord

@@ -13,7 +13,14 @@ import {
 } from '@fuku/ui/components'
 import { useQuery } from '@tanstack/react-query'
 import { Column, ColumnDef } from '@tanstack/react-table'
-import { ArrowDown, ArrowUp, ArrowUpDown, Ellipsis } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Ellipsis,
+  Pencil,
+  Trash,
+} from 'lucide-react'
 
 import { TeamMemberUI, toTeamMemberUI } from '~/lib/member'
 import { getHiddenColumns } from '~/lib/table'
@@ -155,7 +162,7 @@ export default function TeamMembersContent() {
                     onEditMemberClick(teamMember.id)
                   }}
                 >
-                  Edit
+                  <Pencil /> Edit
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -164,7 +171,7 @@ export default function TeamMembersContent() {
                     onRemoveMemberClick(teamMember.id)
                   }}
                 >
-                  Remove
+                  <Trash /> Remove
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
