@@ -237,27 +237,23 @@ export function MembersDataTableSection({
             })}
         </DropdownMenuContent>
       </DropdownMenu>
-      <Button variant='outline' onClick={onAddMemberClick}>
-        <Plus />
-        <span className='hidden lg:inline'>Add Member</span>
-      </Button>
     </>
   )
 
   return (
-    <div className='flex flex-col gap-4'>
+    <div className='flex flex-col gap-2'>
       <div className='flex items-center'>
         {tableFilters}
         <div className='ml-auto flex gap-2'>{tableActions}</div>
       </div>
-      <div className='overflow-hidden rounded-md border'>
-        <Table>
+      <div className='table-container'>
+        <Table className='table'>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map(header => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead className='table-head' key={header.id}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -278,7 +274,7 @@ export function MembersDataTableSection({
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id} className='relative'>
+                    <TableCell key={cell.id} className='table-cell'>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -300,8 +296,17 @@ export function MembersDataTableSection({
           </TableBody>
         </Table>
       </div>
-      <div className='flex items-center justify-end space-x-2'>
+      <div className='table-footer'>
         <Button
+          variant='ghost'
+          className='text-muted-foreground'
+          onClick={onAddMemberClick}
+        >
+          <Plus />
+          <span className='hidden lg:inline'>New team member</span>
+        </Button>
+        <Button
+          className='ml-auto'
           variant='outline'
           size='sm'
           aria-description='Go to previous page'
