@@ -1,7 +1,6 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
-import { useParams } from 'next/navigation'
 import {
   Badge,
   Button,
@@ -25,6 +24,7 @@ import {
 import { DialogId } from '~/lib/dialog'
 import { TeamMemberUI, toTeamMemberUI } from '~/lib/member'
 import { getHiddenColumns } from '~/lib/table'
+import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 import { ContentSkeleton } from '../../content-skeleton'
@@ -44,16 +44,15 @@ const getMultiSortIcon = (column: Column<any, any>) => {
 
 export default function TeamMembersContent() {
   const trpc = useTRPC()
-  const params = useParams()
-  const currentTeamSlug = params.slug as string
+  const { currentTeamId } = useDashboardStore()
 
   const { openDialog, openAlertDialog } = useDialogStore()
 
   const { data: members, isPending } = useQuery({
     ...trpc.teamMember.getAllByTeam.queryOptions({
-      teamSlug: currentTeamSlug!,
+      teamId: currentTeamId!,
     }),
-    enabled: !!currentTeamSlug,
+    enabled: !!currentTeamId,
   })
 
   const onEditMemberClick = useCallback((id: string) => {

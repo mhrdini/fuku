@@ -6,25 +6,21 @@ import { protectedProcedure } from '../../trpc'
 export const locationRouter = {
   getAllByTeam: protectedProcedure
     .input(
-      z
-        .object({
-          teamId: z.string().optional(),
-          teamSlug: z.string().optional(),
-          limit: z.number().optional(),
-        })
-        .refine(data => data.teamId || data.teamSlug, {
-          message: 'Either teamId or teamSlug must be provided',
-        }),
+      z.object({
+        teamId: z.string(),
+        limit: z.number().optional(),
+      }),
     )
     .query(async ({ input, ctx }) => {
       const locations = await ctx.db.location.findMany({
         where: {
           team: {
-            ...(input.teamId ? { id: input.teamId } : {}),
-            ...(input.teamSlug ? { slug: input.teamSlug } : {}),
+            id: input.teamId,
           },
+          deletedAt: null,
         },
         ...(input.limit && { take: input.limit }),
+        orderBy: { createdAt: 'asc' },
       })
       return locations
     }),
@@ -58,14 +54,14 @@ export const locationRouter = {
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const updatedLocation = await ctx.db.location.update({
+      const updated = await ctx.db.location.update({
         where: { id: input.id },
         data: {
           ...(input.name !== undefined ? { name: input.name } : {}),
           ...(input.address !== undefined ? { address: input.address } : {}),
         },
       })
-      return updatedLocation
+      return updated
     }),
   delete: protectedProcedure
     .input(
@@ -74,14 +70,14 @@ export const locationRouter = {
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      await ctx.db.location.update({
+      const deleted = await ctx.db.location.update({
         where: { id: input.id },
         data: {
           deletedAt: new Date(),
           deletedById: ctx.session.user.id,
         },
       })
-      return { success: true }
+      return deleted
     }),
   restore: protectedProcedure
     .input(
@@ -90,13 +86,13 @@ export const locationRouter = {
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      await ctx.db.location.update({
+      const restored = await ctx.db.location.update({
         where: { id: input.id },
         data: {
           deletedAt: null,
           deletedById: null,
         },
       })
-      return { success: true }
+      return restored
     }),
 } satisfies TRPCRouterRecord
