@@ -1,43 +1,38 @@
 'use client'
 
+import { useParams } from 'next/navigation'
 import {
-  AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
   Button,
-  Spinner,
+  Skeleton,
 } from '@fuku/ui/components'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { useTeamMemberStore } from '~/store/member'
+import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 
-interface RemoveMemberAlertDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
-
-export const RemoveMemberAlertDialog = ({
-  open,
-  onOpenChange,
-}: RemoveMemberAlertDialogProps) => {
+export const RemoveMemberAlertDialog = () => {
   const queryClient = useQueryClient()
-  const { currentTeamMemberId } = useTeamMemberStore()
+
+  const params = useParams()
+  const currentTeamSlug = params.slug as string
+  const { editingId: currentTeamMemberId } = useDialogStore()
 
   const trpc = useTRPC()
-  const { data: teamMember } = useQuery({
-    ...trpc.teamMember.getById.queryOptions({
-      id: currentTeamMemberId!,
+  const { data: teamMember, isPending: isLoadingTeamMember } = useQuery({
+    ...trpc.teamMember.getAllByTeam.queryOptions({
+      teamSlug: currentTeamSlug!,
     }),
-    enabled: !!currentTeamMemberId,
+    select: members =>
+      members.find(member => member.id === currentTeamMemberId),
   })
 
-  const { mutateAsync: removeMember } = useMutation({
+  const { mutateAsync: removeMember, isPending } = useMutation({
     ...trpc.teamMember.delete.mutationOptions(),
     onError: error => {
       toast.error(
@@ -86,38 +81,34 @@ export const RemoveMemberAlertDialog = ({
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      {!teamMember ? (
-        <AlertDialogContent>
-          <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
-          <Spinner />
-        </AlertDialogContent>
-      ) : (
-        <AlertDialogContent>
-          <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to remove{' '}
-            <span className='font-semibold'>
-              {teamMember?.givenNames} {teamMember?.familyName}
-            </span>
-            ?
-            <br />
-            <span className='font-semibold'>This action cannot be undone.</span>
-          </AlertDialogDescription>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction asChild>
-              <Button
-                variant='destructive'
-                onClick={onRemove}
-                className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
-              >
-                Remove
-              </Button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      )}
-    </AlertDialog>
+    <>
+      <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
+      <AlertDialogDescription>
+        Are you sure you want to remove{' '}
+        {isLoadingTeamMember ? (
+          <Skeleton className='inline-block h-4 w-10' />
+        ) : (
+          <span className='font-semibold'>
+            {teamMember?.givenNames} {teamMember?.familyName}
+          </span>
+        )}
+        ?
+        <br />
+        <span className='font-semibold'>This action cannot be undone.</span>
+      </AlertDialogDescription>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogAction asChild>
+          <Button
+            variant='destructive'
+            onClick={onRemove}
+            disabled={isLoadingTeamMember || isPending}
+            className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
+          >
+            Remove
+          </Button>
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </>
   )
 }
