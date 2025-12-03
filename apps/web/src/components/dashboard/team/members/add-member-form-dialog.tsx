@@ -57,7 +57,7 @@ const TeamMemberCreateFormSchema = TeamMemberInputSchema.extend({
 type TeamMemberCreateFormType = z.infer<typeof TeamMemberCreateFormSchema>
 
 export const AddMemberFormDialog = () => {
-  const { currentTeamId, currentTeamSlug } = useDashboardStore()
+  const { currentTeamId } = useDashboardStore()
 
   const { id, closeDialog } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
@@ -67,9 +67,9 @@ export const AddMemberFormDialog = () => {
 
   const { data: payGrades } = useQuery({
     ...trpc.payGrade.getAllByTeam.queryOptions({
-      teamSlug: currentTeamSlug!,
+      teamId: currentTeamId!,
     }),
-    enabled: !!currentTeamSlug,
+    enabled: !!currentTeamId,
   })
 
   const { mutateAsync: addMember, isPending } = useMutation({
@@ -82,7 +82,9 @@ export const AddMemberFormDialog = () => {
     onSuccess: data => {
       closeDialog()
       queryClient.invalidateQueries({
-        queryKey: trpc.teamMember.getAllByTeam.queryKey(),
+        ...trpc.location.getAllByTeam.queryOptions({
+          teamId: currentTeamId!,
+        }),
       })
       toast.success(
         `${data.givenNames} ${data.familyName} has been added to the team.`,

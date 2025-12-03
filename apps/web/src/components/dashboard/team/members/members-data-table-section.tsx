@@ -75,7 +75,7 @@ export function MembersDataTableSection({
   columns,
   defaultHiddenColumns,
 }: MembersDataTableProps<TeamMemberUI, any>) {
-  const { currentTeamSlug } = useDashboardStore()
+  const { currentTeamId } = useDashboardStore()
 
   const { openDialog } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
@@ -86,7 +86,7 @@ export function MembersDataTableSection({
   const trpc = useTRPC()
   const { data: payGrades } = useSuspenseQuery(
     trpc.payGrade.getAllByTeam.queryOptions({
-      teamSlug: currentTeamSlug!,
+      teamId: currentTeamId!,
     }),
   )
 
