@@ -51,9 +51,12 @@ import {
 
 import { TeamMemberUI } from '~/lib/member'
 import { useDashboardStore } from '~/store/dashboard'
-import { useTeamMemberStore } from '~/store/member'
+import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
-import { AddMemberFormDialog } from './add-member-form-dialog'
+
+import './add-member-form-dialog'
+
+import { DialogId } from '~/lib/dialog'
 
 declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {
@@ -72,9 +75,15 @@ export function MembersDataTableSection({
   columns,
   defaultHiddenColumns,
 }: MembersDataTableProps<TeamMemberUI, any>) {
-  const trpc = useTRPC()
   const { currentTeamSlug } = useDashboardStore()
 
+  const { openDialog } = useDialogStore()
+  const [payGradeOpen, setPayGradeOpen] = useState(false)
+  const onAddMemberClick = () => {
+    openDialog({ id: DialogId.ADD_TEAM_MEMBER })
+  }
+
+  const trpc = useTRPC()
   const { data: payGrades } = useSuspenseQuery(
     trpc.payGrade.getAllByTeam.queryOptions({
       teamSlug: currentTeamSlug!,
@@ -83,13 +92,6 @@ export function MembersDataTableSection({
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
-  const [payGradeOpen, setPayGradeOpen] = useState(false)
-  const { addDialogOpen, setAddDialogOpen } = useTeamMemberStore()
-
-  const onAddMemberClick = () => {
-    setAddDialogOpen(true)
-  }
 
   const table = useReactTable({
     data,
@@ -247,10 +249,6 @@ export function MembersDataTableSection({
       <div className='flex items-center'>
         {tableFilters}
         <div className='ml-auto flex gap-2'>{tableActions}</div>
-        <AddMemberFormDialog
-          open={addDialogOpen}
-          onOpenChange={setAddDialogOpen}
-        />
       </div>
       <div className='overflow-hidden rounded-md border'>
         <Table>

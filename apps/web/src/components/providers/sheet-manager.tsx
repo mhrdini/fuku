@@ -8,11 +8,7 @@ import { AddLocationFormSheet } from '../dashboard/team/locations/add-location-f
 import { EditPayGradeFormSheet } from '../dashboard/team/overview/edit-pay-grade-form-sheet'
 import { EditShiftTypeFormSheet } from '../dashboard/team/overview/edit-shift-type-form-sheet'
 
-interface SheetManagerProps {
-  children?: React.ReactNode
-}
-
-export const SheetManager = ({ children }: SheetManagerProps) => {
+export const SheetManager = () => {
   const { id, closeSheet } = useSheetStore()
 
   return (
