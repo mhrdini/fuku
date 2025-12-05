@@ -6,10 +6,15 @@ model Location {
   name    String  @unique
   address String?
 
-  teamId           String
+  teamId           String            @map("team_id")
   team             Team              @relation(fields: [teamId], references: [id])
   shiftAssignments ShiftAssignment[]
-  color            String?
+  color            String?           @default("#000000")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  deletedById String?   @map("deleted_by_id")
 
   @@map("location")
 }
@@ -22,6 +27,13 @@ model ShiftType {
   endTime          DateTime          @map("end_time")
   shiftAssignments ShiftAssignment[]
   color            String?
+  teamId           String            @map("team_id")
+  team             Team              @relation(fields: [teamId], references: [id])
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  deletedById String?   @map("deleted_by_id")
 
   @@map("shift_type")
 }

@@ -2,7 +2,7 @@
 
 import { Fragment, useMemo } from 'react'
 import Link from 'next/link'
-import { useParams, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,15 +12,19 @@ import {
   BreadcrumbSeparator,
   Skeleton,
 } from '@fuku/ui/components'
+import { cn } from '@fuku/ui/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 
 import { useDashboardStore } from '~/store/dashboard'
 import { useTRPC } from '~/trpc/client'
+import { useSession } from '../providers/session-provider'
+
+const MAX_VISIBLE = 3
+const MAX_TRAILING = 1
 
 export function Breadcrumbs() {
-  const params = useParams()
-  const username = params?.username as string
   const { currentTeamSlug } = useDashboardStore()
+  const session = useSession()
 
   const trpc = useTRPC()
 
@@ -33,33 +37,42 @@ export function Breadcrumbs() {
   const segments = pathname.split('/').filter(Boolean)
 
   const crumbs = useMemo(() => {
+    // ignore the 'team' segment
+    const length = segments.length - 1
+
     return segments
       .map((segment, idx) => {
-        const href = '/' + segments.slice(0, idx + 1).join('/')
+        if (length > MAX_VISIBLE && idx !== 0 && idx < length - MAX_TRAILING) {
+          return idx === 1 ? '…' : null
+        }
+        return segment
+      })
+      .filter(Boolean)
+      .map((segment, idx, arr) => {
+        if (segment === null) return null
+        if (segment === '…') return { href: '', label: '…' }
 
         let label = decodeURIComponent(segment)
           .replace(/-/g, ' ')
           .replace(/\b\w/g, c => c.toUpperCase())
 
-        if (segment === username) {
-          label = 'Home'
-        }
+        if (segment === session?.user.username) label = 'Home'
+        if (segment === currentTeamSlug && team) label = team.name
+        if (segment === 'team') return null
 
-        if (segment === 'team') {
-          return null
-        }
-
-        if (segment === currentTeamSlug && team) {
-          label = team.name
-        }
+        const href =
+          '/' +
+          arr
+            .slice(0, idx + 1)
+            .filter(s => s !== '…')
+            .join('/')
 
         return { href, label }
       })
       .filter(
-        (crumb): crumb is { href: string; label: string } =>
-          crumb !== null && crumb !== undefined,
+        (crumb): crumb is { href: string; label: string } => crumb !== null,
       )
-  }, [segments, team, currentTeamSlug, username])
+  }, [segments, team, currentTeamSlug, session?.user.username])
 
   return (
     <Breadcrumb className=''>
@@ -73,7 +86,12 @@ export function Breadcrumbs() {
 
               <BreadcrumbItem>
                 {idx === crumbs.length - 1 || !crumb.href ? (
-                  <BreadcrumbPage className='cursor-default'>
+                  <BreadcrumbPage
+                    className={cn(
+                      idx === crumbs.length - 1 && 'font-semibold',
+                      'cursor-default',
+                    )}
+                  >
                     {crumb.label}
                   </BreadcrumbPage>
                 ) : (

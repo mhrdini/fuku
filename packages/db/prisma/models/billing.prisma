@@ -1,7 +1,7 @@
 model WorkHour {
   id                String          @id @default(uuid())
   shiftAssignmentId String          @unique @map("shift_assignment_id")
-  shiftAssignment   ShiftAssignment @relation("ShiftAssignmentToWorkHour", fields: [shiftAssignmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  shiftAssignment   ShiftAssignment @relation("ShiftAssignmentToWorkHour", fields: [shiftAssignmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   actualStart       DateTime        @map("actual_start")
   actualEnd         DateTime        @map("actual_end")
   rateMultiplier    Float           @default(1.0) @map("rate_multiplier")
