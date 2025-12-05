@@ -1,5 +1,6 @@
-import { useParams } from 'next/navigation'
 import { Cog, LucideIcon, UserCircle2, Users } from 'lucide-react'
+
+import { useDashboardStore } from '~/store/dashboard'
 
 export type Group = {
   label: string
@@ -22,8 +23,7 @@ export type Submenu = {
 }
 
 export const useMenu = (): Group[] => {
-  const params = useParams()
-  const currentTeamSlug = params.slug as string
+  const { currentTeamSlug } = useDashboardStore()
 
   return !currentTeamSlug
     ? []

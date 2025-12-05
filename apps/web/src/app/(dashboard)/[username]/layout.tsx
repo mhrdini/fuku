@@ -6,6 +6,7 @@ import { DashboardContentLayout } from '~/components/dashboard/content-layout'
 import { DashboardHeader } from '~/components/dashboard/header'
 import { DashboardSidebar } from '~/components/dashboard/sidebar'
 import { DialogManager } from '~/components/providers/dialog-manager'
+import { SessionProvider } from '~/components/providers/session-provider'
 import { SheetManager } from '~/components/providers/sheet-manager'
 import { HydrateClient, prefetch, trpc } from '~/trpc/server'
 
@@ -28,17 +29,19 @@ export default async function DashboardLayout({
 
   return (
     <div className='min-h-screen w-full'>
-      <HydrateClient>
-        <SheetManager />
-        <DialogManager />
-        <SidebarProvider>
-          <DashboardSidebar username={username} />
-          <div className='flex flex-1 flex-col'>
-            <DashboardHeader />
-            <DashboardContentLayout>{children}</DashboardContentLayout>
-          </div>
-        </SidebarProvider>
-      </HydrateClient>
+      <SessionProvider session={session}>
+        <HydrateClient>
+          <SheetManager />
+          <DialogManager />
+          <SidebarProvider>
+            <DashboardSidebar username={username} />
+            <div className='flex flex-1 flex-col'>
+              <DashboardHeader />
+              <DashboardContentLayout>{children}</DashboardContentLayout>
+            </div>
+          </SidebarProvider>
+        </HydrateClient>
+      </SessionProvider>
     </div>
   )
 }
