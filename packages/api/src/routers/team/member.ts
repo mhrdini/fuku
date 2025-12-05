@@ -26,7 +26,7 @@ export const teamMemberRouter = {
   getAllByTeam: protectedProcedure
     .input(
       z.object({
-        teamId: z.string().optional(),
+        teamId: z.string(),
         limit: z.number().optional(),
       }),
     )
