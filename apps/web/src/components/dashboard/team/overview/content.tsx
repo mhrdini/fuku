@@ -1,9 +1,8 @@
 'use client'
 
+import { Suspense } from 'react'
 import {
   Button,
-  Dialog,
-  DialogTrigger,
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -11,7 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@fuku/ui/components'
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { Users } from 'lucide-react'
 
 import { ContentSkeleton } from '~/components/dashboard/content-skeleton'
@@ -21,51 +20,38 @@ import { SummarySection } from './summary-section'
 
 export default function TeamOverviewContent() {
   const trpc = useTRPC()
-
   const { currentTeamId } = useDashboardStore()
 
-  const { data: team, isPending } = useQuery({
+  const { data: team } = useSuspenseQuery({
     ...trpc.team.getAllOwned.queryOptions(),
     select: teams => teams.find(team => team.id === currentTeamId),
   })
 
-  const renderTeamContent = () => (
-    <div className='flex flex-col gap-2'>
-      <SummarySection />
-    </div>
-  )
-
-  const renderEmptyContent = () => (
-    <Empty>
-      <EmptyHeader>
-        <EmptyMedia variant='icon'>
-          <Users />
-        </EmptyMedia>
-        <EmptyTitle>No Teams Yet</EmptyTitle>
-        <EmptyDescription>
-          You haven&apos;t created any teams yet. Get started by creating your
-          first team.
-        </EmptyDescription>
-      </EmptyHeader>
-      <EmptyContent>
-        <div className='flex gap-2'>
-          <DialogTrigger asChild>
-            <Button>Create Team</Button>
-          </DialogTrigger>
-        </div>
-      </EmptyContent>
-    </Empty>
-  )
-
   return (
-    <Dialog>
-      {isPending ? (
-        <ContentSkeleton />
-      ) : team ? (
-        renderTeamContent()
+    <Suspense fallback={<ContentSkeleton />}>
+      {team ? (
+        <div className='flex flex-col gap-2'>
+          <SummarySection />
+        </div>
       ) : (
-        renderEmptyContent()
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant='icon'>
+              <Users />
+            </EmptyMedia>
+            <EmptyTitle>No Teams Yet</EmptyTitle>
+            <EmptyDescription>
+              You haven&apos;t created any teams yet. Get started by creating
+              your first team.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <div className='flex gap-2'>
+              <Button>Create Team</Button>
+            </div>
+          </EmptyContent>
+        </Empty>
       )}
-    </Dialog>
+    </Suspense>
   )
 }

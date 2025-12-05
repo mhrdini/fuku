@@ -16,19 +16,20 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@fuku/ui/components'
-import {
-  useSuspenseQueries,
-} from '@tanstack/react-query'
+import { useSuspenseQueries } from '@tanstack/react-query'
 import { ArrowRight, Crown } from 'lucide-react'
 
+import { useSession } from '~/components/providers/session-provider'
+import { useDashboardStore } from '~/store/dashboard'
 import { useTRPC } from '~/trpc/client'
 
 const MAX_VISIBLE = 3
 
 export const SummarySection = () => {
+  const session = useSession()
   const params = useParams()
-  const username = params?.username as string
-  const slug = params?.slug as string
+  const currentTeamSlug = params.slug as string
+  const { currentTeamId } = useDashboardStore()
 
   const router = useRouter()
   const trpc = useTRPC()
@@ -41,34 +42,36 @@ export const SummarySection = () => {
   ] = useSuspenseQueries({
     queries: [
       trpc.teamMember.getAllByTeam.queryOptions({
-        teamSlug: slug,
+        teamId: currentTeamId!,
       }),
       trpc.location.getAllByTeam.queryOptions({
-        teamSlug: slug,
+        teamId: currentTeamId!,
       }),
       trpc.payGrade.getAllByTeam.queryOptions({
-        teamSlug: slug,
+        teamId: currentTeamId!,
       }),
       trpc.shiftType.getAllByTeam.queryOptions({
-        teamSlug: slug,
+        teamId: currentTeamId!,
       }),
     ],
   })
 
   const onManageMembersClick = () => {
-    router.push(`/${username}/team/${slug}/members`)
+    router.push(`/${session?.user.username}/team/${currentTeamSlug}/members`)
   }
 
   const onManageLocationsClick = () => {
-    router.push(`/${username}/team/${slug}/locations`)
+    router.push(`/${session?.user.username}/team/${currentTeamSlug}/locations`)
   }
 
   const onManageShiftTypesClick = () => {
-    router.push(`/${username}/team/${slug}/shift-types`)
+    router.push(
+      `/${session?.user.username}/team/${currentTeamSlug}/shift-types`,
+    )
   }
 
   const onManagePayGradesClick = () => {
-    router.push(`/${username}/team/${slug}/pay-grades`)
+    router.push(`/${session?.user.username}/team/${currentTeamSlug}/pay-grades`)
   }
 
   const teamMembersSummary = (
