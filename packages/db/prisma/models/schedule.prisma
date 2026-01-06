@@ -23,8 +23,8 @@ model ShiftType {
   id               String            @id @default(uuid())
   name             String            @unique
   description      String?
-  startTime        DateTime          @map("start_time")
-  endTime          DateTime          @map("end_time")
+  startTime        String            @map("start_time") // in 24-hr, zero-padded "HH:MM" format (e.g., "09:00") 
+  endTime          String            @map("end_time") // same format as startTime
   shiftAssignments ShiftAssignment[]
   color            String?
   teamId           String            @map("team_id")

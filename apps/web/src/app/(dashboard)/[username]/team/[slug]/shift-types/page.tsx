@@ -1,3 +1,5 @@
+import { TeamShiftTypesContent } from '~/components/dashboard/team/shift-types/content'
+
 export default function TeamShiftTypesPage() {
-  return <div>Team Shift Types Page</div>
+  return <TeamShiftTypesContent />
 }

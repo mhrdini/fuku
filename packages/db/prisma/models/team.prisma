@@ -53,7 +53,7 @@ model TeamMember {
   team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   payGradeId String?   @map("pay_grade_id")
-  payGrade   PayGrade? @relation(fields: [payGradeId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  payGrade   PayGrade? @relation(fields: [payGradeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   teamMemberRole TeamMemberRole @default(STAFF) @map("team_member_role")
 
