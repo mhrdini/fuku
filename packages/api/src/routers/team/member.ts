@@ -130,7 +130,7 @@ export const teamMemberRouter = {
         throw new TRPCError({
           code: 'FORBIDDEN',
           message:
-            'Cannot edit this team member (not found, deleted, or insufficient permissions)',
+            'Cannot update this team member (not found, deleted, or insufficient permissions)',
         })
 
       return updated

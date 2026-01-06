@@ -25,19 +25,16 @@ const MAX_TRAILING = 1
 export function Breadcrumbs() {
   const { currentTeamSlug } = useDashboardStore()
   const session = useSession()
-
+  const pathname = usePathname()
+  const segments = pathname.split('/').filter(Boolean)
   const trpc = useTRPC()
 
-  const { data: team, isPending } = useQuery({
-    ...trpc.team.getBySlug.queryOptions({ slug: currentTeamSlug! }),
+  const { data: team, isFetching } = useQuery({
+    ...trpc.team.getBySlug.queryOptions({ slug: currentTeamSlug ?? '' }),
     enabled: !!currentTeamSlug,
   })
 
-  const pathname = usePathname()
-  const segments = pathname.split('/').filter(Boolean)
-
   const crumbs = useMemo(() => {
-    // ignore the 'team' segment
     const length = segments.length - 1
 
     return segments
@@ -49,7 +46,7 @@ export function Breadcrumbs() {
       })
       .filter(Boolean)
       .map((segment, idx, arr) => {
-        if (segment === null) return null
+        if (!segment) return null
         if (segment === '…') return { href: '', label: '…' }
 
         let label = decodeURIComponent(segment)
@@ -69,21 +66,18 @@ export function Breadcrumbs() {
 
         return { href, label }
       })
-      .filter(
-        (crumb): crumb is { href: string; label: string } => crumb !== null,
-      )
+      .filter(Boolean) as { href: string; label: string }[]
   }, [segments, team, currentTeamSlug, session?.user.username])
 
   return (
-    <Breadcrumb className=''>
+    <Breadcrumb>
       <BreadcrumbList>
-        {isPending ? (
+        {isFetching ? (
           <Skeleton className='h-4 w-16' />
         ) : (
           crumbs.map((crumb, idx) => (
             <Fragment key={crumb.href}>
               {idx !== 0 && <BreadcrumbSeparator />}
-
               <BreadcrumbItem>
                 {idx === crumbs.length - 1 || !crumb.href ? (
                   <BreadcrumbPage

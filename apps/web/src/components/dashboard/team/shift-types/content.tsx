@@ -24,15 +24,16 @@ import {
 import { Ellipsis, Plus, Trash } from 'lucide-react'
 
 import { EditableCell } from '~/components/ui/editable-cell'
+import { TimeInput } from '~/components/ui/time-input'
 import { DialogId } from '~/lib/dialog'
-import { LocationUI } from '~/lib/location'
 import { SheetId } from '~/lib/sheet'
+import { ShiftTypeUI } from '~/lib/shift-types'
 import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
-export const TeamLocationsContent = () => {
+export const TeamShiftTypesContent = () => {
   const queryClient = useQueryClient()
   const trpc = useTRPC()
   const { currentTeamId } = useDashboardStore()
@@ -43,37 +44,52 @@ export const TeamLocationsContent = () => {
   } | null>(null)
 
   const { data } = useQuery({
-    ...trpc.location.getAllByTeam.queryOptions({
+    ...trpc.shiftType.getAllByTeam.queryOptions({
       teamId: currentTeamId!,
     }),
     enabled: !!currentTeamId,
   })
 
-  const { mutateAsync: updateLocation, isPending: isUpdating } = useMutation({
-    ...trpc.location.update.mutationOptions(),
-    onSuccess: () => {
+  const { mutateAsync: updateShiftType, isPending: isUpdating } = useMutation({
+    ...trpc.shiftType.update.mutationOptions(),
+    onSuccess: data => {
       queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
+        ...trpc.shiftType.getAllByTeam.queryOptions({
           teamId: currentTeamId!,
         }),
       })
     },
   })
 
+  const updateTime = async ({
+    id,
+    timeType,
+    time,
+  }: {
+    id: string
+    timeType: 'startTime' | 'endTime'
+    time: string
+  }) => {
+    await updateShiftType({
+      id,
+      [timeType]: time,
+    })
+  }
+
   const { openAlertDialog } = useDialogStore()
-  const onRemoveLocation = async (id: string) => {
+  const onRemoveShiftType = async (id: string) => {
     openAlertDialog({
-      id: DialogId.REMOVE_LOCATION,
+      id: DialogId.REMOVE_SHIFT_TYPE,
       editingId: id,
     })
   }
 
   const { openSheet } = useSheetStore()
-  const onNewLocation = () => {
-    openSheet({ id: SheetId.CREATE_LOCATION })
+  const onNewShiftType = () => {
+    openSheet({ id: SheetId.CREATE_SHIFT_TYPE })
   }
 
-  const columns: ColumnDef<LocationUI, any>[] = [
+  const columns: ColumnDef<ShiftTypeUI, any>[] = [
     {
       id: 'actions',
       enableHiding: false,
@@ -83,7 +99,7 @@ export const TeamLocationsContent = () => {
         </div>
       ),
       cell: ({ row }) => {
-        const location = row.original
+        const shiftType = row.original
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -95,9 +111,7 @@ export const TeamLocationsContent = () => {
             <DropdownMenuContent align='start'>
               <DropdownMenuItem
                 variant='destructive'
-                onClick={() => {
-                  onRemoveLocation(location.id)
-                }}
+                onClick={() => onRemoveShiftType(shiftType.id)}
               >
                 <Trash /> Remove
               </DropdownMenuItem>
@@ -108,7 +122,7 @@ export const TeamLocationsContent = () => {
     },
     {
       accessorKey: 'name',
-      header: 'Location Name',
+      header: 'Shift Type Name',
       cell: ({ row, renderValue }) => (
         <EditableCell
           row={row.original}
@@ -116,25 +130,38 @@ export const TeamLocationsContent = () => {
           renderValue={renderValue}
           editingCell={editingCell}
           setEditingCell={setEditingCell}
-          onSave={updateLocation}
+          onSave={updateShiftType}
           isUpdating={isUpdating}
         />
       ),
     },
     {
-      accessorKey: 'address',
-      header: 'Address',
-      cell: ({ row, renderValue }) => (
-        <EditableCell
-          row={row.original}
-          columnName='address'
-          renderValue={renderValue}
-          editingCell={editingCell}
-          setEditingCell={setEditingCell}
-          onSave={updateLocation}
-          isUpdating={isUpdating}
-        />
-      ),
+      accessorKey: 'startTime',
+      header: 'Start Time',
+      cell: ({ row }) => {
+        return (
+          <TimeInput
+            id={row.original.id}
+            timeType='startTime'
+            value={row.original.startTime}
+            onChange={updateTime}
+          />
+        )
+      },
+    },
+    {
+      accessorKey: 'endTime',
+      header: 'End Time',
+      cell: ({ row }) => {
+        return (
+          <TimeInput
+            id={row.original.id}
+            timeType='endTime'
+            value={row.original.endTime}
+            onChange={updateTime}
+          />
+        )
+      },
     },
   ]
 
@@ -198,9 +225,9 @@ export const TeamLocationsContent = () => {
         <Button
           variant='ghost'
           className='text-muted-foreground'
-          onClick={onNewLocation}
+          onClick={onNewShiftType}
         >
-          <Plus /> New location
+          <Plus /> New shift type
         </Button>
       </div>
     </div>
