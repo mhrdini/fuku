@@ -1,6 +1,10 @@
+'use client'
+
 import { JSX, memo, useState } from 'react'
 import { Input } from '@fuku/ui/components'
 import { Getter } from '@tanstack/react-table'
+import { TRPCClientError } from '@trpc/client'
+import { toast } from 'sonner'
 
 import { TRPCUpdatePayload } from '~/lib/db'
 
@@ -51,8 +55,16 @@ function EditableCellInner<
       } as TRPCUpdatePayload<DataType>
 
       await onSave(payload)
-    } finally {
+
       setEditingCell(null)
+    } catch (error) {
+      if (error instanceof TRPCClientError) {
+        const zodError = error.data?.zodError
+        const issue = zodError?.fieldErrors?.[columnName as string]?.[0]
+        toast.error(issue ?? 'Invalid value. Please try again.')
+      } else {
+        toast.error('Something went wrong. Please try again.')
+      }
     }
   }
 
