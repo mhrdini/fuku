@@ -153,7 +153,7 @@ export const SummarySection = () => {
           <Badge variant='outline'>
             <span>{pg.name}</span>
           </Badge>
-          <Badge variant='secondary'>${pg.baseRate.toFixed(2)}/hr</Badge>
+          <Badge variant='secondary'>{pg.baseRate.toFixed(2)}</Badge>
         </div>
       )}
       manageButtonText='Manage'
