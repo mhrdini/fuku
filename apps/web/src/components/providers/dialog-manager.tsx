@@ -10,9 +10,10 @@ import {
 import { DialogId } from '~/lib/dialog'
 import { useDialogStore } from '~/store/dialog'
 import { RemoveLocationAlertDialog } from '../dashboard/team/locations/remove-location-alert-dialog'
-import { AddMemberFormDialog } from '../dashboard/team/members/add-member-form-dialog'
-import { EditMemberFormDialog } from '../dashboard/team/members/edit-member-form-dialog'
+import { CreateMemberFormDialog } from '../dashboard/team/members/create-member-form-dialog'
 import { RemoveMemberAlertDialog } from '../dashboard/team/members/remove-member-alert-dialog'
+import { UpdateMemberFormDialog } from '../dashboard/team/members/update-member-form-dialog'
+import { RemoveShiftTypeAlertDialog } from '../dashboard/team/shift-types/remove-shift-type-alert-dialog'
 
 export const DialogManager = () => {
   const { open, id, isAlert, closeDialog } = useDialogStore()
@@ -25,14 +26,15 @@ export const DialogManager = () => {
     <>
       <Dialog open={open && !isAlert} onOpenChange={handleClose}>
         <DialogContent>
-          {id === DialogId.ADD_TEAM_MEMBER && <AddMemberFormDialog />}
-          {id === DialogId.EDIT_TEAM_MEMBER && <EditMemberFormDialog />}
+          {id === DialogId.CREATE_TEAM_MEMBER && <CreateMemberFormDialog />}
+          {id === DialogId.UPDATE_TEAM_MEMBER && <UpdateMemberFormDialog />}
         </DialogContent>
       </Dialog>
       <AlertDialog open={open && isAlert} onOpenChange={closeDialog}>
         <AlertDialogContent>
           {id === DialogId.REMOVE_TEAM_MEMBER && <RemoveMemberAlertDialog />}
           {id === DialogId.REMOVE_LOCATION && <RemoveLocationAlertDialog />}
+          {id === DialogId.REMOVE_SHIFT_TYPE && <RemoveShiftTypeAlertDialog />}
         </AlertDialogContent>
       </AlertDialog>
     </>

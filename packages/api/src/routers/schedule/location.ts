@@ -29,12 +29,12 @@ export const locationRouter = {
       z.object({
         teamId: z.string(),
         name: z.string(),
-        address: z.string().nullable().optional(),
-        color: z.string().nullable().optional(),
+        address: z.string().nullish(),
+        color: z.string().nullish(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const newLocation = await ctx.db.location.create({
+      const created = await ctx.db.location.create({
         data: {
           teamId: input.teamId,
           name: input.name,
@@ -42,15 +42,15 @@ export const locationRouter = {
           color: input.color,
         },
       })
-      return newLocation
+      return created
     }),
   update: protectedProcedure
     .input(
       z.object({
         id: z.string(),
         name: z.string().optional(),
-        address: z.string().nullable().optional(),
-        color: z.string().nullable().optional(),
+        address: z.string().nullish(),
+        color: z.string().nullish(),
       }),
     )
     .mutation(async ({ input, ctx }) => {

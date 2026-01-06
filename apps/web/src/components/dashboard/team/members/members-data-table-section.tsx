@@ -54,7 +54,7 @@ import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 
-import './add-member-form-dialog'
+import './create-member-form-dialog'
 
 import { DialogId } from '~/lib/dialog'
 
@@ -79,8 +79,8 @@ export function MembersDataTableSection({
 
   const { openDialog } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
-  const onAddMemberClick = () => {
-    openDialog({ id: DialogId.ADD_TEAM_MEMBER })
+  const onCreateMember = () => {
+    openDialog({ id: DialogId.CREATE_TEAM_MEMBER })
   }
 
   const trpc = useTRPC()
@@ -247,13 +247,13 @@ export function MembersDataTableSection({
         <div className='ml-auto flex gap-2'>{tableActions}</div>
       </div>
       <div className='table-container'>
-        <Table className='table'>
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map(header => {
                   return (
-                    <TableHead className='table-head' key={header.id}>
+                    <TableHead key={header.id}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -274,7 +274,7 @@ export function MembersDataTableSection({
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id} className='table-cell'>
+                    <TableCell key={cell.id} className='cursor-default'>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -300,7 +300,7 @@ export function MembersDataTableSection({
         <Button
           variant='ghost'
           className='text-muted-foreground'
-          onClick={onAddMemberClick}
+          onClick={onCreateMember}
         >
           <Plus />
           <span className='hidden lg:inline'>New team member</span>

@@ -1,7 +1,7 @@
 export const SheetId = {
-  ADD_LOCATION: 'addLocation',
-  ADD_SHIFT_TYPE: 'addShiftType',
-  ADD_PAY_GRADE: 'addPayGrade',
+  CREATE_LOCATION: 'createLocation',
+  CREATE_SHIFT_TYPE: 'createShiftType',
+  CREATE_PAY_GRADE: 'createPayGrade',
 } as const
 
 export type SheetId = (typeof SheetId)[keyof typeof SheetId]

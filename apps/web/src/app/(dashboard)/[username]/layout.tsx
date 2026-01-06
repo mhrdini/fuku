@@ -29,8 +29,8 @@ export default async function DashboardLayout({
 
   return (
     <div className='min-h-screen w-full'>
-      <SessionProvider session={session}>
-        <HydrateClient>
+      <HydrateClient>
+        <SessionProvider session={session}>
           <SheetManager />
           <DialogManager />
           <SidebarProvider>
@@ -40,8 +40,8 @@ export default async function DashboardLayout({
               <DashboardContentLayout>{children}</DashboardContentLayout>
             </div>
           </SidebarProvider>
-        </HydrateClient>
-      </SessionProvider>
+        </SessionProvider>
+      </HydrateClient>
     </div>
   )
 }

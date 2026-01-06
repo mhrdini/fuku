@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { LocationInputSchema } from '@fuku/db/schemas'
+import { ShiftTypeInputSchema } from '@fuku/db/schemas'
 import {
   Button,
   Field,
@@ -24,29 +24,29 @@ import { useDashboardStore } from '~/store/dashboard'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
-const LocationCreateFormSchema = LocationInputSchema.extend({
-  teamId: z.string(),
-  name: z.string().min(1, { error: 'invalid_location_name' }),
-  address: z.string().optional(),
-  color: z.string().optional().nullable(),
+const ShiftTypeCreateFormSchema = ShiftTypeInputSchema.extend({
+  name: z.string().min(1, { error: 'invalid_shift_type_name' }),
+  description: z.string().optional(),
+  color: z.string().optional(),
 }).omit({
   shiftAssignments: true,
 })
 
-type LocationCreateFormType = z.infer<typeof LocationCreateFormSchema>
+type ShiftTypeCreateFormType = z.infer<typeof ShiftTypeCreateFormSchema>
 
-export const AddLocationFormSheet = () => {
-  const title = 'Add New Location'
+export const CreateShiftTypeFormSheet = () => {
+  const title = 'Create New Shift Type'
   const { closeSheet } = useSheetStore()
 
   const { currentTeamId } = useDashboardStore()
-  const form = useForm<LocationCreateFormType>({
+  const form = useForm<ShiftTypeCreateFormType>({
     defaultValues: {
       teamId: currentTeamId || '',
       name: '',
-      address: '',
+      startTime: '09:00',
+      endTime: '17:00',
     },
-    resolver: zodResolver(LocationCreateFormSchema),
+    resolver: zodResolver(ShiftTypeCreateFormSchema),
   })
 
   useEffect(() => {
@@ -57,8 +57,8 @@ export const AddLocationFormSheet = () => {
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-  const { mutateAsync: addLocation, isPending } = useMutation({
-    ...trpc.location.create.mutationOptions(),
+  const { mutateAsync: createShiftType, isPending } = useMutation({
+    ...trpc.shiftType.create.mutationOptions(),
     onError: error => {
       toast.error(
         `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
@@ -67,29 +67,28 @@ export const AddLocationFormSheet = () => {
     onSuccess: data => {
       closeSheet()
       queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
+        ...trpc.shiftType.getAllByTeam.queryOptions({
           teamId: currentTeamId!,
         }),
       })
-      toast.success(`${data.name} has been added.`)
+      toast.success(`${data.name} has been created.`)
     },
   })
 
-  const onSubmit = async (data: LocationCreateFormType) => {
+  const onSubmit = async (data: ShiftTypeCreateFormType) => {
     try {
-      await addLocation(data)
+      await createShiftType(data)
     } catch {
       // handled in onError
     }
   }
-
   return (
     <>
       <SheetHeader>
         <SheetTitle>{title}</SheetTitle>
       </SheetHeader>
       <form
-        id='form-add-location'
+        id='form-create-shift-tyoe'
         className='flex flex-col gap-4 h-full'
         onSubmit={form.handleSubmit(onSubmit)}
       >
@@ -100,14 +99,14 @@ export const AddLocationFormSheet = () => {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor='form-add-location-name'>
-                    Location Name
+                  <FieldLabel htmlFor='form-create-shift-type-name'>
+                    Name
                   </FieldLabel>
                   <Input
                     {...field}
-                    id='form-add-location-name'
+                    id='form-create-shift-type-name'
                     aria-invalid={fieldState.invalid}
-                    placeholder='e.g. Main Office'
+                    placeholder='e.g. Morning Shift'
                     autoComplete='off'
                   />
                   {fieldState.invalid && (
@@ -117,19 +116,44 @@ export const AddLocationFormSheet = () => {
               )}
             />
             <Controller
-              name='address'
+              name='startTime'
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor='form-add-location-address'>
-                    Address
+                  <FieldLabel htmlFor='form-create-shift-type-start-time'>
+                    Start Time
                   </FieldLabel>
                   <Input
                     {...field}
-                    id='form-add-location-address'
+                    type='time'
+                    id='form-create-shift-type-start-time'
                     aria-invalid={fieldState.invalid}
-                    placeholder='e.g. 123 Main St, City, Country'
+                    placeholder='09:00'
                     autoComplete='off'
+                    className='appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              name='endTime'
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor='form-create-shift-type-end-time'>
+                    End Time
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    type='time'
+                    id='form-create-shift-type-end-time'
+                    aria-invalid={fieldState.invalid}
+                    placeholder='17:00'
+                    autoComplete='off'
+                    className='appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -141,7 +165,7 @@ export const AddLocationFormSheet = () => {
         </FieldSet>
         <SheetFooter>
           <Button disabled={isPending}>
-            {isPending ? <Spinner /> : 'Add location'}
+            {isPending ? <Spinner /> : 'Create shift type'}
           </Button>
           <SheetClose asChild>
             <Button variant='outline' disabled={isPending}>

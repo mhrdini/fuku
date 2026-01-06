@@ -55,14 +55,14 @@ export default function TeamMembersContent() {
     enabled: !!currentTeamId,
   })
 
-  const onEditMemberClick = useCallback((id: string) => {
+  const onUpdateMember = useCallback((id: string) => {
     openDialog({
-      id: DialogId.EDIT_TEAM_MEMBER,
+      id: DialogId.UPDATE_TEAM_MEMBER,
       editingId: id,
     })
   }, [])
 
-  const onRemoveMemberClick = useCallback((id: string) => {
+  const onRemoveMember = useCallback((id: string) => {
     openAlertDialog({
       id: DialogId.REMOVE_TEAM_MEMBER,
       editingId: id,
@@ -92,16 +92,16 @@ export default function TeamMembersContent() {
               <DropdownMenuContent align='start'>
                 <DropdownMenuItem
                   onClick={() => {
-                    onEditMemberClick(teamMember.id)
+                    onUpdateMember(teamMember.id)
                   }}
                 >
-                  <Pencil /> Edit
+                  <Pencil /> Update
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant='destructive'
                   onClick={() => {
-                    onRemoveMemberClick(teamMember.id)
+                    onRemoveMember(teamMember.id)
                   }}
                 >
                   <Trash /> Remove

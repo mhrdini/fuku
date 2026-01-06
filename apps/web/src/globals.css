@@ -16,15 +16,15 @@
     @apply overflow-hidden rounded-md border;
   }
 
-  [data-slot='table'].table {
+  table[data-slot='table'] {
     @apply w-full table-auto border-collapse;
   }
 
-  [data-slot='table-head'].table-head {
+  thead[data-slot='table-head'] {
     @apply first:w-0 first:whitespace-nowrap;
   }
 
-  [data-slot='table-cell'].table-cell {
+  td[data-slot='table-cell'] {
     @apply relative first:w-0;
   }
 

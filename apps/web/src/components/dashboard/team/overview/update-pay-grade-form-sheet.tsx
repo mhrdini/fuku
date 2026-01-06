@@ -1,6 +1,6 @@
 import { SheetHeader, SheetTitle } from '@fuku/ui/components'
 
-export const EditPayGradeFormSheet = () => {
+export const UpdatePayGradeFormSheet = () => {
   const title = 'Pay Grades'
 
   return (

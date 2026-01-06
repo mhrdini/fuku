@@ -56,7 +56,7 @@ const TeamMemberCreateFormSchema = TeamMemberInputSchema.extend({
 
 type TeamMemberCreateFormType = z.infer<typeof TeamMemberCreateFormSchema>
 
-export const AddMemberFormDialog = () => {
+export const CreateMemberFormDialog = () => {
   const { currentTeamId } = useDashboardStore()
 
   const { id, closeDialog } = useDialogStore()
@@ -72,7 +72,7 @@ export const AddMemberFormDialog = () => {
     enabled: !!currentTeamId,
   })
 
-  const { mutateAsync: addMember, isPending } = useMutation({
+  const { mutateAsync: createMember, isPending } = useMutation({
     ...trpc.teamMember.create.mutationOptions(),
     onError: error => {
       toast.error(
@@ -87,7 +87,7 @@ export const AddMemberFormDialog = () => {
         }),
       })
       toast.success(
-        `${data.givenNames} ${data.familyName} has been added to the team.`,
+        `${data.givenNames} ${data.familyName} has been created to the team.`,
       )
     },
   })
@@ -105,7 +105,7 @@ export const AddMemberFormDialog = () => {
   })
 
   useEffect(() => {
-    if (id === DialogId.ADD_TEAM_MEMBER && currentTeamId) {
+    if (id === DialogId.CREATE_TEAM_MEMBER && currentTeamId) {
       form.reset(
         {
           givenNames: '',
@@ -126,7 +126,7 @@ export const AddMemberFormDialog = () => {
       return
     }
     try {
-      await addMember(data)
+      await createMember(data)
     } catch {
       // handled in onError
     }
@@ -141,8 +141,8 @@ export const AddMemberFormDialog = () => {
   return (
     <>
       <DialogTitle>New Team Member</DialogTitle>
-      <FieldDescription>Add a new member to your team.</FieldDescription>
-      <form id='form-add-member' onSubmit={form.handleSubmit(onSubmit)}>
+      <FieldDescription>Create a new member to your team.</FieldDescription>
+      <form id='form-create-member' onSubmit={form.handleSubmit(onSubmit)}>
         <FieldSet>
           <FieldGroup>
             <Controller
@@ -150,12 +150,12 @@ export const AddMemberFormDialog = () => {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor='form-add-member-given-names'>
+                  <FieldLabel htmlFor='form-create-member-given-names'>
                     Given Name(s)
                   </FieldLabel>
                   <Input
                     {...field}
-                    id='form-add-member-given-names'
+                    id='form-create-member-given-names'
                     aria-invalid={fieldState.invalid}
                     placeholder='Given Name(s)'
                     autoComplete='off'
@@ -171,12 +171,12 @@ export const AddMemberFormDialog = () => {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor='form-add-member-family-name'>
+                  <FieldLabel htmlFor='form-create-member-family-name'>
                     Last Name
                   </FieldLabel>
                   <Input
                     {...field}
-                    id='form-add-member-family-name'
+                    id='form-create-member-family-name'
                     aria-invalid={fieldState.invalid}
                     placeholder='Last Name'
                     autoComplete='off'
@@ -197,13 +197,13 @@ export const AddMemberFormDialog = () => {
                     data-invalid={fieldState.invalid}
                     className='col-span-2 sm:col-span-2'
                   >
-                    <FieldLabel htmlFor='form-add-member-pay-grade-id'>
+                    <FieldLabel htmlFor='form-create-member-pay-grade-id'>
                       Pay Grade
                     </FieldLabel>
                     <Popover open={payGradeOpen} onOpenChange={setPayGradeOpen}>
                       <PopoverTrigger asChild>
                         <Button
-                          id='form-add-member-pay-grade-id'
+                          id='form-create-member-pay-grade-id'
                           variant='outline'
                           role='combobox'
                           className='justify-between'
@@ -255,11 +255,11 @@ export const AddMemberFormDialog = () => {
                 )}
               />
               <Field className='col-span-1'>
-                <FieldLabel htmlFor='form-add-member-base-rate'>
+                <FieldLabel htmlFor='form-create-member-base-rate'>
                   Base Rate
                 </FieldLabel>
                 <Button
-                  id='form-add-member-base-rate'
+                  id='form-create-member-base-rate'
                   variant='outline'
                   disabled
                   className='text-justify items-start justify-start disabled:opacity-100'
@@ -280,12 +280,12 @@ export const AddMemberFormDialog = () => {
                     data-invalid={fieldState.invalid}
                     className='col-span-1'
                   >
-                    <FieldLabel htmlFor='form-add-member-rate-multiplier'>
+                    <FieldLabel htmlFor='form-create-member-rate-multiplier'>
                       Multiplier
                     </FieldLabel>
                     <Input
                       {...field}
-                      id='form-add-member-rate-multiplier'
+                      id='form-create-member-rate-multiplier'
                       type='number'
                       step='0.01'
                       min='0'
@@ -313,12 +313,12 @@ export const AddMemberFormDialog = () => {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field>
-                  <FieldLabel htmlFor='form-add-member-username'>
+                  <FieldLabel htmlFor='form-create-member-username'>
                     Linked Account
                   </FieldLabel>
                   <Input
                     {...field}
-                    id='form-add-member-username'
+                    id='form-create-member-username'
                     aria-invalid={fieldState.invalid}
                     placeholder='Username (optional)'
                   />
@@ -340,7 +340,11 @@ export const AddMemberFormDialog = () => {
               ) : (
                 <DialogClose asChild>{cancelButton}</DialogClose>
               )}
-              <Button type='submit' form='form-add-member' disabled={isPending}>
+              <Button
+                type='submit'
+                form='form-create-member'
+                disabled={isPending}
+              >
                 {isPending ? <Spinner /> : 'Create'}
               </Button>
             </Field>

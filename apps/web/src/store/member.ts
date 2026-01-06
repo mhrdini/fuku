@@ -4,8 +4,8 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 type TeamMemberStore = {
   payGradeOpen: boolean
   setPayGradeOpen: (open: boolean) => void
-  addDialogOpen: boolean
-  setAddDialogOpen: (open: boolean) => void
+  createDialogOpen: boolean
+  setCreateDialogOpen: (open: boolean) => void
   editDialogOpen: boolean
   setEditDialogOpen: (open: boolean) => void
   removeDialogOpen: boolean
@@ -19,8 +19,8 @@ export const useTeamMemberStore = create(
     set => ({
       payGradeOpen: false,
       setPayGradeOpen: (open: boolean) => set({ payGradeOpen: open }),
-      addDialogOpen: false,
-      setAddDialogOpen: (open: boolean) => set({ addDialogOpen: open }),
+      createDialogOpen: false,
+      setCreateDialogOpen: (open: boolean) => set({ createDialogOpen: open }),
       editDialogOpen: false,
       setEditDialogOpen: (open: boolean) => set({ editDialogOpen: open }),
       removeDialogOpen: false,

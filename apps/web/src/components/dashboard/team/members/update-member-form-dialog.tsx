@@ -37,12 +37,12 @@ import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 import { DiscardChangesAlertDialogContent } from '../../discard-changes-alert-dialog'
 
-const TeamMemberEditFormSchema = TeamMemberSchema.extend({
+const TeamMemberUpdateFormSchema = TeamMemberSchema.extend({
   username: z.string().optional(),
 })
-type TeamMemberEditFormType = z.infer<typeof TeamMemberEditFormSchema>
+type TeamMemberUpdateFormType = z.infer<typeof TeamMemberUpdateFormSchema>
 
-export const EditMemberFormDialog = () => {
+export const UpdateMemberFormDialog = () => {
   const { currentTeamId } = useDashboardStore()
 
   const { editingId: currentTeamMemberId, closeDialog } = useDialogStore()
@@ -70,7 +70,7 @@ export const EditMemberFormDialog = () => {
     enabled: !!currentTeamId,
   })
 
-  const form = useForm<TeamMemberEditFormType>({
+  const form = useForm<TeamMemberUpdateFormType>({
     defaultValues: {
       givenNames: '',
       familyName: '',
@@ -78,7 +78,7 @@ export const EditMemberFormDialog = () => {
       rateMultiplier: 1,
       username: '',
     },
-    resolver: zodResolver(TeamMemberEditFormSchema),
+    resolver: zodResolver(TeamMemberUpdateFormSchema),
   })
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export const EditMemberFormDialog = () => {
     }
   }, [teamMemberFetched, teamMember])
 
-  const { mutateAsync: editMember } = useMutation({
+  const { mutateAsync: updateMember } = useMutation({
     ...trpc.teamMember.update.mutationOptions(),
     onError: error => {
       toast.error(
@@ -112,13 +112,13 @@ export const EditMemberFormDialog = () => {
     },
   })
 
-  const onSubmit = async (data: TeamMemberEditFormType) => {
+  const onSubmit = async (data: TeamMemberUpdateFormType) => {
     if (!form.formState.isDirty) {
       form.setError('root', { message: 'There are no changes to save.' })
       return
     }
     try {
-      await editMember(data)
+      await updateMember(data)
     } catch {
       // Handled in onError
     }
@@ -138,14 +138,14 @@ export const EditMemberFormDialog = () => {
     <>
       {!teamMember || !payGrades ? (
         <>
-          <DialogTitle>Edit Team Member</DialogTitle>
+          <DialogTitle>Update Team Member</DialogTitle>
           <Spinner />
         </>
       ) : (
         <>
-          <DialogTitle>Edit Team Member</DialogTitle>
+          <DialogTitle>Update Team Member</DialogTitle>
           <form
-            id='form-edit-member'
+            id='form-update-member'
             onSubmit={form.handleSubmit(onSubmit, onError)}
           >
             <FieldSet
@@ -159,12 +159,12 @@ export const EditMemberFormDialog = () => {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor='form-edit-member-given-names'>
+                      <FieldLabel htmlFor='form-update-member-given-names'>
                         Given Name(s)
                       </FieldLabel>
                       <Input
                         {...field}
-                        id='form-edit-member-given-names'
+                        id='form-update-member-given-names'
                         aria-invalid={fieldState.invalid}
                         placeholder='Given Name(s)'
                         autoComplete='off'
@@ -180,12 +180,12 @@ export const EditMemberFormDialog = () => {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor='form-edit-member-family-name'>
+                      <FieldLabel htmlFor='form-update-member-family-name'>
                         Last Name
                       </FieldLabel>
                       <Input
                         {...field}
-                        id='form-edit-member-family-name'
+                        id='form-update-member-family-name'
                         aria-invalid={fieldState.invalid}
                         placeholder='Last Name'
                         autoComplete='off'
@@ -206,7 +206,7 @@ export const EditMemberFormDialog = () => {
                         data-invalid={fieldState.invalid}
                         className='col-span-2 sm:col-span-2'
                       >
-                        <FieldLabel htmlFor='form-edit-member-pay-grade-id'>
+                        <FieldLabel htmlFor='form-update-member-pay-grade-id'>
                           Pay Grade
                         </FieldLabel>
                         <Popover
@@ -215,7 +215,7 @@ export const EditMemberFormDialog = () => {
                         >
                           <PopoverTrigger asChild>
                             <Button
-                              id='form-edit-member-pay-grade-id'
+                              id='form-update-member-pay-grade-id'
                               variant='outline'
                               role='combobox'
                               className='justify-between'
@@ -277,11 +277,11 @@ export const EditMemberFormDialog = () => {
                     )}
                   />
                   <Field className='col-span-1'>
-                    <FieldLabel htmlFor='form-edit-member-base-rate'>
+                    <FieldLabel htmlFor='form-update-member-base-rate'>
                       Base Rate
                     </FieldLabel>
                     <Button
-                      id='form-edit-member-base-rate'
+                      id='form-update-member-base-rate'
                       variant='outline'
                       disabled
                       className='text-justify items-start justify-start disabled:opacity-100'
@@ -303,12 +303,12 @@ export const EditMemberFormDialog = () => {
                         data-invalid={fieldState.invalid}
                         className='col-span-1'
                       >
-                        <FieldLabel htmlFor='form-edit-member-rate-multiplier'>
+                        <FieldLabel htmlFor='form-update-member-rate-multiplier'>
                           Multiplier
                         </FieldLabel>
                         <Input
                           {...field}
-                          id='form-edit-member-rate-multiplier'
+                          id='form-update-member-rate-multiplier'
                           type='number'
                           step='0.01'
                           min='0'
@@ -336,12 +336,12 @@ export const EditMemberFormDialog = () => {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field>
-                      <FieldLabel htmlFor='form-edit-member-username'>
+                      <FieldLabel htmlFor='form-update-member-username'>
                         Linked Account
                       </FieldLabel>
                       <Input
                         {...field}
-                        id='form-edit-member-username'
+                        id='form-update-member-username'
                         aria-invalid={fieldState.invalid}
                         placeholder='Username (optional)'
                       />
@@ -368,7 +368,7 @@ export const EditMemberFormDialog = () => {
                   </AlertDialog>
                   <Button
                     type='submit'
-                    form='form-edit-member'
+                    form='form-update-member'
                     disabled={isPending}
                   >
                     {isPending ? <Spinner /> : 'Confirm'}

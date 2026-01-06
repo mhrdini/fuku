@@ -56,21 +56,21 @@ export const SummarySection = () => {
     ],
   })
 
-  const onManageMembersClick = () => {
+  const onManageMembers = () => {
     router.push(`/${session?.user.username}/team/${currentTeamSlug}/members`)
   }
 
-  const onManageLocationsClick = () => {
+  const onManageLocations = () => {
     router.push(`/${session?.user.username}/team/${currentTeamSlug}/locations`)
   }
 
-  const onManageShiftTypesClick = () => {
+  const onManageShiftTypes = () => {
     router.push(
       `/${session?.user.username}/team/${currentTeamSlug}/shift-types`,
     )
   }
 
-  const onManagePayGradesClick = () => {
+  const onManagePayGrades = () => {
     router.push(`/${session?.user.username}/team/${currentTeamSlug}/pay-grades`)
   }
 
@@ -97,7 +97,7 @@ export const SummarySection = () => {
         </div>
       )}
       manageButtonText='Manage'
-      onManageClick={onManageMembersClick}
+      onManage={onManageMembers}
     />
   )
 
@@ -117,7 +117,7 @@ export const SummarySection = () => {
         </div>
       )}
       manageButtonText='Manage'
-      onManageClick={onManageLocationsClick}
+      onManage={onManageLocations}
     />
   )
 
@@ -135,20 +135,12 @@ export const SummarySection = () => {
             <span>{st.name}</span>
           </Badge>
           <div className='text-sm text-muted-foreground'>
-            {Intl.DateTimeFormat('en-GB', {
-              hour: '2-digit',
-              minute: '2-digit',
-            }).format(st.startTime)}{' '}
-            -{' '}
-            {Intl.DateTimeFormat('en-GB', {
-              hour: '2-digit',
-              minute: '2-digit',
-            }).format(st.endTime)}
+            {st.startTime} - {st.endTime}
           </div>
         </div>
       )}
       manageButtonText='Manage'
-      onManageClick={onManageShiftTypesClick}
+      onManage={onManageShiftTypes}
     />
   )
 
@@ -165,7 +157,7 @@ export const SummarySection = () => {
         </div>
       )}
       manageButtonText='Manage'
-      onManageClick={onManagePayGradesClick}
+      onManage={onManagePayGrades}
     />
   )
 
@@ -188,7 +180,7 @@ interface SummaryCardProps<T> {
   renderItem: (item: T) => React.ReactNode
   description?: string
   manageButtonText: string
-  onManageClick?: () => void
+  onManage?: () => void
 }
 
 function SummaryCard<T>({
@@ -197,7 +189,7 @@ function SummaryCard<T>({
   renderItem,
   description,
   manageButtonText,
-  onManageClick,
+  onManage,
 }: SummaryCardProps<T>) {
   return (
     <Card className='w-[200px] md:w-1/4 border-none p-0 gap-4 *:first:mt-4'>
@@ -233,7 +225,7 @@ function SummaryCard<T>({
       <div className='p-0 mt-auto border-t'>
         <Button
           className='w-full rounded-b-xl rounded-t-none'
-          onClick={onManageClick}
+          onClick={onManage}
           variant='ghost'
         >
           {manageButtonText}

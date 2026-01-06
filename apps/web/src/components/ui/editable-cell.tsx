@@ -16,6 +16,7 @@ type EditableCellProps<
   setEditingCell: (cell: { rowId: string; columnKey: string } | null) => void
   onSave: (update: TRPCUpdatePayload<DataType>) => Promise<ReturnType>
   isUpdating: boolean
+  children?: React.ReactNode
 }
 
 function EditableCellInner<
@@ -30,6 +31,7 @@ function EditableCellInner<
   setEditingCell,
   onSave,
   isUpdating,
+  children,
 }: EditableCellProps<DataType, ColumnKey, ReturnType>) {
   type ValueType = DataType[ColumnKey]
   const [value, setValue] = useState<ValueType>(row[columnName])
@@ -46,7 +48,7 @@ function EditableCellInner<
     try {
       const payload: TRPCUpdatePayload<DataType> = {
         id: row.id,
-        [columnName]: value === null ? undefined : value,
+        [columnName]: value,
       } as TRPCUpdatePayload<DataType>
       await onSave(payload)
     } finally {
@@ -62,7 +64,9 @@ function EditableCellInner<
   // TODO: Implement optimistic update to stop split second flicker when saving
   return (
     <div className='relative h-5 w-full min-w-0 overflow-hidden flex items-center'>
-      {isEditing ? (
+      {children ? (
+        children
+      ) : (
         <Input
           className='absolute inset-0 w-full h-full min-w-0 leading-none text-sm p-0 m-0 border-none rounded-none focus-visible:ring-0 shadow-none'
           value={String(value ?? '')}
@@ -70,16 +74,6 @@ function EditableCellInner<
           onChange={e => setValue(e.target.value as unknown as ValueType)}
           onKeyDown={handleKeyDown}
         />
-      ) : (
-        <div
-          className='cursor-text text-sm w-full h-full truncate block'
-          onClick={e => {
-            e.stopPropagation()
-            setEditingCell({ rowId: row.id, columnKey: columnName as string })
-          }}
-        >
-          {isEditing && isUpdating ? value : renderValue()}
-        </div>
       )}
     </div>
   )
