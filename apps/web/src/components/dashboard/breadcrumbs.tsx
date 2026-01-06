@@ -21,21 +21,30 @@ export function Breadcrumbs() {
   const params = useParams()
   const username = params?.username as string
   const { currentTeamSlug } = useDashboardStore()
-
+  const session = useSession()
+  const pathname = usePathname()
+  const segments = pathname.split('/').filter(Boolean)
   const trpc = useTRPC()
 
-  const { data: team, isPending } = useQuery({
-    ...trpc.team.getBySlug.queryOptions({ slug: currentTeamSlug! }),
+  const { data: team, isFetching } = useQuery({
+    ...trpc.team.getBySlug.queryOptions({ slug: currentTeamSlug ?? '' }),
     enabled: !!currentTeamSlug,
   })
 
-  const pathname = usePathname()
-  const segments = pathname.split('/').filter(Boolean)
-
   const crumbs = useMemo(() => {
+    const length = segments.length - 1
+
     return segments
       .map((segment, idx) => {
-        const href = '/' + segments.slice(0, idx + 1).join('/')
+        if (length > MAX_VISIBLE && idx !== 0 && idx < length - MAX_TRAILING) {
+          return idx === 1 ? '…' : null
+        }
+        return segment
+      })
+      .filter(Boolean)
+      .map((segment, idx, arr) => {
+        if (!segment) return null
+        if (segment === '…') return { href: '', label: '…' }
 
         let label = decodeURIComponent(segment)
           .replace(/-/g, ' ')
@@ -55,22 +64,18 @@ export function Breadcrumbs() {
 
         return { href, label }
       })
-      .filter(
-        (crumb): crumb is { href: string; label: string } =>
-          crumb !== null && crumb !== undefined,
-      )
-  }, [segments, team, currentTeamSlug, username])
+      .filter(Boolean) as { href: string; label: string }[]
+  }, [segments, team, currentTeamSlug, session?.user.username])
 
   return (
-    <Breadcrumb className=''>
+    <Breadcrumb>
       <BreadcrumbList>
-        {isPending ? (
+        {isFetching ? (
           <Skeleton className='h-4 w-16' />
         ) : (
           crumbs.map((crumb, idx) => (
             <Fragment key={crumb.href}>
               {idx !== 0 && <BreadcrumbSeparator />}
-
               <BreadcrumbItem>
                 {idx === crumbs.length - 1 || !crumb.href ? (
                   <BreadcrumbPage className='cursor-default'>

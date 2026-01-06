@@ -50,11 +50,11 @@ export function UserAuthForm({
     resolver: zodResolver(isRegister ? registerSchema : loginSchema),
   })
 
-  const onLoginPromptClick = () => {
+  const onLoginClick = () => {
     router.push('/login')
   }
 
-  const onRegisterPromptClick = () => {
+  const onRegisterClick = () => {
     router.push('/register')
   }
 
@@ -193,7 +193,7 @@ export function UserAuthForm({
             {isRegister && (
               <Button
                 type='button'
-                onClick={onLoginPromptClick}
+                onClick={onLoginClick}
                 variant='link'
                 className='underline'
               >
@@ -203,7 +203,7 @@ export function UserAuthForm({
             {!isRegister && (
               <Button
                 type='button'
-                onClick={onRegisterPromptClick}
+                onClick={onRegisterClick}
                 variant='secondary'
                 className='underline'
               >

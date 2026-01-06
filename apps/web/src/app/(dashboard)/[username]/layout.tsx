@@ -27,13 +27,17 @@ export default async function DashboardLayout({
   return (
     <div className='min-h-screen w-full'>
       <HydrateClient>
-        <SidebarProvider>
-          <DashboardSidebar username={username} />
-          <div className='flex flex-1 flex-col'>
-            <DashboardHeader />
-            <DashboardContentLayout>{children}</DashboardContentLayout>
-          </div>
-        </SidebarProvider>
+        <SessionProvider session={session}>
+          <SheetManager />
+          <DialogManager />
+          <SidebarProvider>
+            <DashboardSidebar username={username} />
+            <div className='flex flex-1 flex-col'>
+              <DashboardHeader />
+              <DashboardContentLayout>{children}</DashboardContentLayout>
+            </div>
+          </SidebarProvider>
+        </SessionProvider>
       </HydrateClient>
     </div>
   )

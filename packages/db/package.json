@@ -14,7 +14,7 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev --skip-generate",
     "db:migrate:dev:auto": "prisma migrate dev --name auto --skip-generate",
-    "db:push": "prisma db push --skip-generate",
+    "db:push": "prisma db push",
     "db:seed": "tsx src/seed.ts",
     "db:seed:dev": "tsx src/seed.development.ts",
     "db:reset": "prisma migrate reset",

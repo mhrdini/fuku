@@ -4,3 +4,31 @@
 @theme inline {
   --font-sans: var(--font-geist);
 }
+
+@layer components {
+  main.dashboard {
+    h2 {
+      @apply text-xl font-semibold;
+    }
+  }
+
+  .table-container {
+    @apply overflow-hidden rounded-md border;
+  }
+
+  table[data-slot='table'] {
+    @apply w-full table-auto border-collapse;
+  }
+
+  thead[data-slot='table-head'] {
+    @apply first:w-0 first:whitespace-nowrap;
+  }
+
+  td[data-slot='table-cell'] {
+    @apply relative first:w-0;
+  }
+
+  .table-footer {
+    @apply flex items-center space-x-2;
+  }
+}

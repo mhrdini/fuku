@@ -7,6 +7,7 @@ type DashboardStore = {
   currentTeamId: string | null
   currentTeamSlug: string | null
   setCurrentTeam: ({ id, slug }: { id?: string; slug?: string }) => void
+  reset: () => void
 }
 
 export const useDashboardStore = create(
@@ -21,6 +22,11 @@ export const useDashboardStore = create(
         set({
           ...(id ? { currentTeamId: id } : {}),
           ...(slug ? { currentTeamSlug: slug } : {}),
+        }),
+      reset: () =>
+        set({
+          currentTeamId: null,
+          currentTeamSlug: null,
         }),
     }),
     {
