@@ -319,7 +319,7 @@ export const UpdateMemberFormDialog = () => {
                             field.onChange(
                               e.target.value === ''
                                 ? 0
-                                : parseFloat(e.target.value),
+                                : Number(e.target.value),
                             )
                           }
                         />

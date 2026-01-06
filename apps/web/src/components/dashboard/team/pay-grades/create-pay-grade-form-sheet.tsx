@@ -136,7 +136,7 @@ export const CreatePayGradeFormSheet = () => {
                     autoComplete='off'
                     onChange={e =>
                       field.onChange(
-                        e.target.value === '' ? 0 : parseFloat(e.target.value),
+                        e.target.value === '' ? 0 : Number(e.target.value),
                       )
                     }
                   />
