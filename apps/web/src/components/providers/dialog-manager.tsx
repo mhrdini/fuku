@@ -13,6 +13,7 @@ import { RemoveLocationAlertDialog } from '../dashboard/team/locations/remove-lo
 import { CreateMemberFormDialog } from '../dashboard/team/members/create-member-form-dialog'
 import { RemoveMemberAlertDialog } from '../dashboard/team/members/remove-member-alert-dialog'
 import { UpdateMemberFormDialog } from '../dashboard/team/members/update-member-form-dialog'
+import { RemovePayGradeAlertDialog } from '../dashboard/team/pay-grades/remove-pay-grade-alert-dialog'
 import { RemoveShiftTypeAlertDialog } from '../dashboard/team/shift-types/remove-shift-type-alert-dialog'
 
 export const DialogManager = () => {
@@ -35,6 +36,7 @@ export const DialogManager = () => {
           {id === DialogId.REMOVE_TEAM_MEMBER && <RemoveMemberAlertDialog />}
           {id === DialogId.REMOVE_LOCATION && <RemoveLocationAlertDialog />}
           {id === DialogId.REMOVE_SHIFT_TYPE && <RemoveShiftTypeAlertDialog />}
+          {id === DialogId.REMOVE_PAY_GRADE && <RemovePayGradeAlertDialog />}
         </AlertDialogContent>
       </AlertDialog>
     </>

@@ -5,7 +5,7 @@ import { Sheet, SheetContent } from '@fuku/ui/components'
 import { SheetId } from '~/lib/sheet'
 import { useSheetStore } from '~/store/sheet'
 import { CreateLocationFormSheet } from '../dashboard/team/locations/create-location-form-sheet'
-import { UpdatePayGradeFormSheet } from '../dashboard/team/overview/update-pay-grade-form-sheet'
+import { CreatePayGradeFormSheet } from '../dashboard/team/pay-grades/create-pay-grade-form-sheet'
 import { CreateShiftTypeFormSheet } from '../dashboard/team/shift-types/create-shift-type-form-sheet'
 
 export const SheetManager = () => {
@@ -16,7 +16,7 @@ export const SheetManager = () => {
       <SheetContent side='right'>
         {id === SheetId.CREATE_LOCATION && <CreateLocationFormSheet />}
         {id === SheetId.CREATE_SHIFT_TYPE && <CreateShiftTypeFormSheet />}
-        {id === SheetId.CREATE_PAY_GRADE && <UpdatePayGradeFormSheet />}
+        {id === SheetId.CREATE_PAY_GRADE && <CreatePayGradeFormSheet />}
       </SheetContent>
     </Sheet>
   )

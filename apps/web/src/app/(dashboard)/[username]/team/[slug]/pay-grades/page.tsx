@@ -1,3 +1,5 @@
+import { TeamPayGradesContent } from '~/components/dashboard/team/pay-grades/content'
+
 export default function TeamPayGradesPage() {
-  return <div>Team Pay Grades Page</div>
+  return <TeamPayGradesContent />
 }

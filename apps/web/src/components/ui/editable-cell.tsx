@@ -26,30 +26,30 @@ function EditableCellInner<
 >({
   row,
   columnName,
-  renderValue,
   editingCell,
   setEditingCell,
   onSave,
-  isUpdating,
   children,
 }: EditableCellProps<DataType, ColumnKey, ReturnType>) {
-  type ValueType = DataType[ColumnKey]
-  const [value, setValue] = useState<ValueType>(row[columnName])
+  const [value, setValue] = useState<string>(
+    row[columnName] == null ? '' : String(row[columnName]),
+  )
 
   const isEditing =
     editingCell?.rowId === row.id && editingCell?.columnKey === columnName
 
   const cancelChanges = () => {
-    setValue(row[columnName])
+    setValue(row[columnName] == null ? '' : String(row[columnName]))
     setEditingCell(null)
   }
 
   const saveChanges = async () => {
     try {
-      const payload: TRPCUpdatePayload<DataType> = {
+      const payload = {
         id: row.id,
-        [columnName]: value,
+        [columnName]: value === '' ? null : value,
       } as TRPCUpdatePayload<DataType>
+
       await onSave(payload)
     } finally {
       setEditingCell(null)
@@ -61,7 +61,6 @@ function EditableCellInner<
     else if (e.key === 'Enter') saveChanges()
   }
 
-  // TODO: Implement optimistic update to stop split second flicker when saving
   return (
     <div className='relative h-5 w-full min-w-0 overflow-hidden flex items-center'>
       {children ? (
@@ -69,9 +68,9 @@ function EditableCellInner<
       ) : (
         <Input
           className='absolute inset-0 w-full h-full min-w-0 leading-none text-sm p-0 m-0 border-none rounded-none focus-visible:ring-0 shadow-none'
-          value={String(value ?? '')}
+          value={value}
           autoFocus
-          onChange={e => setValue(e.target.value as unknown as ValueType)}
+          onChange={e => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
         />
       )}
