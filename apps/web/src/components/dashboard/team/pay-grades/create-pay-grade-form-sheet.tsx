@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { ShiftTypeInputSchema } from '@fuku/db/schemas'
+import { PayGradeInputSchema } from '@fuku/db/schemas'
 import {
   Button,
   Field,
@@ -24,30 +24,31 @@ import { useDashboardStore } from '~/store/dashboard'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
-const ShiftTypeCreateFormSchema = ShiftTypeInputSchema.extend({
-  name: z.string().min(1, { error: 'invalid_shift_type_name' }),
+const PayGradeCreateFormSchema = PayGradeInputSchema.extend({
+  name: z.string().min(1, { error: 'invalid_pay_grade_name' }),
   description: z.string().optional(),
-  color: z.string().optional(),
+  baseRate: z
+    .number({ error: 'invalid_base_rate' })
+    .min(0, { error: 'invalid_base_rate_negative' }),
 }).omit({
-  shiftAssignments: true,
   team: true,
+  teamMembers: true,
 })
 
-type ShiftTypeCreateFormType = z.infer<typeof ShiftTypeCreateFormSchema>
+type PayGradeCreateFormGrade = z.infer<typeof PayGradeCreateFormSchema>
 
-export const CreateShiftTypeFormSheet = () => {
-  const title = 'Create New Shift Type'
+export const CreatePayGradeFormSheet = () => {
+  const title = 'Create New Pay Grade'
   const { closeSheet } = useSheetStore()
 
   const { currentTeamId } = useDashboardStore()
-  const form = useForm<ShiftTypeCreateFormType>({
+  const form = useForm<PayGradeCreateFormGrade>({
     defaultValues: {
       teamId: currentTeamId || '',
       name: '',
-      startTime: '09:00',
-      endTime: '17:00',
+      baseRate: 0,
     },
-    resolver: zodResolver(ShiftTypeCreateFormSchema),
+    resolver: zodResolver(PayGradeCreateFormSchema),
   })
 
   useEffect(() => {
@@ -58,8 +59,8 @@ export const CreateShiftTypeFormSheet = () => {
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-  const { mutateAsync: createShiftType, isPending } = useMutation({
-    ...trpc.shiftType.create.mutationOptions(),
+  const { mutateAsync: createPayGrade, isPending } = useMutation({
+    ...trpc.payGrade.create.mutationOptions(),
     onError: error => {
       toast.error(
         `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
@@ -68,7 +69,7 @@ export const CreateShiftTypeFormSheet = () => {
     onSuccess: data => {
       closeSheet()
       queryClient.invalidateQueries({
-        ...trpc.shiftType.getAllByTeam.queryOptions({
+        ...trpc.payGrade.getAllByTeam.queryOptions({
           teamId: currentTeamId!,
         }),
       })
@@ -76,9 +77,9 @@ export const CreateShiftTypeFormSheet = () => {
     },
   })
 
-  const onSubmit = async (data: ShiftTypeCreateFormType) => {
+  const onSubmit = async (data: PayGradeCreateFormGrade) => {
     try {
-      await createShiftType(data)
+      await createPayGrade(data)
     } catch {
       // handled in onError
     }
@@ -89,7 +90,7 @@ export const CreateShiftTypeFormSheet = () => {
         <SheetTitle>{title}</SheetTitle>
       </SheetHeader>
       <form
-        id='form-create-shift-type'
+        id='form-create-pay-grade'
         className='flex flex-col gap-4 h-full'
         onSubmit={form.handleSubmit(onSubmit)}
       >
@@ -100,14 +101,14 @@ export const CreateShiftTypeFormSheet = () => {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor='form-create-shift-type-name'>
+                  <FieldLabel htmlFor='form-create-pay-grade-name'>
                     Name
                   </FieldLabel>
                   <Input
                     {...field}
-                    id='form-create-shift-type-name'
+                    id='form-create-pay-grade-name'
                     aria-invalid={fieldState.invalid}
-                    placeholder='e.g. Morning Shift'
+                    placeholder='e.g. Morning Pay'
                     autoComplete='off'
                   />
                   {fieldState.invalid && (
@@ -117,44 +118,27 @@ export const CreateShiftTypeFormSheet = () => {
               )}
             />
             <Controller
-              name='startTime'
+              name='baseRate'
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor='form-create-shift-type-start-time'>
-                    Start Time
+                  <FieldLabel htmlFor='form-create-pay-grade-base-rate'>
+                    Base Rate
                   </FieldLabel>
                   <Input
                     {...field}
-                    type='time'
-                    id='form-create-shift-type-start-time'
+                    id='form-create-pay-grade-base-rate'
+                    type='number'
+                    step='0.01'
+                    min='0'
                     aria-invalid={fieldState.invalid}
-                    placeholder='09:00'
+                    placeholder='Base Rate'
                     autoComplete='off'
-                    className='appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name='endTime'
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor='form-create-shift-type-end-time'>
-                    End Time
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    type='time'
-                    id='form-create-shift-type-end-time'
-                    aria-invalid={fieldState.invalid}
-                    placeholder='17:00'
-                    autoComplete='off'
-                    className='appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
+                    onChange={e =>
+                      field.onChange(
+                        e.target.value === '' ? 0 : parseFloat(e.target.value),
+                      )
+                    }
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -166,7 +150,7 @@ export const CreateShiftTypeFormSheet = () => {
         </FieldSet>
         <SheetFooter>
           <Button disabled={isPending}>
-            {isPending ? <Spinner /> : 'Create shift type'}
+            {isPending ? <Spinner /> : 'Create pay grade'}
           </Button>
           <SheetClose asChild>
             <Button variant='outline' disabled={isPending}>

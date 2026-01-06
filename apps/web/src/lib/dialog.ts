@@ -4,6 +4,7 @@ export const DialogId = {
   REMOVE_TEAM_MEMBER: 'removeTeamMember',
   REMOVE_LOCATION: 'removeLocation',
   REMOVE_SHIFT_TYPE: 'removeShiftType',
+  REMOVE_PAY_GRADE: 'removePayGrade',
 } as const
 
 export type DialogId = (typeof DialogId)[keyof typeof DialogId]
