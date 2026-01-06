@@ -2,6 +2,7 @@ import type { TRPCRouterRecord } from '@trpc/server'
 import z from 'zod/v4'
 
 import { protectedProcedure } from '../../trpc'
+import { numberFromInput } from '../../utils/numberFromInput'
 
 export const payGradeRouter = {
   getAllByTeamId: protectedProcedure
@@ -32,7 +33,7 @@ export const payGradeRouter = {
         teamId: z.string(),
         name: z.string(),
         description: z.string().nullish(),
-        baseRate: z.coerce.number(),
+        baseRate: numberFromInput({ min: 0 }),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -54,7 +55,7 @@ export const payGradeRouter = {
         id: z.string(),
         name: z.string().optional(),
         description: z.string().nullish(),
-        baseRate: z.coerce.number().optional(),
+        baseRate: numberFromInput({ min: 0 }).optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
