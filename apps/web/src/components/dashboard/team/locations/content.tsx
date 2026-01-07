@@ -43,19 +43,14 @@ export const TeamLocationsContent = () => {
   } | null>(null)
 
   const { data } = useQuery({
-    ...trpc.location.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
-    enabled: !!currentTeamId,
+    ...trpc.location.list.queryOptions({}),
   })
 
   const { mutateAsync: updateLocation, isPending: isUpdating } = useMutation({
     ...trpc.location.update.mutationOptions(),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        queryKey: trpc.location.list.queryKey(),
       })
     },
   })

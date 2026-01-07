@@ -23,11 +23,9 @@ export default function TeamOverviewContent() {
 
   const { currentTeamSlug } = useDashboardStore()
 
-  const { data: team, isPending } = useQuery({
-    ...trpc.team.getBySlug.queryOptions({
-      slug: currentTeamSlug!,
-    }),
-    enabled: !!currentTeamSlug,
+  const { data: team } = useSuspenseQuery({
+    ...trpc.team.getAllOwned.queryOptions({}),
+    select: teams => teams.find(team => team.id === currentTeamId),
   })
 
   const renderTeamContent = () => (

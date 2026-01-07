@@ -44,19 +44,14 @@ export const TeamShiftTypesContent = () => {
   } | null>(null)
 
   const { data } = useQuery({
-    ...trpc.shiftType.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
-    enabled: !!currentTeamId,
+    ...trpc.shiftType.list.queryOptions({}),
   })
 
   const { mutateAsync: updateShiftType, isPending: isUpdating } = useMutation({
     ...trpc.shiftType.update.mutationOptions(),
     onSuccess: data => {
       queryClient.invalidateQueries({
-        ...trpc.shiftType.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        ...trpc.shiftType.list.queryOptions({}),
       })
     },
   })

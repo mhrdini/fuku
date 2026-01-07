@@ -18,18 +18,15 @@ import { useDashboardStore } from '~/store/dashboard'
 import { useTRPC } from '~/trpc/client'
 
 export function Breadcrumbs() {
-  const params = useParams()
-  const username = params?.username as string
-  const { currentTeamSlug } = useDashboardStore()
   const session = useSession()
   const pathname = usePathname()
   const segments = pathname.split('/').filter(Boolean)
   const trpc = useTRPC()
 
   const { data: team, isFetching } = useQuery({
-    ...trpc.team.getBySlug.queryOptions({ slug: currentTeamSlug ?? '' }),
-    enabled: !!currentTeamSlug,
+    ...trpc.team.getActive.queryOptions(),
   })
+  const { currentTeamSlug } = useDashboardStore()
 
   const crumbs = useMemo(() => {
     const length = segments.length - 1
@@ -50,17 +47,17 @@ export function Breadcrumbs() {
           .replace(/-/g, ' ')
           .replace(/\b\w/g, c => c.toUpperCase())
 
-        if (segment === username) {
-          label = 'Home'
-        }
+        if (segment === session?.user.username) label = 'Home'
+        if (segment === currentTeamSlug && team && team.lastActiveTeam)
+          label = team.lastActiveTeam.name
+        if (segment === 'team') return null
 
-        if (segment === 'team') {
-          return null
-        }
-
-        if (segment === currentTeamSlug && team) {
-          label = team.name
-        }
+        const href =
+          '/' +
+          arr
+            .slice(0, idx + 1)
+            .filter(s => s !== '…')
+            .join('/')
 
         return { href, label }
       })

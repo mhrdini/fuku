@@ -49,10 +49,7 @@ export default function TeamMembersContent() {
   const { openDialog, openAlertDialog } = useDialogStore()
 
   const { data: members, isPending } = useQuery({
-    ...trpc.teamMember.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
-    enabled: !!currentTeamId,
+    ...trpc.teamMember.list.queryOptions({}),
   })
 
   const onUpdateMember = useCallback((id: string) => {
@@ -95,7 +92,7 @@ export default function TeamMembersContent() {
                     onUpdateMember(teamMember.id)
                   }}
                 >
-                  <Pencil /> Update
+                  <Pencil /> Edit
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

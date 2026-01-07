@@ -2,7 +2,7 @@ import { Cog, LucideIcon, UserCircle2, Users } from 'lucide-react'
 
 import { useDashboardStore } from '~/store/dashboard'
 
-export type Group = {
+export type MenuGroup = {
   label: string
   menus: Menu[]
 }
@@ -22,7 +22,7 @@ export type Submenu = {
   icon?: LucideIcon
 }
 
-export const useMenu = (): Group[] => {
+export const useMenu = (): MenuGroup[] => {
   const { currentTeamSlug } = useDashboardStore()
 
   return !currentTeamSlug

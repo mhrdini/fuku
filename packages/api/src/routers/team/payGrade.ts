@@ -1,45 +1,38 @@
 import type { TRPCRouterRecord } from '@trpc/server'
 import z from 'zod/v4'
 
-import { protectedProcedure } from '../../trpc'
+import { teamProcedure } from '../../trpc'
 import { numberFromInput } from '../../utils/numberFromInput'
 
 export const payGradeRouter = {
-  getAllByTeamId: protectedProcedure
-    .input(z.object({ teamId: z.string() }))
-    .query(async ({ input, ctx }) => {
-      const payGrades = await ctx.db.payGrade.findMany({
-        where: { teamId: input.teamId },
-      })
-      return payGrades
-    }),
-  getAllByTeamSlug: protectedProcedure
-    .input(z.object({ teamSlug: z.string() }))
-    .query(async ({ input, ctx }) => {
-      const payGrades = await ctx.db.payGrade.findMany({
+  list: teamProcedure
+    .input(
+      z.object({
+        limit: z.number().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.db.payGrade.findMany({
         where: {
-          team: {
-            slug: input.teamSlug,
-          },
+          teamId: ctx.activeTeamId,
         },
         ...(input.limit && { take: input.limit }),
         orderBy: { createdAt: 'asc' },
       })
-      return payGrades
     }),
-  create: protectedProcedure
+
+  create: teamProcedure
     .input(
       z.object({
-        teamId: z.string(),
         name: z.string(),
         description: z.string().nullish(),
         baseRate: numberFromInput({ min: 0 }),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const created = await ctx.db.payGrade.create({
+      return ctx.db.payGrade.create({
         data: {
-          teamId: input.teamId,
+          teamId: ctx.activeTeamId,
           name: input.name,
           ...(input.description !== undefined
             ? { description: input.description }
@@ -47,9 +40,9 @@ export const payGradeRouter = {
           baseRate: input.baseRate,
         },
       })
-      return created
     }),
-  update: protectedProcedure
+
+  update: teamProcedure
     .input(
       z.object({
         id: z.string(),
@@ -59,8 +52,11 @@ export const payGradeRouter = {
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const updated = await ctx.db.payGrade.update({
-        where: { id: input.id },
+      return ctx.db.payGrade.update({
+        where: {
+          id: input.id,
+          teamId: ctx.activeTeamId,
+        },
         data: {
           ...(input.name !== undefined ? { name: input.name } : {}),
           ...(input.description !== undefined
@@ -69,18 +65,20 @@ export const payGradeRouter = {
           ...(input.baseRate !== undefined ? { baseRate: input.baseRate } : {}),
         },
       })
-      return updated
     }),
-  delete: protectedProcedure
+
+  delete: teamProcedure
     .input(
       z.object({
         id: z.string(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const deleted = await ctx.db.payGrade.delete({
-        where: { id: input.id },
+      return ctx.db.payGrade.delete({
+        where: {
+          id: input.id,
+          teamId: ctx.activeTeamId,
+        },
       })
-      return deleted
     }),
 } satisfies TRPCRouterRecord

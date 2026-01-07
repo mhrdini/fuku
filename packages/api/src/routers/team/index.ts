@@ -11,72 +11,6 @@ import { protectedProcedure } from '../../trpc'
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 8)
 
 export const teamRouter = {
-  getById: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ input, ctx }) => {
-      if (!input.id)
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Team ID is required',
-        })
-
-      const team = await ctx.db.team.findFirst({
-        where: {
-          id: input.id,
-          deletedAt: null,
-          adminUsers: { some: { id: ctx.session.user.id } },
-        },
-        include: {
-          teamMembers: {
-            where: { deletedAt: null },
-            include: {
-              user: { select: { id: true, name: true, username: true } },
-              payGrade: { select: { id: true, name: true, baseRate: true } },
-            },
-          },
-          payGrades: { select: { id: true, name: true, baseRate: true } },
-        },
-      })
-
-      if (!team)
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: `No team with id '${input.id}' found or you do not have permission to view it`,
-        })
-
-      return team
-    }),
-
-  getBySlug: protectedProcedure
-    .input(z.object({ slug: z.string() }))
-    .query(async ({ input, ctx }) => {
-      const team = await ctx.db.team.findFirst({
-        where: {
-          slug: input.slug,
-          deletedAt: null,
-          adminUsers: { some: { id: ctx.session.user.id } },
-        },
-        include: {
-          teamMembers: {
-            where: { deletedAt: null },
-            include: {
-              user: { select: { id: true, name: true, username: true } },
-              payGrade: { select: { id: true, name: true, baseRate: true } },
-            },
-          },
-          payGrades: { select: { id: true, name: true, baseRate: true } },
-        },
-      })
-
-      if (!team)
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: `No team with slug '${input.slug}' found or you do not have permission to view it`,
-        })
-
-      return team
-    }),
-
   getAllOwned: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id
     const teams = await ctx.db.team.findMany({
@@ -171,6 +105,49 @@ export const teamRouter = {
       return members
     }),
 
+  getActive: protectedProcedure.query(({ ctx }) => {
+    return ctx.db.user.findUnique({
+      where: { id: ctx.session.user.id },
+      select: {
+        lastActiveTeam: {
+          select: {
+            id: true,
+            slug: true,
+            name: true,
+            description: true,
+          },
+        },
+      },
+    })
+  }),
+
+  setActive: protectedProcedure
+    .input(z.object({ teamId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id
+      const team = await ctx.db.team.findFirst({
+        where: {
+          id: input.teamId,
+          deletedAt: null,
+          OR: [
+            { adminUsers: { some: { id: userId } } },
+            { teamMembers: { some: { userId, deletedAt: null } } },
+          ],
+        },
+      })
+
+      if (!team) {
+        throw new TRPCError({ code: 'FORBIDDEN' })
+      }
+
+      await ctx.db.user.update({
+        where: { id: userId },
+        data: { lastActiveTeamId: team.id },
+      })
+
+      return team
+    }),
+
   create: protectedProcedure
     .input(TeamInputSchema.pick({ name: true, description: true }))
     .mutation(async ({ input, ctx }) => {
@@ -239,6 +216,18 @@ export const teamRouter = {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: `No team with id '${input.id}' found or you do not have permission to delete it`,
+        })
+      }
+
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: { lastActiveTeamId: true },
+      })
+
+      if (user?.lastActiveTeamId === input.id) {
+        await ctx.db.user.update({
+          where: { id: ctx.session.user.id },
+          data: { lastActiveTeamId: null },
         })
       }
 
