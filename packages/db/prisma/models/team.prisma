@@ -4,16 +4,18 @@ model Team {
   name        String
   description String?
 
-  teamMembers TeamMember[]
-  adminUsers  User[]       @relation("UserTeams")
-  payGrades   PayGrade[]
-  locations   Location[]
-  shiftTypes  ShiftType[]
+  teamMembers     TeamMember[]
+  adminUsers      User[]       @relation("UserTeams")
+  payGrades       PayGrade[]
+  locations       Location[]
+  shiftTypes      ShiftType[]
+  lastActiveUsers User[]       @relation("LastActiveTeamUsers")
 
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
   deletedById String?   @map("deleted_by_id")
+  users       User[]
 
   @@index([deletedAt])
   @@map("team")

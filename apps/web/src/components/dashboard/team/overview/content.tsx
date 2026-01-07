@@ -23,7 +23,7 @@ export default function TeamOverviewContent() {
   const { currentTeamId } = useDashboardStore()
 
   const { data: team } = useSuspenseQuery({
-    ...trpc.team.getAllOwned.queryOptions(),
+    ...trpc.team.getAllOwned.queryOptions({}),
     select: teams => teams.find(team => team.id === currentTeamId),
   })
 

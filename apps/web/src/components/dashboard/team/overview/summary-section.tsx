@@ -41,18 +41,10 @@ export const SummarySection = () => {
     { data: shiftTypes },
   ] = useSuspenseQueries({
     queries: [
-      trpc.teamMember.getAllByTeam.queryOptions({
-        teamId: currentTeamId!,
-      }),
-      trpc.location.getAllByTeam.queryOptions({
-        teamId: currentTeamId!,
-      }),
-      trpc.payGrade.getAllByTeam.queryOptions({
-        teamId: currentTeamId!,
-      }),
-      trpc.shiftType.getAllByTeam.queryOptions({
-        teamId: currentTeamId!,
-      }),
+      trpc.teamMember.list.queryOptions({}),
+      trpc.location.list.queryOptions({}),
+      trpc.payGrade.list.queryOptions({}),
+      trpc.shiftType.list.queryOptions({}),
     ],
   })
 

@@ -69,9 +69,7 @@ export const CreatePayGradeFormSheet = () => {
     onSuccess: data => {
       closeSheet()
       queryClient.invalidateQueries({
-        ...trpc.payGrade.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        ...trpc.payGrade.list.queryOptions({}),
       })
       toast.success(`${data.name} has been created.`)
     },

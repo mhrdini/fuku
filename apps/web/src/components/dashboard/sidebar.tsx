@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Collapsible,
@@ -27,7 +27,11 @@ import {
   SidebarMenuSubItem,
   Skeleton,
 } from '@fuku/ui/components'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from '@tanstack/react-query'
 import { ChevronRight, ChevronsUpDown, Dot, Plus, Users2 } from 'lucide-react'
 
 import { useMenu } from '~/lib/menu'
@@ -35,21 +39,43 @@ import { useDashboardStore } from '~/store/dashboard'
 import { useTRPC } from '~/trpc/client'
 
 export const DashboardSidebar = ({ username }: { username: string }) => {
+  const queryClient = useQueryClient()
   const trpc = useTRPC()
-
   const { data: teams, isPending: isLoadingTeams } = useSuspenseQuery(
     trpc.team.getAllOwned.queryOptions(),
   )
+  const { currentTeamSlug, setCurrentTeam } = useDashboardStore()
 
-  const { currentTeamId, setCurrentTeam } = useDashboardStore()
+  const { mutateAsync: setActiveTeam } = useMutation({
+    ...trpc.team.setActive.mutationOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: trpc.teamMember.list.queryKey(),
+      })
+      queryClient.invalidateQueries({
+        queryKey: trpc.location.list.queryKey(),
+      })
+      queryClient.invalidateQueries({
+        queryKey: trpc.shiftType.list.queryKey(),
+      })
+      queryClient.invalidateQueries({
+        queryKey: trpc.payGrade.list.queryKey(),
+      })
+      router.refresh()
+    },
+  })
+
   useEffect(() => {
-    if (teams?.length && !currentTeamId) {
-      setCurrentTeam({ id: teams[0].id, slug: teams[0].slug })
-    }
-  }, [teams, currentTeamId, setCurrentTeam])
+    if (!teams.length) return
+    if (currentTeamSlug) return
+
+    const team = teams[0]
+    setCurrentTeam({ id: team.id, slug: team.slug })
+    void setActiveTeam({ teamId: team.id })
+  }, [teams, currentTeamSlug, setCurrentTeam, setActiveTeam])
 
   const router = useRouter()
-  const groups = useMenu()
+  const menuGroups = useMenu()
 
   const onMenuButtonClick = useCallback(
     (url: string) => {
@@ -58,12 +84,15 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
     [username],
   )
 
+  const onNewTeam = () => {}
+
   const loadingTeamsHeader = <Skeleton />
 
   const noTeamsHeader = (
     <SidebarMenuButton
       className='border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50'
       size='lg'
+      onClick={onNewTeam}
     >
       <div className='flex aspect-square size-8 items-center justify-center rounded-lg'>
         <Plus className='size-4' />
@@ -96,14 +125,15 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
         className='w-[var(--radix-dropdown-menu-trigger-width)]'
         side='bottom'
       >
-        {/* // TODO: Use setCurrentTeam to update team ID and slug when changing teams                                                          */}
-        {teams.slice(1).map(team => (
-          <DropdownMenuItem>
-            <span>{team.name}</span>
-          </DropdownMenuItem>
-        ))}
-        {teams.slice(1).length > 0 && <DropdownMenuSeparator />}
-        <DropdownMenuItem>
+        {teams
+          .filter(t => t.slug !== currentTeamSlug)
+          .map(team => (
+            <DropdownMenuItem>
+              <span>{team.name}</span>
+            </DropdownMenuItem>
+          ))}
+        {teams.length > 1 && <DropdownMenuSeparator />}
+        <DropdownMenuItem onClick={onNewTeam}>
           <Plus /> Create new team
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -125,8 +155,8 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
       </SidebarHeader>
       <SidebarContent>
         {teams.length > 0 &&
-          currentTeamId &&
-          groups.map(group => (
+          currentTeamSlug &&
+          menuGroups.map(group => (
             <SidebarGroup key={group.label}>
               {group.label && (
                 <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
