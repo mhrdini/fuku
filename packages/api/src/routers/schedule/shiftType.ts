@@ -1,13 +1,12 @@
 import type { TRPCRouterRecord } from '@trpc/server'
 import z from 'zod/v4'
 
-import { protectedProcedure } from '../../trpc'
+import { teamProcedure } from '../../trpc'
 
 export const shiftTypeRouter = {
-  getAllByTeam: protectedProcedure
+  list: teamProcedure
     .input(
       z.object({
-        teamId: z.string(),
         limit: z.number().optional(),
       }),
     )
@@ -15,7 +14,7 @@ export const shiftTypeRouter = {
       const shiftTypes = await ctx.db.shiftType.findMany({
         where: {
           team: {
-            id: input.teamId,
+            id: ctx.activeTeamId,
           },
           deletedAt: null,
         },
@@ -26,10 +25,9 @@ export const shiftTypeRouter = {
       })
       return shiftTypes
     }),
-  create: protectedProcedure
+  create: teamProcedure
     .input(
       z.object({
-        teamId: z.string(),
         name: z.string(),
         description: z.string().optional(),
         startTime: z.string(),
@@ -40,7 +38,7 @@ export const shiftTypeRouter = {
     .mutation(async ({ input, ctx }) => {
       const created = await ctx.db.shiftType.create({
         data: {
-          teamId: input.teamId,
+          teamId: ctx.activeTeamId,
           name: input.name,
           ...(input.description && { description: input.description }),
           startTime: input.startTime,
@@ -50,7 +48,7 @@ export const shiftTypeRouter = {
       })
       return created
     }),
-  update: protectedProcedure
+  update: teamProcedure
     .input(
       z.object({
         id: z.string(),
@@ -76,7 +74,7 @@ export const shiftTypeRouter = {
       })
       return updated
     }),
-  delete: protectedProcedure
+  delete: teamProcedure
     .input(
       z.object({
         id: z.string(),
@@ -94,7 +92,7 @@ export const shiftTypeRouter = {
       })
       return deleted
     }),
-  restore: protectedProcedure
+  restore: teamProcedure
     .input(
       z.object({
         id: z.string(),

@@ -43,19 +43,14 @@ export const TeamPayGradesContent = () => {
   } | null>(null)
 
   const { data } = useQuery({
-    ...trpc.payGrade.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
-    enabled: !!currentTeamId,
+    ...trpc.payGrade.list.queryOptions({}),
   })
 
   const { mutateAsync: updatePayGrade, isPending: isUpdating } = useMutation({
     ...trpc.payGrade.update.mutationOptions(),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        ...trpc.payGrade.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        ...trpc.payGrade.list.queryOptions({}),
       })
     },
   })

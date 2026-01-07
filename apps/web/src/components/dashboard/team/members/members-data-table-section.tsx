@@ -85,9 +85,7 @@ export function MembersDataTableSection({
 
   const trpc = useTRPC()
   const { data: payGrades } = useSuspenseQuery(
-    trpc.payGrade.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
+    trpc.payGrade.list.queryOptions({}),
   )
 
   const [sorting, setSorting] = useState<SortingState>([])

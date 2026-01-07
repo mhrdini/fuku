@@ -23,16 +23,15 @@ const MAX_VISIBLE = 3
 const MAX_TRAILING = 1
 
 export function Breadcrumbs() {
-  const { currentTeamSlug } = useDashboardStore()
   const session = useSession()
   const pathname = usePathname()
   const segments = pathname.split('/').filter(Boolean)
   const trpc = useTRPC()
 
   const { data: team, isFetching } = useQuery({
-    ...trpc.team.getBySlug.queryOptions({ slug: currentTeamSlug ?? '' }),
-    enabled: !!currentTeamSlug,
+    ...trpc.team.getActive.queryOptions(),
   })
+  const { currentTeamSlug } = useDashboardStore()
 
   const crumbs = useMemo(() => {
     const length = segments.length - 1
@@ -54,7 +53,8 @@ export function Breadcrumbs() {
           .replace(/\b\w/g, c => c.toUpperCase())
 
         if (segment === session?.user.username) label = 'Home'
-        if (segment === currentTeamSlug && team) label = team.name
+        if (segment === currentTeamSlug && team && team.lastActiveTeam)
+          label = team.lastActiveTeam.name
         if (segment === 'team') return null
 
         const href =

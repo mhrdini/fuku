@@ -25,9 +25,7 @@ export const RemoveLocationAlertDialog = () => {
 
   const trpc = useTRPC()
   const { data: location, isPending: isLoadingLocation } = useQuery({
-    ...trpc.location.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
+    ...trpc.location.list.queryOptions({}),
     select: locations =>
       locations.find(location => location.id === currentLocationId),
   })
@@ -41,9 +39,7 @@ export const RemoveLocationAlertDialog = () => {
     },
     onSuccess: data => {
       queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        ...trpc.location.list.queryOptions({}),
       })
       const toastId = toast(`${data.name} has been removed.`, {
         action: {
@@ -64,9 +60,7 @@ export const RemoveLocationAlertDialog = () => {
     },
     onSuccess: data => {
       queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        ...trpc.location.list.queryOptions({}),
       })
       toast.success(`${data.name} has been restored.`)
     },
