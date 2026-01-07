@@ -25,9 +25,7 @@ export const RemoveShiftTypeAlertDialog = () => {
 
   const trpc = useTRPC()
   const { data: shiftType, isPending: isLoadingShiftType } = useQuery({
-    ...trpc.shiftType.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
+    ...trpc.shiftType.list.queryOptions({}),
     select: shiftTypes =>
       shiftTypes.find(shiftType => shiftType.id === currentShiftTypeId),
   })
@@ -41,9 +39,7 @@ export const RemoveShiftTypeAlertDialog = () => {
     },
     onSuccess: data => {
       queryClient.invalidateQueries({
-        ...trpc.shiftType.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        ...trpc.shiftType.list.queryOptions({}),
       })
       const toastId = toast(`${data.name} has been removed.`, {
         action: {
@@ -64,9 +60,7 @@ export const RemoveShiftTypeAlertDialog = () => {
     },
     onSuccess: data => {
       queryClient.invalidateQueries({
-        ...trpc.shiftType.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        ...trpc.shiftType.list.queryOptions({}),
       })
       toast.success(`${data.name} has been restored.`)
     },

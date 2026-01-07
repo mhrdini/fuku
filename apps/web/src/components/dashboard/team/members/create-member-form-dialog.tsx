@@ -66,10 +66,7 @@ export const CreateMemberFormDialog = () => {
   const trpc = useTRPC()
 
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
-    enabled: !!currentTeamId,
+    ...trpc.payGrade.list.queryOptions({}),
   })
 
   const { mutateAsync: createMember, isPending } = useMutation({
@@ -82,9 +79,7 @@ export const CreateMemberFormDialog = () => {
     onSuccess: data => {
       closeDialog()
       queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        ...trpc.location.list.queryOptions({}),
       })
       toast.success(
         `${data.givenNames} ${data.familyName} has been created to the team.`,

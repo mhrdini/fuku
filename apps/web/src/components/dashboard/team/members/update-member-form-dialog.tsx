@@ -56,18 +56,13 @@ export const UpdateMemberFormDialog = () => {
     isPending,
     isSuccess: teamMemberFetched,
   } = useQuery({
-    ...trpc.teamMember.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
+    ...trpc.teamMember.list.queryOptions({}),
     select: members =>
       members.find(member => member.id === currentTeamMemberId),
   })
 
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
-    enabled: !!currentTeamId,
+    ...trpc.payGrade.list.queryOptions({}),
   })
 
   const form = useForm<TeamMemberUpdateFormType>({
@@ -104,9 +99,7 @@ export const UpdateMemberFormDialog = () => {
     onSuccess: data => {
       closeDialog()
       queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        ...trpc.location.list.queryOptions({}),
       })
       toast.success(`${data.givenNames} ${data.familyName} has been updated.`)
     },
@@ -138,12 +131,12 @@ export const UpdateMemberFormDialog = () => {
     <>
       {!teamMember || !payGrades ? (
         <>
-          <DialogTitle>Update Team Member</DialogTitle>
+          <DialogTitle>Edit Team Member</DialogTitle>
           <Spinner />
         </>
       ) : (
         <>
-          <DialogTitle>Update Team Member</DialogTitle>
+          <DialogTitle>Edit Team Member</DialogTitle>
           <form
             id='form-update-member'
             onSubmit={form.handleSubmit(onSubmit, onError)}

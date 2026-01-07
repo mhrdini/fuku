@@ -67,9 +67,7 @@ export const CreateLocationFormSheet = () => {
     onSuccess: data => {
       closeSheet()
       queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        ...trpc.location.list.queryOptions({}),
       })
       toast.success(`${data.name} has been created.`)
     },

@@ -25,9 +25,7 @@ export const RemoveMemberAlertDialog = () => {
 
   const trpc = useTRPC()
   const { data: teamMember, isPending: isLoadingTeamMember } = useQuery({
-    ...trpc.teamMember.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
+    ...trpc.teamMember.list.queryOptions({}),
     select: members =>
       members.find(member => member.id === currentTeamMemberId),
   })
@@ -41,9 +39,7 @@ export const RemoveMemberAlertDialog = () => {
     },
     onSuccess: data => {
       queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        ...trpc.location.list.queryOptions({}),
       })
       const toastId = toast(
         `${data.givenNames} ${data.familyName} has been removed.`,
@@ -67,9 +63,7 @@ export const RemoveMemberAlertDialog = () => {
     },
     onSuccess: data => {
       queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        ...trpc.location.list.queryOptions({}),
       })
       toast.success(`${data.givenNames} ${data.familyName} has been restored.`)
     },

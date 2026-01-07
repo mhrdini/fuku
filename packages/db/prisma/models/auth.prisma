@@ -10,11 +10,16 @@ model User {
   ownedTeams  Team[]       @relation("UserTeams")
   memberships TeamMember[] @relation("UserMemberships")
 
+  lastActiveTeamId String?
+  lastActiveTeam   Team?   @relation("LastActiveTeamUsers", fields: [lastActiveTeamId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
   accounts Account[]
   sessions Session[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  team      Team?    @relation(fields: [teamId], references: [id])
+  teamId    String?
 
   @@map("user")
 }

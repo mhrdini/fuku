@@ -68,9 +68,7 @@ export const CreateShiftTypeFormSheet = () => {
     onSuccess: data => {
       closeSheet()
       queryClient.invalidateQueries({
-        ...trpc.shiftType.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+        ...trpc.shiftType.list.queryOptions({}),
       })
       toast.success(`${data.name} has been created.`)
     },
