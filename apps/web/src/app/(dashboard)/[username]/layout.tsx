@@ -23,12 +23,12 @@ export default async function DashboardLayout({
   if (!session || session.user.username !== username) {
     redirect('/login')
   } else {
-    prefetch(trpc.user.getByUsername.queryOptions({ username }))
-    prefetch(trpc.team.getAllOwned.queryOptions())
+    prefetch(trpc.user.byUsername.queryOptions({ username }))
+    prefetch(trpc.team.getUserTeams.queryOptions())
   }
 
   return (
-    <div className='min-h-screen w-full'>
+    <div className='min-h-screen'>
       <HydrateClient>
         <SessionProvider session={session}>
           <SheetManager />

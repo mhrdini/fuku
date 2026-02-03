@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useParams } from 'next/navigation'
 import {
   Button,
   DropdownMenu,
@@ -28,7 +29,6 @@ import { TimeInput } from '~/components/ui/time-input'
 import { DialogId } from '~/lib/dialog'
 import { SheetId } from '~/lib/sheet'
 import { ShiftTypeUI } from '~/lib/shift-types'
-import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
@@ -36,7 +36,12 @@ import { useTRPC } from '~/trpc/client'
 export const TeamShiftTypesContent = () => {
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-  const { currentTeamId } = useDashboardStore()
+  const params = useParams()
+  const slug = params?.slug as string
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
 
   const [editingCell, setEditingCell] = useState<{
     rowId: string
@@ -44,15 +49,16 @@ export const TeamShiftTypesContent = () => {
   } | null>(null)
 
   const { data } = useQuery({
-    ...trpc.shiftType.list.queryOptions({}),
+    ...trpc.shiftType.list.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
   })
 
   const { mutateAsync: updateShiftType, isPending: isUpdating } = useMutation({
     ...trpc.shiftType.update.mutationOptions(),
     onSuccess: data => {
-      queryClient.invalidateQueries({
-        ...trpc.shiftType.list.queryOptions({}),
-      })
+      queryClient.invalidateQueries(
+        trpc.shiftType.list.queryOptions({ teamId: team!.id }),
+      )
     },
   })
 

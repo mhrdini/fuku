@@ -1,16 +1,41 @@
-import {
-  TeamInputSchema,
-  TeamUpdateInputObjectZodSchema,
-} from '@fuku/db/schemas'
+import { TeamUpdateInputObjectZodSchema } from '@fuku/db/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
 import { customAlphabet } from 'nanoid'
 import { z } from 'zod/v4'
 
+import { TeamCreateInputSchema, UserTeam } from '../../schemas'
 import { protectedProcedure } from '../../trpc'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 8)
 
 export const teamRouter = {
+  bySlug: protectedProcedure
+    .input(z.object({ slug: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findFirst({
+        where: {
+          slug: input.slug,
+          deletedAt: null,
+          OR: [
+            { adminUsers: { some: { id: ctx.session.user.id } } },
+            {
+              teamMembers: {
+                some: { userId: ctx.session.user.id, deletedAt: null },
+              },
+            },
+          ],
+        },
+        include: {
+          teamMembers: { where: { deletedAt: null } },
+        },
+      })
+
+      if (!team) {
+        throw new TRPCError({ code: 'NOT_FOUND' })
+      }
+
+      return team
+    }),
   getAllOwned: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id
     const teams = await ctx.db.team.findMany({
@@ -26,51 +51,79 @@ export const teamRouter = {
     return teams
   }),
 
-  getActive: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.user.findUnique({
+  getUserTeams: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.db.user.findUnique({
       where: { id: ctx.session.user.id },
       select: {
-        lastActiveTeam: {
+        ownedTeams: {
+          where: { deletedAt: null },
           select: {
             id: true,
             slug: true,
             name: true,
             description: true,
+            teamMembers: true,
+            createdAt: true,
+          },
+        },
+        memberships: {
+          where: {
+            deletedAt: null,
+            team: { deletedAt: null },
+          },
+          select: {
+            team: {
+              select: {
+                id: true,
+                slug: true,
+                name: true,
+                description: true,
+                teamMembers: true,
+                createdAt: true,
+              },
+            },
+            teamMemberRole: true,
           },
         },
       },
     })
+
+    if (!user) return []
+
+    const owned: UserTeam[] = user.ownedTeams.map(team => ({
+      id: team.id,
+      slug: team.slug,
+      name: team.name,
+      description: team.description,
+      teamMembers: team.teamMembers,
+      createdAt: team.createdAt,
+      role: 'ADMIN',
+    }))
+
+    const member: UserTeam[] = user.memberships
+      .filter(m => m.team)
+      .map(m => ({
+        id: m.team!.id,
+        slug: m.team!.slug,
+        name: m.team!.name,
+        description: m.team!.description,
+        teamMembers: m.team!.teamMembers,
+        createdAt: m.team!.createdAt,
+        role: m.teamMemberRole, // STAFF or ADMIN
+      }))
+
+    // Deduplicate by team id (owned team might also appear as membership)
+    const byId = new Map<string, UserTeam>()
+
+    for (const t of member) byId.set(t.id, t)
+    for (const t of owned) byId.set(t.id, t)
+
+    const teams = [...byId.values()]
+    return teams
   }),
 
-  setActive: protectedProcedure
-    .input(z.object({ teamId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id
-      const team = await ctx.db.team.findFirst({
-        where: {
-          id: input.teamId,
-          deletedAt: null,
-          OR: [
-            { adminUsers: { some: { id: userId } } },
-            { teamMembers: { some: { userId, deletedAt: null } } },
-          ],
-        },
-      })
-
-      if (!team) {
-        throw new TRPCError({ code: 'FORBIDDEN' })
-      }
-
-      await ctx.db.user.update({
-        where: { id: userId },
-        data: { lastActiveTeamId: team.id },
-      })
-
-      return team
-    }),
-
   create: protectedProcedure
-    .input(TeamInputSchema.pick({ name: true, description: true }))
+    .input(TeamCreateInputSchema)
     .mutation(async ({ input, ctx }) => {
       let slug: string
       while (true) {
@@ -84,15 +137,81 @@ export const teamRouter = {
         }
       }
 
+      const adminUserIds = input.teamMembers
+        .filter(m => m.teamMemberRole === 'ADMIN' && m.userId)
+        .map(m => ({ id: m.userId! }))
+
       const newTeam = await ctx.db.team.create({
         data: {
           slug,
           name: input.name,
           description: input.description,
-          adminUsers: { connect: { id: ctx.session.user.id } },
+          locations: {
+            create: input.locations.map(l => ({
+              name: l.name,
+              ...(l.color && { color: l.color }),
+            })),
+          },
+          shiftTypes: {
+            create: input.shiftTypes.map(s => ({
+              name: s.name,
+              startTime: s.startTime,
+              endTime: s.endTime,
+            })),
+          },
+          adminUsers: {
+            connect: adminUserIds,
+          },
+        },
+        include: {
+          adminUsers: true,
+          locations: true,
+          shiftTypes: true,
         },
       })
-      return newTeam
+
+      // to map between payGradeClientId and payGradeId
+      const payGrades = await Promise.all(
+        input.payGrades.map(pg =>
+          ctx.db.payGrade.create({
+            data: {
+              teamId: newTeam.id,
+              name: pg.name,
+              baseRate: pg.baseRate,
+            },
+          }),
+        ),
+      )
+
+      const payGradeMap = new Map<string, string>()
+      input.payGrades.forEach((pg, i) => {
+        payGradeMap.set(pg.id, payGrades[i].id)
+      })
+
+      const teamMembers = await Promise.all(
+        input.teamMembers.map(tm =>
+          ctx.db.teamMember.create({
+            data: {
+              teamId: newTeam.id,
+              userId: tm.userId ?? null,
+              familyName: tm.familyName,
+              givenNames: tm.givenNames,
+              teamMemberRole: tm.teamMemberRole,
+              rateMultiplier: tm.rateMultiplier,
+              payGradeId: tm.payGradeClientId
+                ? (payGradeMap.get(tm.payGradeClientId) ?? null)
+                : null,
+            },
+          }),
+        ),
+      )
+
+      ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: { lastActiveTeamId: newTeam.id },
+      })
+
+      return { ...newTeam, teamMembers, payGrades }
     }),
 
   update: protectedProcedure
