@@ -3,6 +3,7 @@
 import { Fragment, useMemo } from 'react'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,11 +11,9 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-  Skeleton,
 } from '@fuku/ui/components'
 import { useQuery } from '@tanstack/react-query'
 
-import { useDashboardStore } from '~/store/dashboard'
 import { useTRPC } from '~/trpc/client'
 
 export function Breadcrumbs() {
@@ -23,10 +22,12 @@ export function Breadcrumbs() {
   const segments = pathname.split('/').filter(Boolean)
   const trpc = useTRPC()
 
-  const { data: team, isFetching } = useQuery({
-    ...trpc.team.getActive.queryOptions(),
+  const params = useParams()
+  const slug = params.slug as string | undefined
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
   })
-  const { currentTeamSlug } = useDashboardStore()
 
   const crumbs = useMemo(() => {
     const length = segments.length - 1
@@ -48,8 +49,7 @@ export function Breadcrumbs() {
           .replace(/\b\w/g, c => c.toUpperCase())
 
         if (segment === session?.user.username) label = 'Home'
-        if (segment === currentTeamSlug && team && team.lastActiveTeam)
-          label = team.lastActiveTeam.name
+        if (segment === team?.slug) label = team ? team.name : ''
         if (segment === 'team') return null
 
         const href =
@@ -62,31 +62,32 @@ export function Breadcrumbs() {
         return { href, label }
       })
       .filter(Boolean) as { href: string; label: string }[]
-  }, [segments, team, currentTeamSlug, session?.user.username])
+  }, [segments, team, session?.user.username])
 
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {isFetching ? (
-          <Skeleton className='h-4 w-16' />
-        ) : (
-          crumbs.map((crumb, idx) => (
-            <Fragment key={crumb.href}>
-              {idx !== 0 && <BreadcrumbSeparator />}
-              <BreadcrumbItem>
-                {idx === crumbs.length - 1 || !crumb.href ? (
-                  <BreadcrumbPage className='cursor-default'>
-                    {crumb.label}
-                  </BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink asChild>
-                    <Link href={crumb.href}>{crumb.label}</Link>
-                  </BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
-            </Fragment>
-          ))
-        )}
+        {crumbs.map((crumb, idx) => (
+          <Fragment key={crumb.href}>
+            {idx !== 0 && <BreadcrumbSeparator />}
+            <BreadcrumbItem>
+              {idx === crumbs.length - 1 || !crumb.href ? (
+                <BreadcrumbPage
+                  className={cn(
+                    idx === crumbs.length - 1 && 'font-semibold',
+                    'cursor-default',
+                  )}
+                >
+                  {crumb.label}
+                </BreadcrumbPage>
+              ) : (
+                <BreadcrumbLink asChild>
+                  <Link href={crumb.href}>{crumb.label}</Link>
+                </BreadcrumbLink>
+              )}
+            </BreadcrumbItem>
+          </Fragment>
+        ))}
       </BreadcrumbList>
     </Breadcrumb>
   )

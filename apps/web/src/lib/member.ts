@@ -40,7 +40,7 @@ export const toTeamMemberUI = (
 ): TeamMemberUI => ({
   ...m,
   fullName: `${m.givenNames} ${m.familyName}`,
-  payGradeName: m.payGrade?.name ?? 'No Pay Grade',
+  payGradeName: m.payGrade?.name ?? 'Unassigned',
   baseRate: m.payGrade?.baseRate ?? null,
   effectiveRate: m.payGrade ? m.payGrade.baseRate! * m.rateMultiplier : null,
   username: m.user ? m.user.username : null,

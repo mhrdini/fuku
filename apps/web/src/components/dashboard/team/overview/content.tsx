@@ -1,5 +1,6 @@
 'use client'
 
+import { useParams } from 'next/navigation'
 import {
   Button,
   Dialog,
@@ -12,29 +13,25 @@ import {
   EmptyTitle,
 } from '@fuku/ui/components'
 import { useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Users } from 'lucide-react'
 
-import { ContentSkeleton } from '~/components/dashboard/content-skeleton'
-import { useDashboardStore } from '~/store/dashboard'
 import { useTRPC } from '~/trpc/client'
 
 export default function TeamOverviewContent() {
   const trpc = useTRPC()
-
-  const { currentTeamSlug } = useDashboardStore()
-
-  const { data: team } = useSuspenseQuery({
-    ...trpc.team.getAllOwned.queryOptions({}),
-    select: teams => teams.find(team => team.id === currentTeamId),
+  const params = useParams()
+  const slug = params?.slug as string
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
   })
 
-  const renderTeamContent = () => (
-    <>
-      <h1 className='text-xl font-semibold'>Overview</h1>
-    </>
-  )
-
-  const renderEmptyContent = () => (
+  return team ? (
+    <div className='flex flex-col gap-2'>
+      <SummarySection />
+    </div>
+  ) : (
     <Empty>
       <EmptyHeader>
         <EmptyMedia variant='icon'>
@@ -48,23 +45,9 @@ export default function TeamOverviewContent() {
       </EmptyHeader>
       <EmptyContent>
         <div className='flex gap-2'>
-          <DialogTrigger asChild>
-            <Button>Create Team</Button>
-          </DialogTrigger>
+          <Button>Create Team</Button>
         </div>
       </EmptyContent>
     </Empty>
-  )
-
-  return (
-    <Dialog>
-      {isPending ? (
-        <ContentSkeleton />
-      ) : team ? (
-        renderTeamContent()
-      ) : (
-        renderEmptyContent()
-      )}
-    </Dialog>
   )
 }

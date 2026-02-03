@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 
 import { getSession } from '~/auth/server'
@@ -11,9 +10,5 @@ export default async function LoginPage() {
     redirect(`/${session.user.username}`)
   }
 
-  return (
-    <Suspense>
-      <UserAuthForm />
-    </Suspense>
-  )
+  return <UserAuthForm />
 }

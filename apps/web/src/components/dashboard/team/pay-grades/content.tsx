@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useParams } from 'next/navigation'
 import {
   Button,
   DropdownMenu,
@@ -27,31 +28,37 @@ import { EditableCell } from '~/components/ui/editable-cell'
 import { DialogId } from '~/lib/dialog'
 import { PayGradeUI } from '~/lib/payGrade'
 import { SheetId } from '~/lib/sheet'
-import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
 export const TeamPayGradesContent = () => {
-  const queryClient = useQueryClient()
-  const trpc = useTRPC()
-  const { currentTeamId } = useDashboardStore()
-
   const [editingCell, setEditingCell] = useState<{
     rowId: string
     columnKey: string
   } | null>(null)
 
+  const queryClient = useQueryClient()
+  const trpc = useTRPC()
+
+  const params = useParams()
+  const slug = params?.slug as string
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
+
   const { data } = useQuery({
-    ...trpc.payGrade.list.queryOptions({}),
+    ...trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
   })
 
   const { mutateAsync: updatePayGrade, isPending: isUpdating } = useMutation({
     ...trpc.payGrade.update.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        ...trpc.payGrade.list.queryOptions({}),
-      })
+      queryClient.invalidateQueries(
+        trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+      )
     },
   })
 
