@@ -1,5 +1,6 @@
 'use client'
 
+import { useParams } from 'next/navigation'
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -12,20 +13,24 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 
 export const RemoveLocationAlertDialog = () => {
-  const queryClient = useQueryClient()
-
-  const { currentTeamId } = useDashboardStore()
+  const params = useParams()
+  const slug = params?.slug as string
 
   const { editingId: currentLocationId } = useDialogStore()
 
+  const queryClient = useQueryClient()
   const trpc = useTRPC()
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
   const { data: location, isPending: isLoadingLocation } = useQuery({
-    ...trpc.location.list.queryOptions({}),
+    ...trpc.location.list.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
     select: locations =>
       locations.find(location => location.id === currentLocationId),
   })
@@ -38,9 +43,9 @@ export const RemoveLocationAlertDialog = () => {
       )
     },
     onSuccess: data => {
-      queryClient.invalidateQueries({
-        ...trpc.location.list.queryOptions({}),
-      })
+      queryClient.invalidateQueries(
+        trpc.location.list.queryOptions({ teamId: team!.id }),
+      )
       const toastId = toast(`${data.name} has been removed.`, {
         action: {
           label: 'Undo',
@@ -59,9 +64,9 @@ export const RemoveLocationAlertDialog = () => {
       toast.error(`${error.message}`)
     },
     onSuccess: data => {
-      queryClient.invalidateQueries({
-        ...trpc.location.list.queryOptions({}),
-      })
+      queryClient.invalidateQueries(
+        trpc.location.list.queryOptions({ teamId: team!.id }),
+      )
       toast.success(`${data.name} has been restored.`)
     },
   })

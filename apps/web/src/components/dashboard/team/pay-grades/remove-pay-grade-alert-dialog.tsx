@@ -1,5 +1,6 @@
 'use client'
 
+import { useParams } from 'next/navigation'
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -12,20 +13,24 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 
 export const RemovePayGradeAlertDialog = () => {
   const queryClient = useQueryClient()
-
-  const { currentTeamId } = useDashboardStore()
+  const trpc = useTRPC()
+  const params = useParams()
+  const slug = params?.slug as string
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
 
   const { editingId: currentPayGradeId } = useDialogStore()
 
-  const trpc = useTRPC()
   const { data: payGrade, isPending: isLoadingPayGrade } = useQuery({
-    ...trpc.payGrade.list.queryOptions({}),
+    ...trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
     select: payGrades =>
       payGrades.find(payGrade => payGrade.id === currentPayGradeId),
   })
@@ -38,9 +43,9 @@ export const RemovePayGradeAlertDialog = () => {
       )
     },
     onSuccess: data => {
-      queryClient.invalidateQueries({
-        ...trpc.payGrade.list.queryOptions({}),
-      })
+      queryClient.invalidateQueries(
+        trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+      )
       toast(`${data.name} has been removed.`)
     },
   })
@@ -48,7 +53,7 @@ export const RemovePayGradeAlertDialog = () => {
   const onRemove = async () => {
     if (!currentPayGradeId) return
     try {
-      await removePayGrade({ id: currentPayGradeId })
+      await removePayGrade({ id: currentPayGradeId, teamId: team!.id })
     } catch {
       // Handled in onError
     }

@@ -1,12 +1,13 @@
 import type { TRPCRouterRecord } from '@trpc/server'
 import z from 'zod/v4'
 
-import { teamProcedure } from '../../trpc'
+import { protectedProcedure } from '../../trpc'
 
 export const locationRouter = {
-  list: teamProcedure
+  list: protectedProcedure
     .input(
       z.object({
+        teamId: z.string(),
         limit: z.number().optional(),
       }),
     )
@@ -14,7 +15,7 @@ export const locationRouter = {
       const locations = await ctx.db.location.findMany({
         where: {
           team: {
-            id: ctx.activeTeamId,
+            id: input.teamId,
           },
           deletedAt: null,
         },
@@ -23,9 +24,10 @@ export const locationRouter = {
       })
       return locations
     }),
-  create: teamProcedure
+  create: protectedProcedure
     .input(
       z.object({
+        teamId: z.string(),
         name: z.string(),
         address: z.string().nullish(),
         color: z.string().nullish(),
@@ -34,7 +36,7 @@ export const locationRouter = {
     .mutation(async ({ input, ctx }) => {
       const created = await ctx.db.location.create({
         data: {
-          teamId: ctx.activeTeamId,
+          teamId: input.teamId,
           name: input.name,
           address: input.address,
           color: input.color,
@@ -42,7 +44,7 @@ export const locationRouter = {
       })
       return created
     }),
-  update: teamProcedure
+  update: protectedProcedure
     .input(
       z.object({
         id: z.string(),
@@ -61,7 +63,7 @@ export const locationRouter = {
       })
       return updated
     }),
-  delete: teamProcedure
+  delete: protectedProcedure
     .input(
       z.object({
         id: z.string(),
@@ -77,7 +79,7 @@ export const locationRouter = {
       })
       return deleted
     }),
-  restore: teamProcedure
+  restore: protectedProcedure
     .input(
       z.object({
         id: z.string(),

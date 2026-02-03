@@ -1,4 +1,7 @@
+'use client'
+
 import { useEffect } from 'react'
+import { useParams } from 'next/navigation'
 import { ShiftTypeInputSchema } from '@fuku/db/schemas'
 import {
   Button,
@@ -15,12 +18,11 @@ import {
   Spinner,
 } from '@fuku/ui/components'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import z from 'zod/v4'
 
-import { useDashboardStore } from '~/store/dashboard'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
@@ -38,11 +40,18 @@ type ShiftTypeCreateFormType = z.infer<typeof ShiftTypeCreateFormSchema>
 export const CreateShiftTypeFormSheet = () => {
   const title = 'Create New Shift Type'
   const { closeSheet } = useSheetStore()
+  const queryClient = useQueryClient()
+  const trpc = useTRPC()
+  const params = useParams()
+  const slug = params?.slug as string
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
 
-  const { currentTeamId } = useDashboardStore()
   const form = useForm<ShiftTypeCreateFormType>({
     defaultValues: {
-      teamId: currentTeamId || '',
+      teamId: team ? team.id : '',
       name: '',
       startTime: '09:00',
       endTime: '17:00',
@@ -51,13 +60,11 @@ export const CreateShiftTypeFormSheet = () => {
   })
 
   useEffect(() => {
-    if (currentTeamId) {
-      form.resetField('teamId', { defaultValue: currentTeamId })
+    if (team) {
+      form.resetField('teamId', { defaultValue: team.id })
     }
-  }, [currentTeamId])
+  }, [team])
 
-  const queryClient = useQueryClient()
-  const trpc = useTRPC()
   const { mutateAsync: createShiftType, isPending } = useMutation({
     ...trpc.shiftType.create.mutationOptions(),
     onError: error => {
@@ -67,9 +74,9 @@ export const CreateShiftTypeFormSheet = () => {
     },
     onSuccess: data => {
       closeSheet()
-      queryClient.invalidateQueries({
-        ...trpc.shiftType.list.queryOptions({}),
-      })
+      queryClient.invalidateQueries(
+        trpc.shiftType.list.queryOptions({ teamId: team!.id }),
+      )
       toast.success(`${data.name} has been created.`)
     },
   })

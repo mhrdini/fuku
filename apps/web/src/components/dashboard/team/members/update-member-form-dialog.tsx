@@ -1,4 +1,7 @@
+'use client'
+
 import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -32,7 +35,6 @@ import { toast } from 'sonner'
 import z from 'zod/v4'
 
 import { TeamMemberSchema } from '~/lib/member'
-import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 import { DiscardChangesAlertDialogContent } from '../../discard-changes-alert-dialog'
@@ -43,26 +45,32 @@ const TeamMemberUpdateFormSchema = TeamMemberSchema.extend({
 type TeamMemberUpdateFormType = z.infer<typeof TeamMemberUpdateFormSchema>
 
 export const UpdateMemberFormDialog = () => {
-  const { currentTeamId } = useDashboardStore()
-
   const { editingId: currentTeamMemberId, closeDialog } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
+  const params = useParams()
+  const slug = params?.slug as string
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
 
   const {
     data: teamMember,
     isPending,
     isSuccess: teamMemberFetched,
   } = useQuery({
-    ...trpc.teamMember.list.queryOptions({}),
+    ...trpc.teamMember.list.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
     select: members =>
       members.find(member => member.id === currentTeamMemberId),
   })
 
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.list.queryOptions({}),
+    ...trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
   })
 
   const form = useForm<TeamMemberUpdateFormType>({
@@ -98,9 +106,9 @@ export const UpdateMemberFormDialog = () => {
     },
     onSuccess: data => {
       closeDialog()
-      queryClient.invalidateQueries({
-        ...trpc.location.list.queryOptions({}),
-      })
+      queryClient.invalidateQueries(
+        trpc.teamMember.list.queryOptions({ teamId: team!.id }),
+      )
       toast.success(`${data.givenNames} ${data.familyName} has been updated.`)
     },
   })
