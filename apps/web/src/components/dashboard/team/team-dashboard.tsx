@@ -11,7 +11,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@fuku/ui/components'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Users } from 'lucide-react'
 
 import { useTRPC } from '~/trpc/client'
@@ -19,9 +19,7 @@ import { useTRPC } from '~/trpc/client'
 export default function TeamDashboard() {
   const trpc = useTRPC()
 
-  const { data: teams } = useSuspenseQuery(
-    trpc.team.getAllOwned.queryOptions({}),
-  )
+  const { data: teams } = useQuery(trpc.team.getUserTeams.queryOptions())
 
   const renderTeamContent = () => (
     <div className='flex items-center justify-between gap-4 px-4 py-2 sm:px-6 xl:gap-6'>

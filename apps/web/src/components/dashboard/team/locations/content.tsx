@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useParams } from 'next/navigation'
 import {
   Button,
   DropdownMenu,
@@ -27,31 +28,37 @@ import { EditableCell } from '~/components/ui/editable-cell'
 import { DialogId } from '~/lib/dialog'
 import { LocationUI } from '~/lib/location'
 import { SheetId } from '~/lib/sheet'
-import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
 export const TeamLocationsContent = () => {
+  const params = useParams()
+  const slug = params.slug as string
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-  const { currentTeamId } = useDashboardStore()
 
   const [editingCell, setEditingCell] = useState<{
     rowId: string
     columnKey: string
   } | null>(null)
 
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
+
   const { data } = useQuery({
-    ...trpc.location.list.queryOptions({}),
+    ...trpc.location.list.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
   })
 
   const { mutateAsync: updateLocation, isPending: isUpdating } = useMutation({
     ...trpc.location.update.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: trpc.location.list.queryKey(),
-      })
+      queryClient.invalidateQueries(
+        trpc.location.list.queryOptions({ teamId: team?.id! }),
+      )
     },
   })
 

@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { cn } from '@fuku/ui/lib/utils'
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
-import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react'
+import { CheckIcon, ChevronRightIcon } from 'lucide-react'
 
 function DropdownMenu({
   ...props
@@ -91,18 +91,18 @@ function DropdownMenuCheckboxItem({
     <DropdownMenuPrimitive.CheckboxItem
       data-slot='dropdown-menu-checkbox-item'
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       checked={checked}
       {...props}
     >
-      <span className='pointer-events-none absolute left-2 flex size-3.5 items-center justify-center'>
+      {children}
+      <span className='pointer-events-none absolute right-2 flex size-3.5 items-center justify-center'>
         <DropdownMenuPrimitive.ItemIndicator>
           <CheckIcon className='size-4' />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
-      {children}
     </DropdownMenuPrimitive.CheckboxItem>
   )
 }
@@ -127,17 +127,21 @@ function DropdownMenuRadioItem({
     <DropdownMenuPrimitive.RadioItem
       data-slot='dropdown-menu-radio-item'
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        'focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-1.5 rounded-md py-1 pl-2 pr-8 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
       )}
       {...props}
     >
-      <span className='pointer-events-none absolute left-2 flex size-3.5 items-center justify-center'>
+      {children}
+
+      <span
+        data-slot='dropdown-menu-radio-item-indicator'
+        className='pointer-events-none absolute right-2 flex items-center justify-center'
+      >
         <DropdownMenuPrimitive.ItemIndicator>
-          <CircleIcon className='size-2 fill-current' />
+          <CheckIcon className='size-4' />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
-      {children}
     </DropdownMenuPrimitive.RadioItem>
   )
 }

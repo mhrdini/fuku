@@ -1,5 +1,6 @@
 'use client'
 
+import { useParams } from 'next/navigation'
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -12,20 +13,24 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 
 export const RemoveShiftTypeAlertDialog = () => {
   const queryClient = useQueryClient()
-
-  const { currentTeamId } = useDashboardStore()
+  const trpc = useTRPC()
+  const params = useParams()
+  const slug = params?.slug as string
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
 
   const { editingId: currentShiftTypeId } = useDialogStore()
 
-  const trpc = useTRPC()
   const { data: shiftType, isPending: isLoadingShiftType } = useQuery({
-    ...trpc.shiftType.list.queryOptions({}),
+    ...trpc.shiftType.list.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
     select: shiftTypes =>
       shiftTypes.find(shiftType => shiftType.id === currentShiftTypeId),
   })
@@ -38,9 +43,9 @@ export const RemoveShiftTypeAlertDialog = () => {
       )
     },
     onSuccess: data => {
-      queryClient.invalidateQueries({
-        ...trpc.shiftType.list.queryOptions({}),
-      })
+      queryClient.invalidateQueries(
+        trpc.shiftType.list.queryOptions({ teamId: team!.id }),
+      )
       const toastId = toast(`${data.name} has been removed.`, {
         action: {
           label: 'Undo',
@@ -59,9 +64,9 @@ export const RemoveShiftTypeAlertDialog = () => {
       toast.error(`${error.message}`)
     },
     onSuccess: data => {
-      queryClient.invalidateQueries({
-        ...trpc.shiftType.list.queryOptions({}),
-      })
+      queryClient.invalidateQueries(
+        trpc.shiftType.list.queryOptions({ teamId: team!.id }),
+      )
       toast.success(`${data.name} has been restored.`)
     },
   })

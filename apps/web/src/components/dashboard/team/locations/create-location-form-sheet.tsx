@@ -1,4 +1,7 @@
+'use client'
+
 import { useEffect } from 'react'
+import { useParams } from 'next/navigation'
 import { LocationInputSchema } from '@fuku/db/schemas'
 import {
   Button,
@@ -15,12 +18,11 @@ import {
   Spinner,
 } from '@fuku/ui/components'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import z from 'zod/v4'
 
-import { useDashboardStore } from '~/store/dashboard'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
@@ -39,10 +41,21 @@ export const CreateLocationFormSheet = () => {
   const title = 'Create New Location'
   const { closeSheet } = useSheetStore()
 
-  const { currentTeamId } = useDashboardStore()
+  const params = useParams()
+  const slug = params?.slug as string
+
+  const queryClient = useQueryClient()
+  const trpc = useTRPC()
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({
+      slug,
+    }),
+    enabled: !!slug,
+  })
+
   const form = useForm<LocationCreateFormType>({
     defaultValues: {
-      teamId: currentTeamId || '',
+      teamId: team?.id || '',
       name: '',
       address: '',
     },
@@ -50,13 +63,11 @@ export const CreateLocationFormSheet = () => {
   })
 
   useEffect(() => {
-    if (currentTeamId) {
-      form.resetField('teamId', { defaultValue: currentTeamId })
+    if (team) {
+      form.resetField('teamId', { defaultValue: team.id })
     }
-  }, [currentTeamId])
+  }, [team])
 
-  const queryClient = useQueryClient()
-  const trpc = useTRPC()
   const { mutateAsync: createLocation, isPending } = useMutation({
     ...trpc.location.create.mutationOptions(),
     onError: error => {
@@ -66,9 +77,11 @@ export const CreateLocationFormSheet = () => {
     },
     onSuccess: data => {
       closeSheet()
-      queryClient.invalidateQueries({
-        ...trpc.location.list.queryOptions({}),
-      })
+      queryClient.invalidateQueries(
+        trpc.location.list.queryOptions({
+          teamId: team!.id,
+        }),
+      )
       toast.success(`${data.name} has been created.`)
     },
   })

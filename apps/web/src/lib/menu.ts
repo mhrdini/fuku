@@ -1,6 +1,5 @@
-import { Cog, LucideIcon, UserCircle2, Users } from 'lucide-react'
-
-import { useDashboardStore } from '~/store/dashboard'
+import { UserTeam } from '@fuku/api/schemas'
+import { Cog, LucideIcon, UserCircle2, Users2 } from 'lucide-react'
 
 export type MenuGroup = {
   label: string
@@ -22,27 +21,25 @@ export type Submenu = {
   icon?: LucideIcon
 }
 
-export const useMenu = (): MenuGroup[] => {
-  const { currentTeamSlug } = useDashboardStore()
-
-  return !currentTeamSlug
+export const useMenu = (team: UserTeam | null): MenuGroup[] => {
+  return !team
     ? []
     : [
         {
           label: 'Teams',
           menus: [
             {
-              href: `/team/${currentTeamSlug}`,
+              href: `/team/${team.slug}`,
               label: 'Overview',
-              icon: Users,
+              icon: Users2,
             },
             {
-              href: `/team/${currentTeamSlug}/members`,
+              href: `/team/${team.slug}/members`,
               label: 'Members',
               icon: UserCircle2,
             },
             {
-              href: `/team/${currentTeamSlug}/settings`,
+              href: `/team/${team.slug}/settings`,
               label: 'Settings',
               icon: Cog,
             },

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import { TeamMemberRole } from '@fuku/db'
 import { TeamMemberInputSchema } from '@fuku/db/schemas'
 import {
@@ -36,7 +37,6 @@ import { toast } from 'sonner'
 import z from 'zod/v4'
 
 import { DialogId } from '~/lib/dialog'
-import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 import { DiscardChangesAlertDialogContent } from '../../discard-changes-alert-dialog'
@@ -57,16 +57,23 @@ const TeamMemberCreateFormSchema = TeamMemberInputSchema.extend({
 type TeamMemberCreateFormType = z.infer<typeof TeamMemberCreateFormSchema>
 
 export const CreateMemberFormDialog = () => {
-  const { currentTeamId } = useDashboardStore()
-
-  const { id, closeDialog } = useDialogStore()
-  const [payGradeOpen, setPayGradeOpen] = useState(false)
+  const params = useParams()
+  const slug = params?.slug as string
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
 
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
+
+  const { id, closeDialog } = useDialogStore()
+  const [payGradeOpen, setPayGradeOpen] = useState(false)
+
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.list.queryOptions({}),
+    ...trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
   })
 
   const { mutateAsync: createMember, isPending } = useMutation({
@@ -78,9 +85,9 @@ export const CreateMemberFormDialog = () => {
     },
     onSuccess: data => {
       closeDialog()
-      queryClient.invalidateQueries({
-        ...trpc.location.list.queryOptions({}),
-      })
+      queryClient.invalidateQueries(
+        trpc.location.list.queryOptions({ teamId: team!.id }),
+      )
       toast.success(
         `${data.givenNames} ${data.familyName} has been created to the team.`,
       )
@@ -100,12 +107,12 @@ export const CreateMemberFormDialog = () => {
   })
 
   useEffect(() => {
-    if (id === DialogId.CREATE_TEAM_MEMBER && currentTeamId) {
+    if (id === DialogId.CREATE_TEAM_MEMBER && team && team.id) {
       form.reset(
         {
           givenNames: '',
           familyName: '',
-          teamId: currentTeamId,
+          teamId: team.id,
           rateMultiplier: 1,
           teamMemberRole: TeamMemberRole.STAFF,
           username: '',
@@ -113,7 +120,7 @@ export const CreateMemberFormDialog = () => {
         { keepDirty: false },
       )
     }
-  }, [id, currentTeamId])
+  }, [id, team])
 
   const onSubmit = async (data: TeamMemberCreateFormType) => {
     if (!form.formState.isDirty) {

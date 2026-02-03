@@ -3,19 +3,20 @@ import { TeamMemberSchema } from '@fuku/db/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
 import z from 'zod/v4'
 
-import { teamProcedure } from '../../trpc'
+import { protectedProcedure } from '../../trpc'
 
 export const teamMemberRouter = {
-  list: teamProcedure
+  list: protectedProcedure
     .input(
       z.object({
+        teamId: z.string(),
         limit: z.number().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       return ctx.db.teamMember.findMany({
         where: {
-          teamId: ctx.activeTeamId, // ← source of truth
+          teamId: input.teamId,
           deletedAt: null,
         },
         include: {
@@ -32,11 +33,10 @@ export const teamMemberRouter = {
       })
     }),
 
-  create: teamProcedure
+  create: protectedProcedure
     .input(
       TeamMemberSchema.omit({
         id: true,
-        teamId: true,
         createdAt: true,
         updatedAt: true,
         deletedAt: true,
@@ -65,13 +65,12 @@ export const teamMemberRouter = {
       return ctx.db.teamMember.create({
         data: {
           ...data,
-          teamId: ctx.activeTeamId!,
           userId,
         },
       })
     }),
 
-  update: teamProcedure
+  update: protectedProcedure
     .input(
       TeamMemberSchema.partial().extend({
         id: z.string(),
@@ -107,13 +106,18 @@ export const teamMemberRouter = {
       return updated
     }),
 
-  delete: teamProcedure
-    .input(z.object({ id: z.string() }))
+  delete: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        teamId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       const member = await ctx.db.teamMember.findFirst({
         where: {
           id: input.id,
-          teamId: ctx.activeTeamId!,
+          teamId: input.teamId,
           deletedAt: null,
         },
       })
@@ -129,7 +133,7 @@ export const teamMemberRouter = {
       if (member.teamMemberRole === TeamMemberRole.ADMIN) {
         const activeAdminCount = await ctx.db.teamMember.count({
           where: {
-            teamId: ctx.activeTeamId!,
+            teamId: input.teamId,
             teamMemberRole: TeamMemberRole.ADMIN,
             deletedAt: null,
           },
@@ -152,7 +156,7 @@ export const teamMemberRouter = {
       })
     }),
 
-  restore: teamProcedure
+  restore: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const restored = await ctx.db.teamMember.update({

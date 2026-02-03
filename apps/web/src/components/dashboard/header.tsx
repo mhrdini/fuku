@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import { Separator, SidebarTrigger } from '@fuku/ui/components'
 
 import { LogOutButton } from '~/components/auth/log-out-button'
