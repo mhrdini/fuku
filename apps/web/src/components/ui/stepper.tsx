@@ -4,7 +4,7 @@ import { Fragment, useCallback } from 'react'
 import { Button, Label, Separator } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { ZodObject } from 'zod'
+import { ZodObject } from 'zod/v4'
 
 export type Step = {
   label: string

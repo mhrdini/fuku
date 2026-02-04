@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import {
   Badge,
@@ -15,6 +16,7 @@ import { useQueries, useQuery } from '@tanstack/react-query'
 import { ArrowRight } from 'lucide-react'
 
 import { useSession } from '~/components/providers/session-provider'
+import { isEntity } from '~/lib/db'
 import { useTRPC } from '~/trpc/client'
 
 const MAX_VISIBLE = 3
@@ -33,30 +35,74 @@ export const SummarySection = () => {
   })
 
   const [
-    { data: members },
-    { data: locations },
-    { data: payGrades },
-    { data: shiftTypes },
+    { data: memberIds },
+    { data: locationIds },
+    { data: payGradeIds },
+    { data: shiftTypeIds },
   ] = useQueries({
     queries: [
       {
-        ...trpc.teamMember.list.queryOptions({ teamId: team!.id }),
+        ...trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
         enabled: !!team,
       },
       {
-        ...trpc.location.list.queryOptions({ teamId: team!.id }),
+        ...trpc.location.listIds.queryOptions({ teamId: team!.id }),
         enabled: !!team,
       },
       {
-        ...trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+        ...trpc.payGrade.listIds.queryOptions({ teamId: team!.id }),
         enabled: !!team,
       },
       {
-        ...trpc.shiftType.list.queryOptions({ teamId: team!.id }),
+        ...trpc.shiftType.listIds.queryOptions({ teamId: team!.id }),
         enabled: !!team,
       },
     ],
   })
+
+  const memberQueries = useQueries({
+    queries: (memberIds ?? []).map(({ id }) => ({
+      ...trpc.teamMember.byId.queryOptions({ id }),
+      enabled: !!memberIds,
+    })),
+  })
+
+  const members = useMemo(() => {
+    return memberQueries.map(q => q.data).filter(isEntity)
+  }, [memberQueries])
+
+  const locationQueries = useQueries({
+    queries: (locationIds ?? []).map(({ id }) => ({
+      ...trpc.location.byId.queryOptions({ id }),
+      enabled: !!locationIds,
+    })),
+  })
+
+  const locations = useMemo(() => {
+    return locationQueries.map(q => q.data).filter(isEntity)
+  }, [locationQueries])
+
+  const payGradeQueries = useQueries({
+    queries: (payGradeIds ?? []).map(({ id }) => ({
+      ...trpc.payGrade.byId.queryOptions({ id }),
+      enabled: !!payGradeIds,
+    })),
+  })
+
+  const payGrades = useMemo(() => {
+    return payGradeQueries.map(q => q.data).filter(isEntity)
+  }, [payGradeQueries])
+
+  const shiftTypeQueries = useQueries({
+    queries: (shiftTypeIds ?? []).map(({ id }) => ({
+      ...trpc.shiftType.byId.queryOptions({ id }),
+      enabled: !!shiftTypeIds,
+    })),
+  })
+
+  const shiftTypes = useMemo(() => {
+    return shiftTypeQueries.map(q => q.data).filter(isEntity)
+  }, [shiftTypeQueries])
 
   const onManageMembers = () => {
     router.push(`/${session?.user.username}/team/${slug}/members`)

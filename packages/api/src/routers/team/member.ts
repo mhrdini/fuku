@@ -1,12 +1,57 @@
-import { TeamMemberRole } from '@fuku/db'
-import { TeamMemberSchema } from '@fuku/db/schemas'
+import { TeamMemberRoleValues, TeamMemberSchema } from '@fuku/db/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
 import z from 'zod/v4'
 
+import { TeamMemberCreateInputSchema } from '../../schemas'
 import { protectedProcedure } from '../../trpc'
 
 export const teamMemberRouter = {
-  list: protectedProcedure
+  // source of truth for a member -> create / update / restore
+  byId: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.db.teamMember.findFirst({
+        where: {
+          id: input.id,
+          deletedAt: null,
+        },
+        include: {
+          payGrade: true,
+          user: true,
+        },
+      })
+    }),
+
+  // membership + ordering -> create / delete / restore
+  listIds: protectedProcedure
+    .input(
+      z.object({
+        teamId: z.string(),
+        limit: z.number().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.db.teamMember.findMany({
+        where: {
+          teamId: input.teamId,
+          deletedAt: null,
+        },
+        ...(input.limit && { take: input.limit }),
+        orderBy: {
+          createdAt: 'asc',
+        },
+        select: {
+          id: true,
+        },
+      })
+    }),
+
+  // UI snapshot -> never invalidated
+  listDetailed: protectedProcedure
     .input(
       z.object({
         teamId: z.string(),
@@ -20,29 +65,23 @@ export const teamMemberRouter = {
           deletedAt: null,
         },
         include: {
-          user: true,
           payGrade: true,
+          user: true,
         },
-        ...(input.limit && { take: input.limit }),
         orderBy: [
           { payGrade: { name: 'asc' } },
           { createdAt: 'asc' },
           { givenNames: 'asc' },
           { familyName: 'asc' },
         ],
+        ...(input.limit && { take: input.limit }),
       })
     }),
 
   create: protectedProcedure
     .input(
-      TeamMemberSchema.omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-        deletedById: true,
-      }).extend({
-        username: z.string().optional(),
+      TeamMemberCreateInputSchema.extend({
+        teamId: z.string(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -66,6 +105,10 @@ export const teamMemberRouter = {
         data: {
           ...data,
           userId,
+        },
+        include: {
+          payGrade: true,
+          user: true,
         },
       })
     }),
@@ -102,6 +145,10 @@ export const teamMemberRouter = {
           ...data,
           ...(userId !== null && { userId }),
         },
+        include: {
+          payGrade: true,
+          user: true,
+        },
       })
       return updated
     }),
@@ -130,11 +177,11 @@ export const teamMemberRouter = {
         })
       }
 
-      if (member.teamMemberRole === TeamMemberRole.ADMIN) {
+      if (member.teamMemberRole === TeamMemberRoleValues.ADMIN) {
         const activeAdminCount = await ctx.db.teamMember.count({
           where: {
             teamId: input.teamId,
-            teamMemberRole: TeamMemberRole.ADMIN,
+            teamMemberRole: TeamMemberRoleValues.ADMIN,
             deletedAt: null,
           },
         })
@@ -166,6 +213,10 @@ export const teamMemberRouter = {
         data: {
           deletedAt: null,
           deletedById: null,
+        },
+        include: {
+          payGrade: true,
+          user: true,
         },
       })
       return restored

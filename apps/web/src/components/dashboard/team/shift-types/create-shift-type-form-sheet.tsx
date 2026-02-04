@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { ShiftTypeInputSchema } from '@fuku/db/schemas'
+import { ColorHex } from '@fuku/db/schemas'
 import {
   Button,
   Field,
@@ -26,13 +26,13 @@ import z from 'zod/v4'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
-const ShiftTypeCreateFormSchema = ShiftTypeInputSchema.extend({
+const ShiftTypeCreateFormSchema = z.object({
+  teamId: z.uuid({ error: 'invalid_team_id' }),
+  startTime: z.string({ error: 'invalid_start_time' }),
+  endTime: z.string({ error: 'invalid_end_time' }),
   name: z.string().min(1, { error: 'invalid_shift_type_name' }),
-  description: z.string().optional(),
-  color: z.string().optional(),
-}).omit({
-  shiftAssignments: true,
-  team: true,
+  description: z.string().nullish(),
+  color: ColorHex.optional(),
 })
 
 type ShiftTypeCreateFormType = z.infer<typeof ShiftTypeCreateFormSchema>
@@ -75,7 +75,7 @@ export const CreateShiftTypeFormSheet = () => {
     onSuccess: data => {
       closeSheet()
       queryClient.invalidateQueries(
-        trpc.shiftType.list.queryOptions({ teamId: team!.id }),
+        trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
       )
       toast.success(`${data.name} has been created.`)
     },

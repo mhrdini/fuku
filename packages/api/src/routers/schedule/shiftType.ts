@@ -1,10 +1,25 @@
 import type { TRPCRouterRecord } from '@trpc/server'
+import { ColorHex } from '@fuku/db/schemas'
 import z from 'zod/v4'
 
 import { protectedProcedure } from '../../trpc'
 
 export const shiftTypeRouter = {
-  list: protectedProcedure
+  byId: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.shiftType.findFirst({
+        where: {
+          id: input.id,
+          deletedAt: null,
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      })
+    }),
+
+  listIds: protectedProcedure
     .input(
       z.object({
         teamId: z.string(),
@@ -12,7 +27,31 @@ export const shiftTypeRouter = {
       }),
     )
     .query(async ({ input, ctx }) => {
-      const shiftTypes = await ctx.db.shiftType.findMany({
+      return ctx.db.shiftType.findMany({
+        where: {
+          team: {
+            id: input.teamId,
+          },
+          deletedAt: null,
+        },
+        ...(input.limit && { take: input.limit }),
+        orderBy: {
+          createdAt: 'asc',
+        },
+        select: {
+          id: true,
+        },
+      })
+    }),
+  listDetailed: protectedProcedure
+    .input(
+      z.object({
+        teamId: z.string(),
+        limit: z.number().optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      return ctx.db.shiftType.findMany({
         where: {
           team: {
             id: input.teamId,
@@ -24,17 +63,16 @@ export const shiftTypeRouter = {
           createdAt: 'asc',
         },
       })
-      return shiftTypes
     }),
   create: protectedProcedure
     .input(
       z.object({
         teamId: z.string(),
         name: z.string(),
-        description: z.string().optional(),
+        description: z.string().nullish(),
         startTime: z.string(),
         endTime: z.string(),
-        color: z.string().optional(),
+        color: ColorHex.optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -58,7 +96,7 @@ export const shiftTypeRouter = {
         description: z.string().nullish(),
         startTime: z.string().nullish(),
         endTime: z.string().nullish(),
-        color: z.string().nullish(),
+        color: ColorHex.optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
