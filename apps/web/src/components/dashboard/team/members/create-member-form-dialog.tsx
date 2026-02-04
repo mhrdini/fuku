@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { TeamMemberRole } from '@fuku/db'
-import { TeamMemberInputSchema } from '@fuku/db/schemas'
+import { TeamMemberCreateInputSchema } from '@fuku/api/schemas'
+import { TeamMemberRoleValues } from '@fuku/db/schemas'
 import {
   AlertDialog,
   AlertDialogTrigger,
   Button,
+  Checkbox,
   Command,
   CommandEmpty,
   CommandGroup,
@@ -32,7 +33,12 @@ import { cn } from '@fuku/ui/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronDown } from 'lucide-react'
-import { Controller, useForm } from 'react-hook-form'
+import {
+  Controller,
+  SubmitErrorHandler,
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form'
 import { toast } from 'sonner'
 import z from 'zod/v4'
 
@@ -41,18 +47,7 @@ import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 import { DiscardChangesAlertDialogContent } from '../../discard-changes-alert-dialog'
 
-const TeamMemberCreateFormSchema = TeamMemberInputSchema.extend({
-  givenNames: z.string().min(1, { error: 'invalid_given_names' }),
-  familyName: z.string().min(1, { error: 'invalid_family_name' }),
-  payGradeId: z.string({ error: 'invalid_pay_grade_id' }),
-  rateMultiplier: z
-    .number({ error: 'invalid_rate_multiplier' })
-    .min(0, { error: 'invalid_rate_multiplier_negative' }),
-  username: z.string().optional(),
-}).omit({
-  unavailabilities: true,
-  dayAssignments: true,
-})
+const TeamMemberCreateFormSchema = TeamMemberCreateInputSchema
 
 type TeamMemberCreateFormType = z.infer<typeof TeamMemberCreateFormSchema>
 
@@ -72,7 +67,7 @@ export const CreateMemberFormDialog = () => {
   const [payGradeOpen, setPayGradeOpen] = useState(false)
 
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+    ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
     enabled: !!team,
   })
 
@@ -85,11 +80,16 @@ export const CreateMemberFormDialog = () => {
     },
     onSuccess: data => {
       closeDialog()
-      queryClient.invalidateQueries(
-        trpc.location.list.queryOptions({ teamId: team!.id }),
+      queryClient.setQueryData(
+        trpc.teamMember.byId.queryKey({ id: data.id }),
+        data,
       )
+      queryClient.invalidateQueries(
+        trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
+      )
+
       toast.success(
-        `${data.givenNames} ${data.familyName} has been created to the team.`,
+        `${data.givenNames} ${data.familyName} has been added to the team.`,
       )
     },
   })
@@ -98,10 +98,9 @@ export const CreateMemberFormDialog = () => {
     defaultValues: {
       givenNames: '',
       familyName: '',
-      teamId: '',
       rateMultiplier: 1,
-      teamMemberRole: TeamMemberRole.STAFF,
-      username: '',
+      teamMemberRole: TeamMemberRoleValues.STAFF,
+      payGradeId: null,
     },
     resolver: zodResolver(TeamMemberCreateFormSchema),
   })
@@ -110,19 +109,18 @@ export const CreateMemberFormDialog = () => {
     if (id === DialogId.CREATE_TEAM_MEMBER && team && team.id) {
       form.reset(
         {
-          givenNames: '',
-          familyName: '',
           teamId: team.id,
-          rateMultiplier: 1,
-          teamMemberRole: TeamMemberRole.STAFF,
-          username: '',
+          teamMemberRole: TeamMemberRoleValues.STAFF,
         },
-        { keepDirty: false },
+        {
+          keepDefaultValues: true,
+          keepDirty: false,
+        },
       )
     }
   }, [id, team])
 
-  const onSubmit = async (data: TeamMemberCreateFormType) => {
+  const onSubmit: SubmitHandler<TeamMemberCreateFormType> = async data => {
     if (!form.formState.isDirty) {
       form.setError('root', { message: 'There are no changes to save.' })
       return
@@ -130,8 +128,15 @@ export const CreateMemberFormDialog = () => {
     try {
       await createMember(data)
     } catch {
-      // handled in onError
+      // handled in mutation onError
     }
+  }
+
+  const onError: SubmitErrorHandler<
+    TeamMemberCreateFormType
+  > = async errors => {
+    console.log('team member create values:', form.getValues())
+    console.log('team member create error:', errors)
   }
 
   const cancelButton = (
@@ -144,7 +149,10 @@ export const CreateMemberFormDialog = () => {
     <>
       <DialogTitle>New Team Member</DialogTitle>
       <FieldDescription>Create a new member to your team.</FieldDescription>
-      <form id='form-create-member' onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        id='form-create-member'
+        onSubmit={form.handleSubmit(onSubmit, onError)}
+      >
         <FieldSet>
           <FieldGroup>
             <Controller
@@ -307,6 +315,32 @@ export const CreateMemberFormDialog = () => {
                 )}
               />
             </div>
+            <Controller
+              name='teamMemberRole'
+              control={form.control}
+              render={({ field }) => (
+                <Field orientation='horizontal'>
+                  <Checkbox
+                    checked={field.value === TeamMemberRoleValues.ADMIN}
+                    id='form-create-member-is-admin'
+                    onCheckedChange={checked =>
+                      field.onChange(
+                        checked
+                          ? TeamMemberRoleValues.ADMIN
+                          : TeamMemberRoleValues.STAFF,
+                      )
+                    }
+                  />
+                  <FieldLabel
+                    htmlFor='form-create-member-is-admin'
+                    className='font-normal'
+                  >
+                    Set as team admin
+                  </FieldLabel>
+                </Field>
+              )}
+            />
+
             <FieldSeparator />
             <Controller
               name='username'
@@ -318,6 +352,7 @@ export const CreateMemberFormDialog = () => {
                   </FieldLabel>
                   <Input
                     {...field}
+                    value={field.value ?? ''}
                     id='form-create-member-username'
                     aria-invalid={fieldState.invalid}
                     placeholder='Username (optional)'

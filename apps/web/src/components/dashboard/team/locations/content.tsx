@@ -49,7 +49,7 @@ export const TeamLocationsContent = () => {
   })
 
   const { data } = useQuery({
-    ...trpc.location.list.queryOptions({ teamId: team!.id }),
+    ...trpc.location.listDetailed.queryOptions({ teamId: team!.id }),
     enabled: !!team,
   })
 
@@ -57,7 +57,7 @@ export const TeamLocationsContent = () => {
     ...trpc.location.update.mutationOptions(),
     onSuccess: () => {
       queryClient.invalidateQueries(
-        trpc.location.list.queryOptions({ teamId: team?.id! }),
+        trpc.location.listDetailed.queryOptions({ teamId: team?.id! }),
       )
     },
   })

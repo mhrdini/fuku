@@ -1,9 +1,12 @@
-import { TeamUpdateInputObjectZodSchema } from '@fuku/db/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
 import { customAlphabet } from 'nanoid'
-import { z } from 'zod/v4'
+import z from 'zod/v4'
 
-import { TeamCreateInputSchema, UserTeam } from '../../schemas'
+import {
+  TeamCreateInputSchema,
+  TeamUpdateInputSchema,
+  UserTeam,
+} from '../../schemas'
 import { protectedProcedure } from '../../trpc'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 8)
@@ -215,7 +218,7 @@ export const teamRouter = {
     }),
 
   update: protectedProcedure
-    .input(TeamUpdateInputObjectZodSchema.extend({ id: z.string() }))
+    .input(TeamUpdateInputSchema)
     .mutation(async ({ input, ctx }) => {
       const { id, ...data } = input
       const updatedCount = await ctx.db.team.updateMany({

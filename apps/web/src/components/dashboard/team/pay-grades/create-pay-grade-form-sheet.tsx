@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { PayGradeInputSchema } from '@fuku/db/schemas'
 import {
   Button,
   Field,
@@ -26,15 +25,13 @@ import z from 'zod/v4'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
-const PayGradeCreateFormSchema = PayGradeInputSchema.extend({
+const PayGradeCreateFormSchema = z.object({
+  teamId: z.uuid({ error: 'invalid_team_id' }),
   name: z.string().min(1, { error: 'invalid_pay_grade_name' }),
-  description: z.string().optional(),
+  description: z.string().nullish(),
   baseRate: z
     .number({ error: 'invalid_base_rate' })
     .min(0, { error: 'invalid_base_rate_negative' }),
-}).omit({
-  team: true,
-  teamMembers: true,
 })
 
 type PayGradeCreateFormGrade = z.infer<typeof PayGradeCreateFormSchema>
@@ -77,7 +74,7 @@ export const CreatePayGradeFormSheet = () => {
     onSuccess: data => {
       closeSheet()
       queryClient.invalidateQueries(
-        trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+        trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
       )
       toast.success(`${data.name} has been created.`)
     },

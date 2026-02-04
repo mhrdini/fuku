@@ -29,7 +29,7 @@ export const RemovePayGradeAlertDialog = () => {
   const { editingId: currentPayGradeId } = useDialogStore()
 
   const { data: payGrade, isPending: isLoadingPayGrade } = useQuery({
-    ...trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+    ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
     enabled: !!team,
     select: payGrades =>
       payGrades.find(payGrade => payGrade.id === currentPayGradeId),
@@ -44,7 +44,7 @@ export const RemovePayGradeAlertDialog = () => {
     },
     onSuccess: data => {
       queryClient.invalidateQueries(
-        trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+        trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
       )
       toast(`${data.name} has been removed.`)
     },

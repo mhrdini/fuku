@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@fuku/ui/components'
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import { Column, ColumnDef } from '@tanstack/react-table'
 import {
   ArrowDown,
@@ -22,6 +22,7 @@ import {
   Trash,
 } from 'lucide-react'
 
+import { isEntity } from '~/lib/db'
 import { DialogId } from '~/lib/dialog'
 import { TeamMemberUI, toTeamMemberUI } from '~/lib/member'
 import { getHiddenColumns } from '~/lib/table'
@@ -52,12 +53,24 @@ export default function TeamMembersContent() {
 
   const { openDialog, openAlertDialog } = useDialogStore()
 
-  const { data: members } = useQuery({
-    ...trpc.teamMember.list.queryOptions({ teamId: team!.id }),
+  const { data: memberIds } = useQuery({
+    ...trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
     enabled: !!team,
   })
 
+  const memberQueries = useQueries({
+    queries: (memberIds ?? []).map(({ id }) => ({
+      ...trpc.teamMember.byId.queryOptions({ id }),
+      enabled: !!memberIds,
+    })),
+  })
+
+  const members = useMemo(() => {
+    return memberQueries.map(q => q.data).filter(isEntity)
+  }, [memberQueries])
+
   const onUpdateMember = useCallback((id: string) => {
+    console.log('onUpdateMember id:', id)
     openDialog({
       id: DialogId.UPDATE_TEAM_MEMBER,
       editingId: id,
@@ -65,6 +78,8 @@ export default function TeamMembersContent() {
   }, [])
 
   const onRemoveMember = useCallback((id: string) => {
+    console.log('onRemoveMember id:', id)
+
     openAlertDialog({
       id: DialogId.REMOVE_TEAM_MEMBER,
       editingId: id,
@@ -185,7 +200,7 @@ export default function TeamMembersContent() {
   return (
     <MembersDataTableSection
       columns={columns}
-      data={members ? members.map(toTeamMemberUI) : []}
+      data={members ? members.map(m => toTeamMemberUI(m)) : []}
       defaultHiddenColumns={defaultHiddenColumns}
     />
   )
