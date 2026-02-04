@@ -22,10 +22,10 @@ export default async function DashboardLayout({
 
   if (!session || session.user.username !== username) {
     redirect('/login')
-  } else {
-    prefetch(trpc.user.byUsername.queryOptions({ username }))
-    prefetch(trpc.team.getUserTeams.queryOptions())
   }
+
+  await prefetch(trpc.user.byUsername.queryOptions({ username }))
+  await prefetch(trpc.user.getSidebarState.queryOptions())
 
   return (
     <div className='min-h-screen'>

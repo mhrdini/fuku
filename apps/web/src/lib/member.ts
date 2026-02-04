@@ -1,40 +1,11 @@
 // --- For data table rows ---
 // Extend the schema with included relations
 
-import {
-  DayAssignmentSchema,
-  PayGradeSchema,
-  TeamMemberSchema as TeamMemberZodSchema,
-  TeamSchema,
-  UnavailabilitySchema,
-  UserSchema,
-} from '@fuku/db/schemas'
+import { TeamMemberOutput, TeamMemberOutputSchema } from '@fuku/api/schemas'
 import z from 'zod/v4'
 
 // from the procedure and also with UI-specific fields
-export const TeamMemberSchema = TeamMemberZodSchema.extend({
-  dayAssignments: DayAssignmentSchema.partial().array().nullish(),
-  unavailabilities: UnavailabilitySchema.partial().array().nullish(),
-  team: TeamSchema.partial().nullish(),
-  user: UserSchema.partial().nullish(),
-  payGrade: PayGradeSchema.partial().nullish(),
-  teamMemberRole: TeamMemberZodSchema.shape.teamMemberRole.unwrap(),
-  rateMultiplier: TeamMemberZodSchema.shape.rateMultiplier.unwrap(),
-})
-
-export type TeamMemberType = z.infer<typeof TeamMemberSchema>
-
-export const TeamMemberLightweightSchema = TeamMemberSchema.omit({
-  team: true,
-  unavailabilities: true,
-  dayAssignments: true,
-})
-
-export const TeamMemberUISchema = TeamMemberSchema.omit({
-  team: true,
-  unavailabilities: true,
-  dayAssignments: true,
-}).extend({
+export const TeamMemberUISchema = TeamMemberOutputSchema.extend({
   // UI-specific fields
   fullName: z.string(),
   payGradeName: z.string(),
@@ -46,12 +17,12 @@ export const TeamMemberUISchema = TeamMemberSchema.omit({
 export type TeamMemberUI = z.infer<typeof TeamMemberUISchema>
 
 export const toTeamMemberUI = (
-  m: z.infer<typeof TeamMemberLightweightSchema>,
+  m: NonNullable<TeamMemberOutput>,
 ): TeamMemberUI => ({
   ...m,
   fullName: `${m.givenNames} ${m.familyName}`,
   payGradeName: m.payGrade?.name ?? 'Unassigned',
   baseRate: m.payGrade?.baseRate ?? null,
-  effectiveRate: m.payGrade ? m.payGrade.baseRate! * m.rateMultiplier : null,
+  effectiveRate: m.payGrade ? m.payGrade.baseRate * m.rateMultiplier : null,
   username: m.user ? m.user.username : null,
 })

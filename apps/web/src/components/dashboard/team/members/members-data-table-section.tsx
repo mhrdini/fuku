@@ -91,7 +91,7 @@ export function MembersDataTableSection({
     enabled: !!slug,
   })
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+    ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
     enabled: !!team,
   })
 
@@ -169,7 +169,7 @@ export function MembersDataTableSection({
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                {payGrades!.map(pg => (
+                {payGrades?.map(pg => (
                   <CommandItem
                     key={pg.id}
                     value={pg.name}

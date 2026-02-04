@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { TeamCreateInputSchema, TeamCreateInputType } from '@fuku/api/schemas'
+import { TeamCreateInput, TeamCreateInputSchema } from '@fuku/api/schemas'
 import {
   Badge,
   Button,
@@ -66,6 +66,8 @@ import {
 import {
   Controller,
   FormProvider,
+  SubmitErrorHandler,
+  SubmitHandler,
   useFieldArray,
   UseFieldArrayReturn,
   useForm,
@@ -81,7 +83,7 @@ import { useTRPC } from '~/trpc/client'
 
 const TeamCreateFormSchema = TeamCreateInputSchema
 
-type TeamCreateFormType = TeamCreateInputType
+type TeamCreateFormType = TeamCreateInput
 
 const BasicInfoSectionSchema = TeamCreateFormSchema.pick({
   name: true,
@@ -157,6 +159,16 @@ export default function NewTeamPage() {
     ),
   )
 
+  // id values are only needed for client-side form state management
+  // there will be server-generated ids upon creation that will actually be
+  // stored in the db, so we can use random uuids here
+
+  // for the case of pay grade ids, we use "payGradeClientId" to differentiate
+  // between the server-generated ids "payGradeId" and the client-side ids
+  // as we need to use the client ids to know which pay grade is assigned to
+  // which team member. the create procedure will resolve the correct ids upon
+  // pay grade and team member creation.
+
   useEffect(() => {
     if (isFetched && currentUser) {
       const exists = form
@@ -172,6 +184,7 @@ export default function NewTeamPage() {
             familyName: '',
             teamMemberRole: 'ADMIN',
             rateMultiplier: 1,
+            teamId: crypto.randomUUID(),
           },
         ])
       }
@@ -198,11 +211,16 @@ export default function NewTeamPage() {
     },
   })
 
-  const onSubmit = (values: TeamCreateFormType) => {
-    console.log('submitting:', values)
+  const onSubmit: SubmitHandler<TeamCreateFormType> = values => {
+    console.log('new team submitting:', values)
     try {
       createTeam(values)
     } catch {}
+  }
+
+  const onError: SubmitErrorHandler<TeamCreateFormType> = errors => {
+    console.log('new team submit errors:', errors)
+    console.log('new team submit values:', form.getValues())
   }
 
   const sections = [
@@ -216,7 +234,10 @@ export default function NewTeamPage() {
       <h2>Create a new team</h2>
       {stepper}
       <FormProvider {...form}>
-        <form id='form-new-team' onSubmit={form.handleSubmit(onSubmit)}>
+        <form
+          id='form-new-team'
+          onSubmit={form.handleSubmit(onSubmit, onError)}
+        >
           {sections[index]}
           <Field orientation='horizontal' className='mt-6'>
             <Button
@@ -290,6 +311,7 @@ function BasicInfoSection() {
               </FieldLabel>
               <Input
                 {...field}
+                value={field.value || ''}
                 id='form-user-auth-description'
                 aria-invalid={fieldState.invalid}
                 placeholder='Description (optional)'
@@ -559,6 +581,7 @@ function TeamMemberSheet({
       givenNames: '',
       teamMemberRole: 'STAFF',
       rateMultiplier: 1,
+      teamId: crypto.randomUUID(),
     },
     resolver: zodResolver(TeamMemberFormSchema),
   })
@@ -574,9 +597,6 @@ function TeamMemberSheet({
   }, [editingIndex, open])
 
   const submitTeamMember = async (values: TeamMemberFormType) => {
-    const isValid = await form.trigger()
-    if (!isValid) return
-
     if (editingIndex !== null) {
       update(editingIndex, { ...fields[editingIndex], ...values })
     } else {
@@ -786,7 +806,15 @@ function TeamMemberSheet({
               )}
               <Button
                 className='ml-auto'
-                onClick={form.handleSubmit(submitTeamMember)}
+                onClick={async () => {
+                  form.trigger().then(isValid => {
+                    if (isValid) {
+                      form.handleSubmit(submitTeamMember)()
+                    } else {
+                      console.log('form invalid', form.formState.errors)
+                    }
+                  })
+                }}
               >
                 {editingIndex !== null ? 'Save' : 'Add'}
               </Button>

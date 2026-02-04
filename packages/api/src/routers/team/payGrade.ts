@@ -5,7 +5,44 @@ import { protectedProcedure } from '../../trpc'
 import { numberFromInput } from '../../utils/numberFromInput'
 
 export const payGradeRouter = {
-  list: protectedProcedure
+  byId: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.db.payGrade.findFirst({
+        where: {
+          id: input.id,
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      })
+    }),
+
+  listIds: protectedProcedure
+    .input(
+      z.object({
+        teamId: z.string(),
+        limit: z.number().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.db.payGrade.findMany({
+        where: {
+          teamId: input.teamId,
+        },
+        ...(input.limit && { take: input.limit }),
+        orderBy: { createdAt: 'asc' },
+        select: {
+          id: true,
+        },
+      })
+    }),
+
+  listDetailed: protectedProcedure
     .input(
       z.object({
         teamId: z.string(),

@@ -30,10 +30,10 @@ export const RemoveMemberAlertDialog = () => {
   })
 
   const { data: teamMember, isPending: isLoadingTeamMember } = useQuery({
-    ...trpc.teamMember.list.queryOptions({ teamId: team!.id }),
-    enabled: !!team,
-    select: members =>
-      members.find(member => member.id === currentTeamMemberId),
+    ...trpc.teamMember.byId.queryOptions({
+      id: currentTeamMemberId!,
+    }),
+    enabled: !!currentTeamMemberId,
   })
 
   const { mutateAsync: removeMember, isPending } = useMutation({
@@ -44,10 +44,11 @@ export const RemoveMemberAlertDialog = () => {
       )
     },
     onSuccess: data => {
+      queryClient.removeQueries({
+        queryKey: trpc.teamMember.byId.queryKey({ id: data.id }),
+      })
       queryClient.invalidateQueries(
-        trpc.location.list.queryOptions({
-          teamId: team!.id,
-        }),
+        trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
       )
       const toastId = toast(
         `${data.givenNames} ${data.familyName} has been removed.`,
@@ -70,8 +71,12 @@ export const RemoveMemberAlertDialog = () => {
       toast.error(`${error.message}`)
     },
     onSuccess: data => {
+      queryClient.setQueryData(
+        trpc.teamMember.byId.queryKey({ id: data.id }),
+        data,
+      )
       queryClient.invalidateQueries(
-        trpc.location.list.queryOptions({ teamId: team!.id }),
+        trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
       )
       toast.success(`${data.givenNames} ${data.familyName} has been restored.`)
     },

@@ -3,6 +3,10 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import {
+  TeamMemberUpdateInput,
+  TeamMemberUpdateInputSchema,
+} from '@fuku/api/schemas'
+import {
   AlertDialog,
   AlertDialogTrigger,
   Button,
@@ -30,19 +34,17 @@ import { cn } from '@fuku/ui/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronDown } from 'lucide-react'
-import { Controller, useForm } from 'react-hook-form'
+import {
+  Controller,
+  SubmitErrorHandler,
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form'
 import { toast } from 'sonner'
-import z from 'zod/v4'
 
-import { TeamMemberSchema } from '~/lib/member'
 import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 import { DiscardChangesAlertDialogContent } from '../../discard-changes-alert-dialog'
-
-const TeamMemberUpdateFormSchema = TeamMemberSchema.extend({
-  username: z.string().optional(),
-})
-type TeamMemberUpdateFormType = z.infer<typeof TeamMemberUpdateFormSchema>
 
 export const UpdateMemberFormDialog = () => {
   const { editingId: currentTeamMemberId, closeDialog } = useDialogStore()
@@ -62,32 +64,38 @@ export const UpdateMemberFormDialog = () => {
     isPending,
     isSuccess: teamMemberFetched,
   } = useQuery({
-    ...trpc.teamMember.list.queryOptions({ teamId: team!.id }),
-    enabled: !!team,
-    select: members =>
-      members.find(member => member.id === currentTeamMemberId),
+    ...trpc.teamMember.byId.queryOptions({ id: currentTeamMemberId! }),
+    enabled: !!currentTeamMemberId,
   })
 
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+    ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
     enabled: !!team,
   })
 
-  const form = useForm<TeamMemberUpdateFormType>({
+  const form = useForm<TeamMemberUpdateInput>({
     defaultValues: {
+      id: currentTeamMemberId || '',
       givenNames: '',
       familyName: '',
       payGradeId: '',
       rateMultiplier: 1,
       username: '',
     },
-    resolver: zodResolver(TeamMemberUpdateFormSchema),
+    resolver: zodResolver(TeamMemberUpdateInputSchema),
   })
 
   useEffect(() => {
-    if (teamMemberFetched && teamMember) {
+    if (teamMemberFetched && teamMember && currentTeamMemberId) {
       form.reset(
-        { ...teamMember, username: teamMember.user?.username || '' },
+        {
+          ...teamMember,
+          id: currentTeamMemberId,
+          userId: teamMember.user?.id || null,
+          user: teamMember.user || null,
+          payGrade: teamMember.payGrade || null,
+          username: teamMember.user?.username || '',
+        },
         {
           keepDirty: false,
           keepTouched: false,
@@ -95,7 +103,7 @@ export const UpdateMemberFormDialog = () => {
         },
       )
     }
-  }, [teamMemberFetched, teamMember])
+  }, [teamMemberFetched, teamMember, currentTeamMemberId])
 
   const { mutateAsync: updateMember } = useMutation({
     ...trpc.teamMember.update.mutationOptions(),
@@ -105,15 +113,16 @@ export const UpdateMemberFormDialog = () => {
       )
     },
     onSuccess: data => {
-      closeDialog()
-      queryClient.invalidateQueries(
-        trpc.teamMember.list.queryOptions({ teamId: team!.id }),
+      queryClient.setQueryData(
+        trpc.teamMember.byId.queryKey({ id: data.id }),
+        data,
       )
+      closeDialog()
       toast.success(`${data.givenNames} ${data.familyName} has been updated.`)
     },
   })
 
-  const onSubmit = async (data: TeamMemberUpdateFormType) => {
+  const onSubmit: SubmitHandler<TeamMemberUpdateInput> = async data => {
     if (!form.formState.isDirty) {
       form.setError('root', { message: 'There are no changes to save.' })
       return
@@ -125,8 +134,9 @@ export const UpdateMemberFormDialog = () => {
     }
   }
 
-  const onError = (errors: any) => {
-    console.error('Form submission errors:', errors)
+  const onError: SubmitErrorHandler<TeamMemberUpdateInput> = errors => {
+    console.error('update member errors:', errors)
+    console.error('update member values:', form.getValues())
   }
 
   const cancelButton = (

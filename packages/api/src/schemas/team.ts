@@ -1,70 +1,58 @@
+import { TeamMember, TeamMemberRole, TeamSchema } from '@fuku/db/schemas'
+import z from 'zod/v4'
+
 import {
-  LocationSchema,
-  PayGradeSchema,
-  ShiftTypeSchema,
-  TeamMemberSchema,
-} from '@fuku/db/schemas'
-import { z } from 'zod/v4'
+  LocationCreateInputSchema,
+  LocationUpdateInputSchema,
+} from './location'
+import {
+  PayGradeCreateInputSchema,
+  PayGradeUpdateInputSchema,
+} from './payGrade'
+import {
+  ShiftTypeCreateInputSchema,
+  ShiftTypeUpdateInputSchema,
+} from './shiftType'
+import {
+  TeamMemberCreateInputSchema,
+  TeamMemberUpdateInputSchema,
+} from './teamMember'
 
-export const TeamCreateInputSchema = z.object({
+export const TeamCreateInputSchema = TeamSchema.extend({
   name: z.string().min(1, 'invalid_team_name'),
-  description: z.string().optional(),
-
-  teamMembers: z.array(
-    TeamMemberSchema.partial().extend({
-      id: z.string(),
-      userId: z.string().nullish(),
-      familyName: z.string(),
-      givenNames: z.string().min(1, 'invalid_given_names'),
-      teamMemberRole: z.enum(['ADMIN', 'STAFF']),
-      rateMultiplier: z.number().min(0, 'invalid_rate_multiplier'),
-      payGradeClientId: z.string().nullish(),
-    }),
-  ),
-
-  payGrades: z.array(
-    PayGradeSchema.partial().extend({
-      id: z.string(),
-      name: z.string().min(1, 'invalid_pay_grade_name'),
-      baseRate: z.number().min(0, 'invalid_base_rate'),
-    }),
-  ),
-
-  locations: z.array(
-    LocationSchema.partial().extend({
-      id: z.string(),
-      name: z.string().min(1, 'invalid_location_name'),
-      color: z.string().nullish(),
-    }),
-  ),
-
-  shiftTypes: z.array(
-    ShiftTypeSchema.partial().extend({
-      id: z.string(),
-      name: z.string().min(1, 'invalid_shift_type_name'),
-      startTime: z.string(),
-      endTime: z.string(),
-    }),
-  ),
+  description: z.string().nullish(),
+  teamMembers: z.array(TeamMemberCreateInputSchema),
+  payGrades: z.array(PayGradeCreateInputSchema),
+  locations: z.array(LocationCreateInputSchema),
+  shiftTypes: z.array(ShiftTypeCreateInputSchema),
+}).omit({
+  id: true,
+  slug: true,
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
+  deletedById: true,
 })
 
-export type TeamCreateInputType = z.infer<typeof TeamCreateInputSchema>
+export type TeamCreateInput = z.infer<typeof TeamCreateInputSchema>
 
-export type TeamMember = {
-  id: string
-  userId: string | null
-  familyName: string
-  givenNames: string
-  teamMemberRole: 'ADMIN' | 'STAFF'
-  rateMultiplier: number
+export type UserTeam = Pick<
+  z.infer<typeof TeamSchema>,
+  'id' | 'slug' | 'name' | 'description' | 'createdAt'
+> & {
+  role: TeamMemberRole
+  teamMembers: TeamMember[]
 }
 
-export type UserTeam = {
-  id: string
-  slug: string
-  name: string
-  description: string | null
-  createdAt: Date
-  role: 'ADMIN' | 'STAFF'
-  teamMembers: Array<TeamMember>
-}
+export const TeamUpdateInputSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, 'invalid_team_name').optional(),
+  description: z.string().nullish(),
+
+  teamMembers: z.array(TeamMemberUpdateInputSchema).optional(),
+  payGrades: z.array(PayGradeUpdateInputSchema).optional(),
+  locations: z.array(LocationUpdateInputSchema).optional(),
+  shiftTypes: z.array(ShiftTypeUpdateInputSchema).optional(),
+})
+
+export type TeamUpdateInputType = z.infer<typeof TeamUpdateInputSchema>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Collapsible,
@@ -39,22 +39,16 @@ import {
 } from 'lucide-react'
 
 import { useMenu } from '~/lib/menu'
+import { useTeamStore } from '~/store/team'
 import { useTRPC } from '~/trpc/client'
-import { useSession } from '../providers/session-provider'
 
 export const DashboardSidebar = ({ username }: { username: string }) => {
+  const { activeTeamId, setActiveTeamId } = useTeamStore()
+
   const trpc = useTRPC()
-  const session = useSession()
-
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   const { data: sidebarState } = useQuery({
     ...trpc.user.getSidebarState.queryOptions(),
-    enabled: !!session?.user,
   })
 
   const router = useRouter()
@@ -72,11 +66,12 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
   }
 
   const onSelectTeam = (id: string, slug: string) => {
+    setActiveTeamId(id)
     router.push(`/${username}/team/${slug}`)
   }
 
   const teamsHeader =
-    !mounted || sidebarState === undefined ? (
+    sidebarState === undefined ? (
       <>
         <div className='flex aspect-square size-8 items-center justify-center rounded-lg bg-muted'>
           <Skeleton className='size-4 rounded' />
@@ -132,7 +127,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
             )}
           </SidebarMenuButton>
         </DropdownMenuTrigger>
-        {sidebarState.teams && (
+        {sidebarState.teams.length > 0 && (
           <DropdownMenuContent
             className='w-[var(--radix-dropdown-menu-trigger-width)]'
             side='bottom'

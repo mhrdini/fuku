@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { LocationInputSchema } from '@fuku/db/schemas'
+import { ColorHex } from '@fuku/db/schemas'
 import {
   Button,
   Field,
@@ -26,13 +26,11 @@ import z from 'zod/v4'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
-const LocationCreateFormSchema = LocationInputSchema.extend({
+const LocationCreateFormSchema = z.object({
   teamId: z.string(),
   name: z.string().min(1, { error: 'invalid_location_name' }),
   address: z.string().optional(),
-  color: z.string().optional().nullable(),
-}).omit({
-  shiftAssignments: true,
+  color: ColorHex.optional(),
 })
 
 type LocationCreateFormType = z.infer<typeof LocationCreateFormSchema>
@@ -78,7 +76,7 @@ export const CreateLocationFormSheet = () => {
     onSuccess: data => {
       closeSheet()
       queryClient.invalidateQueries(
-        trpc.location.list.queryOptions({
+        trpc.location.listDetailed.queryOptions({
           teamId: team!.id,
         }),
       )
