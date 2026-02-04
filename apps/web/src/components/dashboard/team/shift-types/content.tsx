@@ -49,7 +49,7 @@ export const TeamShiftTypesContent = () => {
   } | null>(null)
 
   const { data } = useQuery({
-    ...trpc.shiftType.list.queryOptions({ teamId: team!.id }),
+    ...trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
     enabled: !!team,
   })
 
@@ -57,7 +57,7 @@ export const TeamShiftTypesContent = () => {
     ...trpc.shiftType.update.mutationOptions(),
     onSuccess: data => {
       queryClient.invalidateQueries(
-        trpc.shiftType.list.queryOptions({ teamId: team!.id }),
+        trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
       )
     },
   })

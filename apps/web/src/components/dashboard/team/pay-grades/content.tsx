@@ -49,7 +49,7 @@ export const TeamPayGradesContent = () => {
   })
 
   const { data } = useQuery({
-    ...trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+    ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
     enabled: !!team,
   })
 
@@ -57,7 +57,7 @@ export const TeamPayGradesContent = () => {
     ...trpc.payGrade.update.mutationOptions(),
     onSuccess: () => {
       queryClient.invalidateQueries(
-        trpc.payGrade.list.queryOptions({ teamId: team!.id }),
+        trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
       )
     },
   })
@@ -202,7 +202,7 @@ export const TeamPayGradesContent = () => {
           className='text-muted-foreground'
           onClick={onNewPayGrade}
         >
-          <Plus /> New Pay Grade
+          <Plus /> New pay grade
         </Button>
       </div>
     </div>

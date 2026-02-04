@@ -1,10 +1,26 @@
 import type { TRPCRouterRecord } from '@trpc/server'
+import { ColorHex } from '@fuku/db/schemas'
 import z from 'zod/v4'
 
 import { protectedProcedure } from '../../trpc'
 
 export const locationRouter = {
-  list: protectedProcedure
+  byId: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.db.location.findFirst({
+        where: {
+          id: input.id,
+        },
+        orderBy: { createdAt: 'asc' },
+      })
+    }),
+
+  listIds: protectedProcedure
     .input(
       z.object({
         teamId: z.string(),
@@ -12,7 +28,30 @@ export const locationRouter = {
       }),
     )
     .query(async ({ input, ctx }) => {
-      const locations = await ctx.db.location.findMany({
+      return ctx.db.location.findMany({
+        where: {
+          team: {
+            id: input.teamId,
+          },
+          deletedAt: null,
+        },
+        ...(input.limit && { take: input.limit }),
+        orderBy: { createdAt: 'asc' },
+        select: {
+          id: true,
+        },
+      })
+    }),
+
+  listDetailed: protectedProcedure
+    .input(
+      z.object({
+        teamId: z.string(),
+        limit: z.number().optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      return ctx.db.location.findMany({
         where: {
           team: {
             id: input.teamId,
@@ -22,7 +61,6 @@ export const locationRouter = {
         ...(input.limit && { take: input.limit }),
         orderBy: { createdAt: 'asc' },
       })
-      return locations
     }),
   create: protectedProcedure
     .input(
@@ -30,7 +68,7 @@ export const locationRouter = {
         teamId: z.string(),
         name: z.string(),
         address: z.string().nullish(),
-        color: z.string().nullish(),
+        color: ColorHex.optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -50,7 +88,7 @@ export const locationRouter = {
         id: z.string(),
         name: z.string().optional(),
         address: z.string().nullish(),
-        color: z.string().nullish(),
+        color: ColorHex.optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
