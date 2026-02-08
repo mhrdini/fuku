@@ -47,6 +47,9 @@ export const RemoveLocationAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.location.listIds.queryOptions({ teamId: team!.id }),
       )
+      queryClient.invalidateQueries(
+        trpc.location.listDetailed.queryOptions({ teamId: team!.id }),
+      )
       const toastId = toast(`${data.name} has been removed.`, {
         action: {
           label: 'Undo',
@@ -71,6 +74,9 @@ export const RemoveLocationAlertDialog = () => {
       )
       queryClient.invalidateQueries(
         trpc.location.listIds.queryOptions({ teamId: team!.id }),
+      )
+      queryClient.invalidateQueries(
+        trpc.location.listDetailed.queryOptions({ teamId: team!.id }),
       )
       toast.success(`${data.name} has been restored.`)
     },
