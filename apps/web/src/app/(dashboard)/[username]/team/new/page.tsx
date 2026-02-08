@@ -50,7 +50,7 @@ import {
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Check,
   ChevronDown,
@@ -143,7 +143,7 @@ export default function NewTeamPage() {
   })
 
   const session = useSession()
-
+  const queryClient = useQueryClient()
   const trpc = useTRPC()
 
   const { data: currentUser, isFetched } = useQuery(
@@ -206,7 +206,7 @@ export default function NewTeamPage() {
   const { mutateAsync: createTeam } = useMutation({
     ...trpc.team.create.mutationOptions(),
     onSuccess: data => {
-      console.log('team created:', data)
+      queryClient.invalidateQueries(trpc.user.getSidebarState.queryOptions())
       router.push(`/${session?.user.username}/team/${data.slug}`)
     },
   })
@@ -230,7 +230,7 @@ export default function NewTeamPage() {
   ] as const
 
   return (
-    <div className='flex flex-col self-center gap-6 max-w-lg mx-auto'>
+    <div className='flex flex-col gap-6 max-w-lg mx-auto'>
       <h2>Create a new team</h2>
       {stepper}
       <FormProvider {...form}>
