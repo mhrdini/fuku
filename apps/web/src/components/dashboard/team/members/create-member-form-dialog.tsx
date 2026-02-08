@@ -27,10 +27,10 @@ import {
   FieldSeparator,
   FieldSet,
   Input,
+  LoadingButton,
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Spinner,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -376,13 +376,7 @@ export const CreateMemberFormDialog = () => {
               ) : (
                 <DialogClose asChild>{cancelButton}</DialogClose>
               )}
-              <Button
-                type='submit'
-                form='form-create-member'
-                disabled={isPending}
-              >
-                {isPending ? <Spinner /> : 'Create'}
-              </Button>
+              <LoadingButton loading={isPending}>Create</LoadingButton>
             </Field>
           </FieldGroup>
         </FieldSet>

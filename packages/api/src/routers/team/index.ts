@@ -325,13 +325,105 @@ export const teamRouter = {
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      const userId = ctx.session.user.id
+      const team = await ctx.db.team.findFirst({
+        where: {
+          id: input.id,
+          deletedAt: null,
+          adminUsers: { some: { id: userId } },
+        },
+        include: {
+          teamMembers: true,
+          locations: true,
+          payGrades: true,
+          shiftTypes: true,
+        },
+      })
+
+      if (!team) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: `No team with id '${input.id}' found or you do not have permission to delete it`,
+        })
+      }
+
+      await ctx.db.shiftAssignment.deleteMany({
+        where: {
+          dayAssignment: {
+            teamMember: { teamId: input.id },
+          },
+        },
+      })
+
+      await ctx.db.leaveAssignment.deleteMany({
+        where: {
+          dayAssignment: {
+            teamMember: { teamId: input.id },
+          },
+        },
+      })
+
+      await ctx.db.dayAssignment.deleteMany({
+        where: {
+          teamMember: { teamId: input.id },
+        },
+      })
+
+      await ctx.db.unavailability.deleteMany({
+        where: {
+          teamMember: { teamId: input.id },
+        },
+      })
+
+      const now = new Date()
+
+      await ctx.db.teamMember.updateMany({
+        where: {
+          teamId: input.id,
+          deletedAt: null,
+        },
+        data: {
+          deletedAt: now,
+          deletedById: userId,
+          payGradeId: null,
+        },
+      })
+
+      await ctx.db.location.updateMany({
+        where: {
+          teamId: input.id,
+          deletedAt: null,
+        },
+        data: {
+          deletedAt: now,
+          deletedById: userId,
+        },
+      })
+
+      await ctx.db.shiftType.updateMany({
+        where: {
+          teamId: input.id,
+          deletedAt: null,
+        },
+        data: {
+          deletedAt: now,
+          deletedById: userId,
+        },
+      })
+
+      await ctx.db.payGrade.deleteMany({
+        where: {
+          teamId: input.id,
+        },
+      })
+
       const deletedCount = await ctx.db.team.updateMany({
         where: {
           id: input.id,
           deletedAt: null,
-          adminUsers: { some: { id: ctx.session.user.id } },
+          adminUsers: { some: { id: userId } },
         },
-        data: { deletedAt: new Date(), deletedById: ctx.session.user.id },
+        data: { deletedAt: now, deletedById: userId },
       })
 
       if (deletedCount.count === 0) {
@@ -341,19 +433,27 @@ export const teamRouter = {
         })
       }
 
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { lastActiveTeamId: true },
+      const remainingTeams = await ctx.db.team.findMany({
+        where: {
+          deletedAt: null,
+          OR: [
+            { adminUsers: { some: { id: userId } } },
+            { teamMembers: { some: { userId, deletedAt: null } } },
+          ],
+        },
+        select: { id: true },
+        orderBy: { createdAt: 'asc' },
       })
 
-      if (user?.lastActiveTeamId === input.id) {
-        await ctx.db.user.update({
-          where: { id: ctx.session.user.id },
-          data: { lastActiveTeamId: null },
-        })
-      }
+      const nextActiveTeamId =
+        remainingTeams.length > 0 ? remainingTeams[0].id : null
 
-      return { id: input.id, deletedAt: new Date() }
+      await ctx.db.user.update({
+        where: { id: userId },
+        data: { lastActiveTeamId: nextActiveTeamId },
+      })
+
+      return { team: team, activeTeamId: nextActiveTeamId, deletedAt: now }
     }),
 
   restore: protectedProcedure

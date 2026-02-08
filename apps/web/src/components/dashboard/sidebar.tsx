@@ -28,7 +28,7 @@ import {
   Skeleton,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Check,
   ChevronRight,
@@ -45,10 +45,18 @@ import { useTRPC } from '~/trpc/client'
 export const DashboardSidebar = ({ username }: { username: string }) => {
   const { activeTeamId, setActiveTeamId } = useTeamStore()
 
+  const queryClient = useQueryClient()
   const trpc = useTRPC()
 
   const { data: sidebarState } = useQuery({
     ...trpc.user.getSidebarState.queryOptions(),
+  })
+
+  const { mutateAsync: setLastActiveTeam } = useMutation({
+    ...trpc.user.setLastActiveTeam.mutationOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries(trpc.user.getSidebarState.queryOptions())
+    },
   })
 
   const router = useRouter()
@@ -65,8 +73,9 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
     router.push(`/${username}/team/new`)
   }
 
-  const onSelectTeam = (id: string, slug: string) => {
+  const onSelectTeam = async (id: string, slug: string) => {
     setActiveTeamId(id)
+    await setLastActiveTeam({ teamId: id })
     router.push(`/${username}/team/${slug}`)
   }
 

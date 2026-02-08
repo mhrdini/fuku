@@ -62,11 +62,13 @@ export type UserTeam = Pick<
   teamMembers: TeamMember[]
 }
 
-export const TeamUpdateInputSchema = z.object({
-  id: z.string(),
+export const TeamUpdateInputSchema = TeamSchema.pick({
+  id: true,
+  name: true,
+  description: true,
+}).extend({
   name: z.string().min(1, 'invalid_team_name').optional(),
   description: z.string().nullish(),
-
   teamMembers: z.array(TeamMemberUpdateInputSchema).optional(),
   payGrades: z.array(PayGradeUpdateInputSchema).optional(),
   locations: z.array(LocationUpdateInputSchema).optional(),
