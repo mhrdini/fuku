@@ -22,9 +22,27 @@ export const TeamCreateInputSchema = TeamSchema.extend({
   name: z.string().min(1, 'invalid_team_name'),
   description: z.string().nullish(),
   teamMembers: z.array(TeamMemberCreateInputSchema),
-  payGrades: z.array(PayGradeCreateInputSchema),
-  locations: z.array(LocationCreateInputSchema),
-  shiftTypes: z.array(ShiftTypeCreateInputSchema),
+  payGrades: z.array(
+    PayGradeCreateInputSchema.omit({
+      teamId: true,
+    }).extend({
+      id: z.string(),
+    }),
+  ),
+  locations: z.array(
+    LocationCreateInputSchema.omit({
+      teamId: true,
+    }).extend({
+      id: z.string(),
+    }),
+  ),
+  shiftTypes: z.array(
+    ShiftTypeCreateInputSchema.omit({
+      teamId: true,
+    }).extend({
+      id: z.string(),
+    }),
+  ),
 }).omit({
   id: true,
   slug: true,

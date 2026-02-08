@@ -28,8 +28,8 @@ export default async function DashboardLayout({
     <div className='min-h-screen'>
       <HydrateClient>
         <SessionProvider session={session}>
-          <SheetManager />
           <DialogManager />
+          <SheetManager />
           <SidebarProvider>
             <DashboardSidebar username={username} />
             <div className='flex flex-1 flex-col'>

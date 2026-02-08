@@ -396,11 +396,16 @@ function TeamMembersSection() {
         <FieldDescription>Add members to your team.</FieldDescription>
       </FieldGroup>
       <Field orientation='horizontal'>
-        <Button variant='outline' onClick={openPayGradeSheet}>
+        <Button type='button' variant='outline' onClick={openPayGradeSheet}>
           <Layers />
           Pay Grades
         </Button>
-        <Button variant='outline' className='ml-auto' onClick={openAddMember}>
+        <Button
+          type='button'
+          variant='outline'
+          className='ml-auto'
+          onClick={openAddMember}
+        >
           <UserRoundPlus />
           Add member
         </Button>
@@ -430,7 +435,7 @@ function TeamMembersSection() {
                   )}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant='ghost' size='icon'>
+                      <Button type='button' variant='ghost' size='icon'>
                         <Ellipsis />
                       </Button>
                     </DropdownMenuTrigger>
@@ -685,6 +690,7 @@ function TeamMemberSheet({
                     <Popover open={payGradeOpen} onOpenChange={setPayGradeOpen}>
                       <PopoverTrigger asChild>
                         <Button
+                          type='button'
                           id='form-create-member-pay-grade-id'
                           variant='outline'
                           role='combobox'
@@ -745,6 +751,7 @@ function TeamMemberSheet({
                   Base Rate
                 </FieldLabel>
                 <Button
+                  type='button'
                   id='form-create-member-base-rate'
                   variant='outline'
                   disabled
@@ -805,6 +812,7 @@ function TeamMemberSheet({
                 </Button>
               )}
               <Button
+                type='button'
                 className='ml-auto'
                 onClick={async () => {
                   form.trigger().then(isValid => {
@@ -892,7 +900,7 @@ function PayGradesSheet({
               error={formState.errors.payGrades?.[index]}
             />
           ))}
-          <Button variant='outline' onClick={handleAdd}>
+          <Button type='button' variant='outline' onClick={handleAdd}>
             <Plus />
             Add pay grade
           </Button>
@@ -980,7 +988,7 @@ function PayGradeItem({
       </ItemContent>
 
       <ItemActions>
-        <Button variant='ghost' size='icon' onClick={onDelete}>
+        <Button type='button' variant='ghost' size='icon' onClick={onDelete}>
           <Trash2 />
         </Button>
       </ItemActions>
@@ -1060,6 +1068,7 @@ function AdditionalDetailsSection() {
               </ItemContent>
               <ItemActions>
                 <Button
+                  type='button'
                   variant='secondary'
                   onClick={() => setLocationsOpen(true)}
                 >
@@ -1081,6 +1090,7 @@ function AdditionalDetailsSection() {
               </ItemContent>
               <ItemActions>
                 <Button
+                  type='button'
                   variant='secondary'
                   onClick={() => setShiftTypesOpen(true)}
                 >
@@ -1141,6 +1151,7 @@ function LocationsSheet({
           ))}
 
           <Button
+            type='button'
             variant='outline'
             onClick={() => append({ id: crypto.randomUUID(), name: '' })}
           >
@@ -1202,7 +1213,7 @@ function LocationItem({
         />
       </ItemContent>
       <ItemActions>
-        <Button variant='ghost' size='icon' onClick={onDelete}>
+        <Button type='button' variant='ghost' size='icon' onClick={onDelete}>
           <Trash2 />
         </Button>
       </ItemActions>
@@ -1256,15 +1267,16 @@ function ShiftTypesSheet({
           ))}
 
           <Button
+            type='button'
             variant='outline'
-            onClick={() =>
+            onClick={() => {
               append({
                 id: crypto.randomUUID(),
                 name: '',
                 startTime: '09:00',
                 endTime: '17:00',
               })
-            }
+            }}
           >
             <Plus />
             Add shift type
@@ -1371,7 +1383,7 @@ function ShiftTypeItem({
         />
       </ItemContent>
       <ItemActions>
-        <Button variant='ghost' size='icon' onClick={onDelete}>
+        <Button type='button' variant='ghost' size='icon' onClick={onDelete}>
           <Trash2 />
         </Button>
       </ItemActions>

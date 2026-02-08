@@ -9,10 +9,12 @@ import { CreatePayGradeFormSheet } from '../dashboard/team/pay-grades/create-pay
 import { CreateShiftTypeFormSheet } from '../dashboard/team/shift-types/create-shift-type-form-sheet'
 
 export const SheetManager = () => {
-  const { id, closeSheet } = useSheetStore()
+  const { open, id, closeSheet } = useSheetStore()
+
+  const handleClose = () => closeSheet()
 
   return (
-    <Sheet open={!!id} onOpenChange={() => closeSheet()}>
+    <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent side='right'>
         {id === SheetId.CREATE_LOCATION && <CreateLocationFormSheet />}
         {id === SheetId.CREATE_SHIFT_TYPE && <CreateShiftTypeFormSheet />}

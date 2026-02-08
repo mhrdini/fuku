@@ -84,6 +84,10 @@ function EditableCellInner<
           autoFocus
           onChange={e => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
+          onBlur={() => {
+            if (value !== String(row[columnName] ?? '')) saveChanges()
+            else cancelChanges()
+          }}
         />
       )}
     </div>
