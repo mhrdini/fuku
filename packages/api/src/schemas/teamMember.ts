@@ -20,8 +20,6 @@ export type TeamMemberOutput = z.infer<typeof TeamMemberOutputSchema>
 export const TeamMemberCreateInputSchema = TeamMemberSchema.extend({
   username: z.string().optional(),
   userId: z.string().optional(),
-  givenNames: z.string().min(1, 'invalid_given_names'),
-  rateMultiplier: z.number().min(0, 'invalid_rate_multiplier'),
   payGradeId: z.string().nullish(),
   payGradeClientId: z.string().nullish(),
 }).omit({
@@ -35,7 +33,5 @@ export type TeamMemberCreateInput = z.infer<typeof TeamMemberCreateInputSchema>
 
 export const TeamMemberUpdateInputSchema = TeamMemberOutputSchema.extend({
   username: z.string().optional(),
-  givenNames: z.string().min(1, 'invalid_given_names').optional(),
-  rateMultiplier: z.number().min(0, 'invalid_rate_multiplier').optional(),
 })
 export type TeamMemberUpdateInput = z.infer<typeof TeamMemberUpdateInputSchema>

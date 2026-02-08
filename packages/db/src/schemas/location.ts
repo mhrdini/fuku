@@ -4,7 +4,7 @@ import { ColorHex } from './helpers'
 
 export const LocationSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: z.string().min(1, { error: 'invalid_location_name' }),
   address: z.string().nullable(),
   teamId: z.string(),
   color: ColorHex.optional(),

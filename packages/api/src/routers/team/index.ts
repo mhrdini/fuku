@@ -209,7 +209,7 @@ export const teamRouter = {
         ),
       )
 
-      ctx.db.user.update({
+      await ctx.db.user.update({
         where: { id: ctx.session.user.id },
         data: { lastActiveTeamId: newTeam.id },
       })

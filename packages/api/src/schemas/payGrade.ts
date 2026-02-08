@@ -7,14 +7,7 @@ export const PayGradeOutputSchema = PayGradeSchema.extend({
 
 export type PayGradeOutput = z.infer<typeof PayGradeOutputSchema>
 
-export const PayGradeCreateInputSchema = PayGradeSchema.extend({
-  teamId: z.string({ error: 'invalid_team_id' }),
-  description: z.string().nullish(),
-  name: z.string().min(1, { error: 'invalid_pay_grade_name' }),
-  baseRate: z
-    .number({ error: 'invalid_base_rate' })
-    .min(0, { error: 'invalid_base_rate_negative' }),
-}).omit({
+export const PayGradeCreateInputSchema = PayGradeSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -22,8 +15,6 @@ export const PayGradeCreateInputSchema = PayGradeSchema.extend({
 
 export const PayGradeUpdateInputSchema = PayGradeSchema.partial().extend({
   id: z.string(),
-  name: z.string().min(1, 'invalid_pay_grade_name').optional(),
-  baseRate: z.number().min(0, 'invalid_base_rate').optional(),
 })
 
 export type PayGradeCreateInput = z.infer<typeof PayGradeCreateInputSchema>

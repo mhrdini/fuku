@@ -8,13 +8,13 @@ export const TeamMemberSchema = z.object({
   userId: z.string().nullable(),
 
   familyName: z.string(),
-  givenNames: z.string(),
+  givenNames: z.string().min(1, 'invalid_given_names'),
 
   teamId: z.string(),
   payGradeId: z.string().nullable(),
 
   teamMemberRole: TeamMemberRoleSchema,
-  rateMultiplier: z.number(),
+  rateMultiplier: z.number().min(0, 'invalid_rate_multiplier'),
 
   color: ColorHex.optional(),
 

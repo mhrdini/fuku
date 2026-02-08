@@ -232,7 +232,8 @@ export const TeamShiftTypesContent = () => {
           className='text-muted-foreground'
           onClick={onNewShiftType}
         >
-          <Plus /> New shift type
+          <Plus />
+          <span className='hidden sm:inline'>New shift type</span>
         </Button>
       </div>
     </div>

@@ -69,7 +69,7 @@ export const payGradeRouter = {
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const pg = ctx.db.payGrade.create({
+      const pg = await ctx.db.payGrade.create({
         data: {
           teamId: input.teamId,
           name: input.name,

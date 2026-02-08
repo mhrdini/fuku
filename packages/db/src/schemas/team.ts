@@ -3,7 +3,7 @@ import z from 'zod/v4'
 export const TeamSchema = z.object({
   id: z.string(),
   slug: z.string(),
-  name: z.string(),
+  name: z.string().min(1, 'invalid_team_name'),
   description: z.string().nullish(),
 
   createdAt: z.date(),

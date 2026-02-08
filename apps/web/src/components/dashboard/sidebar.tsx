@@ -187,7 +187,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
 
                     if (!menu.href && menu.submenus) {
                       sidebarMenuContent = (
-                        <Collapsible defaultOpen className='group/collapsible'>
+                        <Collapsible className='group/collapsible'>
                           <SidebarMenuItem>
                             <CollapsibleTrigger asChild>
                               <SidebarMenuButton>

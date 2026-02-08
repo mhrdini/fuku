@@ -206,7 +206,8 @@ export const TeamPayGradesContent = () => {
           className='text-muted-foreground'
           onClick={onNewPayGrade}
         >
-          <Plus /> New pay grade
+          <Plus />
+          <span className='hidden sm:inline'>New pay grade</span>
         </Button>
       </div>
     </div>

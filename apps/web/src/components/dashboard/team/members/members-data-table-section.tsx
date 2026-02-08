@@ -306,7 +306,7 @@ export function MembersDataTableSection({
           onClick={onCreateMember}
         >
           <Plus />
-          <span className='hidden lg:inline'>New team member</span>
+          <span className='hidden sm:inline'>New team member</span>
         </Button>
         <Button
           className='ml-auto'
