@@ -25,6 +25,7 @@ import {
   FieldSeparator,
   FieldSet,
   Input,
+  LoadingButton,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -377,13 +378,7 @@ export const UpdateMemberFormDialog = () => {
                       <DialogClose asChild>{cancelButton}</DialogClose>
                     )}
                   </AlertDialog>
-                  <Button
-                    type='submit'
-                    form='form-update-member'
-                    disabled={isPending}
-                  >
-                    {isPending ? <Spinner /> : 'Confirm'}
-                  </Button>
+                  <LoadingButton loading={isPending}>Save</LoadingButton>
                 </Field>
               </FieldGroup>
             </FieldSet>

@@ -14,11 +14,11 @@ import {
   FieldLabel,
   FieldSet,
   Input,
+  LoadingButton,
   SheetClose,
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  Spinner,
 } from '@fuku/ui/components'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -159,7 +159,7 @@ export const CreatePayGradeFormSheet = () => {
         </FieldSet>
         <SheetFooter>
           <Button form='form-create-pay-grade' disabled={isPending}>
-            {isPending ? <Spinner /> : 'Create pay grade'}
+            <LoadingButton loading={isPending}>Create</LoadingButton>
           </Button>
           <SheetClose asChild>
             <Button variant='outline' disabled={isPending}>
