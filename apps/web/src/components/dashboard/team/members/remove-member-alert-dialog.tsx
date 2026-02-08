@@ -7,7 +7,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
-  Button,
+  LoadingButton,
   Skeleton,
 } from '@fuku/ui/components'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -94,30 +94,30 @@ export const RemoveMemberAlertDialog = () => {
   return (
     <>
       <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
-      <AlertDialogDescription>
-        Are you sure you want to remove{' '}
-        {isLoadingTeamMember ? (
+      {isLoadingTeamMember ? (
+        <AlertDialogDescription asChild>
           <Skeleton className='inline-block h-4 w-10' />
-        ) : (
-          <span className='font-semibold'>
-            {teamMember?.givenNames} {teamMember?.familyName}
-          </span>
-        )}
-        ?
-        <br />
-        <span className='font-semibold'>This action cannot be undone.</span>
-      </AlertDialogDescription>
+        </AlertDialogDescription>
+      ) : (
+        <AlertDialogDescription>
+          <div>Are you sure you want to remove {teamMember?.givenNames}?</div>
+          <div className='font-semibold'>
+            You can restore it after deletion.
+          </div>
+        </AlertDialogDescription>
+      )}
       <AlertDialogFooter>
         <AlertDialogCancel>Cancel</AlertDialogCancel>
         <AlertDialogAction asChild>
-          <Button
+          <LoadingButton
             variant='destructive'
             onClick={onRemove}
+            loading={isPending}
             disabled={isLoadingTeamMember || isPending}
             className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
           >
             Remove
-          </Button>
+          </LoadingButton>
         </AlertDialogAction>
       </AlertDialogFooter>
     </>

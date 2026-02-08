@@ -7,7 +7,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
-  Button,
+  LoadingButton,
   Skeleton,
 } from '@fuku/ui/components'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -66,28 +66,28 @@ export const RemovePayGradeAlertDialog = () => {
   return (
     <>
       <AlertDialogTitle>Remove Pay Grade</AlertDialogTitle>
-      <AlertDialogDescription>
-        Are you sure you want to remove{' '}
-        {isLoadingPayGrade ? (
+      {isLoadingPayGrade ? (
+        <AlertDialogDescription asChild>
           <Skeleton className='inline-block h-4 w-10' />
-        ) : (
-          <span className='font-semibold'>{payGrade?.name}</span>
-        )}
-        ?
-        <br />
-        <span className='font-semibold'>This action cannot be undone.</span>
-      </AlertDialogDescription>
+        </AlertDialogDescription>
+      ) : (
+        <AlertDialogDescription>
+          <div>Are you sure you want to remove {payGrade?.name}?</div>
+          <div className='font-semibold'>This action cannot be undone.</div>
+        </AlertDialogDescription>
+      )}
       <AlertDialogFooter>
         <AlertDialogCancel>Cancel</AlertDialogCancel>
         <AlertDialogAction asChild>
-          <Button
+          <LoadingButton
             variant='destructive'
             onClick={onRemove}
+            loading={isPending}
             disabled={isLoadingPayGrade || isPending}
             className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
           >
             Remove
-          </Button>
+          </LoadingButton>
         </AlertDialogAction>
       </AlertDialogFooter>
     </>

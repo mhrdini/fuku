@@ -45,6 +45,7 @@ const getMultiSortIcon = (column: Column<any, any>) => {
 export default function TeamMembersContent() {
   const trpc = useTRPC()
   const params = useParams()
+  const username = params?.username as string
   const slug = params?.slug as string
   const { data: team } = useQuery({
     ...trpc.team.bySlug.queryOptions({ slug: slug! }),
@@ -117,6 +118,7 @@ export default function TeamMembersContent() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant='destructive'
+                  disabled={teamMember.username === username}
                   onClick={() => {
                     onRemoveMember(teamMember.id)
                   }}
