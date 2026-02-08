@@ -67,9 +67,9 @@ export const CreateShiftTypeFormSheet = () => {
   const { mutateAsync: createShiftType, isPending } = useMutation({
     ...trpc.shiftType.create.mutationOptions(),
     onError: error => {
-      toast.error(
-        `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
-      )
+      toast.error('Error', {
+        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+      })
     },
     onSuccess: data => {
       closeSheet()
@@ -83,7 +83,9 @@ export const CreateShiftTypeFormSheet = () => {
       queryClient.invalidateQueries(
         trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
       )
-      toast.success(`${data.name} has been created.`)
+      toast.success('Shift type', {
+        description: `${data.name} has been created.`,
+      })
     },
   })
 

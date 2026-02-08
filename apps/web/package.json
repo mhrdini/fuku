@@ -24,6 +24,7 @@
     "better-auth": "catalog:",
     "lucide-react": "catalog:",
     "next": "latest",
+    "next-themes": "catalog:",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
     "react-hook-form": "^7.66.0",

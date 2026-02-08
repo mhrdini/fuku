@@ -3,6 +3,7 @@ import '~/globals.css'
 import { Geist, M_PLUS_1 } from 'next/font/google'
 import { Toaster } from '@fuku/ui/components'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { ThemeProvider } from 'next-themes'
 
 import { TRPCReactProvider } from '~/trpc/client'
 
@@ -32,14 +33,17 @@ const RootLayout = ({
   return (
     <html
       lang={locale}
+      suppressHydrationWarning
       className={`${geist.variable} ${mPlus.variable}  antialiased`}
     >
       <body className='font-sans'>
-        <TRPCReactProvider>
-          {children}
-          <ReactQueryDevtools initialIsOpen={false} />
-          <Toaster />
-        </TRPCReactProvider>
+        <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+          <TRPCReactProvider>
+            {children}
+            <ReactQueryDevtools initialIsOpen={false} />
+            <Toaster />
+          </TRPCReactProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

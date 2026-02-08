@@ -36,9 +36,9 @@ export const RemoveLocationAlertDialog = () => {
   const { mutateAsync: removeLocation, isPending } = useMutation({
     ...trpc.location.delete.mutationOptions(),
     onError: error => {
-      toast.error(
-        `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
-      )
+      toast.error('Error', {
+        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+      })
     },
     onSuccess: data => {
       queryClient.removeQueries({
@@ -50,7 +50,8 @@ export const RemoveLocationAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.location.listDetailed.queryOptions({ teamId: team!.id }),
       )
-      const toastId = toast(`${data.name} has been removed.`, {
+      const toastId = toast('Location', {
+        description: `${data.name} has been removed.`,
         action: {
           label: 'Undo',
           onClick: async () => {
@@ -65,7 +66,7 @@ export const RemoveLocationAlertDialog = () => {
   const { mutateAsync: restoreLocation } = useMutation({
     ...trpc.location.restore.mutationOptions(),
     onError: error => {
-      toast.error(`${error.message}`)
+      toast.error('Error', { description: `${error.message}` })
     },
     onSuccess: data => {
       queryClient.setQueryData(
@@ -78,7 +79,9 @@ export const RemoveLocationAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.location.listDetailed.queryOptions({ teamId: team!.id }),
       )
-      toast.success(`${data.name} has been restored.`)
+      toast.success('Location', {
+        description: `${data.name} has been restored.`,
+      })
     },
   })
 
@@ -99,10 +102,12 @@ export const RemoveLocationAlertDialog = () => {
           <Skeleton className='inline-block h-4 w-10' />
         </AlertDialogDescription>
       ) : (
-        <AlertDialogDescription>
-          <div>Are you sure you want to remove {location?.name}?</div>
-          <div className='font-semibold'>
-            You can restore it after deletion.
+        <AlertDialogDescription asChild>
+          <div>
+            <div>Are you sure you want to remove {location?.name}?</div>
+            <div className='font-semibold'>
+              You can restore it after deletion.
+            </div>
           </div>
         </AlertDialogDescription>
       )}

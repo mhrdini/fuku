@@ -50,25 +50,23 @@ export const RemoveMemberAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
       )
-      const toastId = toast(
-        `${data.givenNames} ${data.familyName} has been removed.`,
-        {
-          action: {
-            label: 'Undo',
-            onClick: async () => {
-              await restoreMember({ id: data.id })
-              toast.dismiss(toastId)
-            },
+      const toastId = toast('Team member', {
+        description: `${data.givenNames} ${data.familyName} has been removed.`,
+        action: {
+          label: 'Undo',
+          onClick: async () => {
+            await restoreMember({ id: data.id })
+            toast.dismiss(toastId)
           },
         },
-      )
+      })
     },
   })
 
   const { mutateAsync: restoreMember } = useMutation({
     ...trpc.teamMember.restore.mutationOptions(),
     onError: error => {
-      toast.error(`${error.message}`)
+      toast.error('Error', { description: `${error.message}` })
     },
     onSuccess: data => {
       queryClient.setQueryData(
@@ -78,7 +76,9 @@ export const RemoveMemberAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
       )
-      toast.success(`${data.givenNames} ${data.familyName} has been restored.`)
+      toast.success('Team member', {
+        description: `${data.givenNames} ${data.familyName} has been restored.`,
+      })
     },
   })
 
@@ -99,10 +99,12 @@ export const RemoveMemberAlertDialog = () => {
           <Skeleton className='inline-block h-4 w-10' />
         </AlertDialogDescription>
       ) : (
-        <AlertDialogDescription>
-          <div>Are you sure you want to remove {teamMember?.givenNames}?</div>
-          <div className='font-semibold'>
-            You can restore it after deletion.
+        <AlertDialogDescription asChild>
+          <div>
+            <div>Are you sure you want to remove {teamMember?.givenNames}?</div>
+            <div className='font-semibold'>
+              You can restore it after deletion.
+            </div>
           </div>
         </AlertDialogDescription>
       )}

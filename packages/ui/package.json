@@ -33,7 +33,7 @@
     "clsx": "catalog:",
     "cmdk": "^1.1.1",
     "lucide-react": "catalog:",
-    "next-themes": "^0.4.6",
+    "next-themes": "catalog:",
     "sonner": "catalog:",
     "tailwind-merge": "catalog:",
     "tw-animate-css": "catalog:",

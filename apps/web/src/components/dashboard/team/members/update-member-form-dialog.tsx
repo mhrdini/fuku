@@ -108,9 +108,9 @@ export const UpdateMemberFormDialog = () => {
   const { mutateAsync: updateMember } = useMutation({
     ...trpc.teamMember.update.mutationOptions(),
     onError: error => {
-      toast.error(
-        `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
-      )
+      toast.error('Error', {
+        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+      })
     },
     onSuccess: data => {
       queryClient.setQueryData(
@@ -118,7 +118,9 @@ export const UpdateMemberFormDialog = () => {
         data,
       )
       closeDialog()
-      toast.success(`${data.givenNames} ${data.familyName} has been updated.`)
+      toast.success('Team member', {
+        description: `${data.givenNames} ${data.familyName} has been updated.`,
+      })
     },
   })
 
