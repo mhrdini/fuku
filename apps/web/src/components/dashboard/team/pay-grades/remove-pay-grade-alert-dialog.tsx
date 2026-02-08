@@ -47,6 +47,9 @@ export const RemovePayGradeAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.payGrade.listIds.queryOptions({ teamId: team!.id }),
       )
+      queryClient.invalidateQueries(
+        trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
+      )
       toast(`${data.name} has been removed.`)
     },
   })
