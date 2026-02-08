@@ -36,9 +36,9 @@ export const RemovePayGradeAlertDialog = () => {
   const { mutateAsync: removePayGrade, isPending } = useMutation({
     ...trpc.payGrade.delete.mutationOptions(),
     onError: error => {
-      toast.error(
-        `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
-      )
+      toast.error('Error', {
+        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+      })
     },
     onSuccess: data => {
       queryClient.removeQueries({
@@ -50,7 +50,7 @@ export const RemovePayGradeAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
       )
-      toast(`${data.name} has been removed.`)
+      toast('Pay grade', { description: `${data.name} has been removed.` })
     },
   })
 
@@ -71,9 +71,11 @@ export const RemovePayGradeAlertDialog = () => {
           <Skeleton className='inline-block h-4 w-10' />
         </AlertDialogDescription>
       ) : (
-        <AlertDialogDescription>
-          <div>Are you sure you want to remove {payGrade?.name}?</div>
-          <div className='font-semibold'>This action cannot be undone.</div>
+        <AlertDialogDescription asChild>
+          <div>
+            <div>Are you sure you want to remove {payGrade?.name}?</div>
+            <div className='font-semibold'>This action cannot be undone.</div>
+          </div>
         </AlertDialogDescription>
       )}
       <AlertDialogFooter>

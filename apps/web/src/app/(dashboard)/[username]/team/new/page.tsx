@@ -73,12 +73,14 @@ import {
   useForm,
   useFormContext,
 } from 'react-hook-form'
+import { toast } from 'sonner'
 import z from 'zod/v4'
 
 import { useSession } from '~/components/providers/session-provider'
 import { Step } from '~/components/ui/stepper'
 import { useDebouncedCommit } from '~/hooks/useDebouncedCommit'
 import { useStepper } from '~/hooks/useStepper'
+import { useTeamStore } from '~/store/team'
 import { useTRPC } from '~/trpc/client'
 
 const TeamCreateFormSchema = TeamCreateInputSchema
@@ -125,6 +127,8 @@ const steps: Step[] = [
 ]
 
 export default function NewTeamPage() {
+  const { setOpenTeamSelect } = useTeamStore()
+
   const router = useRouter()
   const { stepper, index, prevStep, nextStep, currentStep } = useStepper(steps)
 
@@ -206,8 +210,12 @@ export default function NewTeamPage() {
   const { mutateAsync: createTeam } = useMutation({
     ...trpc.team.create.mutationOptions(),
     onSuccess: data => {
+      setOpenTeamSelect(false)
       queryClient.invalidateQueries(trpc.user.getSidebarState.queryOptions())
       router.push(`/${session?.user.username}/team/${data.slug}`)
+      toast.success('Team', {
+        description: `${data.name} has been created.`,
+      })
     },
   })
 

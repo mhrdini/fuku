@@ -43,7 +43,8 @@ import { useTeamStore } from '~/store/team'
 import { useTRPC } from '~/trpc/client'
 
 export const DashboardSidebar = ({ username }: { username: string }) => {
-  const { activeTeamId, setActiveTeamId } = useTeamStore()
+  const { openTeamSelect, setOpenTeamSelect, activeTeamId, setActiveTeamId } =
+    useTeamStore()
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
@@ -91,7 +92,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
         </div>
       </>
     ) : (
-      <DropdownMenu>
+      <DropdownMenu open={openTeamSelect} onOpenChange={setOpenTeamSelect}>
         <DropdownMenuTrigger asChild>
           <SidebarMenuButton
             size='lg'
@@ -187,7 +188,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
 
                     if (!menu.href && menu.submenus) {
                       sidebarMenuContent = (
-                        <Collapsible className='group/collapsible'>
+                        <Collapsible defaultOpen className='group/collapsible'>
                           <SidebarMenuItem>
                             <CollapsibleTrigger asChild>
                               <SidebarMenuButton>

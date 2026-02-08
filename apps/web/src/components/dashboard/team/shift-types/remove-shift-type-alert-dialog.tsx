@@ -36,9 +36,9 @@ export const RemoveShiftTypeAlertDialog = () => {
   const { mutateAsync: removeShiftType, isPending } = useMutation({
     ...trpc.shiftType.delete.mutationOptions(),
     onError: error => {
-      toast.error(
-        `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
-      )
+      toast.error('Error', {
+        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+      })
     },
     onSuccess: data => {
       queryClient.removeQueries({
@@ -50,7 +50,8 @@ export const RemoveShiftTypeAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
       )
-      const toastId = toast(`${data.name} has been removed.`, {
+      const toastId = toast('Shift type', {
+        description: `${data.name} has been removed.`,
         action: {
           label: 'Undo',
           onClick: async () => {
@@ -65,7 +66,7 @@ export const RemoveShiftTypeAlertDialog = () => {
   const { mutateAsync: restoreShiftType } = useMutation({
     ...trpc.shiftType.restore.mutationOptions(),
     onError: error => {
-      toast.error(`${error.message}`)
+      toast.error('Error', { description: `${error.message}` })
     },
     onSuccess: data => {
       queryClient.setQueryData(
@@ -75,7 +76,9 @@ export const RemoveShiftTypeAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.shiftType.listIds.queryOptions({ teamId: team!.id }),
       )
-      toast.success(`${data.name} has been restored.`)
+      toast.success('Shift type', {
+        description: `${data.name} has been restored.`,
+      })
     },
   })
 
@@ -96,10 +99,12 @@ export const RemoveShiftTypeAlertDialog = () => {
           <Skeleton className='inline-block h-4 w-10' />
         </AlertDialogDescription>
       ) : (
-        <AlertDialogDescription>
-          <div>Are you sure you want to remove {shiftType?.name}?</div>
-          <div className='font-semibold'>
-            You can restore it after deletion.
+        <AlertDialogDescription asChild>
+          <div>
+            <div>Are you sure you want to remove {shiftType?.name}?</div>
+            <div className='font-semibold'>
+              You can restore it after deletion.
+            </div>
           </div>
         </AlertDialogDescription>
       )}

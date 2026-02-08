@@ -240,7 +240,7 @@ function SummaryCard<T>({
   onManage,
 }: SummaryCardProps<T>) {
   return (
-    <Card className='min-w-[200px] border-none p-0 gap-4 *:first:mt-4'>
+    <Card className='min-w-[200px] p-0 gap-4 *:first:mt-4'>
       <CardHeader className='px-4 gap-0'>
         <CardTitle className='text-sm'>{title}</CardTitle>
         <CardDescription className='text-xs'>

@@ -75,9 +75,9 @@ export const CreateLocationFormSheet = () => {
   const { mutateAsync: createLocation, isPending } = useMutation({
     ...trpc.location.create.mutationOptions(),
     onError: error => {
-      toast.error(
-        `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
-      )
+      toast.error('Error', {
+        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+      })
     },
     onSuccess: data => {
       closeSheet()
@@ -95,7 +95,9 @@ export const CreateLocationFormSheet = () => {
           teamId: team!.id,
         }),
       )
-      toast.success(`${data.name} has been created.`)
+      toast.success('Location', {
+        description: `${data.name} has been created.`,
+      })
     },
   })
   const onSubmit: SubmitHandler<LocationCreateFormType> = async data => {

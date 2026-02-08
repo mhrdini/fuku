@@ -214,7 +214,7 @@ export const TeamSettingsContent = () => {
                   onClick={handleDelete}
                   className='ml-auto'
                 >
-                  Delete Team
+                  Delete this team
                 </LoadingButton>
               </Field>
             </FieldGroup>
