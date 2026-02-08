@@ -158,9 +158,9 @@ export const CreatePayGradeFormSheet = () => {
           </FieldGroup>
         </FieldSet>
         <SheetFooter>
-          <Button form='form-create-pay-grade' disabled={isPending}>
-            <LoadingButton loading={isPending}>Create</LoadingButton>
-          </Button>
+          <LoadingButton form='form-create-pay-grade' loading={isPending}>
+            Create
+          </LoadingButton>
           <SheetClose asChild>
             <Button variant='outline' disabled={isPending}>
               Close

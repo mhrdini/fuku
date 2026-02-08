@@ -14,6 +14,7 @@ import {
   FieldLabel,
   FieldSet,
   Input,
+  LoadingButton,
   SheetClose,
   SheetFooter,
   SheetHeader,
@@ -176,9 +177,9 @@ export const CreateShiftTypeFormSheet = () => {
           </FieldGroup>
         </FieldSet>
         <SheetFooter>
-          <Button form='form-create-shift-type' disabled={isPending}>
+          <LoadingButton form='form-create-shift-type' loading={isPending}>
             {isPending ? <Spinner /> : 'Create shift type'}
-          </Button>
+          </LoadingButton>
           <SheetClose asChild>
             <Button variant='outline' disabled={isPending}>
               Close

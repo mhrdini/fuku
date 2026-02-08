@@ -14,6 +14,7 @@ import {
   FieldLabel,
   FieldSet,
   Input,
+  LoadingButton,
   SheetClose,
   SheetFooter,
   SheetHeader,
@@ -169,13 +170,9 @@ export const CreateLocationFormSheet = () => {
           </FieldGroup>
         </FieldSet>
         <SheetFooter>
-          <Button
-            form='form-create-location'
-            onClick={() => console.log('CLICK FIRED')}
-            disabled={isPending}
-          >
+          <LoadingButton form='form-create-location' loading={isPending}>
             Create location
-          </Button>
+          </LoadingButton>
           <SheetClose asChild>
             <Button type='button' variant='outline' disabled={isPending}>
               Close

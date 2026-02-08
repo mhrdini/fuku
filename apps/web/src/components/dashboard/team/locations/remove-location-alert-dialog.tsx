@@ -7,7 +7,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
-  Button,
+  LoadingButton,
   Skeleton,
 } from '@fuku/ui/components'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -94,30 +94,30 @@ export const RemoveLocationAlertDialog = () => {
   return (
     <>
       <AlertDialogTitle>Remove Location</AlertDialogTitle>
-      <AlertDialogDescription>
-        Are you sure you want to remove{' '}
-        {isLoadingLocation ? (
+      {isLoadingLocation ? (
+        <AlertDialogDescription asChild>
           <Skeleton className='inline-block h-4 w-10' />
-        ) : (
-          <span className='font-semibold'>{location?.name}</span>
-        )}
-        ?
-        <br />
-        <span className='font-semibold'>
-          You can restore it after deletion.
-        </span>
-      </AlertDialogDescription>
+        </AlertDialogDescription>
+      ) : (
+        <AlertDialogDescription>
+          <div>Are you sure you want to remove {location?.name}?</div>
+          <div className='font-semibold'>
+            You can restore it after deletion.
+          </div>
+        </AlertDialogDescription>
+      )}
       <AlertDialogFooter>
         <AlertDialogCancel>Cancel</AlertDialogCancel>
         <AlertDialogAction asChild>
-          <Button
+          <LoadingButton
             variant='destructive'
             onClick={onRemove}
+            loading={isPending}
             disabled={isLoadingLocation || isPending}
             className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
           >
             Remove
-          </Button>
+          </LoadingButton>
         </AlertDialogAction>
       </AlertDialogFooter>
     </>
