@@ -61,9 +61,13 @@ function EditableCellInner<
       if (error instanceof TRPCClientError) {
         const zodError = error.data?.zodError
         const issue = zodError?.fieldErrors?.[columnName as string]?.[0]
-        toast.error(issue ?? 'Invalid value. Please try again.')
+        toast.error('Error', {
+          description: issue ?? 'Invalid value. Please try again.',
+        })
       } else {
-        toast.error('Something went wrong. Please try again.')
+        toast.error('Error', {
+          description: 'Something went wrong. Please try again.',
+        })
       }
     }
   }
@@ -79,7 +83,8 @@ function EditableCellInner<
         children
       ) : (
         <Input
-          className='absolute inset-0 w-full h-full min-w-0 leading-none text-sm p-0 m-0 border-none rounded-none focus-visible:ring-0 shadow-none'
+          id={row.id}
+          className='absolute inset-0 w-full h-full min-w-0 leading-none text-sm p-0 m-0 border-none rounded-none focus-visible:ring-0 shadow-none !bg-transparent'
           value={value}
           autoFocus
           onChange={e => setValue(e.target.value)}

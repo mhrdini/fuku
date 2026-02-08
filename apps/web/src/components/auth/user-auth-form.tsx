@@ -21,6 +21,7 @@ import {
   FieldLabel,
   FieldSet,
   Input,
+  LoadingButton,
 } from '@fuku/ui/components'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
@@ -187,9 +188,14 @@ export function UserAuthForm({
         </CardContent>
         <CardFooter>
           <Field orientation='responsive'>
-            <Button type='submit' form='form-user-auth'>
-              {isRegister ? 'Sign Up' : 'Log In'}
-            </Button>
+            <LoadingButton
+              type='submit'
+              form='form-user-auth'
+              disabled={form.formState.isSubmitting}
+              loading={form.formState.isSubmitting}
+            >
+              {isRegister ? 'Sign up' : 'Log in'}
+            </LoadingButton>
             {isRegister && (
               <Button
                 type='button'
