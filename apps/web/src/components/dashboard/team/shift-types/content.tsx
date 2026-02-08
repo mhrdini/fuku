@@ -48,7 +48,7 @@ export const TeamShiftTypesContent = () => {
     columnKey: string
   } | null>(null)
 
-  const { data } = useQuery({
+  const { data: shiftTypes } = useQuery({
     ...trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
     enabled: !!team,
   })
@@ -56,6 +56,10 @@ export const TeamShiftTypesContent = () => {
   const { mutateAsync: updateShiftType, isPending: isUpdating } = useMutation({
     ...trpc.shiftType.update.mutationOptions(),
     onSuccess: data => {
+      queryClient.setQueryData(
+        trpc.shiftType.byId.queryKey({ id: data.id }),
+        data,
+      )
       queryClient.invalidateQueries(
         trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
       )
@@ -167,7 +171,7 @@ export const TeamShiftTypesContent = () => {
   ]
 
   const table = useReactTable({
-    data: data ?? [],
+    data: shiftTypes ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
   })

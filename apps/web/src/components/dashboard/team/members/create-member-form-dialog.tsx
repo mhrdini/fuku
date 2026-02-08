@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { TeamMemberCreateInputSchema } from '@fuku/api/schemas'
+import {
+  TeamMemberCreateInput,
+  TeamMemberCreateInputSchema,
+} from '@fuku/api/schemas'
 import { TeamMemberRoleValues } from '@fuku/db/schemas'
 import {
   AlertDialog,
@@ -40,7 +43,6 @@ import {
   useForm,
 } from 'react-hook-form'
 import { toast } from 'sonner'
-import z from 'zod/v4'
 
 import { DialogId } from '~/lib/dialog'
 import { useDialogStore } from '~/store/dialog'
@@ -49,22 +51,47 @@ import { DiscardChangesAlertDialogContent } from '../../discard-changes-alert-di
 
 const TeamMemberCreateFormSchema = TeamMemberCreateInputSchema
 
-type TeamMemberCreateFormType = z.infer<typeof TeamMemberCreateFormSchema>
+type TeamMemberCreateFormType = TeamMemberCreateInput
 
 export const CreateMemberFormDialog = () => {
+  const { id, closeDialog } = useDialogStore()
+  const [payGradeOpen, setPayGradeOpen] = useState(false)
+
   const params = useParams()
   const slug = params?.slug as string
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-
   const { data: team } = useQuery({
     ...trpc.team.bySlug.queryOptions({ slug: slug! }),
     enabled: !!slug,
   })
 
-  const { id, closeDialog } = useDialogStore()
-  const [payGradeOpen, setPayGradeOpen] = useState(false)
+  const form = useForm<TeamMemberCreateFormType>({
+    defaultValues: {
+      givenNames: '',
+      familyName: '',
+      rateMultiplier: 1,
+      teamMemberRole: TeamMemberRoleValues.STAFF,
+      payGradeId: null,
+    },
+    resolver: zodResolver(TeamMemberCreateFormSchema),
+  })
+
+  useEffect(() => {
+    if (id === DialogId.CREATE_TEAM_MEMBER && team && team.id) {
+      form.reset(
+        {
+          teamId: team.id,
+          teamMemberRole: TeamMemberRoleValues.STAFF,
+        },
+        {
+          keepDefaultValues: true,
+          keepDirty: false,
+        },
+      )
+    }
+  }, [id, team])
 
   const { data: payGrades } = useQuery({
     ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
@@ -93,32 +120,6 @@ export const CreateMemberFormDialog = () => {
       )
     },
   })
-
-  const form = useForm<TeamMemberCreateFormType>({
-    defaultValues: {
-      givenNames: '',
-      familyName: '',
-      rateMultiplier: 1,
-      teamMemberRole: TeamMemberRoleValues.STAFF,
-      payGradeId: null,
-    },
-    resolver: zodResolver(TeamMemberCreateFormSchema),
-  })
-
-  useEffect(() => {
-    if (id === DialogId.CREATE_TEAM_MEMBER && team && team.id) {
-      form.reset(
-        {
-          teamId: team.id,
-          teamMemberRole: TeamMemberRoleValues.STAFF,
-        },
-        {
-          keepDefaultValues: true,
-          keepDirty: false,
-        },
-      )
-    }
-  }, [id, team])
 
   const onSubmit: SubmitHandler<TeamMemberCreateFormType> = async data => {
     if (!form.formState.isDirty) {
