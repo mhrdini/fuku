@@ -2,7 +2,10 @@
 
 import { useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { ColorHex } from '@fuku/db/schemas'
+import {
+  ShiftTypeCreateInput,
+  ShiftTypeCreateInputSchema,
+} from '@fuku/api/schemas'
 import {
   Button,
   Field,
@@ -21,25 +24,18 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import z from 'zod/v4'
 
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
+import { SheetId } from '../../../../lib/sheet'
 
-const ShiftTypeCreateFormSchema = z.object({
-  teamId: z.uuid({ error: 'invalid_team_id' }),
-  startTime: z.string({ error: 'invalid_start_time' }),
-  endTime: z.string({ error: 'invalid_end_time' }),
-  name: z.string().min(1, { error: 'invalid_shift_type_name' }),
-  description: z.string().nullish(),
-  color: ColorHex.optional(),
-})
+const ShiftTypeCreateFormSchema = ShiftTypeCreateInputSchema
 
-type ShiftTypeCreateFormType = z.infer<typeof ShiftTypeCreateFormSchema>
+type ShiftTypeCreateFormType = ShiftTypeCreateInput
 
 export const CreateShiftTypeFormSheet = () => {
   const title = 'Create New Shift Type'
-  const { closeSheet } = useSheetStore()
+  const { id, closeSheet } = useSheetStore()
   const queryClient = useQueryClient()
   const trpc = useTRPC()
   const params = useParams()
@@ -51,7 +47,6 @@ export const CreateShiftTypeFormSheet = () => {
 
   const form = useForm<ShiftTypeCreateFormType>({
     defaultValues: {
-      teamId: team ? team.id : '',
       name: '',
       startTime: '09:00',
       endTime: '17:00',
@@ -60,10 +55,14 @@ export const CreateShiftTypeFormSheet = () => {
   })
 
   useEffect(() => {
-    if (team) {
-      form.resetField('teamId', { defaultValue: team.id })
+    if (id === SheetId.CREATE_SHIFT_TYPE && team?.id) {
+      form.setValue('teamId', team.id, {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      })
     }
-  }, [team])
+  }, [id, team?.id])
 
   const { mutateAsync: createShiftType, isPending } = useMutation({
     ...trpc.shiftType.create.mutationOptions(),
@@ -74,6 +73,13 @@ export const CreateShiftTypeFormSheet = () => {
     },
     onSuccess: data => {
       closeSheet()
+      queryClient.setQueryData(
+        trpc.shiftType.byId.queryKey({ id: data.id }),
+        data,
+      )
+      queryClient.invalidateQueries(
+        trpc.shiftType.listIds.queryOptions({ teamId: team!.id }),
+      )
       queryClient.invalidateQueries(
         trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
       )
@@ -170,7 +176,7 @@ export const CreateShiftTypeFormSheet = () => {
           </FieldGroup>
         </FieldSet>
         <SheetFooter>
-          <Button disabled={isPending}>
+          <Button form='form-create-shift-type' disabled={isPending}>
             {isPending ? <Spinner /> : 'Create shift type'}
           </Button>
           <SheetClose asChild>

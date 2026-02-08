@@ -8,13 +8,18 @@ export const ShiftTypeOutputSchema = ShiftTypeSchema.extend({
 
 export type ShiftTypeOutput = z.infer<typeof ShiftTypeOutputSchema>
 
-export const ShiftTypeCreateInputSchema = ShiftTypeSchema.pick({
+export const ShiftTypeCreateInputSchema = ShiftTypeSchema.extend({
+  startTime: Time,
+  endTime: Time,
+  name: z.string().min(1, { error: 'invalid_shift_type_name' }),
+  description: z.string().nullish(),
+  color: ColorHex.optional(),
+}).omit({
   id: true,
-  name: true,
-  startTime: true,
-  endTime: true,
-}).extend({
-  name: z.string().min(1, 'invalid_shift_type_name'),
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
+  deletedById: true,
 })
 
 export const ShiftTypeUpdateInputSchema = ShiftTypeSchema.partial().extend({
@@ -23,3 +28,6 @@ export const ShiftTypeUpdateInputSchema = ShiftTypeSchema.partial().extend({
   startTime: Time.optional(),
   endTime: Time.optional(),
 })
+
+export type ShiftTypeCreateInput = z.infer<typeof ShiftTypeCreateInputSchema>
+export type ShiftTypeUpdateInput = z.infer<typeof ShiftTypeUpdateInputSchema>

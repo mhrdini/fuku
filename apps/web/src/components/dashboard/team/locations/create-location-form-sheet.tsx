@@ -2,7 +2,10 @@
 
 import { useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { ColorHex } from '@fuku/db/schemas'
+import {
+  LocationCreateInput,
+  LocationCreateInputSchema,
+} from '@fuku/api/schemas'
 import {
   Button,
   Field,
@@ -15,29 +18,28 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  Spinner,
 } from '@fuku/ui/components'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Controller, useForm } from 'react-hook-form'
+import {
+  Controller,
+  SubmitErrorHandler,
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form'
 import { toast } from 'sonner'
-import z from 'zod/v4'
 
+import { SheetId } from '~/lib/sheet'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
-const LocationCreateFormSchema = z.object({
-  teamId: z.string(),
-  name: z.string().min(1, { error: 'invalid_location_name' }),
-  address: z.string().optional(),
-  color: ColorHex.optional(),
-})
+const LocationCreateFormSchema = LocationCreateInputSchema
 
-type LocationCreateFormType = z.infer<typeof LocationCreateFormSchema>
+type LocationCreateFormType = LocationCreateInput
 
 export const CreateLocationFormSheet = () => {
   const title = 'Create New Location'
-  const { closeSheet } = useSheetStore()
+  const { id, closeSheet } = useSheetStore()
 
   const params = useParams()
   const slug = params?.slug as string
@@ -53,7 +55,6 @@ export const CreateLocationFormSheet = () => {
 
   const form = useForm<LocationCreateFormType>({
     defaultValues: {
-      teamId: team?.id || '',
       name: '',
       address: '',
     },
@@ -61,10 +62,14 @@ export const CreateLocationFormSheet = () => {
   })
 
   useEffect(() => {
-    if (team) {
-      form.resetField('teamId', { defaultValue: team.id })
+    if (id === SheetId.CREATE_LOCATION && team?.id) {
+      form.setValue('teamId', team.id, {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      })
     }
-  }, [team])
+  }, [id, team?.id])
 
   const { mutateAsync: createLocation, isPending } = useMutation({
     ...trpc.location.create.mutationOptions(),
@@ -75,6 +80,15 @@ export const CreateLocationFormSheet = () => {
     },
     onSuccess: data => {
       closeSheet()
+      queryClient.setQueryData(
+        trpc.location.byId.queryKey({ id: data.id }),
+        data,
+      )
+      queryClient.invalidateQueries(
+        trpc.location.listIds.queryOptions({
+          teamId: team!.id,
+        }),
+      )
       queryClient.invalidateQueries(
         trpc.location.listDetailed.queryOptions({
           teamId: team!.id,
@@ -83,13 +97,19 @@ export const CreateLocationFormSheet = () => {
       toast.success(`${data.name} has been created.`)
     },
   })
-
-  const onSubmit = async (data: LocationCreateFormType) => {
+  const onSubmit: SubmitHandler<LocationCreateFormType> = async data => {
+    console.log('create location form values:', form.getValues())
+    console.log('create location form errors:', form.formState.errors)
     try {
       await createLocation(data)
     } catch {
       // handled in onError
     }
+  }
+
+  const onError: SubmitErrorHandler<LocationCreateFormType> = errors => {
+    console.log('create location form errors:', errors)
+    console.log('create location form values:', form.getValues())
   }
 
   return (
@@ -100,7 +120,7 @@ export const CreateLocationFormSheet = () => {
       <form
         id='form-create-location'
         className='flex flex-col gap-4 h-full'
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit, onError)}
       >
         <FieldSet className='grid gap-4 flex-1 auto-rows-min px-4'>
           <FieldGroup>
@@ -149,11 +169,15 @@ export const CreateLocationFormSheet = () => {
           </FieldGroup>
         </FieldSet>
         <SheetFooter>
-          <Button disabled={isPending}>
-            {isPending ? <Spinner /> : 'Create location'}
+          <Button
+            form='form-create-location'
+            onClick={() => console.log('CLICK FIRED')}
+            disabled={isPending}
+          >
+            Create location
           </Button>
           <SheetClose asChild>
-            <Button variant='outline' disabled={isPending}>
+            <Button type='button' variant='outline' disabled={isPending}>
               Close
             </Button>
           </SheetClose>
