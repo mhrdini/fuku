@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
+import { useParams } from 'next/navigation'
 import {
   Badge,
   Button,
@@ -10,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@fuku/ui/components'
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import { Column, ColumnDef } from '@tanstack/react-table'
 import {
   ArrowDown,
@@ -21,13 +22,12 @@ import {
   Trash,
 } from 'lucide-react'
 
+import { isEntity } from '~/lib/db'
 import { DialogId } from '~/lib/dialog'
 import { TeamMemberUI, toTeamMemberUI } from '~/lib/member'
 import { getHiddenColumns } from '~/lib/table'
-import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
-import { ContentSkeleton } from '../../content-skeleton'
 import { MembersDataTableSection } from './members-data-table-section'
 
 const defaultVisibleColumns = ['fullName', 'payGradeName']
@@ -44,25 +44,43 @@ const getMultiSortIcon = (column: Column<any, any>) => {
 
 export default function TeamMembersContent() {
   const trpc = useTRPC()
-  const { currentTeamId } = useDashboardStore()
+  const params = useParams()
+  const username = params?.username as string
+  const slug = params?.slug as string
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
 
   const { openDialog, openAlertDialog } = useDialogStore()
 
-  const { data: members, isPending } = useQuery({
-    ...trpc.teamMember.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
-    enabled: !!currentTeamId,
+  const { data: memberIds } = useQuery({
+    ...trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
   })
 
-  const onEditMemberClick = useCallback((id: string) => {
+  const memberQueries = useQueries({
+    queries: (memberIds ?? []).map(({ id }) => ({
+      ...trpc.teamMember.byId.queryOptions({ id }),
+      enabled: !!memberIds,
+    })),
+  })
+
+  const members = useMemo(() => {
+    return memberQueries.map(q => q.data).filter(isEntity)
+  }, [memberQueries])
+
+  const onUpdateMember = useCallback((id: string) => {
+    console.log('onUpdateMember id:', id)
     openDialog({
-      id: DialogId.EDIT_TEAM_MEMBER,
+      id: DialogId.UPDATE_TEAM_MEMBER,
       editingId: id,
     })
   }, [])
 
-  const onRemoveMemberClick = useCallback((id: string) => {
+  const onRemoveMember = useCallback((id: string) => {
+    console.log('onRemoveMember id:', id)
+
     openAlertDialog({
       id: DialogId.REMOVE_TEAM_MEMBER,
       editingId: id,
@@ -92,7 +110,7 @@ export default function TeamMembersContent() {
               <DropdownMenuContent align='start'>
                 <DropdownMenuItem
                   onClick={() => {
-                    onEditMemberClick(teamMember.id)
+                    onUpdateMember(teamMember.id)
                   }}
                 >
                   <Pencil /> Edit
@@ -100,8 +118,9 @@ export default function TeamMembersContent() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant='destructive'
+                  disabled={teamMember.username === username}
                   onClick={() => {
-                    onRemoveMemberClick(teamMember.id)
+                    onRemoveMember(teamMember.id)
                   }}
                 >
                   <Trash /> Remove
@@ -180,15 +199,11 @@ export default function TeamMembersContent() {
     return getHiddenColumns(defaultVisibleColumns, columns)
   }, [columns])
 
-  const teamMembersTableSection = (
-    <>
-      <MembersDataTableSection
-        columns={columns}
-        data={members ? members.map(toTeamMemberUI) : []}
-        defaultHiddenColumns={defaultHiddenColumns}
-      />
-    </>
+  return (
+    <MembersDataTableSection
+      columns={columns}
+      data={members ? members.map(m => toTeamMemberUI(m)) : []}
+      defaultHiddenColumns={defaultHiddenColumns}
+    />
   )
-
-  return isPending ? <ContentSkeleton /> : <>{teamMembersTableSection}</>
 }

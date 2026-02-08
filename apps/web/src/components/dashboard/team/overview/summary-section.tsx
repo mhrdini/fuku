@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense } from 'react'
+import { useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import {
   Badge,
@@ -11,16 +11,12 @@ import {
   CardHeader,
   CardTitle,
   Separator,
-  Skeleton,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
 } from '@fuku/ui/components'
-import { useSuspenseQueries } from '@tanstack/react-query'
-import { ArrowRight, Crown } from 'lucide-react'
+import { useQueries, useQuery } from '@tanstack/react-query'
+import { ArrowRight } from 'lucide-react'
 
 import { useSession } from '~/components/providers/session-provider'
-import { useDashboardStore } from '~/store/dashboard'
+import { isEntity } from '~/lib/db'
 import { useTRPC } from '~/trpc/client'
 
 const MAX_VISIBLE = 3
@@ -28,50 +24,100 @@ const MAX_VISIBLE = 3
 export const SummarySection = () => {
   const session = useSession()
   const params = useParams()
-  const currentTeamSlug = params.slug as string
-  const { currentTeamId } = useDashboardStore()
+  const slug = params.slug as string
 
   const router = useRouter()
   const trpc = useTRPC()
 
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
+
   const [
-    { data: members },
-    { data: locations },
-    { data: payGrades },
-    { data: shiftTypes },
-  ] = useSuspenseQueries({
+    { data: memberIds },
+    { data: locationIds },
+    { data: payGradeIds },
+    { data: shiftTypeIds },
+  ] = useQueries({
     queries: [
-      trpc.teamMember.getAllByTeam.queryOptions({
-        teamId: currentTeamId!,
-      }),
-      trpc.location.getAllByTeam.queryOptions({
-        teamId: currentTeamId!,
-      }),
-      trpc.payGrade.getAllByTeam.queryOptions({
-        teamId: currentTeamId!,
-      }),
-      trpc.shiftType.getAllByTeam.queryOptions({
-        teamId: currentTeamId!,
-      }),
+      {
+        ...trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
+        enabled: !!team,
+      },
+      {
+        ...trpc.location.listIds.queryOptions({ teamId: team!.id }),
+        enabled: !!team,
+      },
+      {
+        ...trpc.payGrade.listIds.queryOptions({ teamId: team!.id }),
+        enabled: !!team,
+      },
+      {
+        ...trpc.shiftType.listIds.queryOptions({ teamId: team!.id }),
+        enabled: !!team,
+      },
     ],
   })
 
-  const onManageMembersClick = () => {
-    router.push(`/${session?.user.username}/team/${currentTeamSlug}/members`)
+  const memberQueries = useQueries({
+    queries: (memberIds ?? []).map(({ id }) => ({
+      ...trpc.teamMember.byId.queryOptions({ id }),
+      enabled: !!memberIds,
+    })),
+  })
+
+  const members = useMemo(() => {
+    return memberQueries.map(q => q.data).filter(isEntity)
+  }, [memberQueries])
+
+  const locationQueries = useQueries({
+    queries: (locationIds ?? []).map(({ id }) => ({
+      ...trpc.location.byId.queryOptions({ id }),
+      enabled: !!locationIds,
+    })),
+  })
+
+  const locations = useMemo(() => {
+    return locationQueries.map(q => q.data).filter(isEntity)
+  }, [locationQueries])
+
+  const payGradeQueries = useQueries({
+    queries: (payGradeIds ?? []).map(({ id }) => ({
+      ...trpc.payGrade.byId.queryOptions({ id }),
+      enabled: !!payGradeIds,
+    })),
+  })
+
+  const payGrades = useMemo(() => {
+    return payGradeQueries.map(q => q.data).filter(isEntity)
+  }, [payGradeQueries])
+
+  const shiftTypeQueries = useQueries({
+    queries: (shiftTypeIds ?? []).map(({ id }) => ({
+      ...trpc.shiftType.byId.queryOptions({ id }),
+      enabled: !!shiftTypeIds,
+    })),
+  })
+
+  const shiftTypes = useMemo(() => {
+    return shiftTypeQueries.map(q => q.data).filter(isEntity)
+  }, [shiftTypeQueries])
+
+  const onManageMembers = () => {
+    router.push(`/${session?.user.username}/team/${slug}/members`)
   }
 
-  const onManageLocationsClick = () => {
-    router.push(`/${session?.user.username}/team/${currentTeamSlug}/locations`)
+  const onManageLocations = () => {
+    router.push(`/${session?.user.username}/team/${slug}/locations`)
   }
 
-  const onManageShiftTypesClick = () => {
-    router.push(
-      `/${session?.user.username}/team/${currentTeamSlug}/shift-types`,
-    )
+  const onManageShiftTypes = () => {
+    router.push(`/${session?.user.username}/team/${slug}/shift-types`)
   }
 
-  const onManagePayGradesClick = () => {
-    router.push(`/${session?.user.username}/team/${currentTeamSlug}/pay-grades`)
+  const onManagePayGrades = () => {
+    router.push(`/${session?.user.username}/team/${slug}/pay-grades`)
   }
 
   const teamMembersSummary = (
@@ -82,22 +128,24 @@ export const SummarySection = () => {
         <div key={member.id} className='flex items-center justify-between'>
           <div className='text-sm flex gap-1 items-center'>
             {member.givenNames} {member.familyName}
-            {member.teamMemberRole === 'ADMIN' && (
+            {/* {member.teamMemberRole === 'ADMIN' && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Crown className='size-4 text-muted-foreground' />
+                  <Crown className='size-3 text-muted-foreground fill-current' />
                 </TooltipTrigger>
-                <TooltipContent side='right'>
+                <TooltipContent side='top'>
                   <span>Admin</span>
                 </TooltipContent>
               </Tooltip>
-            )}
+            )} */}
           </div>
-          <Badge variant='outline'>{member.payGrade?.name}</Badge>
+          {member.payGrade && (
+            <Badge variant='outline'>{member.payGrade.name}</Badge>
+          )}
         </div>
       )}
       manageButtonText='Manage'
-      onManageClick={onManageMembersClick}
+      onManage={onManageMembers}
     />
   )
 
@@ -117,7 +165,7 @@ export const SummarySection = () => {
         </div>
       )}
       manageButtonText='Manage'
-      onManageClick={onManageLocationsClick}
+      onManage={onManageLocations}
     />
   )
 
@@ -135,20 +183,12 @@ export const SummarySection = () => {
             <span>{st.name}</span>
           </Badge>
           <div className='text-sm text-muted-foreground'>
-            {Intl.DateTimeFormat('en-GB', {
-              hour: '2-digit',
-              minute: '2-digit',
-            }).format(st.startTime)}{' '}
-            -{' '}
-            {Intl.DateTimeFormat('en-GB', {
-              hour: '2-digit',
-              minute: '2-digit',
-            }).format(st.endTime)}
+            {st.startTime} - {st.endTime}
           </div>
         </div>
       )}
       manageButtonText='Manage'
-      onManageClick={onManageShiftTypesClick}
+      onManage={onManageShiftTypes}
     />
   )
 
@@ -161,18 +201,18 @@ export const SummarySection = () => {
           <Badge variant='outline'>
             <span>{pg.name}</span>
           </Badge>
-          <Badge variant='secondary'>${pg.baseRate.toFixed(2)}/hr</Badge>
+          <Badge variant='secondary'>{pg.baseRate.toFixed(2)}</Badge>
         </div>
       )}
       manageButtonText='Manage'
-      onManageClick={onManagePayGradesClick}
+      onManage={onManagePayGrades}
     />
   )
 
   return (
     <div className='flex flex-col gap-4'>
       <h2>Summary</h2>
-      <div className='flex gap-4'>
+      <div className='grid grid-cols-1 @[24rem]/main:grid-cols-2 @[760px]/main:grid-cols-3 gap-4'>
         {teamMembersSummary}
         {locationSummary}
         {shiftTypesSummary}
@@ -188,7 +228,7 @@ interface SummaryCardProps<T> {
   renderItem: (item: T) => React.ReactNode
   description?: string
   manageButtonText: string
-  onManageClick?: () => void
+  onManage?: () => void
 }
 
 function SummaryCard<T>({
@@ -197,43 +237,33 @@ function SummaryCard<T>({
   renderItem,
   description,
   manageButtonText,
-  onManageClick,
+  onManage,
 }: SummaryCardProps<T>) {
   return (
-    <Card className='w-[200px] md:w-1/4 border-none p-0 gap-4 *:first:mt-4'>
+    <Card className='min-w-[200px] p-0 gap-4 *:first:mt-4'>
       <CardHeader className='px-4 gap-0'>
-        <Suspense
-          fallback={
-            <>
-              <Skeleton className='w-12 h-5' />
-              <Skeleton className='w-12 h-4' />
-            </>
-          }
-        >
-          <CardTitle className='text-sm'>{title}</CardTitle>
-          <CardDescription className='text-xs'>
-            {description ?? `${items?.length ?? 0} items`}
-          </CardDescription>
-        </Suspense>
+        <CardTitle className='text-sm'>{title}</CardTitle>
+        <CardDescription className='text-xs'>
+          {description ?? `${items?.length ?? 0} items`}
+        </CardDescription>
       </CardHeader>
       <Separator />
       <CardContent className='flex flex-1 flex-col px-4 gap-2'>
-        <Suspense
-          fallback={
-            <>
-              <Skeleton className='flex-1' />
-              <Skeleton className='flex-1' />
-              <Skeleton className='flex-1' />
-            </>
-          }
-        >
-          {items?.slice(0, MAX_VISIBLE).map(renderItem)}
-        </Suspense>
+        {items && items.length > 0 ? (
+          items.slice(0, MAX_VISIBLE).map(renderItem)
+        ) : (
+          <div
+            className='text-sm text-muted-foreground'
+            aria-description='no items'
+          >
+            —
+          </div>
+        )}
       </CardContent>
       <div className='p-0 mt-auto border-t'>
         <Button
           className='w-full rounded-b-xl rounded-t-none'
-          onClick={onManageClick}
+          onClick={onManage}
           variant='ghost'
         >
           {manageButtonText}

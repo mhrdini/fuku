@@ -22,17 +22,17 @@ export default async function DashboardLayout({
 
   if (!session || session.user.username !== username) {
     redirect('/login')
-  } else {
-    prefetch(trpc.user.getByUsername.queryOptions({ username }))
-    prefetch(trpc.team.getAllOwned.queryOptions())
   }
 
+  await prefetch(trpc.user.byUsername.queryOptions({ username }))
+  await prefetch(trpc.user.getSidebarState.queryOptions())
+
   return (
-    <div className='min-h-screen w-full'>
-      <SessionProvider session={session}>
-        <HydrateClient>
-          <SheetManager />
+    <div className='min-h-screen'>
+      <HydrateClient>
+        <SessionProvider session={session}>
           <DialogManager />
+          <SheetManager />
           <SidebarProvider>
             <DashboardSidebar username={username} />
             <div className='flex flex-1 flex-col'>
@@ -40,8 +40,8 @@ export default async function DashboardLayout({
               <DashboardContentLayout>{children}</DashboardContentLayout>
             </div>
           </SidebarProvider>
-        </HydrateClient>
-      </SessionProvider>
+        </SessionProvider>
+      </HydrateClient>
     </div>
   )
 }

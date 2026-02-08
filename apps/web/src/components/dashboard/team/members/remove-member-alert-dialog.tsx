@@ -1,35 +1,39 @@
 'use client'
 
+import { useParams } from 'next/navigation'
 import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
-  Button,
+  LoadingButton,
   Skeleton,
 } from '@fuku/ui/components'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 
 export const RemoveMemberAlertDialog = () => {
   const queryClient = useQueryClient()
-
-  const { currentTeamId } = useDashboardStore()
+  const trpc = useTRPC()
 
   const { editingId: currentTeamMemberId } = useDialogStore()
 
-  const trpc = useTRPC()
+  const params = useParams()
+  const slug = params?.slug as string
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
+
   const { data: teamMember, isPending: isLoadingTeamMember } = useQuery({
-    ...trpc.teamMember.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
+    ...trpc.teamMember.byId.queryOptions({
+      id: currentTeamMemberId!,
     }),
-    select: members =>
-      members.find(member => member.id === currentTeamMemberId),
+    enabled: !!currentTeamMemberId,
   })
 
   const { mutateAsync: removeMember, isPending } = useMutation({
@@ -40,45 +44,48 @@ export const RemoveMemberAlertDialog = () => {
       )
     },
     onSuccess: data => {
-      queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+      queryClient.removeQueries({
+        queryKey: trpc.teamMember.byId.queryKey({ id: data.id }),
       })
-      const toastId = toast(
-        `${data.givenNames} ${data.familyName} has been removed.`,
-        {
-          action: {
-            label: 'Undo',
-            onClick: async () => {
-              await restoreMember({ id: data.id })
-              toast.dismiss(toastId)
-            },
+      queryClient.invalidateQueries(
+        trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
+      )
+      const toastId = toast('Team member', {
+        description: `${data.givenNames} ${data.familyName} has been removed.`,
+        action: {
+          label: 'Undo',
+          onClick: async () => {
+            await restoreMember({ id: data.id })
+            toast.dismiss(toastId)
           },
         },
-      )
+      })
     },
   })
 
   const { mutateAsync: restoreMember } = useMutation({
     ...trpc.teamMember.restore.mutationOptions(),
     onError: error => {
-      toast.error(`${error.message}`)
+      toast.error('Error', { description: `${error.message}` })
     },
     onSuccess: data => {
-      queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
+      queryClient.setQueryData(
+        trpc.teamMember.byId.queryKey({ id: data.id }),
+        data,
+      )
+      queryClient.invalidateQueries(
+        trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
+      )
+      toast.success('Team member', {
+        description: `${data.givenNames} ${data.familyName} has been restored.`,
       })
-      toast.success(`${data.givenNames} ${data.familyName} has been restored.`)
     },
   })
 
   const onRemove = async () => {
     if (!currentTeamMemberId) return
     try {
-      await removeMember({ id: currentTeamMemberId })
+      await removeMember({ id: currentTeamMemberId, teamId: team!.id })
     } catch {
       // Handled in onError
     }
@@ -87,30 +94,32 @@ export const RemoveMemberAlertDialog = () => {
   return (
     <>
       <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
-      <AlertDialogDescription>
-        Are you sure you want to remove{' '}
-        {isLoadingTeamMember ? (
+      {isLoadingTeamMember ? (
+        <AlertDialogDescription asChild>
           <Skeleton className='inline-block h-4 w-10' />
-        ) : (
-          <span className='font-semibold'>
-            {teamMember?.givenNames} {teamMember?.familyName}
-          </span>
-        )}
-        ?
-        <br />
-        <span className='font-semibold'>This action cannot be undone.</span>
-      </AlertDialogDescription>
+        </AlertDialogDescription>
+      ) : (
+        <AlertDialogDescription asChild>
+          <div>
+            <div>Are you sure you want to remove {teamMember?.givenNames}?</div>
+            <div className='font-semibold'>
+              You can restore it after deletion.
+            </div>
+          </div>
+        </AlertDialogDescription>
+      )}
       <AlertDialogFooter>
         <AlertDialogCancel>Cancel</AlertDialogCancel>
         <AlertDialogAction asChild>
-          <Button
+          <LoadingButton
             variant='destructive'
             onClick={onRemove}
+            loading={isPending}
             disabled={isLoadingTeamMember || isPending}
             className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
           >
             Remove
-          </Button>
+          </LoadingButton>
         </AlertDialogAction>
       </AlertDialogFooter>
     </>

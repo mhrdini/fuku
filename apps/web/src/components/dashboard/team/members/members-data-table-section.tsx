@@ -1,4 +1,6 @@
-import { Suspense, useState } from 'react'
+'use client'
+
+import { useState } from 'react'
 import {
   Badge,
   Button,
@@ -19,7 +21,6 @@ import {
   PopoverContent,
   PopoverTrigger,
   Separator,
-  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -27,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from '@fuku/ui/components'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import {
   Column,
   ColumnDef,
@@ -50,11 +51,12 @@ import {
 } from 'lucide-react'
 
 import { TeamMemberUI } from '~/lib/member'
-import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 
-import './add-member-form-dialog'
+import './create-member-form-dialog'
+
+import { useParams } from 'next/navigation'
 
 import { DialogId } from '~/lib/dialog'
 
@@ -75,20 +77,23 @@ export function MembersDataTableSection({
   columns,
   defaultHiddenColumns,
 }: MembersDataTableProps<TeamMemberUI, any>) {
-  const { currentTeamId } = useDashboardStore()
-
   const { openDialog } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
-  const onAddMemberClick = () => {
-    openDialog({ id: DialogId.ADD_TEAM_MEMBER })
+  const onCreateMember = () => {
+    openDialog({ id: DialogId.CREATE_TEAM_MEMBER })
   }
 
   const trpc = useTRPC()
-  const { data: payGrades } = useSuspenseQuery(
-    trpc.payGrade.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
-  )
+  const params = useParams()
+  const slug = params?.slug as string
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
+  const { data: payGrades } = useQuery({
+    ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
+  })
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -164,33 +169,31 @@ export function MembersDataTableSection({
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                <Suspense fallback={<Skeleton className='h-8 w-full' />}>
-                  {payGrades!.map(pg => (
-                    <CommandItem
-                      key={pg.id}
-                      value={pg.name}
-                      onSelect={value =>
-                        toggleFilter(table.getColumn('payGradeName')!, value)
-                      }
-                      asChild
-                    >
-                      <div>
-                        <Checkbox
-                          id={pg.id}
-                          value={pg.name}
-                          checked={(
-                            (table
-                              .getColumn('payGradeName')
-                              ?.getFilterValue() as string[]) ?? []
-                          ).includes(pg.name)}
-                        />
-                        <Label htmlFor={pg.id} asChild>
-                          <Badge variant='outline'>{pg.name}</Badge>
-                        </Label>
-                      </div>
-                    </CommandItem>
-                  ))}
-                </Suspense>
+                {payGrades?.map(pg => (
+                  <CommandItem
+                    key={pg.id}
+                    value={pg.name}
+                    onSelect={value =>
+                      toggleFilter(table.getColumn('payGradeName')!, value)
+                    }
+                    asChild
+                  >
+                    <div>
+                      <Checkbox
+                        id={pg.id}
+                        value={pg.name}
+                        checked={(
+                          (table
+                            .getColumn('payGradeName')
+                            ?.getFilterValue() as string[]) ?? []
+                        ).includes(pg.name)}
+                      />
+                      <Label htmlFor={pg.id} asChild>
+                        <Badge variant='outline'>{pg.name}</Badge>
+                      </Label>
+                    </div>
+                  </CommandItem>
+                ))}
               </CommandGroup>
               <CommandSeparator />
               <CommandGroup>
@@ -247,13 +250,13 @@ export function MembersDataTableSection({
         <div className='ml-auto flex gap-2'>{tableActions}</div>
       </div>
       <div className='table-container'>
-        <Table className='table'>
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map(header => {
                   return (
-                    <TableHead className='table-head' key={header.id}>
+                    <TableHead key={header.id}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -274,7 +277,7 @@ export function MembersDataTableSection({
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id} className='table-cell'>
+                    <TableCell key={cell.id} className='cursor-default'>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -300,10 +303,10 @@ export function MembersDataTableSection({
         <Button
           variant='ghost'
           className='text-muted-foreground'
-          onClick={onAddMemberClick}
+          onClick={onCreateMember}
         >
           <Plus />
-          <span className='hidden lg:inline'>New team member</span>
+          <span className='hidden sm:inline'>New team member</span>
         </Button>
         <Button
           className='ml-auto'

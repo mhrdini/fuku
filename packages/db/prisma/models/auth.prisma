@@ -10,6 +10,9 @@ model User {
   ownedTeams  Team[]       @relation("UserTeams")
   memberships TeamMember[] @relation("UserMemberships")
 
+  lastActiveTeamId String?
+  lastActiveTeam   Team?   @relation("LastActiveTeamUsers", fields: [lastActiveTeamId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
   accounts Account[]
   sessions Session[]
 

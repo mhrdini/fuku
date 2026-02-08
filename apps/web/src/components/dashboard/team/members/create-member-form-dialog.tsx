@@ -1,12 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { TeamMemberRole } from '@fuku/db'
-import { TeamMemberInputSchema } from '@fuku/db/schemas'
+import { useParams } from 'next/navigation'
+import {
+  TeamMemberCreateInput,
+  TeamMemberCreateInputSchema,
+} from '@fuku/api/schemas'
+import { TeamMemberRoleValues } from '@fuku/db/schemas'
 import {
   AlertDialog,
   AlertDialogTrigger,
   Button,
+  Checkbox,
   Command,
   CommandEmpty,
   CommandGroup,
@@ -22,114 +27,117 @@ import {
   FieldSeparator,
   FieldSet,
   Input,
+  LoadingButton,
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Spinner,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronDown } from 'lucide-react'
-import { Controller, useForm } from 'react-hook-form'
+import {
+  Controller,
+  SubmitErrorHandler,
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form'
 import { toast } from 'sonner'
-import z from 'zod/v4'
 
 import { DialogId } from '~/lib/dialog'
-import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useTRPC } from '~/trpc/client'
 import { DiscardChangesAlertDialogContent } from '../../discard-changes-alert-dialog'
 
-const TeamMemberCreateFormSchema = TeamMemberInputSchema.extend({
-  givenNames: z.string().min(1, { error: 'invalid_given_names' }),
-  familyName: z.string().min(1, { error: 'invalid_family_name' }),
-  payGradeId: z.string({ error: 'invalid_pay_grade_id' }),
-  rateMultiplier: z
-    .number({ error: 'invalid_rate_multiplier' })
-    .min(0, { error: 'invalid_rate_multiplier_negative' }),
-  username: z.string().optional(),
-}).omit({
-  unavailabilities: true,
-  dayAssignments: true,
-})
+const TeamMemberCreateFormSchema = TeamMemberCreateInputSchema
 
-type TeamMemberCreateFormType = z.infer<typeof TeamMemberCreateFormSchema>
+type TeamMemberCreateFormType = TeamMemberCreateInput
 
-export const AddMemberFormDialog = () => {
-  const { currentTeamId } = useDashboardStore()
-
+export const CreateMemberFormDialog = () => {
   const { id, closeDialog } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
 
+  const params = useParams()
+  const slug = params?.slug as string
+
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-
-  const { data: payGrades } = useQuery({
-    ...trpc.payGrade.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
-    enabled: !!currentTeamId,
-  })
-
-  const { mutateAsync: addMember, isPending } = useMutation({
-    ...trpc.teamMember.create.mutationOptions(),
-    onError: error => {
-      toast.error(
-        `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
-      )
-    },
-    onSuccess: data => {
-      closeDialog()
-      queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
-      })
-      toast.success(
-        `${data.givenNames} ${data.familyName} has been added to the team.`,
-      )
-    },
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
   })
 
   const form = useForm<TeamMemberCreateFormType>({
     defaultValues: {
       givenNames: '',
       familyName: '',
-      teamId: '',
       rateMultiplier: 1,
-      teamMemberRole: TeamMemberRole.STAFF,
-      username: '',
+      teamMemberRole: TeamMemberRoleValues.STAFF,
+      payGradeId: null,
     },
     resolver: zodResolver(TeamMemberCreateFormSchema),
   })
 
   useEffect(() => {
-    if (id === DialogId.ADD_TEAM_MEMBER && currentTeamId) {
+    if (id === DialogId.CREATE_TEAM_MEMBER && team && team.id) {
       form.reset(
         {
-          givenNames: '',
-          familyName: '',
-          teamId: currentTeamId,
-          rateMultiplier: 1,
-          teamMemberRole: TeamMemberRole.STAFF,
-          username: '',
+          teamId: team.id,
+          teamMemberRole: TeamMemberRoleValues.STAFF,
         },
-        { keepDirty: false },
+        {
+          keepDefaultValues: true,
+          keepDirty: false,
+        },
       )
     }
-  }, [id, currentTeamId])
+  }, [id, team])
 
-  const onSubmit = async (data: TeamMemberCreateFormType) => {
+  const { data: payGrades } = useQuery({
+    ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
+  })
+
+  const { mutateAsync: createMember, isPending } = useMutation({
+    ...trpc.teamMember.create.mutationOptions(),
+    onError: error => {
+      toast.error('Error', {
+        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+      })
+    },
+    onSuccess: data => {
+      closeDialog()
+      queryClient.setQueryData(
+        trpc.teamMember.byId.queryKey({ id: data.id }),
+        data,
+      )
+      queryClient.invalidateQueries(
+        trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
+      )
+
+      toast.success('Team member', {
+        description: `${data.givenNames} ${data.familyName} has been added to the team.`,
+      })
+    },
+  })
+
+  const onSubmit: SubmitHandler<TeamMemberCreateFormType> = async data => {
     if (!form.formState.isDirty) {
       form.setError('root', { message: 'There are no changes to save.' })
       return
     }
     try {
-      await addMember(data)
+      await createMember(data)
     } catch {
-      // handled in onError
+      // handled in mutation onError
     }
+  }
+
+  const onError: SubmitErrorHandler<
+    TeamMemberCreateFormType
+  > = async errors => {
+    console.log('team member create values:', form.getValues())
+    console.log('team member create error:', errors)
   }
 
   const cancelButton = (
@@ -141,8 +149,11 @@ export const AddMemberFormDialog = () => {
   return (
     <>
       <DialogTitle>New Team Member</DialogTitle>
-      <FieldDescription>Add a new member to your team.</FieldDescription>
-      <form id='form-add-member' onSubmit={form.handleSubmit(onSubmit)}>
+      <FieldDescription>Create a new member to your team.</FieldDescription>
+      <form
+        id='form-create-member'
+        onSubmit={form.handleSubmit(onSubmit, onError)}
+      >
         <FieldSet>
           <FieldGroup>
             <Controller
@@ -150,12 +161,12 @@ export const AddMemberFormDialog = () => {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor='form-add-member-given-names'>
+                  <FieldLabel htmlFor='form-create-member-given-names'>
                     Given Name(s)
                   </FieldLabel>
                   <Input
                     {...field}
-                    id='form-add-member-given-names'
+                    id='form-create-member-given-names'
                     aria-invalid={fieldState.invalid}
                     placeholder='Given Name(s)'
                     autoComplete='off'
@@ -171,12 +182,12 @@ export const AddMemberFormDialog = () => {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor='form-add-member-family-name'>
+                  <FieldLabel htmlFor='form-create-member-family-name'>
                     Last Name
                   </FieldLabel>
                   <Input
                     {...field}
-                    id='form-add-member-family-name'
+                    id='form-create-member-family-name'
                     aria-invalid={fieldState.invalid}
                     placeholder='Last Name'
                     autoComplete='off'
@@ -197,13 +208,13 @@ export const AddMemberFormDialog = () => {
                     data-invalid={fieldState.invalid}
                     className='col-span-2 sm:col-span-2'
                   >
-                    <FieldLabel htmlFor='form-add-member-pay-grade-id'>
+                    <FieldLabel htmlFor='form-create-member-pay-grade-id'>
                       Pay Grade
                     </FieldLabel>
                     <Popover open={payGradeOpen} onOpenChange={setPayGradeOpen}>
                       <PopoverTrigger asChild>
                         <Button
-                          id='form-add-member-pay-grade-id'
+                          id='form-create-member-pay-grade-id'
                           variant='outline'
                           role='combobox'
                           className='justify-between'
@@ -255,11 +266,11 @@ export const AddMemberFormDialog = () => {
                 )}
               />
               <Field className='col-span-1'>
-                <FieldLabel htmlFor='form-add-member-base-rate'>
+                <FieldLabel htmlFor='form-create-member-base-rate'>
                   Base Rate
                 </FieldLabel>
                 <Button
-                  id='form-add-member-base-rate'
+                  id='form-create-member-base-rate'
                   variant='outline'
                   disabled
                   className='text-justify items-start justify-start disabled:opacity-100'
@@ -280,12 +291,12 @@ export const AddMemberFormDialog = () => {
                     data-invalid={fieldState.invalid}
                     className='col-span-1'
                   >
-                    <FieldLabel htmlFor='form-add-member-rate-multiplier'>
+                    <FieldLabel htmlFor='form-create-member-rate-multiplier'>
                       Multiplier
                     </FieldLabel>
                     <Input
                       {...field}
-                      id='form-add-member-rate-multiplier'
+                      id='form-create-member-rate-multiplier'
                       type='number'
                       step='0.01'
                       min='0'
@@ -294,9 +305,7 @@ export const AddMemberFormDialog = () => {
                       autoComplete='off'
                       onChange={e =>
                         field.onChange(
-                          e.target.value === ''
-                            ? 0
-                            : parseFloat(e.target.value),
+                          e.target.value === '' ? 0 : Number(e.target.value),
                         )
                       }
                     />
@@ -307,18 +316,45 @@ export const AddMemberFormDialog = () => {
                 )}
               />
             </div>
+            <Controller
+              name='teamMemberRole'
+              control={form.control}
+              render={({ field }) => (
+                <Field orientation='horizontal'>
+                  <Checkbox
+                    checked={field.value === TeamMemberRoleValues.ADMIN}
+                    id='form-create-member-is-admin'
+                    onCheckedChange={checked =>
+                      field.onChange(
+                        checked
+                          ? TeamMemberRoleValues.ADMIN
+                          : TeamMemberRoleValues.STAFF,
+                      )
+                    }
+                  />
+                  <FieldLabel
+                    htmlFor='form-create-member-is-admin'
+                    className='font-normal'
+                  >
+                    Set as team admin
+                  </FieldLabel>
+                </Field>
+              )}
+            />
+
             <FieldSeparator />
             <Controller
               name='username'
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field>
-                  <FieldLabel htmlFor='form-add-member-username'>
+                  <FieldLabel htmlFor='form-create-member-username'>
                     Linked Account
                   </FieldLabel>
                   <Input
                     {...field}
-                    id='form-add-member-username'
+                    value={field.value ?? ''}
+                    id='form-create-member-username'
                     aria-invalid={fieldState.invalid}
                     placeholder='Username (optional)'
                   />
@@ -340,9 +376,7 @@ export const AddMemberFormDialog = () => {
               ) : (
                 <DialogClose asChild>{cancelButton}</DialogClose>
               )}
-              <Button type='submit' form='form-add-member' disabled={isPending}>
-                {isPending ? <Spinner /> : 'Create'}
-              </Button>
+              <LoadingButton loading={isPending}>Create</LoadingButton>
             </Field>
           </FieldGroup>
         </FieldSet>

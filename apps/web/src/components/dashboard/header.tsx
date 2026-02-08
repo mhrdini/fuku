@@ -1,9 +1,9 @@
 'use client'
 
-import * as React from 'react'
 import { Separator, SidebarTrigger } from '@fuku/ui/components'
 
 import { LogOutButton } from '~/components/auth/log-out-button'
+import { ThemeToggle } from '../theme-toggle'
 import { Breadcrumbs } from './breadcrumbs'
 
 export const DashboardHeader = () => {
@@ -16,6 +16,7 @@ export const DashboardHeader = () => {
       </div>
       <div className='flex items-center gap-1.5'>
         {/* Header actions */}
+        <ThemeToggle />
         <LogOutButton />
       </div>
     </header>

@@ -1,6 +1,10 @@
+'use client'
+
 import { JSX, memo, useState } from 'react'
 import { Input } from '@fuku/ui/components'
 import { Getter } from '@tanstack/react-table'
+import { TRPCClientError } from '@trpc/client'
+import { toast } from 'sonner'
 
 import { TRPCUpdatePayload } from '~/lib/db'
 
@@ -16,6 +20,7 @@ type EditableCellProps<
   setEditingCell: (cell: { rowId: string; columnKey: string } | null) => void
   onSave: (update: TRPCUpdatePayload<DataType>) => Promise<ReturnType>
   isUpdating: boolean
+  children?: React.ReactNode
 }
 
 function EditableCellInner<
@@ -25,32 +30,45 @@ function EditableCellInner<
 >({
   row,
   columnName,
-  renderValue,
   editingCell,
   setEditingCell,
   onSave,
-  isUpdating,
+  children,
 }: EditableCellProps<DataType, ColumnKey, ReturnType>) {
-  type ValueType = DataType[ColumnKey]
-  const [value, setValue] = useState<ValueType>(row[columnName])
+  const [value, setValue] = useState<string>(
+    row[columnName] == null ? '' : String(row[columnName]),
+  )
 
   const isEditing =
     editingCell?.rowId === row.id && editingCell?.columnKey === columnName
 
   const cancelChanges = () => {
-    setValue(row[columnName])
+    setValue(row[columnName] == null ? '' : String(row[columnName]))
     setEditingCell(null)
   }
 
   const saveChanges = async () => {
     try {
-      const payload: TRPCUpdatePayload<DataType> = {
+      const payload = {
         id: row.id,
-        [columnName]: value === null ? undefined : value,
+        [columnName]: value === '' ? null : value,
       } as TRPCUpdatePayload<DataType>
+
       await onSave(payload)
-    } finally {
+
       setEditingCell(null)
+    } catch (error) {
+      if (error instanceof TRPCClientError) {
+        const zodError = error.data?.zodError
+        const issue = zodError?.fieldErrors?.[columnName as string]?.[0]
+        toast.error('Error', {
+          description: issue ?? 'Invalid value. Please try again.',
+        })
+      } else {
+        toast.error('Error', {
+          description: 'Something went wrong. Please try again.',
+        })
+      }
     }
   }
 
@@ -59,27 +77,23 @@ function EditableCellInner<
     else if (e.key === 'Enter') saveChanges()
   }
 
-  // TODO: Implement optimistic update to stop split second flicker when saving
   return (
     <div className='relative h-5 w-full min-w-0 overflow-hidden flex items-center'>
-      {isEditing ? (
-        <Input
-          className='absolute inset-0 w-full h-full min-w-0 leading-none text-sm p-0 m-0 border-none rounded-none focus-visible:ring-0 shadow-none'
-          value={String(value ?? '')}
-          autoFocus
-          onChange={e => setValue(e.target.value as unknown as ValueType)}
-          onKeyDown={handleKeyDown}
-        />
+      {children ? (
+        children
       ) : (
-        <div
-          className='cursor-text text-sm w-full h-full truncate block'
-          onClick={e => {
-            e.stopPropagation()
-            setEditingCell({ rowId: row.id, columnKey: columnName as string })
+        <Input
+          id={row.id}
+          className='absolute inset-0 w-full h-full min-w-0 leading-none text-sm p-0 m-0 border-none rounded-none focus-visible:ring-0 shadow-none !bg-transparent'
+          value={value}
+          autoFocus
+          onChange={e => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={() => {
+            if (value !== String(row[columnName] ?? '')) saveChanges()
+            else cancelChanges()
           }}
-        >
-          {isEditing && isUpdating ? value : renderValue()}
-        </div>
+        />
       )}
     </div>
   )

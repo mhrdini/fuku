@@ -4,11 +4,12 @@ model Team {
   name        String
   description String?
 
-  teamMembers TeamMember[]
-  adminUsers  User[]       @relation("UserTeams")
-  payGrades   PayGrade[]
-  locations   Location[]
-  shiftTypes  ShiftType[]
+  teamMembers     TeamMember[]
+  adminUsers      User[]       @relation("UserTeams")
+  payGrades       PayGrade[]
+  locations       Location[]
+  shiftTypes      ShiftType[]
+  lastActiveUsers User[]       @relation("LastActiveTeamUsers")
 
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
@@ -53,7 +54,7 @@ model TeamMember {
   team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   payGradeId String?   @map("pay_grade_id")
-  payGrade   PayGrade? @relation(fields: [payGradeId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  payGrade   PayGrade? @relation(fields: [payGradeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   teamMemberRole TeamMemberRole @default(STAFF) @map("team_member_role")
 
@@ -61,7 +62,7 @@ model TeamMember {
 
   dayAssignments   DayAssignment[]
   unavailabilities Unavailability[]
-  color            String?
+  color            String           @default("#000000")
 
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")

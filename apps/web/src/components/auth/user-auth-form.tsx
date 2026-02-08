@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  loginSchema,
+  LoginSchema,
   LoginSchemaType,
-  registerSchema,
+  RegisterSchema,
   RegisterSchemaType,
 } from '@fuku/api/schemas'
 import {
@@ -21,6 +21,7 @@ import {
   FieldLabel,
   FieldSet,
   Input,
+  LoadingButton,
 } from '@fuku/ui/components'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
@@ -47,14 +48,14 @@ export function UserAuthForm({
       email: '',
       password: '',
     },
-    resolver: zodResolver(isRegister ? registerSchema : loginSchema),
+    resolver: zodResolver(isRegister ? RegisterSchema : LoginSchema),
   })
 
-  const onLoginPromptClick = () => {
+  const onLoginClick = () => {
     router.push('/login')
   }
 
-  const onRegisterPromptClick = () => {
+  const onRegisterClick = () => {
     router.push('/register')
   }
 
@@ -187,13 +188,18 @@ export function UserAuthForm({
         </CardContent>
         <CardFooter>
           <Field orientation='responsive'>
-            <Button type='submit' form='form-user-auth'>
-              {isRegister ? 'Sign Up' : 'Log In'}
-            </Button>
+            <LoadingButton
+              type='submit'
+              form='form-user-auth'
+              disabled={form.formState.isSubmitting}
+              loading={form.formState.isSubmitting}
+            >
+              {isRegister ? 'Sign up' : 'Log in'}
+            </LoadingButton>
             {isRegister && (
               <Button
                 type='button'
-                onClick={onLoginPromptClick}
+                onClick={onLoginClick}
                 variant='link'
                 className='underline'
               >
@@ -203,7 +209,7 @@ export function UserAuthForm({
             {!isRegister && (
               <Button
                 type='button'
-                onClick={onRegisterPromptClick}
+                onClick={onRegisterClick}
                 variant='secondary'
                 className='underline'
               >

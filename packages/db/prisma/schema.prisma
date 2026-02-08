@@ -3,16 +3,8 @@
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/client"
-}
-
-generator zod {
-  provider = "prisma-zod-generator"
-  config   = "./prisma/zod-generator.config.json"
-  output   = "../generated/schemas"
 }

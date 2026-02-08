@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Collapsible,
@@ -27,29 +27,41 @@ import {
   SidebarMenuSubItem,
   Skeleton,
 } from '@fuku/ui/components'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { ChevronRight, ChevronsUpDown, Dot, Plus, Users2 } from 'lucide-react'
+import { cn } from '@fuku/ui/lib/utils'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  Check,
+  ChevronRight,
+  ChevronsUpDown,
+  Dot,
+  Plus,
+  Users2,
+} from 'lucide-react'
 
 import { useMenu } from '~/lib/menu'
-import { useDashboardStore } from '~/store/dashboard'
+import { useTeamStore } from '~/store/team'
 import { useTRPC } from '~/trpc/client'
 
 export const DashboardSidebar = ({ username }: { username: string }) => {
+  const { openTeamSelect, setOpenTeamSelect, activeTeamId, setActiveTeamId } =
+    useTeamStore()
+
+  const queryClient = useQueryClient()
   const trpc = useTRPC()
 
-  const { data: teams, isPending: isLoadingTeams } = useSuspenseQuery(
-    trpc.team.getAllOwned.queryOptions(),
-  )
+  const { data: sidebarState } = useQuery({
+    ...trpc.user.getSidebarState.queryOptions(),
+  })
 
-  const { currentTeamId, setCurrentTeam } = useDashboardStore()
-  useEffect(() => {
-    if (teams?.length && !currentTeamId) {
-      setCurrentTeam({ id: teams[0].id, slug: teams[0].slug })
-    }
-  }, [teams, currentTeamId, setCurrentTeam])
+  const { mutateAsync: setLastActiveTeam } = useMutation({
+    ...trpc.user.setLastActiveTeam.mutationOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries(trpc.user.getSidebarState.queryOptions())
+    },
+  })
 
   const router = useRouter()
-  const groups = useMenu()
+  const menuGroups = useMenu(sidebarState ? sidebarState.activeTeam : null)
 
   const onMenuButtonClick = useCallback(
     (url: string) => {
@@ -58,75 +70,113 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
     [username],
   )
 
-  const loadingTeamsHeader = <Skeleton />
+  const onNewTeam = () => {
+    router.push(`/${username}/team/new`)
+  }
 
-  const noTeamsHeader = (
-    <SidebarMenuButton
-      className='border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50'
-      size='lg'
-    >
-      <div className='flex aspect-square size-8 items-center justify-center rounded-lg'>
-        <Plus className='size-4' />
-      </div>
-      <div className='grid flex-1 text-left text-sm leading-tight'>
-        <span className='truncate font-medium'>Create your first team</span>
-      </div>
-    </SidebarMenuButton>
-  )
+  const onSelectTeam = async (id: string, slug: string) => {
+    setActiveTeamId(id)
+    await setLastActiveTeam({ teamId: id })
+    router.push(`/${username}/team/${slug}`)
+  }
 
-  const hasTeamsHeader = (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        {teams[0] && (
-          <SidebarMenuButton size='lg'>
-            <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
-              <Users2 className='size-4' />
-            </div>
-            <div className='grid flex-1 text-left text-sm leading-tight'>
-              <span className='truncate font-medium'>{teams[0].name}</span>
-              <span className='truncate text-xs'>
-                {teams[0].teamMembers.length} members
-              </span>
-            </div>
-            <ChevronsUpDown className='ml-auto' />
+  const teamsHeader =
+    sidebarState === undefined ? (
+      <>
+        <div className='flex aspect-square size-8 items-center justify-center rounded-lg bg-muted'>
+          <Skeleton className='size-4 rounded' />
+        </div>
+        <div className='grid flex-1 gap-1'>
+          <Skeleton className='h-3 w-24' />
+          <Skeleton className='h-2 w-16' />
+        </div>
+      </>
+    ) : (
+      <DropdownMenu open={openTeamSelect} onOpenChange={setOpenTeamSelect}>
+        <DropdownMenuTrigger asChild>
+          <SidebarMenuButton
+            size='lg'
+            className={cn(
+              !sidebarState.teams?.length &&
+                'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
+            )}
+            onClick={!sidebarState.teams?.length ? onNewTeam : undefined}
+          >
+            {!sidebarState.activeTeam ? (
+              // no sidebarState.teams
+              <>
+                <div className='flex aspect-square size-8 items-center justify-center rounded-lg'>
+                  <Plus className='size-4' />
+                </div>
+                <div className='grid flex-1 text-left text-sm leading-tight'>
+                  <span className='truncate font-medium'>
+                    Create your first team
+                  </span>
+                </div>
+              </>
+            ) : (
+              // has sidebarState.teams
+              <>
+                <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
+                  <Users2 className='size-4' />
+                </div>
+                <div className='grid flex-1 text-left text-sm leading-tight'>
+                  <span className='truncate font-medium'>
+                    {sidebarState.activeTeam.name}
+                  </span>
+                  <span className='truncate text-xs'>
+                    {sidebarState.activeTeam.teamMembers.length}
+                    {' ' +
+                      (sidebarState.activeTeam.teamMembers.length === 1
+                        ? 'member'
+                        : 'members')}
+                  </span>
+                </div>
+                <ChevronsUpDown className='ml-auto' />
+              </>
+            )}
           </SidebarMenuButton>
+        </DropdownMenuTrigger>
+        {sidebarState.teams.length > 0 && (
+          <DropdownMenuContent
+            className='w-[var(--radix-dropdown-menu-trigger-width)]'
+            side='bottom'
+          >
+            {sidebarState.teams.map(team => (
+              <DropdownMenuItem
+                key={team.id}
+                onClick={() => onSelectTeam(team.id, team.slug)}
+              >
+                {team.name}
+                {sidebarState.activeTeam?.id === team.id && (
+                  <Check className='ml-auto' />
+                )}
+              </DropdownMenuItem>
+            ))}
+
+            {sidebarState.teams.length > 1 && <DropdownMenuSeparator />}
+
+            <DropdownMenuItem onClick={onNewTeam}>
+              <Plus /> Create a new team
+            </DropdownMenuItem>
+          </DropdownMenuContent>
         )}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className='w-[var(--radix-dropdown-menu-trigger-width)]'
-        side='bottom'
-      >
-        {/* // TODO: Use setCurrentTeam to update team ID and slug when changing teams                                                          */}
-        {teams.slice(1).map(team => (
-          <DropdownMenuItem>
-            <span>{team.name}</span>
-          </DropdownMenuItem>
-        ))}
-        {teams.slice(1).length > 0 && <DropdownMenuSeparator />}
-        <DropdownMenuItem>
-          <Plus /> Create new team
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
+      </DropdownMenu>
+    )
 
   return (
     <Sidebar collapsible='icon'>
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem>
-            {isLoadingTeams
-              ? loadingTeamsHeader
-              : teams && teams.length > 0
-                ? hasTeamsHeader
-                : noTeamsHeader}
-          </SidebarMenuItem>
+          <SidebarMenuItem>{teamsHeader}</SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {teams.length > 0 &&
-          currentTeamId &&
-          groups.map(group => (
+        {sidebarState &&
+          sidebarState.teams &&
+          sidebarState.teams.length > 0 &&
+          sidebarState.activeTeam &&
+          menuGroups.map(group => (
             <SidebarGroup key={group.label}>
               {group.label && (
                 <SidebarGroupLabel>{group.label}</SidebarGroupLabel>

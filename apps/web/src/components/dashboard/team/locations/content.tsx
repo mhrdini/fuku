@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useParams } from 'next/navigation'
 import {
   Button,
   DropdownMenu,
@@ -27,36 +28,41 @@ import { EditableCell } from '~/components/ui/editable-cell'
 import { DialogId } from '~/lib/dialog'
 import { LocationUI } from '~/lib/location'
 import { SheetId } from '~/lib/sheet'
-import { useDashboardStore } from '~/store/dashboard'
 import { useDialogStore } from '~/store/dialog'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
 export const TeamLocationsContent = () => {
+  const params = useParams()
+  const slug = params.slug as string
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-  const { currentTeamId } = useDashboardStore()
 
   const [editingCell, setEditingCell] = useState<{
     rowId: string
     columnKey: string
   } | null>(null)
 
-  const { data } = useQuery({
-    ...trpc.location.getAllByTeam.queryOptions({
-      teamId: currentTeamId!,
-    }),
-    enabled: !!currentTeamId,
+  const { data: team } = useQuery({
+    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
+    enabled: !!slug,
+  })
+
+  const { data: locations } = useQuery({
+    ...trpc.location.listDetailed.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
   })
 
   const { mutateAsync: updateLocation, isPending: isUpdating } = useMutation({
     ...trpc.location.update.mutationOptions(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        ...trpc.location.getAllByTeam.queryOptions({
-          teamId: currentTeamId!,
-        }),
-      })
+    onSuccess: data => {
+      queryClient.setQueryData(
+        trpc.location.byId.queryKey({ id: data.id }),
+        data,
+      )
+      queryClient.invalidateQueries(
+        trpc.location.listDetailed.queryOptions({ teamId: team?.id! }),
+      )
     },
   })
 
@@ -69,8 +75,8 @@ export const TeamLocationsContent = () => {
   }
 
   const { openSheet } = useSheetStore()
-  const onNewLocationButtonClick = () => {
-    openSheet({ id: SheetId.ADD_LOCATION })
+  const onNewLocation = () => {
+    openSheet({ id: SheetId.CREATE_LOCATION })
   }
 
   const columns: ColumnDef<LocationUI, any>[] = [
@@ -139,7 +145,7 @@ export const TeamLocationsContent = () => {
   ]
 
   const table = useReactTable({
-    data: data ?? [],
+    data: locations ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
@@ -147,12 +153,12 @@ export const TeamLocationsContent = () => {
   return (
     <div className='flex flex-col gap-2'>
       <div className='table-container'>
-        <Table className='table'>
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow className='h-5' key={headerGroup.id}>
                 {headerGroup.headers.map(header => (
-                  <TableHead className='table-head' key={header.id}>
+                  <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -172,7 +178,7 @@ export const TeamLocationsContent = () => {
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id} className='table-cell'>
+                    <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -198,9 +204,10 @@ export const TeamLocationsContent = () => {
         <Button
           variant='ghost'
           className='text-muted-foreground'
-          onClick={onNewLocationButtonClick}
+          onClick={onNewLocation}
         >
-          <Plus /> New location
+          <Plus />
+          <span className='hidden sm:inline'>New location</span>
         </Button>
       </div>
     </div>

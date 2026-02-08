@@ -1,5 +1,8 @@
 import { Auth, Session } from '@fuku/auth'
 import { db } from '@fuku/db'
+/**
+ * 3. Middlewares
+ */
 import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
 import { z, ZodError } from 'zod/v4'
@@ -53,13 +56,9 @@ const t = initTRPC.context<Context>().create({
 })
 
 /**
- * 3. Routers & Procedures
- * This section defines the routers and procedures of the tRPC API.
+ * 3. Middlewares
  */
-export const createTRPCRouter = t.router
-export const createCallerFactory = t.createCallerFactory
-export const publicProcedure = t.procedure
-export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+const authMiddleware = t.middleware(({ ctx, next }) => {
   if (!ctx.session?.user) {
     throw new TRPCError({ code: 'UNAUTHORIZED' })
   }
@@ -69,3 +68,12 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     },
   })
 })
+
+/**
+ * 4. Routers & Procedures
+ * This section defines the routers and procedures of the tRPC API.
+ */
+export const createTRPCRouter = t.router
+export const createCallerFactory = t.createCallerFactory
+export const publicProcedure = t.procedure
+export const protectedProcedure = t.procedure.use(authMiddleware)
