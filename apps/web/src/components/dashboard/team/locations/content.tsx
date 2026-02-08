@@ -206,7 +206,8 @@ export const TeamLocationsContent = () => {
           className='text-muted-foreground'
           onClick={onNewLocation}
         >
-          <Plus /> New location
+          <Plus />
+          <span className='hidden sm:inline'>New location</span>
         </Button>
       </div>
     </div>

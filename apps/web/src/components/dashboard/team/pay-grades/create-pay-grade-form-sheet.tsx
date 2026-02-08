@@ -117,7 +117,7 @@ export const CreatePayGradeFormSheet = () => {
                     {...field}
                     id='form-create-pay-grade-name'
                     aria-invalid={fieldState.invalid}
-                    placeholder='e.g. Morning Pay'
+                    placeholder='e.g. Full-time'
                     autoComplete='off'
                   />
                   {fieldState.invalid && (

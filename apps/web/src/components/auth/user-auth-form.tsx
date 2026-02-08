@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  loginSchema,
+  LoginSchema,
   LoginSchemaType,
-  registerSchema,
+  RegisterSchema,
   RegisterSchemaType,
 } from '@fuku/api/schemas'
 import {
@@ -47,7 +47,7 @@ export function UserAuthForm({
       email: '',
       password: '',
     },
-    resolver: zodResolver(isRegister ? registerSchema : loginSchema),
+    resolver: zodResolver(isRegister ? RegisterSchema : LoginSchema),
   })
 
   const onLoginClick = () => {

@@ -1,4 +1,4 @@
-import { ColorHex, ShiftTypeSchema, Time } from '@fuku/db/schemas'
+import { ColorHex, ShiftTypeSchema } from '@fuku/db/schemas'
 import z from 'zod/v4'
 
 export const ShiftTypeOutputSchema = ShiftTypeSchema.extend({
@@ -8,13 +8,7 @@ export const ShiftTypeOutputSchema = ShiftTypeSchema.extend({
 
 export type ShiftTypeOutput = z.infer<typeof ShiftTypeOutputSchema>
 
-export const ShiftTypeCreateInputSchema = ShiftTypeSchema.extend({
-  startTime: Time,
-  endTime: Time,
-  name: z.string().min(1, { error: 'invalid_shift_type_name' }),
-  description: z.string().nullish(),
-  color: ColorHex.optional(),
-}).omit({
+export const ShiftTypeCreateInputSchema = ShiftTypeSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -24,9 +18,6 @@ export const ShiftTypeCreateInputSchema = ShiftTypeSchema.extend({
 
 export const ShiftTypeUpdateInputSchema = ShiftTypeSchema.partial().extend({
   id: z.string(),
-  name: z.string().min(1, 'invalid_shift_type_name').optional(),
-  startTime: Time.optional(),
-  endTime: Time.optional(),
 })
 
 export type ShiftTypeCreateInput = z.infer<typeof ShiftTypeCreateInputSchema>

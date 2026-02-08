@@ -182,6 +182,7 @@ export const TeamSettingsContent = () => {
               <Field orientation='responsive'>
                 <FieldError errors={[form.formState.errors.root]} />
                 <LoadingButton
+                  form='form-team-settings'
                   loading={isSaving}
                   disabled={isSaving || isDeleting}
                   className='ml-auto'
@@ -206,6 +207,7 @@ export const TeamSettingsContent = () => {
                 </div>
                 <LoadingButton
                   id='form-team-settings-delete'
+                  type='button'
                   loading={isDeleting}
                   disabled={isSaving || isDeleting}
                   variant='destructive'
