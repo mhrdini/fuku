@@ -226,9 +226,19 @@ export const userRouter = {
     for (const t of owned) byId.set(t.id, t)
 
     const teams: UserTeam[] = [...byId.values()]
+
+    let activeTeam = teams.find(t => t.id === user!.lastActiveTeamId) ?? null
+
+    if (!activeTeam && teams.length > 0) {
+      activeTeam = teams[0]
+      await ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: { lastActiveTeamId: activeTeam.id },
+      })
+    }
     return {
       teams,
-      activeTeam: teams.find(t => t.id === user.lastActiveTeamId) || null,
+      activeTeam: activeTeam,
     }
   }),
 } satisfies TRPCRouterRecord
