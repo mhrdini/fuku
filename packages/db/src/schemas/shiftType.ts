@@ -4,7 +4,7 @@ import { ColorHex, Time } from './helpers'
 
 export const ShiftTypeSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: z.string().min(1, { error: 'invalid_shift_type_name' }),
   description: z.string().nullish(),
   startTime: Time,
   endTime: Time,

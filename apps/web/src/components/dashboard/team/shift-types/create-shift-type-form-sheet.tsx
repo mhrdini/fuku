@@ -19,7 +19,6 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  Spinner,
 } from '@fuku/ui/components'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -178,7 +177,7 @@ export const CreateShiftTypeFormSheet = () => {
         </FieldSet>
         <SheetFooter>
           <LoadingButton form='form-create-shift-type' loading={isPending}>
-            {isPending ? <Spinner /> : 'Create shift type'}
+            Create shift type
           </LoadingButton>
           <SheetClose asChild>
             <Button variant='outline' disabled={isPending}>

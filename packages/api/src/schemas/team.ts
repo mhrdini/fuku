@@ -19,9 +19,11 @@ import {
 } from './teamMember'
 
 export const TeamCreateInputSchema = TeamSchema.extend({
-  name: z.string().min(1, 'invalid_team_name'),
-  description: z.string().nullish(),
-  teamMembers: z.array(TeamMemberCreateInputSchema),
+  teamMembers: z.array(
+    TeamMemberCreateInputSchema.extend({
+      id: z.string(),
+    }),
+  ),
   payGrades: z.array(
     PayGradeCreateInputSchema.omit({
       teamId: true,
@@ -67,8 +69,6 @@ export const TeamUpdateInputSchema = TeamSchema.pick({
   name: true,
   description: true,
 }).extend({
-  name: z.string().min(1, 'invalid_team_name').optional(),
-  description: z.string().nullish(),
   teamMembers: z.array(TeamMemberUpdateInputSchema).optional(),
   payGrades: z.array(PayGradeUpdateInputSchema).optional(),
   locations: z.array(LocationUpdateInputSchema).optional(),
