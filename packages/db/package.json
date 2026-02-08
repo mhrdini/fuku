@@ -9,6 +9,8 @@
     "schema": "./prisma"
   },
   "scripts": {
+    "dev": "prisma generate",
+    "gen:all": "prisma generate",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:dev:auto": "prisma migrate dev --name auto",
@@ -16,17 +18,13 @@
     "db:seed": "tsx src/seed.ts",
     "db:seed:dev": "tsx src/seed.development.ts",
     "db:reset": "prisma migrate reset",
-    "dev": "tsup",
     "format": "prisma format",
-    "gen:all": "prisma generate",
-    "gen:client": "prisma generate",
     "lint": "eslint . --max-warnings 0",
-    "prebuild": "npm run gen:all",
-    "predev": "npm run gen:all",
     "studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "6.19.0",
+    "@prisma/adapter-pg": "catalog:",
+    "@prisma/client": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -34,9 +32,8 @@
     "@fuku/config-typescript": "workspace:*",
     "@types/node": "catalog:",
     "eslint": "catalog:",
-    "prisma": "6.19.0",
+    "prisma": "catalog:",
     "rimraf": "^5.0.5",
-    "tsup": "^8.5.1",
     "tsx": "catalog:",
     "typescript": "catalog:"
   }

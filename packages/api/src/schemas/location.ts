@@ -7,13 +7,16 @@ export const LocationOutputSchema = LocationSchema.extend({
 
 export type LocationOutput = z.infer<typeof LocationOutputSchema>
 
-export const LocationCreateInputSchema = LocationSchema.pick({
-  id: true,
-  name: true,
-  color: true,
-}).extend({
+export const LocationCreateInputSchema = LocationSchema.extend({
   name: z.string().min(1, 'invalid_location_name'),
+  address: z.string().optional(),
   color: ColorHex.optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
+  deletedById: true,
 })
 
 export const LocationUpdateInputSchema = LocationSchema.partial().extend({
@@ -21,3 +24,6 @@ export const LocationUpdateInputSchema = LocationSchema.partial().extend({
   name: z.string().min(1, 'invalid_location_name').optional(),
   color: ColorHex.optional(),
 })
+
+export type LocationCreateInput = z.infer<typeof LocationCreateInputSchema>
+export type LocationUpdateInput = z.infer<typeof LocationUpdateInputSchema>

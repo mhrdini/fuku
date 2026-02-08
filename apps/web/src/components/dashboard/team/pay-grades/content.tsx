@@ -48,14 +48,18 @@ export const TeamPayGradesContent = () => {
     enabled: !!slug,
   })
 
-  const { data } = useQuery({
+  const { data: payGrades } = useQuery({
     ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
     enabled: !!team,
   })
 
   const { mutateAsync: updatePayGrade, isPending: isUpdating } = useMutation({
     ...trpc.payGrade.update.mutationOptions(),
-    onSuccess: () => {
+    onSuccess: data => {
+      queryClient.setQueryData(
+        trpc.payGrade.byId.queryKey({ id: data.id }),
+        data,
+      )
       queryClient.invalidateQueries(
         trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
       )
@@ -141,7 +145,7 @@ export const TeamPayGradesContent = () => {
   ]
 
   const table = useReactTable({
-    data: data ?? [],
+    data: payGrades ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
   })

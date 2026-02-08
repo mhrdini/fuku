@@ -14,6 +14,7 @@ export const TeamMemberOutputSchema = TeamMemberSchema.extend({
     description: z.string().nullable(),
   }).nullable(),
 })
+
 export type TeamMemberOutput = z.infer<typeof TeamMemberOutputSchema>
 
 export const TeamMemberCreateInputSchema = TeamMemberSchema.extend({

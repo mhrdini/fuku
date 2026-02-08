@@ -3,6 +3,10 @@
 import { useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import {
+  PayGradeCreateInput,
+  PayGradeCreateInputSchema,
+} from '@fuku/api/schemas'
+import {
   Button,
   Field,
   FieldError,
@@ -20,25 +24,17 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import z from 'zod/v4'
 
+import { SheetId } from '~/lib/sheet'
 import { useSheetStore } from '~/store/sheet'
 import { useTRPC } from '~/trpc/client'
 
-const PayGradeCreateFormSchema = z.object({
-  teamId: z.uuid({ error: 'invalid_team_id' }),
-  name: z.string().min(1, { error: 'invalid_pay_grade_name' }),
-  description: z.string().nullish(),
-  baseRate: z
-    .number({ error: 'invalid_base_rate' })
-    .min(0, { error: 'invalid_base_rate_negative' }),
-})
-
-type PayGradeCreateFormGrade = z.infer<typeof PayGradeCreateFormSchema>
+const PayGradeCreateFormSchema = PayGradeCreateInputSchema
+type PayGradeCreateFormGrade = PayGradeCreateInput
 
 export const CreatePayGradeFormSheet = () => {
   const title = 'Create New Pay Grade'
-  const { closeSheet } = useSheetStore()
+  const { id, closeSheet } = useSheetStore()
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
@@ -51,7 +47,6 @@ export const CreatePayGradeFormSheet = () => {
 
   const form = useForm<PayGradeCreateFormGrade>({
     defaultValues: {
-      teamId: team ? team.id : '',
       name: '',
       baseRate: 0,
     },
@@ -59,10 +54,14 @@ export const CreatePayGradeFormSheet = () => {
   })
 
   useEffect(() => {
-    if (team) {
-      form.resetField('teamId', { defaultValue: team.id })
+    if (id === SheetId.CREATE_PAY_GRADE && team?.id) {
+      form.setValue('teamId', team.id, {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      })
     }
-  }, [team])
+  }, [id, team?.id])
 
   const { mutateAsync: createPayGrade, isPending } = useMutation({
     ...trpc.payGrade.create.mutationOptions(),
@@ -73,6 +72,13 @@ export const CreatePayGradeFormSheet = () => {
     },
     onSuccess: data => {
       closeSheet()
+      queryClient.setQueryData(
+        trpc.payGrade.byId.queryKey({ id: data.id }),
+        data,
+      )
+      queryClient.invalidateQueries(
+        trpc.payGrade.listIds.queryOptions({ teamId: team!.id }),
+      )
       queryClient.invalidateQueries(
         trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
       )
@@ -152,7 +158,7 @@ export const CreatePayGradeFormSheet = () => {
           </FieldGroup>
         </FieldSet>
         <SheetFooter>
-          <Button disabled={isPending}>
+          <Button form='form-create-pay-grade' disabled={isPending}>
             {isPending ? <Spinner /> : 'Create pay grade'}
           </Button>
           <SheetClose asChild>

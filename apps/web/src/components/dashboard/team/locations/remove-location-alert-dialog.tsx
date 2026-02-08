@@ -29,10 +29,8 @@ export const RemoveLocationAlertDialog = () => {
     enabled: !!slug,
   })
   const { data: location, isPending: isLoadingLocation } = useQuery({
-    ...trpc.location.listDetailed.queryOptions({ teamId: team!.id }),
-    enabled: !!team,
-    select: locations =>
-      locations.find(location => location.id === currentLocationId),
+    ...trpc.location.byId.queryOptions({ id: currentLocationId! }),
+    enabled: !!currentLocationId,
   })
 
   const { mutateAsync: removeLocation, isPending } = useMutation({
@@ -43,8 +41,11 @@ export const RemoveLocationAlertDialog = () => {
       )
     },
     onSuccess: data => {
+      queryClient.removeQueries({
+        queryKey: trpc.location.byId.queryKey({ id: data.id }),
+      })
       queryClient.invalidateQueries(
-        trpc.location.listDetailed.queryOptions({ teamId: team!.id }),
+        trpc.location.listIds.queryOptions({ teamId: team!.id }),
       )
       const toastId = toast(`${data.name} has been removed.`, {
         action: {
@@ -64,8 +65,12 @@ export const RemoveLocationAlertDialog = () => {
       toast.error(`${error.message}`)
     },
     onSuccess: data => {
+      queryClient.setQueryData(
+        trpc.location.byId.queryKey({ id: data.id }),
+        data,
+      )
       queryClient.invalidateQueries(
-        trpc.location.listDetailed.queryOptions({ teamId: team!.id }),
+        trpc.location.listIds.queryOptions({ teamId: team!.id }),
       )
       toast.success(`${data.name} has been restored.`)
     },

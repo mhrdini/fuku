@@ -48,14 +48,18 @@ export const TeamLocationsContent = () => {
     enabled: !!slug,
   })
 
-  const { data } = useQuery({
+  const { data: locations } = useQuery({
     ...trpc.location.listDetailed.queryOptions({ teamId: team!.id }),
     enabled: !!team,
   })
 
   const { mutateAsync: updateLocation, isPending: isUpdating } = useMutation({
     ...trpc.location.update.mutationOptions(),
-    onSuccess: () => {
+    onSuccess: data => {
+      queryClient.setQueryData(
+        trpc.location.byId.queryKey({ id: data.id }),
+        data,
+      )
       queryClient.invalidateQueries(
         trpc.location.listDetailed.queryOptions({ teamId: team?.id! }),
       )
@@ -141,7 +145,7 @@ export const TeamLocationsContent = () => {
   ]
 
   const table = useReactTable({
-    data: data ?? [],
+    data: locations ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
   })

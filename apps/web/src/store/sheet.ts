@@ -8,6 +8,7 @@ type SheetOptions = {
 }
 
 type SheetStore = SheetOptions & {
+  open: boolean
   openSheet: (options: SheetOptions) => void
   closeSheet: () => void
 }
@@ -15,6 +16,7 @@ type SheetStore = SheetOptions & {
 export const useSheetStore = create<SheetStore>(set => ({
   id: null,
   editingId: null,
-  openSheet: ({ id }) => set({ id }),
-  closeSheet: () => set({ id: null }),
+  open: false,
+  openSheet: ({ id, editingId }) => set({ open: true, id, editingId }),
+  closeSheet: () => set({ open: false }),
 }))

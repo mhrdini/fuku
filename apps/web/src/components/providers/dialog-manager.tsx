@@ -19,9 +19,7 @@ import { RemoveShiftTypeAlertDialog } from '../dashboard/team/shift-types/remove
 export const DialogManager = () => {
   const { open, id, isAlert, closeDialog } = useDialogStore()
 
-  const handleClose = () => {
-    closeDialog()
-  }
+  const handleClose = () => closeDialog()
 
   return (
     <>
