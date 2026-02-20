@@ -3,7 +3,7 @@
 import { Sheet, SheetContent } from '@fuku/ui/components'
 
 import { SheetId } from '~/lib/sheet'
-import { useSheetStore } from '~/store/sheet'
+import { useSheetStore } from '~/store/sheet.store'
 import { CreateLocationFormSheet } from '../dashboard/team/locations/create-location-form-sheet'
 import { CreatePayGradeFormSheet } from '../dashboard/team/pay-grades/create-pay-grade-form-sheet'
 import { CreateShiftTypeFormSheet } from '../dashboard/team/shift-types/create-shift-type-form-sheet'

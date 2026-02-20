@@ -26,7 +26,7 @@ import { isEntity } from '~/lib/db'
 import { DialogId } from '~/lib/dialog'
 import { TeamMemberUI, toTeamMemberUI } from '~/lib/member'
 import { getHiddenColumns } from '~/lib/table'
-import { useDialogStore } from '~/store/dialog'
+import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 import { MembersDataTableSection } from './members-data-table-section'
 

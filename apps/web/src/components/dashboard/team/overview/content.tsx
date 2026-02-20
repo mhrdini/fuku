@@ -20,7 +20,7 @@ export default function TeamOverviewContent() {
   const trpc = useTRPC()
   const params = useParams()
   const slug = params?.slug as string
-  const { data: team } = useQuery({
+  const { data: team, isFetching } = useQuery({
     ...trpc.team.bySlug.queryOptions({ slug: slug! }),
     enabled: !!slug,
   })

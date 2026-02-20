@@ -68,6 +68,7 @@ export const TeamUpdateInputSchema = TeamSchema.pick({
   id: true,
   name: true,
   description: true,
+  timeZone: true,
 }).extend({
   teamMembers: z.array(TeamMemberUpdateInputSchema).optional(),
   payGrades: z.array(PayGradeUpdateInputSchema).optional(),

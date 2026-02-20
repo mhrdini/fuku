@@ -1,0 +1,23 @@
+{
+  "name": "@fuku/scheduling",
+  "version": "1.0.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "gen:types": "barrelsby --directory  ./src/domain/types --output ./src/domain/types/index.ts --delete"
+  },
+  "dependencies": {
+    "luxon": "catalog:"
+  },
+  "devDependencies": {
+    "@fuku/config-eslint": "workspace:*",
+    "@fuku/config-prettier": "workspace:*",
+    "@fuku/config-typescript": "workspace:*",
+    "@types/luxon": "^3.7.1",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  },
+  "prettier": "@fuku/config-prettier"
+}
