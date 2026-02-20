@@ -28,8 +28,8 @@ import { EditableCell } from '~/components/ui/editable-cell'
 import { DialogId } from '~/lib/dialog'
 import { LocationUI } from '~/lib/location'
 import { SheetId } from '~/lib/sheet'
-import { useDialogStore } from '~/store/dialog'
-import { useSheetStore } from '~/store/sheet'
+import { useDialogStore } from '~/store/dialog.store'
+import { useSheetStore } from '~/store/sheet.store'
 import { useTRPC } from '~/trpc/client'
 
 export const TeamLocationsContent = () => {

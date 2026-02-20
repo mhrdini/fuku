@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { TeamUpdateInputSchema, TeamUpdateInputType } from '@fuku/api/schemas'
+import { TeamUpdateInputSchema } from '@fuku/api/schemas'
 import {
   Field,
   FieldDescription,
@@ -24,11 +24,19 @@ import {
   SubmitHandler,
   useForm,
 } from 'react-hook-form'
+import { toast } from 'sonner'
+import z from 'zod/v4'
 
+import { TimeZoneController } from '~/components/timezone-controller'
 import { useTRPC } from '~/trpc/client'
 
-const TeamSettingsFormSchema = TeamUpdateInputSchema
-type TeamSettingsFormType = TeamUpdateInputType
+const TeamSettingsFormSchema = TeamUpdateInputSchema.pick({
+  id: true,
+  name: true,
+  description: true,
+  timeZone: true,
+})
+type TeamSettingsFormType = z.infer<typeof TeamSettingsFormSchema>
 
 export const TeamSettingsContent = () => {
   const queryClient = useQueryClient()
@@ -37,7 +45,11 @@ export const TeamSettingsContent = () => {
   const slug = params?.slug as string
   const router = useRouter()
 
-  const { data: team, isSuccess } = useQuery({
+  const {
+    data: team,
+    isSuccess,
+    isPending,
+  } = useQuery({
     ...trpc.team.bySlug.queryOptions({ slug: slug! }),
     enabled: !!slug,
   })
@@ -47,17 +59,25 @@ export const TeamSettingsContent = () => {
       id: team?.id || '',
       name: team?.name || '',
       description: team?.description || null,
+      timeZone: team?.timeZone || '',
     },
     resolver: zodResolver(TeamSettingsFormSchema),
   })
 
+  const {
+    formState: { isDirty },
+  } = form
+
   useEffect(() => {
     if (isSuccess && team) {
-      form.setValue('id', team.id)
-      form.setValue('name', team.name)
-      form.setValue('description', team.description || null)
+      form.reset({
+        id: team.id,
+        name: team.name,
+        description: team.description,
+        timeZone: team.timeZone,
+      })
     }
-  }, [isSuccess])
+  }, [isSuccess, team])
 
   const { mutateAsync: updateTeam, isPending: isSaving } = useMutation({
     ...trpc.team.update.mutationOptions(),
@@ -66,6 +86,9 @@ export const TeamSettingsContent = () => {
       queryClient.invalidateQueries(
         trpc.team.bySlug.queryOptions({ slug: data!.slug }),
       )
+      toast.success('Team', {
+        description: 'Changes saved!',
+      })
     },
   })
 
@@ -98,8 +121,13 @@ export const TeamSettingsContent = () => {
   })
 
   const onSubmit: SubmitHandler<TeamSettingsFormType> = async values => {
+    // console.log('team settings save values:', values)
+    // console.log('team settings form default:', form.formState.defaultValues)
+    // console.log('team settings form dirty fields:', form.formState.dirtyFields)
+    // console.log('team settings form is dirty:', form.formState.isDirty)
+
     if (!team) return
-    if (!form.formState.isDirty) {
+    if (!isDirty) {
       form.setError('root', { message: 'There are no changes to save.' })
       return
     }
@@ -149,6 +177,7 @@ export const TeamSettingsContent = () => {
                       aria-invalid={fieldState.invalid}
                       placeholder='Name'
                       autoComplete='off'
+                      disabled={isPending}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -172,6 +201,7 @@ export const TeamSettingsContent = () => {
                       placeholder='Description'
                       autoComplete='off'
                       className='resize-none h-14 overflow-y-auto'
+                      disabled={isPending}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -179,12 +209,17 @@ export const TeamSettingsContent = () => {
                   </Field>
                 )}
               />
+              <TimeZoneController
+                control={form.control}
+                resetField={form.resetField}
+                disabled={isPending}
+              />
               <Field orientation='responsive'>
                 <FieldError errors={[form.formState.errors.root]} />
                 <LoadingButton
                   form='form-team-settings'
                   loading={isSaving}
-                  disabled={isSaving || isDeleting}
+                  disabled={isPending || isSaving || isDeleting}
                   className='ml-auto'
                 >
                   Save changes
@@ -209,7 +244,7 @@ export const TeamSettingsContent = () => {
                   id='form-team-settings-delete'
                   type='button'
                   loading={isDeleting}
-                  disabled={isSaving || isDeleting}
+                  disabled={isPending || isSaving || isDeleting}
                   variant='destructive'
                   onClick={handleDelete}
                   className='ml-auto'

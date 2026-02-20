@@ -45,7 +45,7 @@ import {
 import { toast } from 'sonner'
 
 import { DialogId } from '~/lib/dialog'
-import { useDialogStore } from '~/store/dialog'
+import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 import { DiscardChangesAlertDialogContent } from '../../discard-changes-alert-dialog'
 
