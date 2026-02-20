@@ -4,6 +4,8 @@ model Team {
   name        String
   description String?
 
+  timeZone String @map("time_zone")
+
   teamMembers     TeamMember[]
   adminUsers      User[]       @relation("UserTeams")
   payGrades       PayGrade[]

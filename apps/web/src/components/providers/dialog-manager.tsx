@@ -8,7 +8,7 @@ import {
 } from '@fuku/ui/components'
 
 import { DialogId } from '~/lib/dialog'
-import { useDialogStore } from '~/store/dialog'
+import { useDialogStore } from '~/store/dialog.store'
 import { RemoveLocationAlertDialog } from '../dashboard/team/locations/remove-location-alert-dialog'
 import { CreateMemberFormDialog } from '../dashboard/team/members/create-member-form-dialog'
 import { RemoveMemberAlertDialog } from '../dashboard/team/members/remove-member-alert-dialog'

@@ -26,7 +26,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { SheetId } from '~/lib/sheet'
-import { useSheetStore } from '~/store/sheet'
+import { useSheetStore } from '~/store/sheet.store'
 import { useTRPC } from '~/trpc/client'
 
 const PayGradeCreateFormSchema = PayGradeCreateInputSchema

@@ -8,7 +8,7 @@ import {
   Button,
 } from '@fuku/ui/components'
 
-import { useDialogStore } from '~/store/dialog'
+import { useDialogStore } from '~/store/dialog.store'
 
 interface DiscardChangesAlertDialogProps {
   onDiscard?: () => void

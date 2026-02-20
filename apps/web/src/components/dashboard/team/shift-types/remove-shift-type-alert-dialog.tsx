@@ -13,7 +13,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { useDialogStore } from '~/store/dialog'
+import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 
 export const RemoveShiftTypeAlertDialog = () => {

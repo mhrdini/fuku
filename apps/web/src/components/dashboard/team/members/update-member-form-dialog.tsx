@@ -42,7 +42,7 @@ import {
 } from 'react-hook-form'
 import { toast } from 'sonner'
 
-import { useDialogStore } from '~/store/dialog'
+import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 import { DiscardChangesAlertDialogContent } from '../../discard-changes-alert-dialog'
 

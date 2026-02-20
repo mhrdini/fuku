@@ -1,11 +1,15 @@
 import { Auth, Session } from '@fuku/auth'
 import { db } from '@fuku/db'
+import { DefaultSchedulerService, SchedulerService } from '@fuku/scheduling'
 /**
  * 3. Middlewares
  */
 import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
 import { z, ZodError } from 'zod/v4'
+
+import { DefaultSchedulerEngine } from '../../scheduling/src/domain/engine/scheduler.engine'
+import { PrismaTeamRepository } from './infrastructure/prisma-team.repository'
 
 /**
  * 1. Context
@@ -18,6 +22,7 @@ export type TRPCContext = {
   authApi: Auth['api']
   session: Session | null
   db: typeof db
+  schedulerService: SchedulerService
 }
 
 export const createTRPCContext = async (options: {
@@ -28,10 +33,17 @@ export const createTRPCContext = async (options: {
   const session = await authApi.getSession({
     headers: options.headers,
   })
+  const schedulerEngine = new DefaultSchedulerEngine()
+  const teamRepository = new PrismaTeamRepository(db)
+  const schedulerService = new DefaultSchedulerService(
+    schedulerEngine,
+    teamRepository,
+  )
   return {
     authApi,
     session,
     db,
+    schedulerService,
   }
 }
 

@@ -39,7 +39,7 @@ import {
 } from 'lucide-react'
 
 import { useMenu } from '~/lib/menu'
-import { useTeamStore } from '~/store/team'
+import { useTeamStore } from '~/store/team.store'
 import { useTRPC } from '~/trpc/client'
 
 export const DashboardSidebar = ({ username }: { username: string }) => {
