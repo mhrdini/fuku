@@ -12,6 +12,33 @@ import { protectedProcedure } from '../../trpc'
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 8)
 
 export const teamRouter = {
+  byId: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findFirst({
+        where: {
+          id: input.id,
+          deletedAt: null,
+          OR: [
+            { adminUsers: { some: { id: ctx.session.user.id } } },
+            {
+              teamMembers: {
+                some: { userId: ctx.session.user.id, deletedAt: null },
+              },
+            },
+          ],
+        },
+        include: {
+          teamMembers: { where: { deletedAt: null } },
+        },
+      })
+
+      if (!team) {
+        throw new TRPCError({ code: 'NOT_FOUND' })
+      }
+
+      return team
+    }),
   bySlug: protectedProcedure
     .input(z.object({ slug: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
@@ -149,6 +176,7 @@ export const teamRouter = {
           slug,
           name: input.name,
           description: input.description,
+          timeZone: input.timeZone,
           locations: {
             create: input.locations.map(l => ({
               name: l.name,

@@ -25,7 +25,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
-import { useSheetStore } from '~/store/sheet'
+import { useSheetStore } from '~/store/sheet.store'
 import { useTRPC } from '~/trpc/client'
 import { SheetId } from '../../../../lib/sheet'
 

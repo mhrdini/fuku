@@ -77,10 +77,11 @@ import { toast } from 'sonner'
 import z from 'zod/v4'
 
 import { useSession } from '~/components/providers/session-provider'
+import { TimeZoneController } from '~/components/timezone-controller'
 import { Step } from '~/components/ui/stepper'
 import { useDebouncedCommit } from '~/hooks/useDebouncedCommit'
 import { useStepper } from '~/hooks/useStepper'
-import { useTeamStore } from '~/store/team'
+import { useTeamStore } from '~/store/team.store'
 import { useTRPC } from '~/trpc/client'
 
 const TeamCreateFormSchema = TeamCreateInputSchema
@@ -90,6 +91,7 @@ type TeamCreateFormType = TeamCreateInput
 const BasicInfoSectionSchema = TeamCreateFormSchema.pick({
   name: true,
   description: true,
+  timeZone: true,
 })
 
 type BasicInfoSectionType = z.infer<typeof BasicInfoSectionSchema>
@@ -139,6 +141,7 @@ export default function NewTeamPage() {
     defaultValues: {
       name: '',
       description: '',
+      timeZone: '',
       teamMembers: [],
       payGrades: [],
       locations: [],
@@ -220,7 +223,6 @@ export default function NewTeamPage() {
   })
 
   const onSubmit: SubmitHandler<TeamCreateFormType> = values => {
-    console.log('new team submitting:', values)
     try {
       createTeam(values)
     } catch {}
@@ -285,12 +287,13 @@ export default function NewTeamPage() {
 }
 
 function BasicInfoSection() {
-  const { control } = useFormContext<BasicInfoSectionType>()
+  const { control, resetField } = useFormContext<BasicInfoSectionType>()
+
   return (
     <FieldSet>
       <FieldGroup>
         <FieldDescription>
-          Start with a name and description for your team.
+          Start with a name, description, and time zone for your team.
         </FieldDescription>
         <Controller
           name='name'
@@ -320,7 +323,7 @@ function BasicInfoSection() {
               <Input
                 {...field}
                 value={field.value || ''}
-                id='form-user-auth-description'
+                id='form-new-team-description'
                 aria-invalid={fieldState.invalid}
                 placeholder='Description (optional)'
                 autoComplete='off'
@@ -329,6 +332,7 @@ function BasicInfoSection() {
             </Field>
           )}
         />
+        <TimeZoneController control={control} resetField={resetField} />
       </FieldGroup>
     </FieldSet>
   )

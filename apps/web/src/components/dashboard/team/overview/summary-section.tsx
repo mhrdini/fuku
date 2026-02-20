@@ -12,8 +12,8 @@ import {
   CardTitle,
   Separator,
 } from '@fuku/ui/components'
-import { useQueries, useQuery } from '@tanstack/react-query'
-import { ArrowRight } from 'lucide-react'
+import { useMutation, useQueries, useQuery } from '@tanstack/react-query'
+import { ArrowRight, Calendar } from 'lucide-react'
 
 import { useSession } from '~/components/providers/session-provider'
 import { isEntity } from '~/lib/db'
@@ -33,6 +33,27 @@ export const SummarySection = () => {
     ...trpc.team.bySlug.queryOptions({ slug: slug! }),
     enabled: !!slug,
   })
+
+  const { mutateAsync: generateMonthly } = useMutation({
+    ...trpc.schedule.generateMonthly.mutationOptions(),
+    onSuccess: schedule => {
+      console.log(schedule)
+    },
+  })
+
+  const handleGenerateSchedule = async () => {
+    if (!team) return
+
+    try {
+      await generateMonthly({
+        teamId: team.id,
+        year: new Date().getFullYear(),
+        month: new Date().getMonth() + 1,
+      })
+    } catch (err) {
+      // handle in onError
+    }
+  }
 
   const [
     { data: memberIds },
@@ -211,7 +232,13 @@ export const SummarySection = () => {
 
   return (
     <div className='flex flex-col gap-4'>
-      <h2>Summary</h2>
+      <div className='flex flex-row'>
+        <h2>Summary</h2>
+        <Button size='sm' className='ml-auto' onClick={handleGenerateSchedule}>
+          <Calendar />
+          Generate Schedule
+        </Button>
+      </div>
       <div className='grid grid-cols-1 @[24rem]/main:grid-cols-2 @[760px]/main:grid-cols-3 gap-4'>
         {teamMembersSummary}
         {locationSummary}

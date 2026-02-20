@@ -29,8 +29,8 @@ import { TimeInput } from '~/components/ui/time-input'
 import { DialogId } from '~/lib/dialog'
 import { SheetId } from '~/lib/sheet'
 import { ShiftTypeUI } from '~/lib/shift-types'
-import { useDialogStore } from '~/store/dialog'
-import { useSheetStore } from '~/store/sheet'
+import { useDialogStore } from '~/store/dialog.store'
+import { useSheetStore } from '~/store/sheet.store'
 import { useTRPC } from '~/trpc/client'
 
 export const TeamShiftTypesContent = () => {

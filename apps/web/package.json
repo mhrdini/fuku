@@ -23,6 +23,7 @@
     "@trpc/tanstack-react-query": "catalog:",
     "better-auth": "catalog:",
     "lucide-react": "catalog:",
+    "luxon": "catalog:",
     "next": "latest",
     "next-themes": "catalog:",
     "react": "catalog:react19",
