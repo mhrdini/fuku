@@ -1,9 +1,11 @@
+import { DateTime } from 'luxon'
 
-import { ISODateString, ZonedPeriod } from '../../shared/utils/date'
+import { ZonedPeriod } from '../../shared/utils/date'
+import { ConstraintEvaluation } from '../constraints'
 import {
   StaffingRequirement,
   ZonedAssignment,
-  ZonedOperationalHour,
+  ZonedOperationalHours,
   ZonedShiftType,
   ZonedUnavailability,
 } from './schedule'
@@ -23,7 +25,7 @@ export interface ZonedSchedulerContext
     | 'period'
   > {
   shiftTypes: ZonedShiftType[]
-  operationalHours: ZonedOperationalHour[]
+  operationalHours: ZonedOperationalHours
   unavailabilities: ZonedUnavailability[]
   assignments: ZonedAssignment[]
   period: ZonedPeriod
@@ -42,24 +44,19 @@ interface SchedulerMetrics {
   averageHoursPerMember: number
 }
 
-export interface ShiftSlot {
-  date: ISODateString
-  shiftTypeId: string
-  assignedCandidate?: Candidate
-}
-
 export interface Candidate {
+  date: DateTime
   teamMemberId: string
-  score: number
-  eligibleShiftSlots: Set<string> // ShiftSlot.date:ShiftSlot.shiftTypeId  'e.g. '2024-01-01:morning'
-  eligibleDays: Set<ISODateString>
-  assignmentCount: number
+  shiftTypeId: string
+  hardConstraintsPassed?: boolean
+  score?: number
+  evaluations?: ConstraintEvaluation[]
 }
 
 export interface ProposedAssignment {
-  date: Date
-  memberId: string
+  date: DateTime
+  teamMemberId: string
   shiftTypeId: string
   score: number
-  // constraintSummary: ConstraintEvaluation[] // idea
+  constraintSummary: ConstraintEvaluation[] // idea
 }

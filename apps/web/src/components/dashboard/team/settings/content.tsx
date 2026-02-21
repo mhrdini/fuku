@@ -45,11 +45,7 @@ export const TeamSettingsContent = () => {
   const slug = params?.slug as string
   const router = useRouter()
 
-  const {
-    data: team,
-    isSuccess,
-    isPending,
-  } = useQuery({
+  const { data: team, isPending } = useQuery({
     ...trpc.team.bySlug.queryOptions({ slug: slug! }),
     enabled: !!slug,
   })
@@ -69,7 +65,7 @@ export const TeamSettingsContent = () => {
   } = form
 
   useEffect(() => {
-    if (isSuccess && team) {
+    if (team) {
       form.reset({
         id: team.id,
         name: team.name,
@@ -77,7 +73,7 @@ export const TeamSettingsContent = () => {
         timeZone: team.timeZone,
       })
     }
-  }, [isSuccess, team])
+  }, [team])
 
   const { mutateAsync: updateTeam, isPending: isSaving } = useMutation({
     ...trpc.team.update.mutationOptions(),
