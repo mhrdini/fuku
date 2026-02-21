@@ -14,20 +14,22 @@ import { useQuery } from '@tanstack/react-query'
 import { Users } from 'lucide-react'
 
 import { useTRPC } from '~/trpc/client'
+import { OperationalHoursSection } from './operational-hours-section'
 import { SummarySection } from './summary-section'
 
 export default function TeamOverviewContent() {
   const trpc = useTRPC()
   const params = useParams()
   const slug = params?.slug as string
-  const { data: team, isFetching } = useQuery({
+  const { data: team } = useQuery({
     ...trpc.team.bySlug.queryOptions({ slug: slug! }),
     enabled: !!slug,
   })
 
   return team ? (
-    <div className='flex flex-col gap-2'>
+    <div className='flex flex-col gap-6'>
       <SummarySection />
+      <OperationalHoursSection teamId={team?.id ?? ''} />
     </div>
   ) : (
     <Empty>
