@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon'
+
 import { Zoned } from '../../shared/utils/date'
 
 export interface PayGrade {
@@ -18,18 +20,21 @@ export interface ShiftType {
 export type ZonedShiftType = Zoned<ShiftType, 'startTime' | 'endTime'>
 
 export interface OperationalHour {
-  dayOfWeek: number // 1 = Monday, 7 = Sunday
-  startTime: string // HH:mm format
+  dayOfWeek: number // 0 = Monday, 6 = Sunday
+  startTime: string
   endTime: string
 }
 
-export type ZonedOperationalHour = Zoned<
-  OperationalHour,
-  'startTime' | 'endTime'
->
+export type ZonedOperationalHours = {
+  [dayOfWeek: number]: {
+    startTime: DateTime
+    endTime: DateTime
+  }
+}
 
 export interface Assignment {
   teamMemberId: string
+  shiftTypeId: string
   date: Date
 }
 

@@ -1,7 +1,5 @@
 import { DateTime } from 'luxon'
 
-export type ISODateString = string // e.g. '2024-01-01'
-
 export type Zoned<T, K extends keyof T> = Omit<T, K> & {
   [P in K]: DateTime
 }
@@ -65,6 +63,18 @@ export function normalizeToMidnight(dt: DateTime): DateTime {
   return dt.startOf('day')
 }
 
+export function toMinutesFromMidnight(dt: DateTime): number {
+  return dt.hour * 60 + dt.minute
+}
+
+export function getDateTimeFromMinutesFromMidnight(
+  minutesFromMidnight: number,
+): DateTime {
+  const hours = Math.floor(minutesFromMidnight / 60)
+  const minutes = minutesFromMidnight % 60
+  return DateTime.fromObject({ hour: hours, minute: minutes })
+}
+
 /**
  *
  * @param period to denote the start and end period for which to generate the
@@ -72,7 +82,7 @@ export function normalizeToMidnight(dt: DateTime): DateTime {
  * @returns array of DateTimes for each day in the period
  * normalised to midnight (i.e. 00:00:00) in team timezone
  */
-export function generateDays(period: ZonedPeriod): DateTime[] {
+export function generateDateTimes(period: ZonedPeriod): DateTime[] {
   const dates: DateTime[] = []
   let current = period.start
 
@@ -85,19 +95,13 @@ export function generateDays(period: ZonedPeriod): DateTime[] {
 }
 
 /**
- *
- * @param dt Luxon DateTime to convert to ISO date string
- * @returns string with YYYY-MM-DD format representing the date in team timezone
- * (e.g. '2026-01-01')
- */
-export function toISODate(dt: DateTime): ISODateString {
-  return dt.toISODate()!
-}
-
-/**
  * Compare if two JS Dates are same calendar day in a timezone
  */
-export function isSameDay(date1: Date, date2: Date, timeZone: string): boolean {
+export function isSameDate(
+  date1: Date,
+  date2: Date,
+  timeZone: string,
+): boolean {
   const d1 = toZonedDateTime(date1, timeZone)
   const d2 = toZonedDateTime(date2, timeZone)
 

@@ -57,7 +57,24 @@ export function OperationalHoursSection({ teamId }: { teamId: string }) {
     },
   })
 
+  const createDefaultDay = () => ({
+    teamId,
+    startTime: undefined as string | undefined,
+    endTime: undefined as string | undefined,
+    deletedAt: new Date() as Date | null,
+  })
+
   const form = useForm<OperationalHourOutput>({
+    defaultValues: {
+      1: createDefaultDay(),
+      2: createDefaultDay(),
+      3: createDefaultDay(),
+      4: createDefaultDay(),
+      5: createDefaultDay(),
+      6: createDefaultDay(),
+      7: createDefaultDay(),
+      ...operationalHours,
+    },
     resolver: zodResolver(OperationalHourOutputSchema),
   })
 
@@ -70,37 +87,28 @@ export function OperationalHoursSection({ teamId }: { teamId: string }) {
     }
   }
 
-  const createDefaultDay = () => ({
-    teamId,
-    startTime: '09:00' as string | undefined,
-    endTime: '17:00' as string | undefined,
-    deletedAt: new Date() as Date | null,
-  })
-
   useEffect(() => {
-    if (isSuccess && operationalHours) {
-      const full = {
-        1: createDefaultDay(),
-        2: createDefaultDay(),
-        3: createDefaultDay(),
-        4: createDefaultDay(),
-        5: createDefaultDay(),
-        6: createDefaultDay(),
-        7: createDefaultDay(),
-      }
+    const full = {
+      1: createDefaultDay(),
+      2: createDefaultDay(),
+      3: createDefaultDay(),
+      4: createDefaultDay(),
+      5: createDefaultDay(),
+      6: createDefaultDay(),
+      7: createDefaultDay(),
+    }
 
-      if (operationalHours) {
-        for (const day of Object.keys(operationalHours) as DayOfWeekKey[]) {
-          full[day] = {
-            ...createDefaultDay(),
-            ...operationalHours[day],
-          }
+    if (operationalHours) {
+      for (const day of Object.keys(operationalHours) as DayOfWeekKey[]) {
+        full[day] = {
+          ...createDefaultDay(),
+          ...operationalHours[day],
         }
       }
-
-      form.reset(full)
     }
-  }, [isSuccess, operationalHours])
+
+    form.reset(full)
+  }, [operationalHours])
 
   const onSubmit: SubmitHandler<OperationalHourOutput> = async values => {
     // console.log('Form values on submit:', values)
@@ -162,7 +170,8 @@ export function OperationalHoursSection({ teamId }: { teamId: string }) {
                     render={({ field }) => (
                       <Field orientation='horizontal'>
                         <Checkbox
-                          id={`closed-${day}`}
+                          {...field}
+                          value={field.value ? 'open' : 'closed'}
                           name={`closed-${day}`}
                           disabled={!isSuccess}
                           checked={!!field.value}
@@ -187,12 +196,13 @@ export function OperationalHoursSection({ teamId }: { teamId: string }) {
                       <Field orientation='horizontal'>
                         <FieldLabel className='sr-only'>Start Time</FieldLabel>
                         <Select
+                          {...field}
+                          value={field.value ?? ''}
+                          onValueChange={field.onChange}
                           disabled={
                             !isSuccess ||
                             form.watch(`${day}.deletedAt`) !== null
                           }
-                          value={field.value}
-                          onValueChange={field.onChange}
                         >
                           <SelectTrigger className='w-full max-w-24'>
                             <SelectValue placeholder='-' />
@@ -217,12 +227,13 @@ export function OperationalHoursSection({ teamId }: { teamId: string }) {
                       <Field orientation='horizontal'>
                         <FieldLabel className='sr-only'>End Time</FieldLabel>
                         <Select
+                          {...field}
+                          value={field.value ?? ''}
+                          onValueChange={field.onChange}
                           disabled={
                             !isSuccess ||
                             form.watch(`${day}.deletedAt`) !== null
                           }
-                          value={field.value}
-                          onValueChange={field.onChange}
                         >
                           <SelectTrigger className='w-full max-w-24'>
                             <SelectValue placeholder='-' />

@@ -4,7 +4,7 @@ import {
 } from '../../domain/engine/scheduler.engine'
 import { SchedulerContext } from '../../domain/types/engine'
 import { Assignment } from '../../domain/types/schedule'
-import { getPeriod } from '../../shared/utils/date'
+import { getPeriod, toJSDate } from '../../shared/utils/date'
 import { TeamRepository } from '../ports/team.repository'
 
 export type SchedulerMode =
@@ -58,13 +58,14 @@ export class DefaultSchedulerService implements SchedulerService {
 
     const context = await this.buildContext(input)
     const engineResult = await this.schedulerEngine.run(context)
+
     const serviceResult = {
       teamId: input.teamId,
       year: input.year,
       month: input.month,
       assignments: engineResult.proposedAssignments.map(pa => ({
-        date: pa.date,
-        teamMemberId: pa.memberId,
+        date: toJSDate(pa.date),
+        teamMemberId: pa.teamMemberId,
         shiftTypeId: pa.shiftTypeId,
       })),
     }
