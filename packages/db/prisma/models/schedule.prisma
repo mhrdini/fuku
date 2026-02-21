@@ -20,15 +20,16 @@ model Location {
 }
 
 model ShiftType {
-  id               String            @id @default(uuid())
-  name             String
-  description      String?
-  startTime        String            @map("start_time") // in 24-hr, zero-padded "HH:MM" format (e.g., "09:00") 
-  endTime          String            @map("end_time") // same format as startTime
-  shiftAssignments ShiftAssignment[]
-  color            String            @default("#000000")
-  teamId           String            @map("team_id")
-  team             Team              @relation(fields: [teamId], references: [id])
+  id                String              @id @default(uuid())
+  name              String
+  description       String?
+  startTime         String              @map("start_time") // in 24-hr, zero-padded "HH:MM" format (e.g., "09:00") 
+  endTime           String              @map("end_time") // same format as startTime
+  shiftAssignments  ShiftAssignment[]
+  color             String              @default("#000000")
+  teamId            String              @map("team_id")
+  team              Team                @relation(fields: [teamId], references: [id])
+  eligiblePayGrades PayGradeShiftType[]
 
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
@@ -39,7 +40,6 @@ model ShiftType {
 }
 
 model OperationalHour {
-  id        String @id @default(uuid())
   dayOfWeek Int    @map("day_of_week") // 1 = Monday, 7 = Sunday
   startTime String @map("start_time") // in 24-hr, zero-padded "HH:MM" format (e.g., "09:00") 
   endTime   String @map("end_time") // same format as startTime
@@ -51,10 +51,22 @@ model OperationalHour {
   deletedAt   DateTime? @map("deleted_at")
   deletedById String?   @map("deleted_by_id")
 
-  @@unique([teamId, dayOfWeek])
+  @@id([teamId, dayOfWeek])
   @@index([teamId])
   @@index([dayOfWeek])
   @@map("operational_hour")
+}
+
+model PayGradeShiftType {
+  payGradeId  String    @map("pay_grade_id")
+  shiftTypeId String    @map("shift_type_id")
+  payGrade    PayGrade  @relation(fields: [payGradeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  shiftType   ShiftType @relation(fields: [shiftTypeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([payGradeId, shiftTypeId])
+  @@index([payGradeId])
+  @@index([shiftTypeId])
+  @@map("pay_grade_shift_type")
 }
 
 // --------------------------------
