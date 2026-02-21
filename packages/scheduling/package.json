@@ -8,13 +8,14 @@
     "gen:types": "barrelsby --directory  ./src/domain/types --output ./src/domain/types/index.ts --delete"
   },
   "dependencies": {
+    "heap-js": "^2.7.1",
     "luxon": "catalog:"
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
     "@fuku/config-prettier": "workspace:*",
     "@fuku/config-typescript": "workspace:*",
-    "@types/luxon": "^3.7.1",
+    "@types/luxon": "catalog:",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"
