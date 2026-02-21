@@ -83,7 +83,7 @@ export const CreateShiftTypeFormSheet = () => {
       queryClient.invalidateQueries(
         trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
       )
-      toast.success('Shift type', {
+      toast.success('Shift Type', {
         description: `${data.name} has been created.`,
       })
     },

@@ -38,6 +38,25 @@ model ShiftType {
   @@map("shift_type")
 }
 
+model OperationalHour {
+  id        String @id @default(uuid())
+  dayOfWeek Int    @map("day_of_week") // 1 = Monday, 7 = Sunday
+  startTime String @map("start_time") // in 24-hr, zero-padded "HH:MM" format (e.g., "09:00") 
+  endTime   String @map("end_time") // same format as startTime
+  teamId    String @map("team_id")
+  team      Team   @relation(fields: [teamId], references: [id])
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  deletedById String?   @map("deleted_by_id")
+
+  @@unique([teamId, dayOfWeek])
+  @@index([teamId])
+  @@index([dayOfWeek])
+  @@map("operational_hour")
+}
+
 // --------------------------------
 // Assignment models
 // --------------------------------

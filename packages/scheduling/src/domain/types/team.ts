@@ -1,5 +1,11 @@
 import { Period } from '../../shared/utils/date'
-import { Assignment, PayGrade, ShiftType, Unavailability } from './schedule'
+import {
+  Assignment,
+  OperationalHour,
+  PayGrade,
+  ShiftType,
+  Unavailability,
+} from './schedule'
 
 export interface Team {
   id: string
@@ -7,7 +13,7 @@ export interface Team {
 
 export interface TeamMember {
   id: string
-  payGradeId: string
+  payGradeId: string | null
   isActive: boolean
 }
 
@@ -16,6 +22,7 @@ export interface TeamSnapshot {
   teamMembers: TeamMember[]
   payGrades: PayGrade[]
   shiftTypes: ShiftType[]
+  operationalHours: OperationalHour[]
   unavailabilities: Unavailability[]
   assignments: Assignment[]
   period: Period

@@ -76,7 +76,7 @@ export const RemoveMemberAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
       )
-      toast.success('Team member', {
+      toast.success('Team Member', {
         description: `${data.givenNames} ${data.familyName} has been restored.`,
       })
     },

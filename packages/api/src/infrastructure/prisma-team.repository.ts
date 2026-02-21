@@ -28,6 +28,13 @@ export class PrismaTeamRepository implements TeamRepository {
             endTime: true,
           },
         },
+        operationalHours: {
+          select: {
+            dayOfWeek: true,
+            startTime: true,
+            endTime: true,
+          },
+        },
       },
     })
 
@@ -76,6 +83,7 @@ export class PrismaTeamRepository implements TeamRepository {
         startTime: st.startTime,
         endTime: st.endTime,
       })),
+      operationalHours: team.operationalHours,
       unavailabilities: unavailabilities.map(u => ({
         teamMemberId: u.teamMemberId,
         date: u.date,

@@ -1,10 +1,19 @@
-import { TeamMember, TeamMemberRole, TeamSchema } from '@fuku/db/schemas'
+import {
+  TeamMember,
+  TeamMemberRole,
+  TeamMemberSchema,
+  TeamSchema,
+} from '@fuku/db/schemas'
 import z from 'zod/v4'
 
 import {
   LocationCreateInputSchema,
   LocationUpdateInputSchema,
 } from './location'
+import {
+  OperationalHourCreateInputSchema,
+  OperationalHourUpdateInputSchema,
+} from './operationalHour'
 import {
   PayGradeCreateInputSchema,
   PayGradeUpdateInputSchema,
@@ -45,6 +54,15 @@ export const TeamCreateInputSchema = TeamSchema.extend({
       id: z.string(),
     }),
   ),
+  operationalHours: z
+    .array(
+      OperationalHourCreateInputSchema.omit({
+        teamId: true,
+      }).extend({
+        id: z.string(),
+      }),
+    )
+    .optional(),
 }).omit({
   id: true,
   slug: true,
@@ -74,6 +92,13 @@ export const TeamUpdateInputSchema = TeamSchema.pick({
   payGrades: z.array(PayGradeUpdateInputSchema).optional(),
   locations: z.array(LocationUpdateInputSchema).optional(),
   shiftTypes: z.array(ShiftTypeUpdateInputSchema).optional(),
+  operationalHours: z.array(OperationalHourUpdateInputSchema).optional(),
 })
 
 export type TeamUpdateInputType = z.infer<typeof TeamUpdateInputSchema>
+
+export const TeamOutputSchema = TeamSchema.extend({
+  teamMembers: z.array(TeamMemberSchema),
+})
+
+export type TeamOutput = z.infer<typeof TeamOutputSchema>
