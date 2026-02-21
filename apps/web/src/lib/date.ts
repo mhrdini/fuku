@@ -1,4 +1,36 @@
-import { supportedTimeZones } from '@fuku/db/schemas'
+import { DayOfWeekKey, supportedTimeZones } from '@fuku/db/schemas'
+import { DateTime, WeekdayNumbers } from 'luxon'
+
+export const WEEKDAY_MAP: Record<DayOfWeekKey, string> = Array.from(
+  { length: 7 },
+  (_, i) => i + 1,
+).reduce(
+  (acc, day) => {
+    const key = String(day) as DayOfWeekKey
+    acc[key] = DateTime.fromObject({
+      weekday: day as WeekdayNumbers,
+    }).weekdayLong!
+    return acc
+  },
+  {} as Record<DayOfWeekKey, string>,
+)
+
+function generateTimeOptions(minuteInterval: number = 30): string[] {
+  const options = []
+
+  for (let minutes = 0; minutes < 24 * 60; minutes += minuteInterval) {
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+
+    const hh = String(hours).padStart(2, '0')
+    const mm = String(mins).padStart(2, '0')
+
+    options.push(`${hh}:${mm}`)
+  }
+  return options
+}
+
+export const TIME_OPTIONS = generateTimeOptions()
 
 export type TimeZoneOption = {
   value: string

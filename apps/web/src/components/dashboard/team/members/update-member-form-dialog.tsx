@@ -118,7 +118,7 @@ export const UpdateMemberFormDialog = () => {
         data,
       )
       closeDialog()
-      toast.success('Team member', {
+      toast.success('Team Member', {
         description: `${data.givenNames} ${data.familyName} has been updated.`,
       })
     },

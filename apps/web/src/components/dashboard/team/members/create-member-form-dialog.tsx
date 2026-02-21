@@ -115,7 +115,7 @@ export const CreateMemberFormDialog = () => {
         trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
       )
 
-      toast.success('Team member', {
+      toast.success('Team Member', {
         description: `${data.givenNames} ${data.familyName} has been added to the team.`,
       })
     },

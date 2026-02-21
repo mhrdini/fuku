@@ -2,6 +2,7 @@ import { createTRPCRouter } from '../trpc'
 import { authRouter } from './auth'
 import { scheduleRouter } from './schedule'
 import { locationRouter } from './schedule/location'
+import { operationalHourRouter } from './schedule/operationalHour'
 import { shiftTypeRouter } from './schedule/shiftType'
 import { teamRouter } from './team'
 import { teamMemberRouter } from './team/member'
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
   payGrade: payGradeRouter,
   location: locationRouter,
   shiftType: shiftTypeRouter,
+  operationalHour: operationalHourRouter,
   schedule: scheduleRouter,
 })
 
