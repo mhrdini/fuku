@@ -82,6 +82,7 @@ export const TeamSettingsContent = () => {
   const { mutateAsync: updateTeam, isPending: isSaving } = useMutation({
     ...trpc.team.update.mutationOptions(),
     onSuccess: async data => {
+      form.reset(form.getValues())
       queryClient.invalidateQueries(trpc.user.getSidebarState.queryOptions())
       queryClient.invalidateQueries(
         trpc.team.bySlug.queryOptions({ slug: data!.slug }),
@@ -131,6 +132,7 @@ export const TeamSettingsContent = () => {
       form.setError('root', { message: 'There are no changes to save.' })
       return
     }
+
     try {
       await updateTeam(values)
     } catch {
