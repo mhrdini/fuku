@@ -2,11 +2,7 @@
   "extends": "@fuku/config-typescript/compiled.json",
   "compilerOptions": {
     "outDir": "dist",
-    "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "@fuku/scheduling/*": ["./src/*"]
-    }
+    "jsx": "react-jsx"
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx"],
   "exclude": ["node_modules", "dist"]

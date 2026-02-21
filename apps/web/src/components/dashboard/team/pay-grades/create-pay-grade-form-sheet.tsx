@@ -82,7 +82,7 @@ export const CreatePayGradeFormSheet = () => {
       queryClient.invalidateQueries(
         trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
       )
-      toast.success('Pay grade', {
+      toast.success('Pay Grade', {
         description: `${data.name} has been created.`,
       })
     },

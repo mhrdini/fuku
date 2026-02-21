@@ -4,6 +4,7 @@ export * from './teamMember'
 export * from './payGrade'
 export * from './location'
 export * from './shiftType'
+export * from './operationalHour'
 
 export * from './helpers'
 export * from './enums'
