@@ -1518,9 +1518,13 @@ function ShiftTypeItem({
                   variant='link'
                   className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
                   type='button'
-                  onClick={() =>
+                  onClick={() => {
                     setConnectedPayGradeIds(payGrades.fields.map(pg => pg.id))
-                  }
+                    latestRef.current.connectPayGrades = payGrades.fields.map(
+                      pg => pg.id,
+                    )
+                    commit()
+                  }}
                 >
                   Select all
                 </Button>
@@ -1528,7 +1532,11 @@ function ShiftTypeItem({
                   variant='link'
                   className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
                   type='button'
-                  onClick={() => setConnectedPayGradeIds([])}
+                  onClick={() => {
+                    setConnectedPayGradeIds([])
+                    latestRef.current.connectPayGrades = []
+                    commit()
+                  }}
                 >
                   Clear all
                 </Button>
