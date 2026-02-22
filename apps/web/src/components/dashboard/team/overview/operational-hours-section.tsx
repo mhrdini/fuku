@@ -59,8 +59,8 @@ export function OperationalHoursSection({ teamId }: { teamId: string }) {
 
   const createDefaultDay = () => ({
     teamId,
-    startTime: undefined as string | undefined,
-    endTime: undefined as string | undefined,
+    startTime: '09:00' as string | undefined,
+    endTime: '17:00' as string | undefined,
     deletedAt: new Date() as Date | null,
   })
 
