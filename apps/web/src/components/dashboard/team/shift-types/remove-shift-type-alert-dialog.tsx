@@ -50,7 +50,7 @@ export const RemoveShiftTypeAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
       )
-      const toastId = toast('Shift type', {
+      const toastId = toast('Shift Type', {
         description: `${data.name} has been removed.`,
         action: {
           label: 'Undo',
@@ -76,7 +76,7 @@ export const RemoveShiftTypeAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.shiftType.listIds.queryOptions({ teamId: team!.id }),
       )
-      toast.success('Shift type', {
+      toast.success('Shift Type', {
         description: `${data.name} has been restored.`,
       })
     },
