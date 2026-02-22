@@ -91,9 +91,14 @@ export const operationalHourRouter = {
   update: protectedProcedure
     .input(OperationalHourUpdateInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input
+      const { ...data } = input
       const updated = await ctx.db.operationalHour.update({
-        where: { id },
+        where: {
+          teamId_dayOfWeek: {
+            teamId: input.teamId,
+            dayOfWeek: input.dayOfWeek,
+          },
+        },
         data: { ...data },
       })
       return updated

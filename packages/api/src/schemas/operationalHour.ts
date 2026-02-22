@@ -7,7 +7,6 @@ import {
 import z from 'zod/v4'
 
 export const OperationalHourCreateInputSchema = OperationalHourSchema.omit({
-  id: true,
   createdAt: true,
   updatedAt: true,
   deletedById: true,
