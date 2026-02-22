@@ -7,6 +7,9 @@ import {
   Badge,
   Button,
   Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
   Combobox,
   ComboboxChip,
   ComboboxChips,
@@ -15,6 +18,7 @@ import {
   ComboboxEmpty,
   ComboboxItem,
   ComboboxList,
+  ComboboxSeparator,
   ComboboxValue,
   Command,
   CommandEmpty,
@@ -47,10 +51,12 @@ import {
   ItemContent,
   ItemDescription,
   ItemGroup,
+  ItemHeader,
   ItemTitle,
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Separator,
   Sheet,
   SheetContent,
   SheetDescription,
@@ -62,6 +68,7 @@ import { cn } from '@fuku/ui/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  ArrowRight,
   Check,
   ChevronDown,
   CornerDownRight,
@@ -235,8 +242,8 @@ export default function NewTeamPage() {
 
   const onSubmit: SubmitHandler<TeamCreateFormType> = values => {
     try {
-      console.log('new team submit values:', values)
-      // createTeam(values)
+      // console.log('new team submit values:', values)
+      createTeam(values)
     } catch {}
   }
 
@@ -435,7 +442,7 @@ function TeamMembersSection() {
         </Button>
       </Field>
       <FieldGroup>
-        <Card className='p-0'>
+        <Card>
           <ItemGroup className='flex py-4 gap-2'>
             {teamMemberFields.map((field, index) => (
               <Item key={field.id} className='py-0'>
@@ -1007,11 +1014,9 @@ function PayGradeItem({
         />
       </ItemContent>
 
-      <ItemActions>
-        <Button type='button' variant='ghost' size='icon' onClick={onDelete}>
-          <Trash2 />
-        </Button>
-      </ItemActions>
+      <Button type='button' variant='ghost' size='icon' onClick={onDelete}>
+        <Trash2 />
+      </Button>
     </Item>
   )
 }
@@ -1084,48 +1089,82 @@ function AdditionalDetailsSection() {
       </FieldGroup>
 
       <FieldGroup>
-        <Card className='py-0'>
+        <Card>
           <ItemGroup>
             <Item>
-              <ItemContent>
+              <ItemHeader>
                 <ItemTitle>Locations</ItemTitle>
-                <ItemDescription>
-                  {locationFields.length
-                    ? locationFields.map(l => l.name).join(', ')
-                    : 'None added'}
-                </ItemDescription>
-              </ItemContent>
-              <ItemActions>
                 <Button
                   type='button'
                   variant='secondary'
+                  className='ml-auto'
                   onClick={() => setLocationsOpen(true)}
                 >
                   Manage
                 </Button>
-              </ItemActions>
+              </ItemHeader>
+              {locationFields.length ? (
+                <ItemContent>
+                  {locationFields.map(l => (
+                    <Badge key={l.id} variant='secondary'>
+                      {l.name}
+                    </Badge>
+                  ))}
+                </ItemContent>
+              ) : null}
             </Item>
-
-            <Item>
-              <ItemContent>
-                <ItemTitle>Shift types</ItemTitle>
-                <ItemDescription>
-                  {shiftTypeFields.length
-                    ? shiftTypeFields
-                        .map(s => `${s.name} (${s.startTime}-${s.endTime})`)
-                        .join(', ')
-                    : 'None added'}
-                </ItemDescription>
-              </ItemContent>
-              <ItemActions>
+            <Separator />
+            <Item className='items-start'>
+              <ItemHeader>
+                <ItemTitle>Shift Types</ItemTitle>
                 <Button
                   type='button'
                   variant='secondary'
+                  className='ml-auto'
                   onClick={() => setShiftTypesOpen(true)}
                 >
                   Manage
                 </Button>
-              </ItemActions>
+              </ItemHeader>
+              {shiftTypeFields.length ? (
+                <ItemContent>
+                  <Card className='divide-y gap-0'>
+                    {shiftTypeFields.map(st => (
+                      <CardContent key={st.id} className='p-4 space-y-2'>
+                        {/* Header Row */}
+                        <div className='flex items-center justify-between'>
+                          <CardTitle>{st.name}</CardTitle>
+                          <CardDescription className='flex items-center gap-1 '>
+                            {st.startTime}
+                            <ArrowRight size={16} />
+                            {st.endTime}
+                          </CardDescription>
+                        </div>
+
+                        {/* Pay Grades */}
+                        {st.connectPayGrades?.length ? (
+                          <div className='flex flex-wrap gap-2'>
+                            {st.connectPayGrades.map(pgId => {
+                              const pg = payGradeFields.find(p => p.id === pgId)
+                              if (!pg) return
+
+                              return (
+                                <Badge key={pgId} variant='secondary'>
+                                  {pg.name}
+                                </Badge>
+                              )
+                            })}
+                          </div>
+                        ) : (
+                          <div className='text-xs text-muted-foreground'>
+                            No pay grades connected
+                          </div>
+                        )}
+                      </CardContent>
+                    ))}
+                  </Card>
+                </ItemContent>
+              ) : null}
             </Item>
           </ItemGroup>
         </Card>
@@ -1473,6 +1512,23 @@ function ShiftTypeItem({
                   </ComboboxItem>
                 )}
               </ComboboxList>
+              <ComboboxSeparator className='m-0' />
+              <Button
+                variant='link'
+                className='w-full text-center text-muted-foreground hover:text-foreground hover:no-underline'
+                type='button'
+                onClick={() =>
+                  setConnectedPayGradeIds(
+                    connectedPayGradeIds.length === payGrades.fields.length
+                      ? []
+                      : payGrades.fields.map(pg => pg.id),
+                  )
+                }
+              >
+                {connectedPayGradeIds.length === payGrades.fields.length
+                  ? 'Clear all'
+                  : 'Select all'}
+              </Button>
             </ComboboxContent>
           </Combobox>
         </div>

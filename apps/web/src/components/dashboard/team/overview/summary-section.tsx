@@ -39,15 +39,15 @@ function SummaryCard<T>({
   onManage,
 }: SummaryCardProps<T>) {
   return (
-    <Card className='min-w-[200px] p-0 gap-4 *:first:mt-4'>
-      <CardHeader className='px-4 gap-0'>
+    <Card className='min-w-[200px] pt-4 pb-0'>
+      <CardHeader className='gap-0'>
         <CardTitle className='text-sm'>{title}</CardTitle>
         <CardDescription className='text-xs'>
           {description ?? `${items?.length ?? 0} items`}
         </CardDescription>
       </CardHeader>
       <Separator />
-      <CardContent className='flex flex-1 flex-col px-4 gap-2'>
+      <CardContent className='flex flex-1 flex-col gap-2'>
         {items && items.length > 0 ? (
           items.slice(0, MAX_VISIBLE).map(renderItem)
         ) : (
