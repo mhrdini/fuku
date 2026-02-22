@@ -4,6 +4,15 @@ import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import {
   Button,
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxValue,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -14,6 +23,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  useComboboxAnchor,
 } from '@fuku/ui/components'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -50,6 +60,11 @@ export const TeamShiftTypesContent = () => {
 
   const { data: shiftTypes } = useQuery({
     ...trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
+  })
+
+  const { data: payGrades } = useQuery({
+    ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
     enabled: !!team,
   })
 
@@ -165,6 +180,63 @@ export const TeamShiftTypesContent = () => {
             value={row.original.endTime}
             onChange={updateTime}
           />
+        )
+      },
+    },
+    {
+      accessorKey: 'eligiblePayGrades',
+      header: 'Pay Grades',
+      cell: ({ row }) => {
+        const anchor = useComboboxAnchor()
+        return (
+          <Combobox
+            multiple
+            items={payGrades ?? []}
+            value={row.original.eligiblePayGrades.map(pg => pg.payGradeId)}
+            onValueChange={(ids: string[]) => {
+              const connectPayGrades = ids.filter(
+                id =>
+                  !row.original.eligiblePayGrades.some(
+                    epg => epg.payGradeId === id,
+                  ),
+              )
+              const disconnectPayGrades = row.original.eligiblePayGrades
+                .filter(epg => !ids.includes(epg.payGradeId))
+                .map(epg => epg.payGradeId)
+
+              updateShiftType({
+                id: row.original.id,
+                connectPayGrades,
+                disconnectPayGrades,
+              })
+            }}
+          >
+            <ComboboxChips ref={anchor} className='w-[300px] min-w-0'>
+              <ComboboxValue>
+                {(ids: string[]) => (
+                  <>
+                    {ids.map(id => {
+                      const pg = payGrades?.find(pg => pg.id === id)
+                      if (!pg) return null
+
+                      return <ComboboxChip key={id}>{pg.name}</ComboboxChip>
+                    })}
+                    <ComboboxChipsInput />
+                  </>
+                )}
+              </ComboboxValue>
+            </ComboboxChips>
+            <ComboboxContent anchor={anchor}>
+              <ComboboxEmpty>No pay grades found.</ComboboxEmpty>
+              <ComboboxList>
+                {item => (
+                  <ComboboxItem key={item.id} value={item.id}>
+                    {item.name}
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
         )
       },
     },

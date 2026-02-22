@@ -8,6 +8,16 @@ import {
 } from '@fuku/api/schemas'
 import {
   Button,
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxSeparator,
+  ComboboxValue,
   Field,
   FieldError,
   FieldGroup,
@@ -19,6 +29,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
+  useComboboxAnchor,
 } from '@fuku/ui/components'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -35,6 +46,7 @@ type PayGradeCreateFormGrade = PayGradeCreateInput
 export const CreatePayGradeFormSheet = () => {
   const title = 'Create New Pay Grade'
   const { id, closeSheet } = useSheetStore()
+  const anchor = useComboboxAnchor()
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
@@ -45,10 +57,16 @@ export const CreatePayGradeFormSheet = () => {
     enabled: !!slug,
   })
 
+  const { data: shiftTypes } = useQuery({
+    ...trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
+  })
+
   const form = useForm<PayGradeCreateFormGrade>({
     defaultValues: {
       name: '',
       baseRate: 0,
+      connectShiftTypes: [],
     },
     resolver: zodResolver(PayGradeCreateFormSchema),
   })
@@ -154,6 +172,77 @@ export const CreatePayGradeFormSheet = () => {
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
+                </Field>
+              )}
+            />
+            <Controller
+              name='connectShiftTypes'
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor='form-create-pay-grade-connect-shift-types'>
+                    Eligible Shift Types
+                  </FieldLabel>
+                  <Combobox
+                    id='form-create-pay-grade-connect-shift-types'
+                    {...field}
+                    multiple
+                    items={shiftTypes ?? []}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <ComboboxChips ref={anchor}>
+                      <ComboboxValue>
+                        {(ids: string[]) => (
+                          <>
+                            {ids.map(id => {
+                              const st = shiftTypes?.find(st => st.id === id)
+                              if (!st) return null
+
+                              return (
+                                <ComboboxChip key={id}>{st.name}</ComboboxChip>
+                              )
+                            })}
+                            <ComboboxChipsInput />
+                          </>
+                        )}
+                      </ComboboxValue>
+                    </ComboboxChips>
+                    <ComboboxContent anchor={anchor}>
+                      <ComboboxEmpty>No shift types found.</ComboboxEmpty>
+                      <ComboboxList>
+                        {item => (
+                          <ComboboxItem key={item.id} value={item.id}>
+                            {item.name}
+                          </ComboboxItem>
+                        )}
+                      </ComboboxList>
+                      <ComboboxSeparator className='m-0' />
+                      <div className='flex flex-row w-full justify-between'>
+                        <Button
+                          variant='link'
+                          className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                          type='button'
+                          onClick={() =>
+                            form.setValue(
+                              'connectShiftTypes',
+                              shiftTypes?.map(st => st.id),
+                            )
+                          }
+                        >
+                          Select all
+                        </Button>
+                        <Button
+                          variant='link'
+                          className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                          type='button'
+                          onClick={() => form.setValue('connectShiftTypes', [])}
+                        >
+                          Clear all
+                        </Button>
+                      </div>
+                    </ComboboxContent>
+                  </Combobox>
                 </Field>
               )}
             />

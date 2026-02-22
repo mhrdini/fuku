@@ -55,7 +55,7 @@ export const shiftTypeRouter = {
       }),
     )
     .query(async ({ input, ctx }) => {
-      return ctx.db.shiftType.findMany({
+      const detailed = await ctx.db.shiftType.findMany({
         where: {
           team: {
             id: input.teamId,
@@ -70,6 +70,7 @@ export const shiftTypeRouter = {
           createdAt: 'asc',
         },
       })
+      return detailed
     }),
   create: protectedProcedure
     .input(ShiftTypeCreateInputSchema)
