@@ -443,7 +443,7 @@ function TeamMembersSection() {
       </Field>
       <FieldGroup>
         <Card>
-          <ItemGroup className='flex py-4 gap-2'>
+          <ItemGroup className='flex gap-2'>
             {teamMemberFields.map((field, index) => (
               <Item key={field.id} className='py-0'>
                 <ItemContent>
@@ -1090,7 +1090,7 @@ function AdditionalDetailsSection() {
 
       <FieldGroup>
         <Card>
-          <ItemGroup>
+          <ItemGroup className='*:first:pt-0 *:last:pb-0'>
             <Item>
               <ItemHeader>
                 <ItemTitle>Locations</ItemTitle>
@@ -1128,7 +1128,7 @@ function AdditionalDetailsSection() {
               </ItemHeader>
               {shiftTypeFields.length ? (
                 <ItemContent>
-                  <Card className='divide-y gap-0'>
+                  <Card className='divide-y gap-0 py-0'>
                     {shiftTypeFields.map(st => (
                       <CardContent key={st.id} className='p-4 space-y-2'>
                         {/* Header Row */}
@@ -1513,22 +1513,26 @@ function ShiftTypeItem({
                 )}
               </ComboboxList>
               <ComboboxSeparator className='m-0' />
-              <Button
-                variant='link'
-                className='w-full text-center text-muted-foreground hover:text-foreground hover:no-underline'
-                type='button'
-                onClick={() =>
-                  setConnectedPayGradeIds(
-                    connectedPayGradeIds.length === payGrades.fields.length
-                      ? []
-                      : payGrades.fields.map(pg => pg.id),
-                  )
-                }
-              >
-                {connectedPayGradeIds.length === payGrades.fields.length
-                  ? 'Clear all'
-                  : 'Select all'}
-              </Button>
+              <div className='flex flex-row w-full justify-between'>
+                <Button
+                  variant='link'
+                  className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                  type='button'
+                  onClick={() =>
+                    setConnectedPayGradeIds(payGrades.fields.map(pg => pg.id))
+                  }
+                >
+                  Select all
+                </Button>
+                <Button
+                  variant='link'
+                  className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                  type='button'
+                  onClick={() => setConnectedPayGradeIds([])}
+                >
+                  Clear all
+                </Button>
+              </div>
             </ComboboxContent>
           </Combobox>
         </div>
