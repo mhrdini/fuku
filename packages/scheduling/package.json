@@ -5,7 +5,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "gen:types": "barrelsby --directory  ./src/domain/types --output ./src/domain/types/index.ts --delete"
+    "gen:index": "barrelsby --directory  ./src/domain/types --output ./src/domain/types/index.ts --delete"
   },
   "dependencies": {
     "heap-js": "^2.7.1",
