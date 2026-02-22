@@ -1,9 +1,11 @@
-import { PayGradeSchema, PayGradeShiftTypeSchema } from '@fuku/db/schemas'
+import { PayGradeSchema } from '@fuku/db/schemas'
 import z from 'zod/v4'
+
+import { PayGradeShiftTypeOutputSchema } from './payGradeShiftType'
 
 export const PayGradeOutputSchema = PayGradeSchema.extend({
   description: z.string().nullable(),
-  eligibleShiftTypes: z.array(PayGradeShiftTypeSchema),
+  eligibleShiftTypes: z.array(PayGradeShiftTypeOutputSchema),
 })
 
 export type PayGradeOutput = z.infer<typeof PayGradeOutputSchema>

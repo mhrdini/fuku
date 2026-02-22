@@ -50,7 +50,7 @@ export const RemoveMemberAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
       )
-      const toastId = toast('Team member', {
+      const toastId = toast('Team Member', {
         description: `${data.givenNames} ${data.familyName} has been removed.`,
         action: {
           label: 'Undo',
