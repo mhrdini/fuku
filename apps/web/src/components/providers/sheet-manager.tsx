@@ -14,7 +14,7 @@ export const SheetManager = () => {
   const handleClose = () => closeSheet()
 
   return (
-    <Sheet open={open} onOpenChange={handleClose}>
+    <Sheet open={open} onOpenChange={handleClose} modal={false}>
       <SheetContent side='right'>
         {id === SheetId.CREATE_LOCATION && <CreateLocationFormSheet />}
         {id === SheetId.CREATE_SHIFT_TYPE && <CreateShiftTypeFormSheet />}

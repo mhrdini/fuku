@@ -4,6 +4,15 @@ import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import {
   Button,
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxValue,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -14,6 +23,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  useComboboxAnchor,
 } from '@fuku/ui/components'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -50,6 +60,11 @@ export const TeamPayGradesContent = () => {
 
   const { data: payGrades } = useQuery({
     ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
+    enabled: !!team,
+  })
+
+  const { data: shiftTypes } = useQuery({
+    ...trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
     enabled: !!team,
   })
 
@@ -141,6 +156,63 @@ export const TeamPayGradesContent = () => {
           isUpdating={isUpdating}
         />
       ),
+    },
+    {
+      accessorKey: 'eligibleShiftTypes',
+      header: 'Shift Types',
+      cell: ({ row }) => {
+        const anchor = useComboboxAnchor()
+        return (
+          <Combobox
+            multiple
+            items={shiftTypes ?? []}
+            value={row.original.eligibleShiftTypes.map(st => st.shiftTypeId)}
+            onValueChange={(ids: string[]) => {
+              const connectShiftTypes = ids.filter(
+                id =>
+                  !row.original.eligibleShiftTypes.some(
+                    est => est.shiftTypeId === id,
+                  ),
+              )
+              const disconnectShiftTypes = row.original.eligibleShiftTypes
+                .filter(est => !ids.includes(est.shiftTypeId))
+                .map(est => est.shiftTypeId)
+
+              updatePayGrade({
+                id: row.original.id,
+                connectShiftTypes,
+                disconnectShiftTypes,
+              })
+            }}
+          >
+            <ComboboxChips ref={anchor} className='w-[300px] min-w-0'>
+              <ComboboxValue>
+                {(ids: string[]) => (
+                  <>
+                    {ids.map(id => {
+                      const st = shiftTypes?.find(st => st.id === id)
+                      if (!st) return null
+
+                      return <ComboboxChip key={id}>{st.name}</ComboboxChip>
+                    })}
+                    <ComboboxChipsInput />
+                  </>
+                )}
+              </ComboboxValue>
+            </ComboboxChips>
+            <ComboboxContent anchor={anchor}>
+              <ComboboxEmpty>No pay grades found.</ComboboxEmpty>
+              <ComboboxList>
+                {item => (
+                  <ComboboxItem key={item.id} value={item.id}>
+                    {item.name}
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        )
+      },
     },
   ]
 
