@@ -51,7 +51,7 @@ Pure logic for generating schedules:
 
 ### `/shared/date-utils.ts`
 
-- Normalise date formats
+- Normalize date formats
 - Calculate date ranges
 - Handle time zones
 

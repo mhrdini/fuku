@@ -3,6 +3,7 @@ import {
   Assignment,
   OperationalHour,
   PayGrade,
+  PayGradeShiftType,
   ShiftType,
   Unavailability,
 } from './schedule'
@@ -14,7 +15,6 @@ export interface Team {
 export interface TeamMember {
   id: string
   payGradeId: string | null
-  isActive: boolean
 }
 
 export interface TeamSnapshot {
@@ -22,6 +22,7 @@ export interface TeamSnapshot {
   teamMembers: TeamMember[]
   payGrades: PayGrade[]
   shiftTypes: ShiftType[]
+  payGradeShiftTypes: PayGradeShiftType[]
   operationalHours: OperationalHour[]
   unavailabilities: Unavailability[]
   assignments: Assignment[]

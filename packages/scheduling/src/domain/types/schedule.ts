@@ -17,6 +17,11 @@ export interface ShiftType {
   endTime: string
 }
 
+export interface PayGradeShiftType {
+  payGradeId: string
+  shiftTypeId: string
+}
+
 export type ZonedShiftType = Zoned<ShiftType, 'startTime' | 'endTime'>
 
 export interface OperationalHour {
