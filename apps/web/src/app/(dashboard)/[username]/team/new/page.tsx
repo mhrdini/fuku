@@ -7,6 +7,15 @@ import {
   Badge,
   Button,
   Card,
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxValue,
   Command,
   CommandEmpty,
   CommandGroup,
@@ -47,6 +56,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  useComboboxAnchor,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -54,6 +64,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Check,
   ChevronDown,
+  CornerDownRight,
   Ellipsis,
   Layers,
   Pencil,
@@ -107,7 +118,7 @@ const TeamMemberFormSchema = TeamMembersSectionSchema.shape.teamMembers.element
 
 type TeamMemberFormType = z.infer<typeof TeamMemberFormSchema>
 
-const AdditionalDetailsSectionSchema = TeamCreateFormSchema.partial({
+const AdditionalDetailsSectionSchema = TeamCreateFormSchema.pick({
   locations: true,
   shiftTypes: true,
 })
@@ -224,7 +235,8 @@ export default function NewTeamPage() {
 
   const onSubmit: SubmitHandler<TeamCreateFormType> = values => {
     try {
-      createTeam(values)
+      console.log('new team submit values:', values)
+      // createTeam(values)
     } catch {}
   }
 
@@ -929,11 +941,7 @@ function PayGradeItem({
   onDelete,
   error,
 }: {
-  field: {
-    id: string
-    name?: string
-    baseRate?: number
-  }
+  field: z.infer<typeof TeamMembersSectionSchema.shape.payGrades.element>
   index: number
   update: (index: number, value: any) => void
   onDelete: () => void
@@ -1036,6 +1044,12 @@ function AdditionalDetailsSection() {
     keyName: 'rhfId',
   })
 
+  const { fields: payGradeFields } = useFieldArray({
+    control,
+    name: 'payGrades',
+    keyName: 'rhfId',
+  })
+
   return (
     <FieldSet>
       <LocationsSheet
@@ -1057,6 +1071,9 @@ function AdditionalDetailsSection() {
           append: appendShiftType,
           remove: removeShiftType,
           update: updateShiftType,
+        }}
+        payGrades={{
+          fields: payGradeFields,
         }}
       />
 
@@ -1183,7 +1200,7 @@ function LocationItem({
   onDelete,
   error,
 }: {
-  field: { id: string; name?: string }
+  field: z.infer<typeof AdditionalDetailsSectionSchema.shape.locations.element>
   index: number
   update: (index: number, value: any) => void
   onDelete: () => void
@@ -1237,6 +1254,7 @@ function ShiftTypesSheet({
   open,
   onOpenChange,
   shiftTypes,
+  payGrades,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -1244,6 +1262,10 @@ function ShiftTypesSheet({
     UseFieldArrayReturn<TeamCreateFormType, 'shiftTypes'>,
     'fields' | 'append' | 'remove' | 'update'
   >
+  payGrades: Pick<
+    UseFieldArrayReturn<TeamCreateFormType, 'payGrades'>,
+    'fields'
+  > // for connecting pay grades to shift types
 }) {
   const { trigger, formState } = useFormContext<TeamCreateFormType>()
   const { fields, append, remove, update } = shiftTypes
@@ -1257,7 +1279,7 @@ function ShiftTypesSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange} modal={false}>
       <SheetContent className='flex flex-col gap-6'>
         <SheetHeader>
           <SheetTitle>Shift Types</SheetTitle>
@@ -1275,6 +1297,7 @@ function ShiftTypesSheet({
               update={update}
               onDelete={() => remove(index)}
               error={formState.errors.shiftTypes?.[index]}
+              payGrades={payGrades}
             />
           ))}
 
@@ -1287,6 +1310,7 @@ function ShiftTypesSheet({
                 name: '',
                 startTime: '09:00',
                 endTime: '17:00',
+                connectPayGrades: [],
               })
             }}
           >
@@ -1305,8 +1329,9 @@ function ShiftTypeItem({
   update,
   onDelete,
   error,
+  payGrades,
 }: {
-  field: { id: string; name?: string; startTime?: string; endTime?: string }
+  field: z.infer<typeof AdditionalDetailsSectionSchema.shape.shiftTypes.element>
   index: number
   update: (index: number, value: any) => void
   onDelete: () => void
@@ -1315,15 +1340,25 @@ function ShiftTypeItem({
     startTime?: { message?: string }
     endTime?: { message?: string }
   }
+  payGrades: Pick<
+    UseFieldArrayReturn<TeamCreateFormType, 'payGrades'>,
+    'fields'
+  >
 }) {
+  const anchor = useComboboxAnchor()
+
   const [name, setName] = useState(field.name ?? '')
   const [startTime, setStartTime] = useState(field.startTime)
   const [endTime, setEndTime] = useState(field.endTime)
+  const [connectedPayGradeIds, setConnectedPayGradeIds] = useState(
+    field.connectPayGrades ?? [],
+  )
 
   const latestRef = useRef({
     name: field.name ?? '',
     startTime: field.startTime,
     endTime: field.endTime,
+    connectPayGrades: field.connectPayGrades,
   })
 
   useEffect(() => {
@@ -1341,6 +1376,11 @@ function ShiftTypeItem({
     latestRef.current.endTime = field.endTime
   }, [field.endTime])
 
+  useEffect(() => {
+    setConnectedPayGradeIds(field.connectPayGrades ?? [])
+    latestRef.current.connectPayGrades = field.connectPayGrades
+  }, [field.connectPayGrades])
+
   const commit = () => {
     update(index, {
       ...field,
@@ -1351,7 +1391,7 @@ function ShiftTypeItem({
   const { schedule, flush } = useDebouncedCommit(commit)
 
   return (
-    <Item className='p-0'>
+    <Item className='p-0 gap-2'>
       <ItemContent className='grid grid-cols-6 gap-2'>
         <Input
           value={name}
@@ -1393,8 +1433,51 @@ function ShiftTypeItem({
           onBlur={flush}
           aria-invalid={!!error?.endTime}
         />
+        <div className='col-span-6 flex items-center gap-2'>
+          <CornerDownRight size={16} className='text-muted-foreground ml-2' />
+          <Combobox
+            multiple
+            items={payGrades.fields}
+            value={connectedPayGradeIds}
+            onValueChange={(ids: string[]) => {
+              setConnectedPayGradeIds(ids)
+              latestRef.current.connectPayGrades = ids
+              commit()
+            }}
+          >
+            <ComboboxChips ref={anchor} className='w-full'>
+              <ComboboxValue>
+                {(ids: string[]) => (
+                  <>
+                    {ids.map(id => {
+                      const pg = payGrades.fields.find(p => p.id === id)
+                      if (!pg) return null
+
+                      return <ComboboxChip key={id}>{pg.name}</ComboboxChip>
+                    })}
+                    <ComboboxChipsInput />
+                  </>
+                )}
+              </ComboboxValue>
+            </ComboboxChips>
+            <ComboboxContent anchor={anchor}>
+              <ComboboxEmpty>No pay grades found.</ComboboxEmpty>
+              <ComboboxList>
+                {(
+                  item: z.infer<
+                    typeof TeamCreateFormSchema.shape.payGrades.element
+                  >,
+                ) => (
+                  <ComboboxItem key={item.id} value={item.id}>
+                    {item.name}
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        </div>
       </ItemContent>
-      <ItemActions>
+      <ItemActions className='items-start h-full'>
         <Button type='button' variant='ghost' size='icon' onClick={onDelete}>
           <Trash2 />
         </Button>

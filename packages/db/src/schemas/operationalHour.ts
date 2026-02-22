@@ -3,7 +3,6 @@ import z from 'zod/v4'
 import { DayOfWeekSchema, Time } from './helpers'
 
 export const OperationalHourSchema = z.object({
-  id: z.string(),
   teamId: z.string(),
   dayOfWeek: DayOfWeekSchema,
   startTime: Time,

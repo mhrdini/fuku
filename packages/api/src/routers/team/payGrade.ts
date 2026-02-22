@@ -16,6 +16,9 @@ export const payGradeRouter = {
         where: {
           id: input.id,
         },
+        include: {
+          eligibleShiftTypes: true,
+        },
         orderBy: {
           createdAt: 'asc',
         },
@@ -55,6 +58,9 @@ export const payGradeRouter = {
           teamId: input.teamId,
         },
         ...(input.limit && { take: input.limit }),
+        include: {
+          eligibleShiftTypes: true,
+        },
         orderBy: { createdAt: 'asc' },
       })
     }),
@@ -66,6 +72,7 @@ export const payGradeRouter = {
         name: z.string(),
         description: z.string().nullish(),
         baseRate: numberFromInput({ min: 0 }),
+        connectShiftTypes: z.array(z.string()).optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -73,10 +80,24 @@ export const payGradeRouter = {
         data: {
           teamId: input.teamId,
           name: input.name,
+          baseRate: input.baseRate,
           ...(input.description !== undefined
             ? { description: input.description }
             : {}),
-          baseRate: input.baseRate,
+          ...(input.connectShiftTypes?.length
+            ? {
+                eligibleShiftTypes: {
+                  create: input.connectShiftTypes.map(id => ({
+                    shiftType: {
+                      connect: { id },
+                    },
+                  })),
+                },
+              }
+            : {}),
+        },
+        include: {
+          eligibleShiftTypes: true,
         },
       })
       return pg
@@ -89,6 +110,8 @@ export const payGradeRouter = {
         name: z.string().optional(),
         description: z.string().nullish(),
         baseRate: numberFromInput({ min: 0 }).optional(),
+        connectShiftTypes: z.array(z.string()).optional(),
+        disconnectShiftTypes: z.array(z.string()).optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -102,6 +125,29 @@ export const payGradeRouter = {
             ? { description: input.description }
             : {}),
           ...(input.baseRate !== undefined ? { baseRate: input.baseRate } : {}),
+          ...(input.connectShiftTypes?.length
+            ? {
+                eligibleShiftTypes: {
+                  create: input.connectShiftTypes.map(id => ({
+                    shiftType: {
+                      connect: { id },
+                    },
+                  })),
+                },
+              }
+            : {}),
+          ...(input.disconnectShiftTypes?.length
+            ? {
+                eligibleShiftTypes: {
+                  deleteMany: input.disconnectShiftTypes.map(shiftTypeId => ({
+                    shiftTypeId,
+                  })),
+                },
+              }
+            : {}),
+        },
+        include: {
+          eligibleShiftTypes: true,
         },
       })
     }),
@@ -118,6 +164,9 @@ export const payGradeRouter = {
         where: {
           id: input.id,
           teamId: input.teamId,
+        },
+        include: {
+          eligibleShiftTypes: true,
         },
       })
     }),
