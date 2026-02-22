@@ -12,13 +12,23 @@ export class PrismaTeamRepository implements TeamRepository {
           select: {
             id: true,
             payGradeId: true,
-            deletedAt: true,
+          },
+          where: {
+            deletedAt: null,
+            payGradeId: {
+              not: null,
+            },
           },
         },
         payGrades: {
           select: {
             id: true,
             baseRate: true,
+            eligibleShiftTypes: {
+              select: {
+                shiftTypeId: true,
+              },
+            },
           },
         },
         shiftTypes: {
@@ -37,6 +47,13 @@ export class PrismaTeamRepository implements TeamRepository {
         },
       },
     })
+
+    const payGradeShiftTypes = team.payGrades.flatMap(pg =>
+      pg.eligibleShiftTypes.map(est => ({
+        payGradeId: pg.id,
+        shiftTypeId: est.shiftTypeId,
+      })),
+    )
 
     const unavailabilities = await this.db.unavailability.findMany({
       where: {
@@ -72,7 +89,6 @@ export class PrismaTeamRepository implements TeamRepository {
       teamMembers: team.teamMembers.map(m => ({
         id: m.id,
         payGradeId: m.payGradeId,
-        isActive: m.deletedAt === null,
       })),
       payGrades: team.payGrades.map(pg => ({
         id: pg.id,
@@ -83,6 +99,7 @@ export class PrismaTeamRepository implements TeamRepository {
         startTime: st.startTime,
         endTime: st.endTime,
       })),
+      payGradeShiftTypes,
       operationalHours: team.operationalHours,
       unavailabilities: unavailabilities.map(u => ({
         teamMemberId: u.teamMemberId,
