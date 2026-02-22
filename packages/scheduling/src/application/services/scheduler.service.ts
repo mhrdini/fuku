@@ -88,7 +88,7 @@ export class DefaultSchedulerService implements SchedulerService {
     // console.log('Generated period for scheduling:', period)
 
     const staffingRequirement = {
-      minMembersPerDay: 3, // TODO: implement dynamic staffing requirements
+      minMembersPerDay: 4, // TODO: implement dynamic staffing requirements
     }
     const teamSnapshot = await this.teamRepository.getTeamSnapshot(
       input.teamId,

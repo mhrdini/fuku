@@ -12,6 +12,7 @@ import {
   ComboboxEmpty,
   ComboboxItem,
   ComboboxList,
+  ComboboxSeparator,
   ComboboxValue,
   DropdownMenu,
   DropdownMenuContent,
@@ -209,6 +210,37 @@ export const TeamPayGradesContent = () => {
                   </ComboboxItem>
                 )}
               </ComboboxList>
+              <ComboboxSeparator className='m-0' />
+              <div className='flex flex-row w-full justify-between'>
+                <Button
+                  variant='link'
+                  className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                  type='button'
+                  onClick={() =>
+                    updatePayGrade({
+                      id: row.original.id,
+                      connectShiftTypes: shiftTypes?.map(st => st.id) ?? [],
+                    })
+                  }
+                >
+                  Select all
+                </Button>
+                <Button
+                  variant='link'
+                  className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                  type='button'
+                  onClick={() =>
+                    updatePayGrade({
+                      id: row.original.id,
+                      disconnectShiftTypes: row.original.eligibleShiftTypes.map(
+                        est => est.shiftTypeId,
+                      ),
+                    })
+                  }
+                >
+                  Clear all
+                </Button>
+              </div>
             </ComboboxContent>
           </Combobox>
         )
