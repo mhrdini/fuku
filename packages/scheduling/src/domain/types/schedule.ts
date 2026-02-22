@@ -34,7 +34,7 @@ export type ZonedOperationalHours = {
 
 export interface Assignment {
   teamMemberId: string
-  shiftTypeId: string
+  shiftTypeId: string | null
   date: Date
 }
 

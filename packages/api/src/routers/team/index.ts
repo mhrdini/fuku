@@ -219,6 +219,21 @@ export const teamRouter = {
         payGradeMap.set(pg.id, payGrades[i].id)
       })
 
+      for (const [i, shift] of input.shiftTypes.entries()) {
+        const shiftTypeId = newTeam.shiftTypes[i].id
+        const eligiblePayGrades = shift.connectPayGrades?.map(id => ({
+          payGradeId: payGradeMap.get(id)!,
+          shiftTypeId,
+        }))
+
+        if (eligiblePayGrades?.length) {
+          await ctx.db.payGradeShiftType.createMany({
+            data: eligiblePayGrades,
+            skipDuplicates: true,
+          })
+        }
+      }
+
       const teamMembers = await Promise.all(
         input.teamMembers.map(tm =>
           ctx.db.teamMember.create({

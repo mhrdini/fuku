@@ -15,7 +15,7 @@
     "dev:styles": "tailwindcss -i ./src/styles.css -o ./dist/index.css --watch",
     "dev:components": "tsc --watch",
     "gen:all": "pnpm run gen:components",
-    "gen:components": "barrelsby --directory  ./src/components/ --output ./src/components/index.ts --delete"
+    "gen:index": "barrelsby --directory  ./src/components/ --output ./src/components/index.ts --delete"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",

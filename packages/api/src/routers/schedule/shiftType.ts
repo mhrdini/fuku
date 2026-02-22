@@ -2,6 +2,7 @@ import type { TRPCRouterRecord } from '@trpc/server'
 import { ColorHex } from '@fuku/db/schemas'
 import z from 'zod/v4'
 
+import { ShiftTypeCreateInputSchema } from '../../schemas'
 import { protectedProcedure } from '../../trpc'
 
 export const shiftTypeRouter = {
@@ -12,6 +13,9 @@ export const shiftTypeRouter = {
         where: {
           id: input.id,
           deletedAt: null,
+        },
+        include: {
+          eligiblePayGrades: true,
         },
         orderBy: {
           createdAt: 'asc',
@@ -59,22 +63,16 @@ export const shiftTypeRouter = {
           deletedAt: null,
         },
         ...(input.limit && { take: input.limit }),
+        include: {
+          eligiblePayGrades: true,
+        },
         orderBy: {
           createdAt: 'asc',
         },
       })
     }),
   create: protectedProcedure
-    .input(
-      z.object({
-        teamId: z.string(),
-        name: z.string(),
-        description: z.string().nullish(),
-        startTime: z.string(),
-        endTime: z.string(),
-        color: ColorHex.optional(),
-      }),
-    )
+    .input(ShiftTypeCreateInputSchema)
     .mutation(async ({ input, ctx }) => {
       const created = await ctx.db.shiftType.create({
         data: {
@@ -84,7 +82,19 @@ export const shiftTypeRouter = {
           startTime: input.startTime,
           endTime: input.endTime,
           ...(input.color && { color: input.color }),
+          ...(input.connectPayGrades?.length
+            ? {
+                eligiblePayGrades: {
+                  create: input.connectPayGrades.map(id => ({
+                    payGrade: {
+                      connect: { id },
+                    },
+                  })),
+                },
+              }
+            : {}),
         },
+        include: { eligiblePayGrades: true },
       })
       return created
     }),
@@ -97,6 +107,8 @@ export const shiftTypeRouter = {
         startTime: z.string().nullish(),
         endTime: z.string().nullish(),
         color: ColorHex.optional(),
+        connectPayGrades: z.array(z.string()).optional(),
+        disconnectPayGrades: z.array(z.string()).optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -110,7 +122,26 @@ export const shiftTypeRouter = {
           ...(input.startTime && { startTime: input.startTime }),
           ...(input.endTime && { endTime: input.endTime }),
           ...(input.color && { color: input.color }),
+          ...(input.connectPayGrades?.length
+            ? {
+                eligiblePayGrades: {
+                  create: input.connectPayGrades.map(id => ({
+                    payGrade: { connect: { id } },
+                  })),
+                },
+              }
+            : {}),
+          ...(input.disconnectPayGrades?.length
+            ? {
+                eligiblePayGrades: {
+                  deleteMany: input.disconnectPayGrades.map(payGradeId => ({
+                    payGradeId,
+                  })),
+                },
+              }
+            : {}),
         },
+        include: { eligiblePayGrades: true },
       })
       return updated
     }),
@@ -129,6 +160,7 @@ export const shiftTypeRouter = {
           deletedAt: new Date(),
           deletedById: ctx.session.user.id,
         },
+        include: { eligiblePayGrades: true },
       })
       return deleted
     }),
@@ -147,6 +179,7 @@ export const shiftTypeRouter = {
           deletedAt: null,
           deletedById: null,
         },
+        include: { eligiblePayGrades: true },
       })
       return restored
     }),
