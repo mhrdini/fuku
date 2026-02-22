@@ -12,6 +12,7 @@ import {
   ComboboxEmpty,
   ComboboxItem,
   ComboboxList,
+  ComboboxSeparator,
   ComboboxValue,
   DropdownMenu,
   DropdownMenuContent,
@@ -235,6 +236,37 @@ export const TeamShiftTypesContent = () => {
                   </ComboboxItem>
                 )}
               </ComboboxList>
+              <ComboboxSeparator className='m-0' />
+              <div className='flex flex-row w-full justify-between'>
+                <Button
+                  variant='link'
+                  className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                  type='button'
+                  onClick={() =>
+                    updateShiftType({
+                      id: row.original.id,
+                      connectPayGrades: payGrades?.map(pg => pg.id) ?? [],
+                    })
+                  }
+                >
+                  Select all
+                </Button>
+                <Button
+                  variant='link'
+                  className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                  type='button'
+                  onClick={() =>
+                    updateShiftType({
+                      id: row.original.id,
+                      disconnectPayGrades: row.original.eligiblePayGrades.map(
+                        epg => epg.payGradeId,
+                      ),
+                    })
+                  }
+                >
+                  Clear all
+                </Button>
+              </div>
             </ComboboxContent>
           </Combobox>
         )
