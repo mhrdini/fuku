@@ -6,6 +6,7 @@ import {
   toZonedDateTime,
   toZonedPeriod,
 } from '../../shared/utils/date'
+import { SegmentScarcityRule } from '../scoring/SegmentScarcityRule'
 import { ZonedOperationalHours } from '../types'
 import {
   Candidate,
@@ -26,7 +27,7 @@ export class DefaultSchedulerEngine implements SchedulerEngine {
     // 3. Collect metrics on the scheduling process (e.g., total shifts assigned, unavailabilities overridden)
     // 4. Return the final proposed assignments along with metrics
 
-    const zonedCtx = this.normaliseDates(ctx)
+    const context = this.normalizeDates(ctx)
 
     // High-level algorithm outline:
     // Propose assignments = for each day in the period
@@ -38,7 +39,9 @@ export class DefaultSchedulerEngine implements SchedulerEngine {
     // staffing requirements
 
     const proposedAssignments: ProposedAssignment[] = []
-    const periodDates = generateDateTimes(zonedCtx.period)
+    const periodDates = generateDateTimes(context.period)
+    const constraints = []
+    const scoringRules = [new SegmentScarcityRule()]
 
     for (const date of periodDates) {
       const candidates: Candidate[] = []
@@ -65,10 +68,10 @@ export class DefaultSchedulerEngine implements SchedulerEngine {
           // }
 
           // // Compute soft rule score
-          // candidate.score = scoringRules.reduce(
-          //   (sum, rule) => sum + rule.score(candidate, ctx),
-          //   0,
-          // )
+          candidate.score = scoringRules.reduce(
+            (sum, rule) => sum + rule.score(candidate, context),
+            0,
+          )
 
           candidates.push(candidate)
         }
@@ -109,11 +112,9 @@ export class DefaultSchedulerEngine implements SchedulerEngine {
   /**
    * Convert all JS dates and HH:mm strings into Luxon DateTime in team timezone
    */
-  private normaliseDates(ctx: SchedulerContext): ZonedSchedulerContext {
+  private normalizeDates(ctx: SchedulerContext): ZonedSchedulerContext {
     return {
-      team: ctx.team,
-      teamMembers: ctx.teamMembers,
-      payGrades: ctx.payGrades,
+      ...ctx,
       shiftTypes: ctx.shiftTypes.map(st => ({
         id: st.id,
         startTime: DateTime.fromObject(
@@ -170,7 +171,6 @@ export class DefaultSchedulerEngine implements SchedulerEngine {
         shiftTypeId: a.shiftTypeId,
         date: toZonedDateTime(a.date, ctx.period.timeZone),
       })),
-      staffingRequirement: ctx.staffingRequirement,
       period: toZonedPeriod(ctx.period),
     }
   }
