@@ -80,7 +80,7 @@ export function getDateTimeFromMinutesFromMidnight(
  * @param period to denote the start and end period for which to generate the
  * days
  * @returns array of DateTimes for each day in the period
- * normalised to midnight (i.e. 00:00:00) in team timezone
+ * normalized to midnight (i.e. 00:00:00) in team timezone
  */
 export function generateDateTimes(period: ZonedPeriod): DateTime[] {
   const dates: DateTime[] = []
