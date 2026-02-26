@@ -339,7 +339,7 @@ export class ConstraintModelBuilder {
 
   // ------ Objective Terms (Soft) ------
 
-  private addBalanceWorkloadObbjective(model: OptimizationModel) {}
+  private addBalanceWorkloadObjective(model: OptimizationModel) {}
 
   // ------ Helpers ------
 
