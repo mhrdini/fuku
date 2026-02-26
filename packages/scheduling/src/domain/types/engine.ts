@@ -42,6 +42,7 @@ export interface SchedulerContext
     | 'assignments'
     | 'period'
   > {
+  staffingRequirement: StaffingRequirement
   shiftTypes: ZonedShiftType[]
   operationalHours: ZonedOperationalHours
   staffingRequirements: StaffingRequirements
