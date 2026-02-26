@@ -3,7 +3,7 @@ import {
   OperationalHourOutput,
   OperationalHourOutputSchema,
 } from '@fuku/api/schemas'
-import { DayOfWeekKey } from '@fuku/db/schemas'
+import { DayOfWeekKey } from '@fuku/domain/schemas'
 import {
   Button,
   Checkbox,
@@ -111,7 +111,7 @@ export function OperationalHoursSection({ teamId }: { teamId: string }) {
   }, [operationalHours])
 
   const onSubmit: SubmitHandler<OperationalHourOutput> = async values => {
-    // console.log('Form values on submit:', values)
+    // console.log('form values on submit:', values)
 
     try {
       const dirtyFields = form.formState.dirtyFields
@@ -135,7 +135,7 @@ export function OperationalHoursSection({ teamId }: { teamId: string }) {
         return acc
       }, {} as OperationalHourOutput)
 
-      // console.log('Submitting hours:', hours)
+      // console.log('submitting hours:', hours)
       await setHours({ teamId, hours })
     } catch {
       // handled in mutation onError
@@ -143,8 +143,8 @@ export function OperationalHoursSection({ teamId }: { teamId: string }) {
   }
 
   const onError: SubmitErrorHandler<OperationalHourOutput> = errors => {
-    console.log('Form errors:', errors)
-    console.log('Form values on error:', form.getValues())
+    console.log('operational hour form errors:', errors)
+    console.log('operational hour form values on error:', form.getValues())
   }
 
   return (

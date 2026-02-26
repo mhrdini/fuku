@@ -1,10 +1,26 @@
+import { WeekdayNumbers } from 'luxon'
+
 import {
   DefaultSchedulerEngine,
   SchedulerEngine,
 } from '../../domain/engine/scheduler.engine'
-import { SchedulerContext } from '../../domain/types/engine'
-import { Assignment } from '../../domain/types/schedule'
-import { getPeriod, toJSDate } from '../../shared/utils/date'
+import {
+  ProposedAssignment,
+  SchedulerContext,
+  TeamSnapshot,
+} from '../../domain/types/engine'
+import {
+  Assignment,
+  StaffingRequirement,
+  ZonedOperationalHours,
+} from '../../domain/types/schedule'
+import {
+  getPeriod,
+  parseTimeString,
+  toJSDate,
+  toZonedDateTime,
+  toZonedPeriod,
+} from '../../shared/utils/date'
 import { TeamRepository } from '../ports/team.repository'
 
 export type SchedulerMode =
@@ -37,11 +53,9 @@ export interface GenerateScheduleOutput {
 }
 
 export class DefaultSchedulerService implements SchedulerService {
-  constructor(
-    private schedulerEngine: SchedulerEngine = new DefaultSchedulerEngine(),
-    private teamRepository: TeamRepository,
-  ) {}
+  constructor(private teamRepository: TeamRepository) {}
 
+  schedulerEngine: SchedulerEngine = new DefaultSchedulerEngine()
   mode: SchedulerMode = 'dry-run'
 
   async generateMonthly(
@@ -57,17 +71,14 @@ export class DefaultSchedulerService implements SchedulerService {
     if (options) this.setOptions(options)
 
     const context = await this.buildContext(input)
-    const engineResult = await this.schedulerEngine.run(context)
+
+    const engineResult = this.schedulerEngine.run(context)
 
     const serviceResult = {
       teamId: input.teamId,
       year: input.year,
       month: input.month,
-      assignments: engineResult.proposedAssignments.map(pa => ({
-        date: toJSDate(pa.date),
-        teamMemberId: pa.teamMemberId,
-        shiftTypeId: pa.shiftTypeId,
-      })),
+      assignments: engineResult.proposedAssignments.map(this.toAssignment),
     }
     return serviceResult
   }
@@ -81,22 +92,75 @@ export class DefaultSchedulerService implements SchedulerService {
   private async buildContext(
     input: GenerateScheduleInput,
   ): Promise<SchedulerContext> {
-    // Fetch data from repositories (e.g. TeamRepository) and construct the SchedulerContext
-
-    // Engine expects period in team timezone
     const period = getPeriod(input.year, input.month, input.timeZone)
-    // console.log('Generated period for scheduling:', period)
 
-    const staffingRequirement = {
-      minMembersPerDay: 4, // TODO: implement dynamic staffing requirements
+    const staffingRequirement: StaffingRequirement = {
+      minMembersPerDay: 4, // TODO: make dynamic
     }
-    const teamSnapshot = await this.teamRepository.getTeamSnapshot(
+
+    const snapshot = await this.teamRepository.getTeamSnapshot(
       input.teamId,
       period,
     )
+
+    return this.toSchedulerContext(snapshot, staffingRequirement)
+  }
+
+  /**
+   * Convert all JS dates and HH:mm strings into Luxon DateTime in team timezone
+   */
+  private toSchedulerContext(
+    snapshot: TeamSnapshot,
+    staffingRequirement: StaffingRequirement,
+  ): SchedulerContext {
+    const timeZone = snapshot.period.timeZone
+
     return {
-      ...teamSnapshot,
+      ...snapshot,
       staffingRequirement,
+
+      shiftTypes: snapshot.shiftTypes.map(st => ({
+        id: st.id,
+        startTime: parseTimeString(st.startTime, timeZone),
+        endTime: parseTimeString(st.endTime, timeZone),
+      })),
+
+      operationalHours: snapshot.operationalHours.reduce((acc, oh) => {
+        acc[oh.dayOfWeek] = {
+          startTime: parseTimeString(
+            oh.startTime,
+            timeZone,
+            oh.dayOfWeek as WeekdayNumbers,
+          ),
+          endTime: parseTimeString(
+            oh.endTime,
+            timeZone,
+            oh.dayOfWeek as WeekdayNumbers,
+          ),
+        }
+        return acc
+      }, {} as ZonedOperationalHours),
+
+      unavailabilities: snapshot.unavailabilities.map(u => ({
+        teamMemberId: u.teamMemberId,
+        date: toZonedDateTime(u.date, timeZone),
+      })),
+
+      assignments: snapshot.assignments.map(a => ({
+        teamMemberId: a.teamMemberId,
+        shiftTypeId: a.shiftTypeId,
+        date: toZonedDateTime(a.date, timeZone),
+      })),
+
+      period: toZonedPeriod(snapshot.period),
+    }
+  }
+
+  private toAssignment(pa: ProposedAssignment): Assignment {
+    return {
+      teamMemberId: pa.teamMemberId,
+      shiftTypeId: pa.shiftTypeId,
+      date: toJSDate(pa.date),
     }
   }
 }

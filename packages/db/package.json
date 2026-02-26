@@ -2,8 +2,7 @@
   "name": "@fuku/db",
   "version": "1.0.0",
   "exports": {
-    ".": "./src/client.ts",
-    "./schemas": "./src/schemas/index.ts"
+    ".": "./src/client.ts"
   },
   "prisma": {
     "schema": "./prisma"
@@ -12,10 +11,10 @@
     "dev": "prisma generate",
     "gen:all": "prisma generate",
     "gen:index": "barrelsby --directory  ./src/schemas --output ./src/schemas/index.ts --delete",
-    "db:migrate:deploy": "prisma migrate deploy",
-    "db:migrate:dev": "prisma migrate dev",
-    "db:migrate:dev:auto": "prisma migrate dev --name auto",
-    "db:push": "prisma db push",
+    "db:migrate:deploy": "prisma migrate deploy && prisma generate",
+    "db:migrate:dev": "prisma migrate dev && prisma generate",
+    "db:migrate:dev:auto": "prisma migrate dev --name auto && prisma generate",
+    "db:push": "prisma db push && prisma generate",
     "db:seed": "tsx src/seed.ts",
     "db:seed:dev": "tsx src/seed.development.ts",
     "db:reset": "prisma migrate reset",
@@ -25,8 +24,7 @@
   },
   "dependencies": {
     "@prisma/adapter-pg": "catalog:",
-    "@prisma/client": "catalog:",
-    "zod": "catalog:"
+    "@prisma/client": "catalog:"
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",

@@ -1,5 +1,5 @@
 import type { TRPCRouterRecord } from '@trpc/server'
-import { ColorHex } from '@fuku/db/schemas'
+import { ColorHex } from '@fuku/domain/schemas'
 import z from 'zod/v4'
 
 import { protectedProcedure } from '../../trpc'

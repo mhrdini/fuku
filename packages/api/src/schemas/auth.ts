@@ -1,4 +1,4 @@
-import { UserSchema } from '@fuku/db/schemas'
+import { UserSchema } from '@fuku/domain/schemas'
 import z from 'zod/v4'
 
 export const PasswordSchema = z
