@@ -1,4 +1,4 @@
-import { ColorHex, ShiftTypeSchema } from '@fuku/db/schemas'
+import { ColorHex, ShiftTypeSchema } from '@fuku/domain/schemas'
 import z from 'zod/v4'
 
 import { PayGradeShiftTypeOutputSchema } from './payGradeShiftType'

@@ -1,4 +1,4 @@
-import { TeamMemberRoleValues, TeamMemberSchema } from '@fuku/db/schemas'
+import { TeamMemberRoleValues, TeamMemberSchema } from '@fuku/domain/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
 import z from 'zod/v4'
 

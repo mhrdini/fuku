@@ -1,4 +1,4 @@
-import { PayGradeSchema } from '@fuku/db/schemas'
+import { PayGradeSchema } from '@fuku/domain/schemas'
 import z from 'zod/v4'
 
 import { PayGradeShiftTypeOutputSchema } from './payGradeShiftType'

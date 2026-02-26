@@ -129,3 +129,38 @@ model Unavailability {
   @@index([date])
   @@map("unavailability")
 }
+
+enum Metric {
+  DAYS_WORKED
+  HOURS_WORKED
+  DAYS_OFF
+  CONSECUTIVE_DAYS_WORKED
+  UNIQUE_MEMBERS_ASSIGNED
+}
+
+enum TimeWindow {
+  DAY
+  WEEK
+  MONTH
+  ROLLING_WEEK
+  ROLLING_MONTH
+}
+
+enum Operator {
+  MIN // value >= threshold
+  MAX // value <= threshold
+}
+
+model Rule {
+  id             String     @id @default(uuid())
+  payGradeId     String     @map("pay_grade_id")
+  payGrade       PayGrade   @relation(fields: [payGradeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  metric         Metric
+  timeWindow     TimeWindow @map("time_window")
+  operator       Operator
+  threshold      Int
+  hardConstraint Boolean    @default(false) @map("hard_constraint")
+
+  @@index([payGradeId])
+  @@map("rule")
+}

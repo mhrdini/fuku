@@ -12,6 +12,7 @@
   "dependencies": {
     "@fuku/auth": "workspace:*",
     "@fuku/db": "workspace:*",
+    "@fuku/domain": "workspace:*",
     "@fuku/scheduling": "workspace:*",
     "@trpc/server": "catalog:",
     "nanoid": "^5.1.6",

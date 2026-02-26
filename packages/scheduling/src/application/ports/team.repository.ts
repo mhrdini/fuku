@@ -1,4 +1,4 @@
-import { TeamSnapshot } from '../../domain/types/team'
+import { TeamSnapshot } from '../../domain/types/engine'
 import { Period } from '../../shared/utils/date'
 
 export interface TeamRepository {

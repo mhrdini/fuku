@@ -34,6 +34,13 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
 
 type UserAuthSchemaType = LoginSchemaType | RegisterSchemaType
 
+const testUser = {
+  name: 'Test User',
+  username: 'testuser',
+  email: 'testuser@example.com',
+  password: 'testuser',
+}
+
 export function UserAuthForm({
   className,
   register,
@@ -42,12 +49,13 @@ export function UserAuthForm({
   const [isRegister] = useState<boolean>(register || false)
   const router = useRouter()
   const form = useForm<UserAuthSchemaType>({
-    defaultValues: {
-      name: '',
-      username: '',
-      email: '',
-      password: '',
-    },
+    // defaultValues: {
+    //   name: '',
+    //   username: '',
+    //   email: '',
+    //   password: '',
+    // },
+    defaultValues: testUser, // for testing purposes only, remove in production
     resolver: zodResolver(isRegister ? RegisterSchema : LoginSchema),
   })
 

@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon'
+import { DateTime, WeekdayNumbers } from 'luxon'
 
 export type Zoned<T, K extends keyof T> = Omit<T, K> & {
   [P in K]: DateTime
@@ -54,6 +54,23 @@ export function toZonedPeriod(period: Period): ZonedPeriod {
     start: toZonedDateTime(period.start, period.timeZone),
     end: toZonedDateTime(period.end, period.timeZone),
   }
+}
+
+export function parseTimeString(
+  timeStr: string,
+  timeZone: string,
+  dayOfWeek?: WeekdayNumbers,
+): DateTime {
+  const [hour, minute] = timeStr.split(':').map(Number)
+
+  return DateTime.fromObject(
+    {
+      hour,
+      minute,
+      ...(dayOfWeek ? { weekday: dayOfWeek } : {}),
+    },
+    { zone: timeZone },
+  )
 }
 
 /**
