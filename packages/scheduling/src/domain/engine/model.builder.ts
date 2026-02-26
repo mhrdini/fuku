@@ -45,6 +45,9 @@ export class ConstraintModelBuilder {
     this.addPayGradeRuleConstraints(model)
     this.addOperationalCoverageConstraint(model)
 
+    this.addBalanceWorkloadObjective(model)
+    this.addMinimizeShiftTypeChangesObjective(model)
+
     // build objective terms
     this.addBalanceWorkloadObjective(model)
     this.addMinimizeShiftTypeChangesObjective(model)
