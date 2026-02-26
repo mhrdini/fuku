@@ -1,29 +1,45 @@
+import { Rule } from '@fuku/domain/schemas'
 import { DateTime } from 'luxon'
 
-import { ZonedPeriod } from '../../shared/utils/date'
-import { ConstraintEvaluation } from '../constraints'
+import { Period, ZonedPeriod } from '../../shared/utils/date'
 import {
+  Assignment,
+  OperationalHour,
+  PayGrade,
+  PayGradeShiftType,
+  ShiftType,
   StaffingRequirement,
+  Unavailability,
   ZonedAssignment,
   ZonedOperationalHours,
   ZonedShiftType,
   ZonedUnavailability,
 } from './schedule'
-import { TeamSnapshot } from './team'
+import { Team, TeamMember } from './team'
 
-export interface SchedulerContext extends TeamSnapshot {
-  staffingRequirement: StaffingRequirement
+export interface TeamSnapshot {
+  team: Team
+  teamMembers: TeamMember[]
+  payGrades: PayGrade[]
+  shiftTypes: ShiftType[]
+  payGradeShiftTypes: PayGradeShiftType[]
+  payGradeRules: Rule[]
+  operationalHours: OperationalHour[]
+  unavailabilities: Unavailability[]
+  assignments: Assignment[]
+  period: Period
 }
 
-export interface ZonedSchedulerContext
+export interface SchedulerContext
   extends Omit<
-    SchedulerContext,
+    TeamSnapshot,
     | 'shiftTypes'
     | 'operationalHours'
     | 'unavailabilities'
     | 'assignments'
     | 'period'
   > {
+  staffingRequirement: StaffingRequirement
   shiftTypes: ZonedShiftType[]
   operationalHours: ZonedOperationalHours
   unavailabilities: ZonedUnavailability[]
@@ -38,25 +54,16 @@ export interface SchedulerResult {
 }
 
 interface SchedulerMetrics {
-  totalShiftsRequired: number
-  totalShiftsAssigned: number
-  totalUnavailabilitiesOverridden: number
-  averageHoursPerMember: number
-}
-
-export interface Candidate {
-  date: DateTime
-  teamMemberId: string
-  shiftTypeId: string
-  hardConstraintsPassed?: boolean
-  score?: number
-  evaluations?: ConstraintEvaluation[]
+  totalSlotsRequired: number
+  totalSlotsFilled: number
+  totalOperationalCoverage: number
+  fairnessStdDeviation: number
+  totalHardConstraintViolations: number
+  totalSoftPenalty: number
 }
 
 export interface ProposedAssignment {
   date: DateTime
   teamMemberId: string
   shiftTypeId: string
-  score: number
-  constraintSummary: ConstraintEvaluation[] // idea
 }

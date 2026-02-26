@@ -445,7 +445,7 @@ function TeamMembersSection() {
         <Card>
           <ItemGroup className='flex gap-2'>
             {teamMemberFields.map((field, index) => (
-              <Item key={field.id} className='py-0'>
+              <Item key={field.rhfId} className='py-0'>
                 <ItemContent>
                   <ItemTitle>
                     {field.givenNames} {field.familyName}
@@ -612,12 +612,10 @@ function TeamMemberSheet({
 
   const form = useForm<TeamMemberFormType>({
     defaultValues: {
-      id: crypto.randomUUID(),
       familyName: '',
       givenNames: '',
       teamMemberRole: 'STAFF',
       rateMultiplier: 1,
-      teamId: crypto.randomUUID(),
     },
     resolver: zodResolver(TeamMemberFormSchema),
   })
@@ -636,7 +634,11 @@ function TeamMemberSheet({
     if (editingIndex !== null) {
       update(editingIndex, { ...fields[editingIndex], ...values })
     } else {
-      append(values)
+      append({
+        ...values,
+        id: crypto.randomUUID(),
+        teamId: crypto.randomUUID(), // just for schema validation
+      })
     }
     onOpenChange(false)
   }

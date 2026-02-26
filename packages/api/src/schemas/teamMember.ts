@@ -3,7 +3,7 @@ import {
   PayGradeSchema,
   TeamMemberSchema,
   UserSchema,
-} from '@fuku/db/schemas'
+} from '@fuku/domain/schemas'
 import z from 'zod/v4'
 
 // output must never have optional fields - they should be nullable if they can be missing

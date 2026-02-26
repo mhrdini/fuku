@@ -29,13 +29,14 @@ model PayGrade {
   description String?
   baseRate    Float   @map("base_rate")
 
-  teamId      String
+  teamId      String       @map("team_id")
   team        Team         @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   teamMembers TeamMember[]
 
   createdAt          DateTime            @default(now()) @map("created_at")
   updatedAt          DateTime            @default(now()) @updatedAt @map("updated_at")
   eligibleShiftTypes PayGradeShiftType[]
+  rules              Rule[]
 
   @@unique([teamId, name])
   @@map("pay_grade")
@@ -54,7 +55,7 @@ model TeamMember {
   familyName String @map("family_name")
   givenNames String @map("given_names")
 
-  teamId String
+  teamId String @map("team_id")
   team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   payGradeId String?   @map("pay_grade_id")

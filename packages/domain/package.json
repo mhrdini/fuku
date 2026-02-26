@@ -1,0 +1,10 @@
+{
+  "name": "@fuku/domain",
+  "version": "1.0.0",
+  "exports": {
+    "./schemas": "./src/schemas/index.ts"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  }
+}

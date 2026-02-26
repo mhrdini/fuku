@@ -8,7 +8,6 @@ import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
 import { z, ZodError } from 'zod/v4'
 
-import { DefaultSchedulerEngine } from '../../scheduling/src/domain/engine/scheduler.engine'
 import { PrismaTeamRepository } from './infrastructure/prisma-team.repository'
 
 /**
@@ -33,12 +32,8 @@ export const createTRPCContext = async (options: {
   const session = await authApi.getSession({
     headers: options.headers,
   })
-  const schedulerEngine = new DefaultSchedulerEngine()
   const teamRepository = new PrismaTeamRepository(db)
-  const schedulerService = new DefaultSchedulerService(
-    schedulerEngine,
-    teamRepository,
-  )
+  const schedulerService = new DefaultSchedulerService(teamRepository)
   return {
     authApi,
     session,

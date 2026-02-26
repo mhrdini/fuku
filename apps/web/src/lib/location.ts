@@ -1,4 +1,4 @@
-import { LocationSchema } from '@fuku/db/schemas'
+import { LocationSchema } from '@fuku/domain/schemas'
 import z from 'zod/v4'
 
 export const LocationUISchema = LocationSchema
