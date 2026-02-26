@@ -46,7 +46,7 @@ export interface ObjectiveTerm {
 export interface OptimizationModel {
   variables: OptimizationVariable[]
   constraints: LinearConstraint[]
-  objective?: {
+  objective: {
     sense: ObjectiveSense
     terms: ObjectiveTerm[]
   }
