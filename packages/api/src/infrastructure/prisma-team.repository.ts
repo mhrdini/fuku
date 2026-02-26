@@ -55,6 +55,26 @@ export class PrismaTeamRepository implements TeamRepository {
       })),
     )
 
+    const payGradeRules = await this.db.rule.findMany({
+      where: {
+        payGradeId: {
+          in: team.payGrades.map(pg => pg.id),
+        },
+      },
+    })
+    // .then(rules =>
+    //   rules.reduce(
+    //     (acc, rule) => {
+    //       if (!acc[rule.payGradeId]) {
+    //         acc[rule.payGradeId] = []
+    //       }
+    //       acc[rule.payGradeId].push(rule)
+    //       return acc
+    //     },
+    //     {} as Record<string, Rule[]>,
+    //   ),
+    // )
+
     const unavailabilities = await this.db.unavailability.findMany({
       where: {
         teamMember: {
@@ -71,6 +91,9 @@ export class PrismaTeamRepository implements TeamRepository {
       where: {
         teamMember: {
           teamId,
+        },
+        shiftAssignment: {
+          isNot: null,
         },
         date: {
           gte: period.start,
@@ -100,6 +123,7 @@ export class PrismaTeamRepository implements TeamRepository {
         endTime: st.endTime,
       })),
       payGradeShiftTypes,
+      payGradeRules,
       operationalHours: team.operationalHours,
       unavailabilities: unavailabilities.map(u => ({
         teamMemberId: u.teamMemberId,
@@ -108,7 +132,7 @@ export class PrismaTeamRepository implements TeamRepository {
       assignments: assignments.map(a => ({
         date: a.date,
         teamMemberId: a.teamMemberId,
-        shiftTypeId: a.shiftAssignment?.shiftTypeId || null, // TODO: handle this better
+        shiftTypeId: a.shiftAssignment!.shiftTypeId, // TODO: handle this better
       })),
       period: period,
     }

@@ -6,7 +6,7 @@ import {
   TeamMemberCreateInput,
   TeamMemberCreateInputSchema,
 } from '@fuku/api/schemas'
-import { TeamMemberRoleValues } from '@fuku/db/schemas'
+import { TeamMemberRoleValues } from '@fuku/domain/schemas'
 import {
   AlertDialog,
   AlertDialogTrigger,

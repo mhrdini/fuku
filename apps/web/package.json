@@ -12,6 +12,7 @@
     "@fuku/api": "workspace:*",
     "@fuku/auth": "workspace:*",
     "@fuku/db": "workspace:*",
+    "@fuku/domain": "workspace:*",
     "@fuku/ui": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "@tanstack/react-query": "catalog:",

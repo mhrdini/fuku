@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "heap-js": "^2.7.1",
-    "luxon": "catalog:"
+    "luxon": "catalog:",
+    "@fuku/domain": "workspace:*"
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",

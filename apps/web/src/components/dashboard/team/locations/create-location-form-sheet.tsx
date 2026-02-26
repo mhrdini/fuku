@@ -101,8 +101,8 @@ export const CreateLocationFormSheet = () => {
     },
   })
   const onSubmit: SubmitHandler<LocationCreateFormType> = async data => {
-    console.log('create location form values:', form.getValues())
-    console.log('create location form errors:', form.formState.errors)
+    // console.log('create location form values:', form.getValues())
+    // console.log('create location form errors:', form.formState.errors)
     try {
       await createLocation(data)
     } catch {

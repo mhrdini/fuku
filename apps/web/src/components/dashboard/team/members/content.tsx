@@ -71,7 +71,6 @@ export default function TeamMembersContent() {
   }, [memberQueries])
 
   const onUpdateMember = useCallback((id: string) => {
-    console.log('onUpdateMember id:', id)
     openDialog({
       id: DialogId.UPDATE_TEAM_MEMBER,
       editingId: id,
@@ -79,8 +78,6 @@ export default function TeamMembersContent() {
   }, [])
 
   const onRemoveMember = useCallback((id: string) => {
-    console.log('onRemoveMember id:', id)
-
     openAlertDialog({
       id: DialogId.REMOVE_TEAM_MEMBER,
       editingId: id,

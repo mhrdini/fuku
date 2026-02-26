@@ -1,4 +1,4 @@
-import { DayOfWeek } from '@fuku/db/schemas'
+import { DayOfWeek } from '@fuku/domain/schemas'
 import { TRPCRouterRecord } from '@trpc/server'
 import z from 'zod/v4'
 

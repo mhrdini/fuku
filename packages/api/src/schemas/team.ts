@@ -3,7 +3,7 @@ import {
   TeamMemberRole,
   TeamMemberSchema,
   TeamSchema,
-} from '@fuku/db/schemas'
+} from '@fuku/domain/schemas'
 import z from 'zod/v4'
 
 import {
