@@ -1,4 +1,4 @@
-import { PayGradeShiftTypeSchema } from '@fuku/db/schemas'
+import { PayGradeShiftTypeSchema } from '@fuku/domain/schemas'
 
 export const PayGradeShiftTypeOutputSchema = PayGradeShiftTypeSchema.omit({
   createdAt: true,

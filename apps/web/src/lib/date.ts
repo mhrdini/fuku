@@ -1,4 +1,4 @@
-import { DayOfWeekKey, supportedTimeZones } from '@fuku/db/schemas'
+import { DayOfWeekKey, supportedTimeZones } from '@fuku/domain/schemas'
 import { DateTime, WeekdayNumbers } from 'luxon'
 
 export const WEEKDAY_MAP: Record<DayOfWeekKey, string> = Array.from(

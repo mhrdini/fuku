@@ -1,3 +1,4 @@
+import { Rule } from '@fuku/domain/schemas'
 import { DateTime } from 'luxon'
 
 import { Zoned } from '../../shared/utils/date'
@@ -22,6 +23,8 @@ export interface PayGradeShiftType {
   shiftTypeId: string
 }
 
+export type PayGradeRules = Rule[]
+
 export type ZonedShiftType = Zoned<ShiftType, 'startTime' | 'endTime'>
 
 export interface OperationalHour {
@@ -41,6 +44,7 @@ export interface Assignment {
   teamMemberId: string
   shiftTypeId: string | null
   date: Date
+  score?: number
 }
 
 export type ZonedAssignment = Zoned<Assignment, 'date'>

@@ -9,7 +9,8 @@
       "@fuku/auth": ["../../packages/auth/src/*"],
       "@fuku/api": ["../../packages/api/src/*"],
       "@fuku/ui": ["../../packages/ui/src/*"],
-      "@fuku/db": ["../../packages/db/src/*"]
+      "@fuku/db": ["../../packages/db/src/*"],
+      "@fuku/domain": ["../../packages/domain/src/*"]
     },
     "plugins": [{ "name": "next" }]
   },
