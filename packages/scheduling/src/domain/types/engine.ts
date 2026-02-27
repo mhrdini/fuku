@@ -53,7 +53,7 @@ export interface SchedulerResult {
   metrics: SchedulerMetrics
 }
 
-interface SchedulerMetrics {
+export interface SchedulerMetrics {
   totalSlotsRequired: number
   totalSlotsFilled: number
   totalOperationalCoverage: number

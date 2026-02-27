@@ -1,8 +1,4 @@
-import {
-  OptimizationModel,
-  OptimizationVariable,
-  VariableType,
-} from './optimization.model'
+import { OptimizationModel, Variable, VariableType } from './optimization.model'
 
 export class VariableBuilder {
   constructor(private model: OptimizationModel) {}
@@ -10,19 +6,19 @@ export class VariableBuilder {
   addVariable(
     name: string,
     type: VariableType,
-    lowerBound?: number,
-    upperBound?: number,
-  ): OptimizationVariable {
+    min?: number,
+    max?: number,
+  ): Variable {
     const exists = this.model.variables.find(v => v.name === name)
     if (exists) {
       throw new Error(`Variable already exists: ${name}`)
     }
 
-    const variable: OptimizationVariable = {
+    const variable: Variable = {
       name,
       type,
-      lowerBound,
-      upperBound,
+      min,
+      max,
     }
 
     this.model.variables.push(variable)
