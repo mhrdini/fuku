@@ -18,6 +18,7 @@ import { getAssignmentVariableName, VariableBuilder } from './variable.builder'
 type MetricExpression = {
   coefficients: CoefficientMap
   adjustRhs?: (rhs: number) => number
+  flipOperator?: boolean
 }
 
 export class ConstraintModelBuilder {
@@ -33,8 +34,10 @@ export class ConstraintModelBuilder {
       },
     }
 
+    // build variables
     this.buildDecisionVariables(model)
 
+    // build constraints
     this.addEligibilityConstraints(model)
     this.addAvailabilityConstraints(model)
     this.addMaxOneShiftTypePerDayConstraints(model)
@@ -42,12 +45,9 @@ export class ConstraintModelBuilder {
     this.addPayGradeRuleConstraints(model)
     this.addOperationalCoverageConstraint(model)
 
+    // build objective terms
     this.addBalanceWorkloadObjective(model)
     this.addMinimizeShiftTypeChangesObjective(model)
-
-    console.log('variables:', model.variables.length)
-    console.log('constraints:', model.constraints.length)
-    console.log('objectives:', model.objective.terms.length)
 
     return model
   }
@@ -95,7 +95,7 @@ export class ConstraintModelBuilder {
               coefficients: {
                 [varName]: 1,
               },
-              operator: '=',
+              operator: '==',
               rhs: 0,
             })
           }
@@ -126,7 +126,7 @@ export class ConstraintModelBuilder {
               coefficients: {
                 [varName]: 1,
               },
-              operator: '=',
+              operator: '==',
               rhs: 0,
             })
           }
@@ -212,9 +212,12 @@ export class ConstraintModelBuilder {
       } else if (rule.metric === MetricValues.UNIQUE_MEMBERS_ASSIGNED) {
         // define "windows" within the period based on timeWindow
         // each as set of day indices that fall within that window and period
-        const windows = Array.from({ length: numDays }, (_, i) =>
-          this.getDaysForTimeWindow(rule.timeWindow, i),
-        )
+        const windows =
+          rule.timeWindow === TimeWindowValues.MONTH
+            ? [this.getDaysForTimeWindow(rule.timeWindow, 0)]
+            : Array.from({ length: numDays }, (_, i) =>
+                this.getDaysForTimeWindow(rule.timeWindow, i),
+              )
 
         windows.forEach((dayIndices, windowIndex) => {
           // auxiliary binary variable per member per window:
@@ -254,15 +257,39 @@ export class ConstraintModelBuilder {
                 })
               }
             }
+
+            // reverse link to ensure auxVar = 0 if member works no shifts in the window
+            const reverseCoefficients: CoefficientMap = {
+              [auxVarName]: 1,
+            }
+
+            for (const d of dayIndices) {
+              for (const st of this.ctx.shiftTypes) {
+                const shiftVarName = getAssignmentVariableName(tm.id, d, st.id)
+
+                reverseCoefficients[shiftVarName] =
+                  (reverseCoefficients[shiftVarName] ?? 0) - 1
+              }
+            }
+
+            model.constraints.push({
+              name: `reverse_link_${auxVarName}`,
+              coefficients: reverseCoefficients,
+              operator: '<=',
+              rhs: 0,
+            })
           }
 
           // Constraint: sum of auxiliary vars respects MIN/MAX threshold
-          const coefficients: CoefficientMap = {}
-          for (const auxVar of auxVariables) coefficients[auxVar] = 1
+          const windowCoefficients: CoefficientMap = {}
+
+          for (const auxVar of auxVariables) {
+            windowCoefficients[auxVar] = 1
+          }
 
           model.constraints.push({
             name: `payGradeRule__${rule.id}__uniqueMembers_window_${windowIndex}`,
-            coefficients: coefficients,
+            coefficients: windowCoefficients,
             operator: this.getOperatorForRule(rule.operator),
             rhs: rule.threshold,
           })
@@ -276,19 +303,18 @@ export class ConstraintModelBuilder {
           for (const tm of this.ctx.teamMembers) {
             if (rule.payGradeId && tm.payGradeId !== rule.payGradeId) continue
             // build metric expression
-            const { coefficients, adjustRhs } = this.computeMetricExpression(
-              rule.metric,
-              tm.id,
-              dayIndices,
-            )
+            const { coefficients, adjustRhs, flipOperator } =
+              this.computeMetricExpression(rule.metric, tm.id, dayIndices)
 
-            // adjust rhs
+            const operator = flipOperator
+              ? this.flipOperator(this.getOperatorForRule(rule.operator))
+              : this.getOperatorForRule(rule.operator)
             const rhs = adjustRhs ? adjustRhs(rule.threshold) : rule.threshold
 
             model.constraints.push({
               name: `payGradeRule__${rule.id}__${tm.id}__${dayIndex}`,
               coefficients,
-              operator: this.getOperatorForRule(rule.operator),
+              operator,
               rhs,
             })
           }
@@ -302,134 +328,183 @@ export class ConstraintModelBuilder {
 
     for (let dayIndex = 0; dayIndex < numDays; dayIndex++) {
       const dayOfWeek = this.ctx.period.start.plus({ days: dayIndex }).weekday
+
       const operationalHours =
         this.ctx.operationalHours[
           dayOfWeek as keyof typeof this.ctx.operationalHours
         ]
 
-      const opStart = operationalHours.startTime
-      const opEnd = operationalHours.endTime
-      const opLength = opEnd.diff(opStart, 'hours').as('hours')
+      const baseDate = this.ctx.period.start
+        .plus({ days: dayIndex })
+        .startOf('day')
+
+      const opStart = baseDate.set({
+        hour: operationalHours.startTime.hour,
+        minute: operationalHours.startTime.minute,
+      })
+
+      const opEnd = baseDate.set({
+        hour: operationalHours.endTime.hour,
+        minute: operationalHours.endTime.minute,
+      })
+
+      const operationalMinutes = opEnd.diff(opStart, 'minutes').as('minutes')
 
       const coefficients: CoefficientMap = {}
 
       for (const tm of this.ctx.teamMembers) {
         for (const st of this.ctx.shiftTypes) {
-          const shiftStart = st.startTime
-          const shiftEnd = st.endTime
+          const shiftStart = baseDate.set({
+            hour: st.startTime.hour,
+            minute: st.startTime.minute,
+          })
 
-          // compute overlap between shift and operational hours
+          const shiftEnd = baseDate.set({
+            hour: st.endTime.hour,
+            minute: st.endTime.minute,
+          })
+
           const overlapStart = opStart > shiftStart ? opStart : shiftStart
           const overlapEnd = opEnd < shiftEnd ? opEnd : shiftEnd
 
           if (overlapStart < overlapEnd) {
-            const overlapHours = overlapEnd
-              .diff(overlapStart, 'hours')
-              .as('hours')
-            // fraction of the operational day covered by this shift
-            const overlapFraction = Math.min(overlapHours / opLength, 1)
+            const overlapMinutes = overlapEnd
+              .diff(overlapStart, 'minutes')
+              .as('minutes')
 
-            if (overlapFraction > 0) {
+            if (overlapMinutes > 0) {
               const varName = getAssignmentVariableName(tm.id, dayIndex, st.id)
-              coefficients[varName] = overlapFraction
+
+              coefficients[varName] = overlapMinutes
             }
           }
         }
       }
 
-      // constraint: total fraction of operational hours covered >= 1
-      model.constraints.push({
-        name: `operationalCoverage__${dayIndex}`,
-        coefficients,
-        operator: '>=',
-        rhs: 1, // 1 full day covered
-      })
+      if (Object.keys(coefficients).length > 0) {
+        model.constraints.push({
+          name: `operationalCoverage__${dayIndex}`,
+          coefficients,
+          operator: '>=',
+          rhs: operationalMinutes,
+        })
+      } else {
+        console.warn(`Operational coverage impossible on day ${dayIndex}`)
+      }
     }
   }
 
   // ------ Objective Terms (Soft) ------
   private addBalanceWorkloadObjective(model: OptimizationModel) {
+    if (this.ctx.teamMembers.length === 0) return
+
     const numDays = this.getNumDays()
-    const team = this.ctx.teamMembers
-    const auxVariables: string[] = []
+    const maxShiftMinutes = Math.max(
+      ...this.ctx.shiftTypes.map(st =>
+        st.endTime.diff(st.startTime, 'minutes').as('minutes'),
+      ),
+    )
 
-    // create variable for average hours
-    const avgHoursVarName = 'avgHours'
-    model.variables.push({
-      name: avgHoursVarName,
-      type: 'continuous',
-      lowerBound: 0,
-    })
+    const maxPossibleMinutes = numDays * maxShiftMinutes
 
-    // compute total hours coefficients per member
-    const memberHoursCoefficients: Record<string, CoefficientMap> = {}
-    for (const tm of team) {
-      const coefficients: CoefficientMap = {}
+    const memberHourVars: string[] = []
+
+    // create memberHours variables
+    for (const tm of this.ctx.teamMembers) {
+      const memberHoursVar = `memberHours_${tm.id}`
+      memberHourVars.push(memberHoursVar)
+
+      model.variables.push({
+        name: memberHoursVar,
+        type: 'integer',
+        min: 0,
+        max: maxPossibleMinutes,
+      })
+
+      // create vars for memberHours = sum(shiftMinutes * assignmentVar)
+      const coefficients: CoefficientMap = {
+        [memberHoursVar]: -1,
+      }
+
       for (let dayIndex = 0; dayIndex < numDays; dayIndex++) {
         for (const st of this.ctx.shiftTypes) {
-          const varName = getAssignmentVariableName(tm.id, dayIndex, st.id)
-          const hours = st.endTime.diff(st.startTime, 'hours').as('hours')
-          coefficients[varName] = hours
+          const assignmentVar = getAssignmentVariableName(
+            tm.id,
+            dayIndex,
+            st.id,
+          )
+
+          const shiftMinutes = st.endTime
+            .diff(st.startTime, 'minutes')
+            .as('minutes')
+
+          coefficients[assignmentVar] = shiftMinutes
         }
       }
-      memberHoursCoefficients[tm.id] = coefficients
+
+      model.constraints.push({
+        name: `define_memberHours_${tm.id}`,
+        coefficients,
+        operator: '==',
+        rhs: 0,
+      })
     }
 
-    // constrain avgHours = (sum of totalHours_i) / N
-    const avgConstraintCoeffs: CoefficientMap = { [avgHoursVarName]: -1 }
-    for (const tm of team) {
-      for (const varName in memberHoursCoefficients[tm.id]) {
-        avgConstraintCoeffs[varName] = 1 / team.length
-      }
-    }
-    model.constraints.push({
-      name: 'balanceWorkload__avgHoursDef',
-      coefficients: avgConstraintCoeffs,
-      operator: '=',
-      rhs: 0,
+    // create max/min vars
+    const maxHoursVar = 'balance_maxHours'
+    const minHoursVar = 'balance_minHours'
+
+    model.variables.push({
+      name: maxHoursVar,
+      type: 'integer',
+      min: 0,
+      max: maxPossibleMinutes,
     })
 
-    // auxiliary deviation variable per member
-    for (const tm of team) {
-      const auxVarName = `balanceWorkload__${tm.id}`
-      auxVariables.push(auxVarName)
-      model.variables.push({
-        name: auxVarName,
-        type: 'continuous',
-        lowerBound: 0,
-      })
+    model.variables.push({
+      name: minHoursVar,
+      type: 'integer',
+      min: 0,
+      max: maxPossibleMinutes,
+    })
 
-      // constraint 1: auxVar >= totalHours_i - avgHours
-      const coeff1: CoefficientMap = { [auxVarName]: 1, [avgHoursVarName]: -1 }
-      Object.assign(coeff1, memberHoursCoefficients[tm.id])
+    // link memberHours to max/min vars
+    for (const tm of this.ctx.teamMembers) {
+      const memberHoursVar = `memberHours_${tm.id}`
+
+      // memberHours <= maxHours
       model.constraints.push({
-        name: `balanceWorkload__upper__${tm.id}`,
-        coefficients: coeff1,
-        operator: '>=',
+        name: `balance_upper_${tm.id}`,
+        coefficients: {
+          [memberHoursVar]: 1,
+          [maxHoursVar]: -1,
+        },
+        operator: '<=',
         rhs: 0,
       })
 
-      // constraint 2: auxVar >= avgHours - totalHours_i
-      const coeff2: CoefficientMap = { [auxVarName]: 1, [avgHoursVarName]: 1 }
-      for (const varName in memberHoursCoefficients[tm.id]) {
-        coeff2[varName] = -memberHoursCoefficients[tm.id][varName]
-      }
+      // memberHours >= minHours
       model.constraints.push({
-        name: `balanceWorkload__lower__${tm.id}`,
-        coefficients: coeff2,
+        name: `balance_lower_${tm.id}`,
+        coefficients: {
+          [memberHoursVar]: 1,
+          [minHoursVar]: -1,
+        },
         operator: '>=',
         rhs: 0,
       })
     }
 
-    // objective: minimize sum of all deviations
-    model.objective!.sense = 'minimize'
-    for (const auxVar of auxVariables) {
-      model.objective!.terms.push({
-        variable: auxVar,
-        coefficient: 1,
-      })
-    }
+    // objective: minimize maxHours - minHours to balance workload
+    model.objective!.terms.push({
+      variable: maxHoursVar,
+      coefficient: 1,
+    })
+
+    model.objective!.terms.push({
+      variable: minHoursVar,
+      coefficient: -1,
+    })
   }
 
   private addMinimizeShiftTypeChangesObjective(model: OptimizationModel) {
@@ -438,44 +513,51 @@ export class ConstraintModelBuilder {
 
     for (const tm of this.ctx.teamMembers) {
       for (let dayIndex = 0; dayIndex < numDays - 1; dayIndex++) {
-        const day1Vars = this.ctx.shiftTypes.map(st =>
-          getAssignmentVariableName(tm.id, dayIndex, st.id),
-        )
-        const day2Vars = this.ctx.shiftTypes.map(st =>
-          getAssignmentVariableName(tm.id, dayIndex + 1, st.id),
-        )
-
-        // auxiliary variable for shift change between dayIndex and dayIndex + 1
         const auxVarName = `shiftChange__${tm.id}__${dayIndex}`
         auxVariables.push(auxVarName)
+
         model.variables.push({
           name: auxVarName,
           type: 'binary',
         })
 
-        // constraint: auxVar >= assignment of day1 shift - assignment of same shift on day2
-        // Here we sum differences for all shifts to detect change
-        const coeffs: CoefficientMap = { [auxVarName]: 1 }
         for (let i = 0; i < this.ctx.shiftTypes.length; i++) {
-          coeffs[day1Vars[i]] = 1
-          coeffs[day2Vars[i]] = -1
-        }
+          for (let j = 0; j < this.ctx.shiftTypes.length; j++) {
+            if (i === j) continue
 
-        model.constraints.push({
-          name: `shiftChange__${tm.id}__${dayIndex}`,
-          coefficients: coeffs,
-          operator: '>=',
-          rhs: 0,
-        })
+            const shift1 = this.ctx.shiftTypes[i]
+            const shift2 = this.ctx.shiftTypes[j]
+
+            const varDay1 = getAssignmentVariableName(
+              tm.id,
+              dayIndex,
+              shift1.id,
+            )
+            const varDay2 = getAssignmentVariableName(
+              tm.id,
+              dayIndex + 1,
+              shift2.id,
+            )
+
+            model.constraints.push({
+              name: `shiftChange__${tm.id}__${dayIndex}__${shift1.id}__${shift2.id}`,
+              coefficients: {
+                [auxVarName]: 1,
+                [varDay1]: -1,
+                [varDay2]: -1,
+              },
+              operator: '>=',
+              rhs: -1,
+            })
+          }
+        }
       }
     }
 
-    // objective: minimize total shift changes
-    model.objective!.sense = 'minimize'
     for (const auxVar of auxVariables) {
       model.objective!.terms.push({
         variable: auxVar,
-        coefficient: 1,
+        coefficient: 0.2,
       })
     }
   }
@@ -503,6 +585,7 @@ export class ConstraintModelBuilder {
     const coefficients: CoefficientMap = {}
 
     let adjustRhs
+    let flipOperator = false
 
     switch (metric) {
       case MetricValues.DAYS_WORKED: {
@@ -547,6 +630,7 @@ export class ConstraintModelBuilder {
           }
         }
         adjustRhs = (rhs: number) => dayIndices.length - rhs
+        flipOperator = true
         break
       }
       default: {
@@ -557,6 +641,7 @@ export class ConstraintModelBuilder {
     return {
       coefficients,
       adjustRhs,
+      flipOperator,
     }
   }
 
@@ -603,5 +688,16 @@ export class ConstraintModelBuilder {
     }
 
     return days
+  }
+
+  private flipOperator(operator: Operator): Operator {
+    switch (operator) {
+      case '<=':
+        return '>='
+      case '>=':
+        return '<='
+      default:
+        return operator
+    }
   }
 }

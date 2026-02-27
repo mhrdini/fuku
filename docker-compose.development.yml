@@ -16,3 +16,13 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - database:/var/lib/postgresql/data
+  solver:
+    build:
+      context: ./packages/solver
+      dockerfile: Dockerfile
+    container_name: solver
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+    command: >
+      uvicorn solver.app:app --host 0.0.0.0 --port 8000 --reload --log-level debug
