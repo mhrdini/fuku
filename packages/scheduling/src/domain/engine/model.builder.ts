@@ -48,6 +48,7 @@ export class ConstraintModelBuilder {
     // build objective terms
     this.addBalanceWorkloadObjective(model)
     this.addMinimizeShiftTypeChangesObjective(model)
+    this.addMaximizeMemberShiftTypeObjective(model)
 
     return model
   }
@@ -498,12 +499,12 @@ export class ConstraintModelBuilder {
     // objective: minimize maxHours - minHours to balance workload
     model.objective!.terms.push({
       variable: maxHoursVar,
-      coefficient: 1,
+      coefficient: 0.8,
     })
 
     model.objective!.terms.push({
       variable: minHoursVar,
-      coefficient: -1,
+      coefficient: -0.8,
     })
   }
 
@@ -559,6 +560,41 @@ export class ConstraintModelBuilder {
         variable: auxVar,
         coefficient: 0.2,
       })
+    }
+  }
+
+  private addMaximizeMemberShiftTypeObjective(model: OptimizationModel) {
+    const numDays = this.getNumDays()
+    for (const tm of this.ctx.teamMembers) {
+      for (const st of this.ctx.shiftTypes) {
+        const auxVarName = `member_${tm.id}_assigned_${st.id}`
+        model.variables.push({
+          name: auxVarName,
+          type: 'binary',
+        })
+        for (let dayIndex = 0; dayIndex < numDays; dayIndex++) {
+          const assignmentVar = getAssignmentVariableName(
+            tm.id,
+            dayIndex,
+            st.id,
+          )
+          // auxVar >= assignmentVar for all days
+          model.constraints.push({
+            name: `link_memberShiftType_${tm.id}_${st.id}_day_${dayIndex}`,
+            coefficients: {
+              [auxVarName]: 1,
+              [assignmentVar]: -1,
+            },
+            operator: '>=',
+            rhs: 0,
+          })
+        }
+        // objective: minimize the number of different shift types assigned to each member to balance experience
+        model.objective!.terms.push({
+          variable: `member_${tm.id}_assigned_${st.id}`,
+          coefficient: -0.6,
+        })
+      }
     }
   }
 
