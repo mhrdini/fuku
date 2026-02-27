@@ -162,6 +162,7 @@ export class DefaultSchedulerService implements SchedulerService {
       teamMemberId: pa.teamMemberId,
       shiftTypeId: pa.shiftTypeId,
       date: toJSDate(pa.date),
+      ...(pa.score !== undefined ? { score: pa.score } : {}),
     }
   }
 }

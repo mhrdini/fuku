@@ -8,9 +8,9 @@
     "gen:index": "barrelsby --directory  ./src/domain/types --output ./src/domain/types/index.ts --delete"
   },
   "dependencies": {
+    "@fuku/domain": "workspace:*",
     "heap-js": "^2.7.1",
-    "luxon": "catalog:",
-    "@fuku/domain": "workspace:*"
+    "luxon": "catalog:"
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
