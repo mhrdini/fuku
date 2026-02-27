@@ -28,7 +28,7 @@ export type PayGradeRules = Rule[]
 export type ZonedShiftType = Zoned<ShiftType, 'startTime' | 'endTime'>
 
 export interface OperationalHour {
-  dayOfWeek: number // 0 = Monday, 6 = Sunday
+  dayOfWeek: number // 1 = Monday, 7 = Sunday
   startTime: string
   endTime: string
 }
