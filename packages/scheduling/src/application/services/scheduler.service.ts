@@ -72,7 +72,7 @@ export class DefaultSchedulerService implements SchedulerService {
 
     const context = await this.buildContext(input)
 
-    const engineResult = this.schedulerEngine.run(context)
+    const engineResult = await this.schedulerEngine.run(context)
 
     const serviceResult = {
       teamId: input.teamId,
@@ -80,6 +80,7 @@ export class DefaultSchedulerService implements SchedulerService {
       month: input.month,
       assignments: engineResult.proposedAssignments.map(this.toAssignment),
     }
+
     return serviceResult
   }
 
