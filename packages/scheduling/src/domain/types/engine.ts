@@ -66,4 +66,5 @@ export interface ProposedAssignment {
   date: DateTime
   teamMemberId: string
   shiftTypeId: string
+  score?: number
 }

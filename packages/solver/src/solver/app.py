@@ -25,7 +25,8 @@ async def health() -> dict[str, str]:
 async def solve(request: SolverRequest) -> SolverResponse:
     """Endpoint to solve the scheduling optimization problem."""
     try:
-        return Solver().run(request)
+        response = Solver().run(request)
+        return response
     except Exception as e:
         # log the error and trigger global exception handler
         logger.debug(f"Error solving model: {e}")
