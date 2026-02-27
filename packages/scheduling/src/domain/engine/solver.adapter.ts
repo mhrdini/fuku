@@ -5,8 +5,8 @@ import {
   VariableType,
 } from './optimization.model'
 
-const SCALE = 100
-const MAX_SAFE = 10000
+const SCALE = 1000
+const MAX_SAFE = 100000
 
 // ---- Generic ----
 export interface SolverAdapter {
