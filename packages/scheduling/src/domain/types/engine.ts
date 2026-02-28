@@ -9,6 +9,7 @@ import {
   PayGradeShiftType,
   ShiftType,
   StaffingRequirement,
+  StaffingRequirements,
   Unavailability,
   ZonedAssignment,
   ZonedOperationalHours,
@@ -24,6 +25,7 @@ export interface TeamSnapshot {
   shiftTypes: ShiftType[]
   payGradeShiftTypes: PayGradeShiftType[]
   payGradeRules: Rule[]
+  staffingRequirements: StaffingRequirement[]
   operationalHours: OperationalHour[]
   unavailabilities: Unavailability[]
   assignments: Assignment[]
@@ -35,13 +37,14 @@ export interface SchedulerContext
     TeamSnapshot,
     | 'shiftTypes'
     | 'operationalHours'
+    | 'staffingRequirements'
     | 'unavailabilities'
     | 'assignments'
     | 'period'
   > {
-  staffingRequirement: StaffingRequirement
   shiftTypes: ZonedShiftType[]
   operationalHours: ZonedOperationalHours
+  staffingRequirements: StaffingRequirements
   unavailabilities: ZonedUnavailability[]
   assignments: ZonedAssignment[]
   period: ZonedPeriod

@@ -6,13 +6,14 @@ model Team {
 
   timeZone String @map("time_zone")
 
-  teamMembers      TeamMember[]
-  adminUsers       User[]            @relation("UserTeams")
-  payGrades        PayGrade[]
-  locations        Location[]
-  shiftTypes       ShiftType[]
-  operationalHours OperationalHour[]
-  lastActiveUsers  User[]            @relation("LastActiveTeamUsers")
+  teamMembers          TeamMember[]
+  adminUsers           User[]                @relation("UserTeams")
+  payGrades            PayGrade[]
+  locations            Location[]
+  shiftTypes           ShiftType[]
+  operationalHours     OperationalHour[]
+  staffingRequirements StaffingRequirement[]
+  lastActiveUsers      User[]                @relation("LastActiveTeamUsers")
 
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
