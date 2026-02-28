@@ -4,8 +4,8 @@ import z from 'zod/v4'
 
 import {
   OperationalHourCreateInputSchema,
-  OperationalHourOutput,
-  OperationalHourOutputSchema,
+  OperationalHoursOutput,
+  OperationalHoursOutputSchema,
   OperationalHourUpdateInputSchema,
 } from '../../schemas'
 import { protectedProcedure } from '../../trpc'
@@ -28,7 +28,7 @@ export const operationalHourRouter = {
           deletedAt: true,
         },
       })
-      const result: OperationalHourOutput = operationalHours.reduce(
+      const result: OperationalHoursOutput = operationalHours.reduce(
         (acc, oh) => {
           const day = oh.dayOfWeek as DayOfWeek
           acc[day] = {
@@ -39,7 +39,7 @@ export const operationalHourRouter = {
           }
           return acc
         },
-        {} as OperationalHourOutput,
+        {} as OperationalHoursOutput,
       )
       return result
     }),
@@ -63,7 +63,7 @@ export const operationalHourRouter = {
           endTime: true,
         },
       })
-      const result: OperationalHourOutput = operationalHours.reduce(
+      const result: OperationalHoursOutput = operationalHours.reduce(
         (acc, oh) => {
           const day = oh.dayOfWeek as DayOfWeek
           acc[day] = {
@@ -74,7 +74,7 @@ export const operationalHourRouter = {
           }
           return acc
         },
-        {} as OperationalHourOutput,
+        {} as OperationalHoursOutput,
       )
       return result
     }),
@@ -105,16 +105,21 @@ export const operationalHourRouter = {
     }),
 
   setHours: protectedProcedure
-    .input(z.object({ teamId: z.string(), hours: OperationalHourOutputSchema }))
+    .input(
+      z.object({
+        teamId: z.string(),
+        operationalHours: OperationalHoursOutputSchema,
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      for (const [day, oh] of Object.entries(input.hours)) {
+      for (const [day, oh] of Object.entries(input.operationalHours)) {
         const dayOfWeek = parseInt(day) as DayOfWeek
 
         if (!oh) {
           await ctx.db.operationalHour.updateMany({
             where: {
               teamId: input.teamId,
-              dayOfWeek: dayOfWeek,
+              dayOfWeek,
             },
             data: {
               deletedAt: new Date(),

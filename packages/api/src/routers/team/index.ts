@@ -171,6 +171,8 @@ export const teamRouter = {
         .filter(m => m.teamMemberRole === 'ADMIN' && m.userId)
         .map(m => ({ id: m.userId! }))
 
+      const daysOfWeek = Array.from({ length: 7 }, (_, i) => i + 1)
+
       const newTeam = await ctx.db.team.create({
         data: {
           slug,
@@ -200,6 +202,18 @@ export const teamRouter = {
           shiftTypes: true,
         },
       })
+
+      // create default staffing requirements
+      await Promise.all(
+        daysOfWeek.map(day =>
+          ctx.db.staffingRequirement.create({
+            data: {
+              teamId: newTeam.id,
+              dayOfWeek: day,
+            },
+          }),
+        ),
+      )
 
       // to map between payGradeClientId and payGradeId
       const payGrades = await Promise.all(

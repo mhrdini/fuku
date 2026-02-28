@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Users } from 'lucide-react'
 
 import { useTRPC } from '~/trpc/client'
-import { OperationalHoursSection } from './operational-hours-section'
+import { DailyRequirementsSection } from './daily-requirements'
 import { SummarySection } from './summary-section'
 
 export default function TeamOverviewContent() {
@@ -29,7 +29,7 @@ export default function TeamOverviewContent() {
   return team ? (
     <div className='flex flex-col gap-6'>
       <SummarySection />
-      <OperationalHoursSection teamId={team?.id ?? ''} />
+      <DailyRequirementsSection teamId={team?.id ?? ''} />
     </div>
   ) : (
     <Empty>

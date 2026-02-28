@@ -10,7 +10,6 @@
   "scripts": {
     "dev": "prisma generate",
     "gen:all": "prisma generate",
-    "gen:index": "barrelsby --directory  ./src/schemas --output ./src/schemas/index.ts --delete",
     "db:migrate:deploy": "prisma migrate deploy && prisma generate",
     "db:migrate:dev": "prisma migrate dev && prisma generate",
     "db:migrate:dev:auto": "prisma migrate dev --name auto && prisma generate",
