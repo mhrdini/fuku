@@ -35,7 +35,7 @@ const OperationalHourOutputValueSchema = OperationalHourSchema.pick({
   deletedAt: true,
 }).nullable()
 
-export const OperationalHourOutputSchema = z
+export const OperationalHoursOutputSchema = z
   .object(
     Object.fromEntries(
       DayOfWeekKeySchema.options.map(day => [
@@ -46,4 +46,6 @@ export const OperationalHourOutputSchema = z
   )
   .partial()
 
-export type OperationalHourOutput = z.infer<typeof OperationalHourOutputSchema>
+export type OperationalHoursOutput = z.infer<
+  typeof OperationalHoursOutputSchema
+>

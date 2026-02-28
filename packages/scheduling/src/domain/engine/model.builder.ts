@@ -41,7 +41,7 @@ export class ConstraintModelBuilder {
     this.addEligibilityConstraints(model)
     this.addAvailabilityConstraints(model)
     this.addMaxOneShiftTypePerDayConstraints(model)
-    this.addMinMembersPerDayConstraints(model)
+    this.addStaffingRequirementsConstraints(model)
     this.addPayGradeRuleConstraints(model)
     this.addOperationalCoverageConstraint(model)
 
@@ -157,10 +157,12 @@ export class ConstraintModelBuilder {
     }
   }
 
-  private addMinMembersPerDayConstraints(model: OptimizationModel) {
+  private addStaffingRequirementsConstraints(model: OptimizationModel) {
     const numDays = this.getNumDays()
     for (let dayIndex = 0; dayIndex < numDays; dayIndex++) {
       const coefficients: Record<string, number> = {}
+      const day = this.ctx.period.start.plus({ days: dayIndex })
+      const staffingRequirement = this.ctx.staffingRequirements[day.weekday]
 
       for (const tm of this.ctx.teamMembers) {
         for (const st of this.ctx.shiftTypes) {
@@ -173,7 +175,14 @@ export class ConstraintModelBuilder {
         name: `minMembersPerDay__${dayIndex}`,
         coefficients,
         operator: '>=',
-        rhs: this.ctx.staffingRequirement.minMembersPerDay,
+        rhs: staffingRequirement.minMembers,
+      })
+
+      model.constraints.push({
+        name: `maxMembersPerDay__${dayIndex}`,
+        coefficients,
+        operator: '<=',
+        rhs: staffingRequirement.maxMembers,
       })
     }
   }

@@ -69,6 +69,23 @@ model PayGradeShiftType {
   @@map("pay_grade_shift_type")
 }
 
+model StaffingRequirement {
+  dayOfWeek Int    @map("day_of_week") // 1 = Monday, 7 = Sunday
+  teamId    String @map("team_id")
+  team      Team   @relation(fields: [teamId], references: [id])
+
+  minMembers Int @default(1) @map("min_members")
+  maxMembers Int @default(4) @map("max_members")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@id([teamId, dayOfWeek])
+  @@index([teamId])
+  @@index([dayOfWeek])
+  @@map("staffing_requirement")
+}
+
 // --------------------------------
 // Assignment models
 // --------------------------------
