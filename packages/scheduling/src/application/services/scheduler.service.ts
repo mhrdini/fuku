@@ -11,7 +11,7 @@ import {
 } from '../../domain/types/engine'
 import {
   Assignment,
-  StaffingRequirement,
+  StaffingRequirements,
   ZonedOperationalHours,
 } from '../../domain/types/schedule'
 import {
@@ -95,31 +95,22 @@ export class DefaultSchedulerService implements SchedulerService {
   ): Promise<SchedulerContext> {
     const period = getPeriod(input.year, input.month, input.timeZone)
 
-    const staffingRequirement: StaffingRequirement = {
-      minMembersPerDay: 4, // TODO: make dynamic
-    }
-
     const snapshot = await this.teamRepository.getTeamSnapshot(
       input.teamId,
       period,
     )
 
-    return this.toSchedulerContext(snapshot, staffingRequirement)
+    return this.toSchedulerContext(snapshot)
   }
 
   /**
    * Convert all JS dates and HH:mm strings into Luxon DateTime in team timezone
    */
-  private toSchedulerContext(
-    snapshot: TeamSnapshot,
-    staffingRequirement: StaffingRequirement,
-  ): SchedulerContext {
+  private toSchedulerContext(snapshot: TeamSnapshot): SchedulerContext {
     const timeZone = snapshot.period.timeZone
 
     return {
       ...snapshot,
-      staffingRequirement,
-
       shiftTypes: snapshot.shiftTypes.map(st => ({
         id: st.id,
         startTime: parseTimeString(st.startTime, timeZone),
@@ -141,6 +132,14 @@ export class DefaultSchedulerService implements SchedulerService {
         }
         return acc
       }, {} as ZonedOperationalHours),
+
+      staffingRequirements: snapshot.staffingRequirements.reduce((acc, sr) => {
+        acc[sr.dayOfWeek] = {
+          minMembers: sr.minMembers,
+          maxMembers: sr.maxMembers,
+        }
+        return acc
+      }, {} as StaffingRequirements),
 
       unavailabilities: snapshot.unavailabilities.map(u => ({
         teamMemberId: u.teamMemberId,

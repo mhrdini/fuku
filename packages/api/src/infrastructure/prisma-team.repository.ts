@@ -45,6 +45,13 @@ export class PrismaTeamRepository implements TeamRepository {
             endTime: true,
           },
         },
+        staffingRequirements: {
+          select: {
+            dayOfWeek: true,
+            minMembers: true,
+            maxMembers: true,
+          },
+        },
       },
     })
 
@@ -125,6 +132,7 @@ export class PrismaTeamRepository implements TeamRepository {
       payGradeShiftTypes,
       payGradeRules,
       operationalHours: team.operationalHours,
+      staffingRequirements: team.staffingRequirements,
       unavailabilities: unavailabilities.map(u => ({
         teamMemberId: u.teamMemberId,
         date: u.date,

@@ -9,7 +9,16 @@ export interface PayGrade {
 }
 
 export interface StaffingRequirement {
-  minMembersPerDay: number
+  dayOfWeek: number // 1 = Monday, 7 = Sunday
+  minMembers: number
+  maxMembers: number
+}
+
+export interface StaffingRequirements {
+  [dayOfWeek: number]: {
+    minMembers: number
+    maxMembers: number
+  }
 }
 
 export interface ShiftType {
