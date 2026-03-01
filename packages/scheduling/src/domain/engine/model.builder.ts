@@ -338,7 +338,6 @@ export class ConstraintModelBuilder {
 
     for (let dayIndex = 0; dayIndex < numDays; dayIndex++) {
       const dayOfWeek = this.ctx.period.start.plus({ days: dayIndex }).weekday
-
       const operationalHours =
         this.ctx.operationalHours[
           dayOfWeek as keyof typeof this.ctx.operationalHours
