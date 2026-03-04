@@ -276,7 +276,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
           {(Object.keys(WEEKDAY_MAP) as DayOfWeekKey[]).map(day => {
             const weekday = WEEKDAY_MAP[day]
             return (
-              <Item size='xs' key={day} className='flex items-center gap-4'>
+              <Item size='xs' key={day} className='flex items-center gap-4 '>
                 <ItemContent className='gap-3'>
                   <ItemTitle>{weekday}</ItemTitle>
                   <ItemActions className='gap-3 grid grid-cols-4 *:items-center'>

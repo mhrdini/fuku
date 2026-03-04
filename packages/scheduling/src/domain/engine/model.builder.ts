@@ -43,7 +43,7 @@ export class ConstraintModelBuilder {
     this.addMaxOneShiftTypePerDayConstraints(model)
     this.addStaffingRequirementsConstraints(model)
     this.addPayGradeRuleConstraints(model)
-    this.addOperationalCoverageConstraint(model)
+    this.addOperationalCoverageConstraints(model)
 
     this.addBalanceWorkloadObjective(model)
     this.addMinimizeShiftTypeChangesObjective(model)
@@ -308,11 +308,14 @@ export class ConstraintModelBuilder {
           })
         })
       } else {
-        for (let dayIndex = 0; dayIndex < numDays; dayIndex++) {
-          const dayIndices = this.getDaysForTimeWindow(
-            rule.timeWindow,
-            dayIndex,
-          )
+        const windows =
+          rule.timeWindow === TimeWindowValues.MONTH
+            ? [this.getDaysForTimeWindow(rule.timeWindow, 0)]
+            : Array.from({ length: numDays }, (_, i) =>
+                this.getDaysForTimeWindow(rule.timeWindow, i),
+              )
+
+        windows.forEach((dayIndices, windowIndex) => {
           for (const tm of this.ctx.teamMembers) {
             if (rule.payGradeId && tm.payGradeId !== rule.payGradeId) continue
             // build metric expression
@@ -325,19 +328,20 @@ export class ConstraintModelBuilder {
             const rhs = adjustRhs ? adjustRhs(rule.threshold) : rule.threshold
 
             model.constraints.push({
-              name: `payGradeRule__${rule.id}__${tm.id}__${dayIndex}`,
+              name: `payGradeRule__${rule.id}__${tm.id}__${windowIndex}`,
               coefficients,
               operator,
               rhs,
             })
           }
-        }
+        })
       }
     }
   }
 
-  private addOperationalCoverageConstraint(model: OptimizationModel) {
+  private addOperationalCoverageConstraints(model: OptimizationModel) {
     const numDays = this.getNumDays()
+    const slotSizeMinutes = 15 // adjust if needed
 
     for (let dayIndex = 0; dayIndex < numDays; dayIndex++) {
       const dayOfWeek = this.ctx.period.start.plus({ days: dayIndex }).weekday
@@ -346,6 +350,8 @@ export class ConstraintModelBuilder {
         this.ctx.operationalHours[
           dayOfWeek as keyof typeof this.ctx.operationalHours
         ]
+
+      if (!operationalHours) continue
 
       const baseDate = this.ctx.period.start
         .plus({ days: dayIndex })
@@ -361,48 +367,49 @@ export class ConstraintModelBuilder {
         minute: operationalHours.endTime.minute,
       })
 
-      const operationalMinutes = opEnd.diff(opStart, 'minutes').as('minutes')
+      const totalOperationalMinutes = opEnd
+        .diff(opStart, 'minutes')
+        .as('minutes')
+      const totalSlots = Math.ceil(totalOperationalMinutes / slotSizeMinutes)
 
-      const coefficients: CoefficientMap = {}
+      for (let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
+        const slotStart = opStart.plus({
+          minutes: slotIndex * slotSizeMinutes,
+        })
 
-      for (const tm of this.ctx.teamMembers) {
-        for (const st of this.ctx.shiftTypes) {
-          const shiftStart = baseDate.set({
-            hour: st.startTime.hour,
-            minute: st.startTime.minute,
-          })
+        const slotEnd = slotStart.plus({
+          minutes: slotSizeMinutes,
+        })
 
-          const shiftEnd = baseDate.set({
-            hour: st.endTime.hour,
-            minute: st.endTime.minute,
-          })
+        const coefficients: CoefficientMap = {}
 
-          const overlapStart = opStart > shiftStart ? opStart : shiftStart
-          const overlapEnd = opEnd < shiftEnd ? opEnd : shiftEnd
+        for (const tm of this.ctx.teamMembers) {
+          for (const st of this.ctx.shiftTypes) {
+            const shiftStart = baseDate.set({
+              hour: st.startTime.hour,
+              minute: st.startTime.minute,
+            })
 
-          if (overlapStart < overlapEnd) {
-            const overlapMinutes = overlapEnd
-              .diff(overlapStart, 'minutes')
-              .as('minutes')
+            const shiftEnd = baseDate.set({
+              hour: st.endTime.hour,
+              minute: st.endTime.minute,
+            })
 
-            if (overlapMinutes > 0) {
+            // shift fully covers slot
+            if (shiftStart <= slotStart && shiftEnd >= slotEnd) {
               const varName = getAssignmentVariableName(tm.id, dayIndex, st.id)
 
-              coefficients[varName] = overlapMinutes
+              coefficients[varName] = 1
             }
           }
         }
-      }
 
-      if (Object.keys(coefficients).length > 0) {
         model.constraints.push({
-          name: `operationalCoverage__${dayIndex}`,
+          name: `coverage__${dayIndex}__${slotIndex}`,
           coefficients,
           operator: '>=',
-          rhs: operationalMinutes,
+          rhs: 1, // at least 1 person covering each slot
         })
-      } else {
-        console.warn(`Operational coverage impossible on day ${dayIndex}`)
       }
     }
   }
