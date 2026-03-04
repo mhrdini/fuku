@@ -1,8 +1,10 @@
 import type { TRPCRouterRecord } from '@trpc/server'
-import { ColorHex } from '@fuku/domain/schemas'
 import z from 'zod/v4'
 
-import { ShiftTypeCreateInputSchema } from '../../schemas'
+import {
+  ShiftTypeCreateInputSchema,
+  ShiftTypeUpdateInputSchema,
+} from '../../schemas'
 import { protectedProcedure } from '../../trpc'
 
 export const shiftTypeRouter = {
@@ -100,18 +102,7 @@ export const shiftTypeRouter = {
       return created
     }),
   update: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        name: z.string().nullish(),
-        description: z.string().nullish(),
-        startTime: z.string().nullish(),
-        endTime: z.string().nullish(),
-        color: ColorHex.optional(),
-        connectPayGrades: z.array(z.string()).optional(),
-        disconnectPayGrades: z.array(z.string()).optional(),
-      }),
-    )
+    .input(ShiftTypeUpdateInputSchema)
     .mutation(async ({ input, ctx }) => {
       const updated = await ctx.db.shiftType.update({
         where: {
@@ -123,6 +114,9 @@ export const shiftTypeRouter = {
           ...(input.startTime && { startTime: input.startTime }),
           ...(input.endTime && { endTime: input.endTime }),
           ...(input.color && { color: input.color }),
+          ...(input.allowedWeekdays && {
+            allowedWeekdays: input.allowedWeekdays,
+          }),
           ...(input.connectPayGrades?.length
             ? {
                 eligiblePayGrades: {

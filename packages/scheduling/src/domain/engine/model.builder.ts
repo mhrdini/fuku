@@ -192,7 +192,7 @@ export class ConstraintModelBuilder {
 
   private addPayGradeRuleConstraints(model: OptimizationModel) {
     const numDays = this.getNumDays()
-    for (const rule of this.ctx.payGradeRules) {
+    for (const rule of this.ctx.rules) {
       if (!rule.hardConstraint) continue
 
       if (rule.metric === MetricValues.CONSECUTIVE_DAYS_WORKED) {

@@ -1,15 +1,25 @@
 import z from 'zod/v4'
 
-import { MetricSchema, OperatorSchema, TimeWindowSchema } from './enums'
+import {
+  MetricSchema,
+  OperatorSchema,
+  RuleTargetSchema,
+  TimeWindowSchema,
+} from './enums'
 
 export const RuleSchema = z.object({
   id: z.string(),
-  payGradeId: z.string(),
+  teamId: z.string(),
+  target: RuleTargetSchema,
+  payGradeId: z.string().optional(),
+  shiftTypeId: z.string().optional(),
+  teamMemberId: z.string().optional(),
   metric: MetricSchema,
   timeWindow: TimeWindowSchema,
   operator: OperatorSchema,
   threshold: z.number(),
   hardConstraint: z.boolean(),
+  penalty: z.number().nonnegative().optional(),
 })
 
 export type Rule = z.infer<typeof RuleSchema>

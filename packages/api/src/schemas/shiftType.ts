@@ -6,6 +6,7 @@ import { PayGradeShiftTypeOutputSchema } from './payGradeShiftType'
 export const ShiftTypeOutputSchema = ShiftTypeSchema.extend({
   description: z.string().nullable(),
   color: ColorHex,
+  allowedWeekdays: z.array(z.number().int().min(1).max(7)),
   eligiblePayGrades: z.array(PayGradeShiftTypeOutputSchema),
 })
 
