@@ -14,6 +14,7 @@ model Team {
   operationalHours     OperationalHour[]
   staffingRequirements StaffingRequirement[]
   lastActiveUsers      User[]                @relation("LastActiveTeamUsers")
+  rules                Rule[]
 
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
@@ -74,6 +75,7 @@ model TeamMember {
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
   deletedById String?   @map("deleted_by_id")
+  rules       Rule[]
 
   @@index([teamId])
   @@index([payGradeId])

@@ -9,6 +9,7 @@ export const ShiftTypeSchema = z.object({
   startTime: Time,
   endTime: Time,
   color: ColorHex.optional(),
+  allowedWeekdays: z.array(z.number().int().min(1).max(7)).optional(),
   teamId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),

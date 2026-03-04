@@ -36,6 +36,7 @@ export class PrismaTeamRepository implements TeamRepository {
             id: true,
             startTime: true,
             endTime: true,
+            allowedWeekdays: true,
           },
         },
         operationalHours: {
@@ -62,11 +63,9 @@ export class PrismaTeamRepository implements TeamRepository {
       })),
     )
 
-    const payGradeRules = await this.db.rule.findMany({
+    const rules = await this.db.rule.findMany({
       where: {
-        payGradeId: {
-          in: team.payGrades.map(pg => pg.id),
-        },
+        teamId,
       },
     })
     // .then(rules =>
@@ -128,9 +127,10 @@ export class PrismaTeamRepository implements TeamRepository {
         id: st.id,
         startTime: st.startTime,
         endTime: st.endTime,
+        allowedWeekdays: st.allowedWeekdays,
       })),
       payGradeShiftTypes,
-      payGradeRules,
+      rules,
       operationalHours: team.operationalHours,
       staffingRequirements: team.staffingRequirements,
       unavailabilities: unavailabilities.map(u => ({
