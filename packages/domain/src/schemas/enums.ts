@@ -35,3 +35,12 @@ export type TimeWindow = z.infer<typeof TimeWindowSchema>
 export const OperatorSchema = z.enum(['MIN', 'MAX'])
 export const OperatorValues = enumToSelfMap(OperatorSchema)
 export type Operator = z.infer<typeof OperatorSchema>
+
+export const RuleTargetSchema = z.enum([
+  'PAY_GRADE',
+  'SHIFT_TYPE',
+  'TEAM_MEMBER',
+  'GLOBAL',
+])
+export const RuleTargetValues = enumToSelfMap(RuleTargetSchema)
+export type RuleTarget = z.infer<typeof RuleTargetSchema>

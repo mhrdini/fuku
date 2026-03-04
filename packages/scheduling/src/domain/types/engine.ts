@@ -1,4 +1,4 @@
-import { Rule } from '@fuku/domain/schemas'
+import { Rule as RuleSchema } from '@fuku/domain/schemas'
 import { DateTime } from 'luxon'
 
 import { Period, ZonedPeriod } from '../../shared/utils/date'
@@ -18,13 +18,24 @@ import {
 } from './schedule'
 import { Team, TeamMember } from './team'
 
+export interface Rule
+  extends Omit<
+    RuleSchema,
+    'payGradeId' | 'shiftTypeId' | 'teamMemberId' | 'penalty'
+  > {
+  payGradeId: string | null
+  shiftTypeId: string | null
+  teamMemberId: string | null
+  penalty: number | null
+}
+
 export interface TeamSnapshot {
   team: Team
   teamMembers: TeamMember[]
   payGrades: PayGrade[]
   shiftTypes: ShiftType[]
   payGradeShiftTypes: PayGradeShiftType[]
-  payGradeRules: Rule[]
+  rules: Rule[]
   staffingRequirements: StaffingRequirement[]
   operationalHours: OperationalHour[]
   unavailabilities: Unavailability[]
