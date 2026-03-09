@@ -71,8 +71,10 @@ export class DefaultSchedulerService implements SchedulerService {
     if (options) this.setOptions(options)
 
     const context = await this.buildContext(input)
+    console.log('\n\nContext built!')
 
     const engineResult = await this.schedulerEngine.run(context)
+    console.log('\n\nEngine run completed!')
 
     const serviceResult = {
       teamId: input.teamId,
@@ -115,6 +117,7 @@ export class DefaultSchedulerService implements SchedulerService {
         id: st.id,
         startTime: parseTimeString(st.startTime, timeZone),
         endTime: parseTimeString(st.endTime, timeZone),
+        allowedWeekdays: st.allowedWeekdays.map(d => d as WeekdayNumbers),
       })),
 
       operationalHours: snapshot.operationalHours.reduce((acc, oh) => {
