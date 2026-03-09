@@ -1,4 +1,8 @@
-import { Rule as RuleSchema } from '@fuku/domain/schemas'
+import {
+  RuleConditionField,
+  RuleConditionOperator,
+  Rule as RuleType,
+} from '@fuku/domain/schemas'
 import { DateTime } from 'luxon'
 
 import { Period, ZonedPeriod } from '../../shared/utils/date'
@@ -18,15 +22,21 @@ import {
 } from './schedule'
 import { Team, TeamMember } from './team'
 
+export interface RuleCondition {
+  field: RuleConditionField
+  operator: RuleConditionOperator
+  value: string | number | boolean | object | string[] | number[] | null
+}
 export interface Rule
   extends Omit<
-    RuleSchema,
+    RuleType,
     'payGradeId' | 'shiftTypeId' | 'teamMemberId' | 'penalty'
   > {
   payGradeId: string | null
   shiftTypeId: string | null
   teamMemberId: string | null
   penalty: number | null
+  ruleConditions: RuleCondition[]
 }
 
 export interface TeamSnapshot {
@@ -53,7 +63,6 @@ export interface SchedulerContext
     | 'assignments'
     | 'period'
   > {
-  staffingRequirement: StaffingRequirement
   shiftTypes: ZonedShiftType[]
   operationalHours: ZonedOperationalHours
   staffingRequirements: StaffingRequirements

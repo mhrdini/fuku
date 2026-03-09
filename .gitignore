@@ -40,3 +40,13 @@ dist/
 
 .vscode/
 packages/db/dist
+
+# python
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+*.pyc
+*.egg-info
+*.ipynb
+*.json

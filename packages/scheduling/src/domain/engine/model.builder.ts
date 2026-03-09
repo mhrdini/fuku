@@ -1,13 +1,14 @@
 import {
   Metric,
   MetricValues,
-  OperatorValues,
-  Operator as RuleOperator,
+  RuleConditionOperatorValues,
+  RuleOperator,
+  RuleOperatorValues,
   TimeWindow,
   TimeWindowValues,
 } from '@fuku/domain/schemas'
 
-import { SchedulerContext } from '../types'
+import { Rule, SchedulerContext, TeamMember } from '../types'
 import {
   CoefficientMap,
   Operator,
@@ -24,6 +25,8 @@ type MetricExpression = {
 export class ConstraintModelBuilder {
   constructor(private ctx: SchedulerContext) {}
 
+  private payGradeToShiftTypesMap = new Map<string, Set<string>>()
+
   build(): OptimizationModel {
     const model: OptimizationModel = {
       variables: [],
@@ -34,6 +37,9 @@ export class ConstraintModelBuilder {
       },
     }
 
+    // precompute maps for efficient constraint building
+    this.buildPayGradeShiftTypeMap()
+
     // build variables
     this.buildDecisionVariables(model)
 
@@ -42,7 +48,8 @@ export class ConstraintModelBuilder {
     this.addAvailabilityConstraints(model)
     this.addMaxOneShiftTypePerDayConstraints(model)
     this.addStaffingRequirementsConstraints(model)
-    this.addPayGradeRuleConstraints(model)
+    this.addShiftTypeAllowedWeekdaysConstraints(model)
+    this.addRuleConstraints(model)
     this.addOperationalCoverageConstraints(model)
 
     this.addBalanceWorkloadObjective(model)
@@ -52,6 +59,7 @@ export class ConstraintModelBuilder {
     this.addBalanceWorkloadObjective(model)
     this.addMinimizeShiftTypeChangesObjective(model)
     this.addMaximizeMemberShiftTypeObjective(model)
+    this.addSoftMaxShiftTypePerDayObjective(model)
 
     return model
   }
@@ -75,21 +83,12 @@ export class ConstraintModelBuilder {
 
   private addEligibilityConstraints(model: OptimizationModel) {
     const numDays = this.getNumDays()
-    const payGradeToShiftTypes = new Map<string, Set<string>>()
-    for (const pgst of this.ctx.payGradeShiftTypes) {
-      if (!payGradeToShiftTypes.has(pgst.payGradeId)) {
-        payGradeToShiftTypes.set(pgst.payGradeId, new Set())
-      }
-      payGradeToShiftTypes.get(pgst.payGradeId)!.add(pgst.shiftTypeId)
-    }
-
     for (const tm of this.ctx.teamMembers) {
-      const eligibleShiftTypes =
-        tm.payGradeId && payGradeToShiftTypes.get(tm.payGradeId)
-
+      const payGradeShiftTypes = this.payGradeToShiftTypesMap.get(
+        tm.payGradeId!,
+      )
       for (const st of this.ctx.shiftTypes) {
-        const isEligible =
-          (eligibleShiftTypes && eligibleShiftTypes.has(st.id)) || false
+        const isEligible = payGradeShiftTypes!.has(st.id) || false
         if (!isEligible) {
           for (let dayIndex = 0; dayIndex < numDays; dayIndex++) {
             const varName = getAssignmentVariableName(tm.id, dayIndex, st.id)
@@ -190,7 +189,35 @@ export class ConstraintModelBuilder {
     }
   }
 
-  private addPayGradeRuleConstraints(model: OptimizationModel) {
+  private addShiftTypeAllowedWeekdaysConstraints(model: OptimizationModel) {
+    const numDays = this.getNumDays()
+    for (const st of this.ctx.shiftTypes) {
+      if (!st.allowedWeekdays || st.allowedWeekdays.length === 0) continue
+
+      const allowedWeekdays = new Set(st.allowedWeekdays)
+
+      for (let dayIndex = 0; dayIndex < numDays; dayIndex++) {
+        const weekday = this.ctx.period.start.plus({ days: dayIndex }).weekday
+
+        if (!allowedWeekdays.has(weekday)) {
+          for (const tm of this.ctx.teamMembers) {
+            const varName = getAssignmentVariableName(tm.id, dayIndex, st.id)
+
+            model.constraints.push({
+              name: `shiftTypeAllowedWeekdays__${tm.id}__${dayIndex}__${st.id}`,
+              coefficients: {
+                [varName]: 1,
+              },
+              operator: '==',
+              rhs: 0,
+            })
+          }
+        }
+      }
+    }
+  }
+
+  private addRuleConstraints(model: OptimizationModel) {
     const numDays = this.getNumDays()
     for (const rule of this.ctx.rules) {
       if (!rule.hardConstraint) continue
@@ -198,31 +225,38 @@ export class ConstraintModelBuilder {
       if (rule.metric === MetricValues.CONSECUTIVE_DAYS_WORKED) {
         const windowLength = rule.threshold + 1 // exclusive
         for (const tm of this.ctx.teamMembers) {
-          if (rule.payGradeId && tm.payGradeId !== rule.payGradeId) continue
+          if (!this.isRuleTargetMember(rule, tm)) continue
+
           // only iterate while the window fits inside the schedule period
           for (
             let startDay = 0;
             startDay <= numDays - windowLength;
             startDay++
           ) {
+            if (!this.hasValidConditions(rule, startDay)) continue
+
             // build coefficients
             const coefficients: CoefficientMap = {}
             for (let d = startDay; d < startDay + windowLength; d++) {
               for (const st of this.ctx.shiftTypes) {
+                if (!this.isRuleTargetMember(rule, tm)) continue
                 const varName = getAssignmentVariableName(tm.id, d, st.id)
                 coefficients[varName] = 1
               }
             }
 
             model.constraints.push({
-              name: `payGradeRule__${rule.id}__consec__${tm.id}__${startDay}`,
+              name: `rule__${rule.id}__consec__${tm.id}__${startDay}`,
               coefficients,
               operator: this.getOperatorForRule(rule.operator),
               rhs: rule.threshold,
             })
           }
         }
-      } else if (rule.metric === MetricValues.UNIQUE_MEMBERS_ASSIGNED) {
+        continue
+      }
+
+      if (rule.metric === MetricValues.UNIQUE_MEMBERS_ASSIGNED) {
         // define "windows" within the period based on timeWindow
         // each as set of day indices that fall within that window and period
         const windows =
@@ -239,7 +273,7 @@ export class ConstraintModelBuilder {
           const auxVariables: string[] = []
 
           for (const tm of this.ctx.teamMembers) {
-            if (rule.payGradeId && tm.payGradeId !== rule.payGradeId) continue
+            if (!this.isRuleTargetMember(rule, tm)) continue
 
             const auxVarName = `uniqueMember__${rule.id}__${tm.id}__${windowIndex}`
             auxVariables.push(auxVarName)
@@ -251,7 +285,9 @@ export class ConstraintModelBuilder {
 
             // link aux variable to all shifts assigned to this member in the window
             for (const d of dayIndices) {
+              if (!this.hasValidConditions(rule, d)) continue
               for (const st of this.ctx.shiftTypes) {
+                if (!this.isRuleTargetMember(rule, tm)) continue
                 // shiftVar = 1 if member is assigned to that shift type
                 // shiftVar = 0 if member is not assigned to that shift type
                 const shiftVarName = getAssignmentVariableName(tm.id, d, st.id)
@@ -277,7 +313,10 @@ export class ConstraintModelBuilder {
             }
 
             for (const d of dayIndices) {
+              if (!this.hasValidConditions(rule, d)) continue
               for (const st of this.ctx.shiftTypes) {
+                if (!this.isRuleTargetMember(rule, tm)) continue
+
                 const shiftVarName = getAssignmentVariableName(tm.id, d, st.id)
 
                 reverseCoefficients[shiftVarName] =
@@ -301,40 +340,47 @@ export class ConstraintModelBuilder {
           }
 
           model.constraints.push({
-            name: `payGradeRule__${rule.id}__uniqueMembers_window_${windowIndex}`,
+            name: `rule__${rule.id}__uniqueMembers_window_${windowIndex}`,
             coefficients: windowCoefficients,
             operator: this.getOperatorForRule(rule.operator),
             rhs: rule.threshold,
           })
         })
-      } else {
-        const windows =
-          rule.timeWindow === TimeWindowValues.MONTH
-            ? [this.getDaysForTimeWindow(rule.timeWindow, 0)]
-            : Array.from({ length: numDays }, (_, i) =>
-                this.getDaysForTimeWindow(rule.timeWindow, i),
-              )
+        continue
+      }
 
-        windows.forEach((dayIndices, windowIndex) => {
-          for (const tm of this.ctx.teamMembers) {
-            if (rule.payGradeId && tm.payGradeId !== rule.payGradeId) continue
-            // build metric expression
-            const { coefficients, adjustRhs, flipOperator } =
-              this.computeMetricExpression(rule.metric, tm.id, dayIndices)
+      // All other metrics
+      const windows =
+        rule.timeWindow === TimeWindowValues.MONTH
+          ? [this.getDaysForTimeWindow(rule.timeWindow, 0)]
+          : Array.from({ length: numDays }, (_, i) =>
+              this.getDaysForTimeWindow(rule.timeWindow, i),
+            )
 
-            const operator = flipOperator
-              ? this.flipOperator(this.getOperatorForRule(rule.operator))
-              : this.getOperatorForRule(rule.operator)
-            const rhs = adjustRhs ? adjustRhs(rule.threshold) : rule.threshold
+      let windowIndex = 0
+      for (const dayIndices of windows) {
+        const dayIndex = dayIndices[0]
+        if (!this.hasValidConditions(rule, dayIndex)) continue
+        for (const tm of this.ctx.teamMembers) {
+          if (!this.isRuleTargetMember(rule, tm)) continue
 
-            model.constraints.push({
-              name: `payGradeRule__${rule.id}__${tm.id}__${windowIndex}`,
-              coefficients,
-              operator,
-              rhs,
-            })
-          }
-        })
+          // build metric expression
+          const { coefficients, adjustRhs, flipOperator } =
+            this.computeMetricExpression(rule.metric, tm.id, dayIndices)
+
+          const operator = flipOperator
+            ? this.flipOperator(this.getOperatorForRule(rule.operator))
+            : this.getOperatorForRule(rule.operator)
+          const rhs = adjustRhs ? adjustRhs(rule.threshold) : rule.threshold
+
+          model.constraints.push({
+            name: `rule__${rule.id}__${tm.id}__${windowIndex}`,
+            coefficients,
+            operator,
+            rhs,
+          })
+          windowIndex++
+        }
       }
     }
   }
@@ -577,7 +623,7 @@ export class ConstraintModelBuilder {
     for (const auxVar of auxVariables) {
       model.objective!.terms.push({
         variable: auxVar,
-        coefficient: 0.2,
+        coefficient: -0.2,
       })
     }
   }
@@ -611,7 +657,53 @@ export class ConstraintModelBuilder {
         // objective: minimize the number of different shift types assigned to each member to balance experience
         model.objective!.terms.push({
           variable: `member_${tm.id}_assigned_${st.id}`,
-          coefficient: -0.6,
+          coefficient: -1,
+        })
+      }
+    }
+  }
+
+  private addSoftMaxShiftTypePerDayObjective(model: OptimizationModel) {
+    const numDays = this.getNumDays()
+
+    for (let dayIndex = 0; dayIndex < numDays; dayIndex++) {
+      for (const st of this.ctx.shiftTypes) {
+        const target = 2 // TODO: target per day for each shift type
+
+        const excessVar = `excessShiftType__${st.id}__${dayIndex}`
+
+        model.variables.push({
+          name: excessVar,
+          type: 'integer',
+          min: 0,
+        })
+
+        const coefficients: CoefficientMap = {
+          [excessVar]: -1,
+        }
+
+        for (const tm of this.ctx.teamMembers) {
+          const assignmentVar = getAssignmentVariableName(
+            tm.id,
+            dayIndex,
+            st.id,
+          )
+
+          coefficients[assignmentVar] = 1
+        }
+
+        // sum(assignments) - excess ≤ target
+        model.constraints.push({
+          name: `softMaxShiftType__${st.id}__${dayIndex}`,
+          coefficients,
+          operator: '<=',
+          rhs: target,
+        })
+
+        // penalize excess
+        model.objective!.terms.push({
+          variable: excessVar,
+          coefficient: 0.5,
         })
       }
     }
@@ -628,8 +720,17 @@ export class ConstraintModelBuilder {
     )
   }
 
+  private buildPayGradeShiftTypeMap() {
+    for (const pgst of this.ctx.payGradeShiftTypes) {
+      if (!this.payGradeToShiftTypesMap.has(pgst.payGradeId)) {
+        this.payGradeToShiftTypesMap.set(pgst.payGradeId, new Set())
+      }
+      this.payGradeToShiftTypesMap.get(pgst.payGradeId)!.add(pgst.shiftTypeId)
+    }
+  }
+
   private getOperatorForRule(operator: RuleOperator): Operator {
-    return operator === OperatorValues.MAX ? '<=' : '>='
+    return operator === RuleOperatorValues.MAX ? '<=' : '>='
   }
 
   private computeMetricExpression(
@@ -754,5 +855,114 @@ export class ConstraintModelBuilder {
       default:
         return operator
     }
+  }
+
+  private isRuleTargetMember(rule: Rule, teamMember: TeamMember) {
+    if (rule.target === 'GLOBAL') return true
+
+    if (rule.target === 'PAY_GRADE')
+      return teamMember.payGradeId === rule.payGradeId
+
+    if (rule.target === 'SHIFT_TYPE') {
+      const eligibleShiftTypes = this.payGradeToShiftTypesMap.get(
+        teamMember.payGradeId!,
+      )
+      return eligibleShiftTypes?.has(rule.shiftTypeId!) ?? false
+    }
+
+    if (rule.target === 'TEAM_MEMBER')
+      return teamMember.id === rule.teamMemberId
+
+    return false
+  }
+
+  private hasValidConditions(rule: Rule, dayIndex: number): boolean {
+    if (!rule.ruleConditions?.length) return true
+
+    const day = this.ctx.period.start.plus({ days: dayIndex })
+    const month = day.month
+    const weekday = day.weekday
+
+    for (const cond of rule.ruleConditions) {
+      switch (cond.field) {
+        case 'MONTH': {
+          if (typeof cond.value === 'number') {
+            switch (cond.operator) {
+              case RuleConditionOperatorValues.EQ:
+                if (month !== cond.value) return false
+                break
+              case RuleConditionOperatorValues.NEQ:
+                if (month === cond.value) return false
+                break
+              case RuleConditionOperatorValues.GTE:
+                if (month < cond.value) return false
+                break
+              case RuleConditionOperatorValues.LTE:
+                if (month > cond.value) return false
+                break
+              default:
+                return false
+            }
+          }
+          if (this.isIntArray(cond.value)) {
+            switch (cond.operator) {
+              case RuleConditionOperatorValues.IN:
+                if (!cond.value.includes(month)) return false
+                break
+              case RuleConditionOperatorValues.NOT_IN:
+                if (cond.value.includes(month)) return false
+                break
+              default:
+                return false
+            }
+          }
+          break
+        }
+        case 'WEEKDAY': {
+          if (typeof cond.value === 'number') {
+            switch (cond.operator) {
+              case RuleConditionOperatorValues.EQ:
+                if (weekday !== cond.value) return false
+                break
+              case RuleConditionOperatorValues.NEQ:
+                if (weekday === cond.value) return false
+                break
+              case RuleConditionOperatorValues.GTE:
+                if (weekday < cond.value) return false
+                break
+              case RuleConditionOperatorValues.LTE:
+                if (weekday > cond.value) return false
+                break
+              default:
+                return false
+            }
+          }
+          if (this.isIntArray(cond.value)) {
+            switch (cond.operator) {
+              case RuleConditionOperatorValues.IN:
+                if (!cond.value.includes(weekday)) return false
+                break
+              case RuleConditionOperatorValues.NOT_IN:
+                if (cond.value.includes(weekday)) return false
+                break
+              default:
+                return false
+            }
+          }
+        }
+      }
+    }
+    return true
+  }
+
+  private isIntArray(value: any): value is number[] {
+    return (
+      Array.isArray(value) &&
+      value.every(v => typeof v === 'number' && Number.isInteger(v))
+    )
+  }
+
+  private isStringArray(value: any): value is string[] {
+    return Array.isArray(value) && value.every(v => typeof v === 'string')
   }
 }

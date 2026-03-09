@@ -10,13 +10,14 @@ export interface SchedulerEngine {
 export class DefaultSchedulerEngine implements SchedulerEngine {
   async run(ctx: SchedulerContext): Promise<SchedulerResult> {
     const model = new ConstraintModelBuilder(ctx).build()
-
+    console.log('\n\nModel built!')
     // console.log('variables:', model.variables.length)
     // console.log('constraints:', model.constraints.length)
     // console.log('objective terms:', model.objective?.terms.length)
 
     const solver = new CpSatSolverAdapter('http://localhost:8000/solve')
     const solverResult = await solver.solve(model)
+    console.log('\n\nSolver finished!')
 
     // console.log(
     //   'solver result:',
@@ -27,6 +28,7 @@ export class DefaultSchedulerEngine implements SchedulerEngine {
 
     const mapper = new SolutionMapper(ctx, solverResult)
     const result = mapper.getResult()
+    console.log('\n\nResult mapped!')
 
     return result
   }

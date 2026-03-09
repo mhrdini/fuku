@@ -32,9 +32,9 @@ export const TimeWindowSchema = z.enum([
 export const TimeWindowValues = enumToSelfMap(TimeWindowSchema)
 export type TimeWindow = z.infer<typeof TimeWindowSchema>
 
-export const OperatorSchema = z.enum(['MIN', 'MAX'])
-export const OperatorValues = enumToSelfMap(OperatorSchema)
-export type Operator = z.infer<typeof OperatorSchema>
+export const RuleOperatorSchema = z.enum(['MIN', 'MAX'])
+export const RuleOperatorValues = enumToSelfMap(RuleOperatorSchema)
+export type RuleOperator = z.infer<typeof RuleOperatorSchema>
 
 export const RuleTargetSchema = z.enum([
   'PAY_GRADE',
@@ -44,3 +44,21 @@ export const RuleTargetSchema = z.enum([
 ])
 export const RuleTargetValues = enumToSelfMap(RuleTargetSchema)
 export type RuleTarget = z.infer<typeof RuleTargetSchema>
+
+export const RuleConditionFieldSchema = z.enum(['MONTH', 'WEEKDAY'])
+export const RuleConditionFieldValues = enumToSelfMap(RuleConditionFieldSchema)
+export type RuleConditionField = z.infer<typeof RuleConditionFieldSchema>
+
+export const RuleConditionOperatorSchema = z.enum([
+  'EQ',
+  'NEQ',
+  'IN',
+  'NOT_IN',
+  'GTE',
+  'LTE',
+])
+
+export const RuleConditionOperatorValues = enumToSelfMap(
+  RuleConditionOperatorSchema,
+)
+export type RuleConditionOperator = z.infer<typeof RuleConditionOperatorSchema>

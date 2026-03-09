@@ -63,23 +63,23 @@ export class PrismaTeamRepository implements TeamRepository {
       })),
     )
 
-    const rules = await this.db.rule.findMany({
-      where: {
-        teamId,
-      },
-    })
-    // .then(rules =>
-    //   rules.reduce(
-    //     (acc, rule) => {
-    //       if (!acc[rule.payGradeId]) {
-    //         acc[rule.payGradeId] = []
-    //       }
-    //       acc[rule.payGradeId].push(rule)
-    //       return acc
-    //     },
-    //     {} as Record<string, Rule[]>,
-    //   ),
-    // )
+    const rules = await this.db.rule
+      .findMany({
+        where: {
+          teamId,
+        },
+        include: { ruleConditions: true },
+      })
+      .then(rules =>
+        rules.map(rule => ({
+          ...rule,
+          penalty: rule.penalty ?? null,
+          payGradeId: rule.payGradeId ?? null,
+          shiftTypeId: rule.shiftTypeId ?? null,
+          teamMemberId: rule.teamMemberId ?? null,
+          ruleConditions: rule.ruleConditions,
+        })),
+      )
 
     const unavailabilities = await this.db.unavailability.findMany({
       where: {
@@ -112,6 +112,8 @@ export class PrismaTeamRepository implements TeamRepository {
         shiftAssignment: true,
       },
     })
+
+    console.log('Fetched team snapshot from DB for teamId:', teamId)
 
     return {
       team: { id: team.id },
