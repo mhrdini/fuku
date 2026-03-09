@@ -2,7 +2,7 @@ import z from 'zod/v4'
 
 import {
   MetricSchema,
-  OperatorSchema,
+  RuleOperatorSchema,
   RuleTargetSchema,
   TimeWindowSchema,
 } from './enums'
@@ -16,7 +16,7 @@ export const RuleSchema = z.object({
   teamMemberId: z.string().optional(),
   metric: MetricSchema,
   timeWindow: TimeWindowSchema,
-  operator: OperatorSchema,
+  operator: RuleOperatorSchema,
   threshold: z.number(),
   hardConstraint: z.boolean(),
   penalty: z.number().nonnegative().optional(),
