@@ -1,6 +1,6 @@
 import { DayOfWeek, DayOfWeekSchema } from '@fuku/domain/schemas'
 import { TRPCRouterRecord } from '@trpc/server'
-import z from 'zod/v4'
+import { z } from 'zod/v4'
 
 import {
   StaffingRequirementsOutput,

@@ -4,7 +4,7 @@ import {
   TeamMemberSchema,
   UserSchema,
 } from '@fuku/domain/schemas'
-import z from 'zod/v4'
+import { z } from 'zod/v4'
 
 // output must never have optional fields - they should be nullable if they can be missing
 export const TeamMemberOutputSchema = TeamMemberSchema.extend({
