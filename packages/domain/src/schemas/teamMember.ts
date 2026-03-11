@@ -1,4 +1,4 @@
-import z from 'zod/v4'
+import { z } from 'zod/v4'
 
 import { TeamMemberRoleSchema } from './enums'
 import { ColorHex } from './helpers'
