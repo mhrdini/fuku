@@ -33,7 +33,7 @@ import {
   useForm,
 } from 'react-hook-form'
 import { toast } from 'sonner'
-import z from 'zod/v4'
+import { z } from 'zod/v4'
 
 import { NumberStepperInput } from '~/components/ui/number-stepper-input'
 import { TIME_OPTIONS, WEEKDAY_MAP } from '~/lib/date'

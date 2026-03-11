@@ -2,7 +2,7 @@
 // Extend the schema with included relations
 
 import { TeamMemberOutput, TeamMemberOutputSchema } from '@fuku/api/schemas'
-import z from 'zod/v4'
+import { z } from 'zod/v4'
 
 // from the procedure and also with UI-specific fields
 export const TeamMemberUISchema = TeamMemberOutputSchema.extend({

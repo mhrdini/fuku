@@ -23,7 +23,7 @@ const mappings = [
 for (const map of mappings) {
   console.log(`Generating barrel for ${map.directory}...`)
   execSync(
-    `pnpx barrelsby --directory ${map.directory} --outFile ${map.outFile} --delete --exclude node_modules --exclude dist`,
+    `barrelsby --directory ${map.directory} --outFile ${map.outFile} --delete --exclude node_modules --exclude dist`,
     { stdio: 'inherit' },
   )
 }

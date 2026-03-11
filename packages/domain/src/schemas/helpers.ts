@@ -1,4 +1,4 @@
-import z from 'zod/v4'
+import { z } from 'zod/v4'
 
 /** Common fields */
 export const ColorHex = z.string().regex(/^#([0-9A-Fa-f]{6})$/)

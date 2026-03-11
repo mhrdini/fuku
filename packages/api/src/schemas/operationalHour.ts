@@ -4,7 +4,7 @@ import {
   DayOfWeekSchema,
   OperationalHourSchema,
 } from '@fuku/domain/schemas'
-import z from 'zod/v4'
+import { z } from 'zod/v4'
 
 export const OperationalHourCreateInputSchema = OperationalHourSchema.omit({
   createdAt: true,

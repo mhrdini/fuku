@@ -1,5 +1,5 @@
 import { UserTeam } from '@fuku/api/schemas'
-import { Cog, LucideIcon, UserCircle2, Users2 } from 'lucide-react'
+import { Calendar, Cog, LucideIcon, UserCircle2, Users2 } from 'lucide-react'
 
 export type MenuGroup = {
   label: string
@@ -32,6 +32,11 @@ export const useMenu = (team: UserTeam | null): MenuGroup[] => {
               href: `/team/${team.slug}`,
               label: 'Overview',
               icon: Users2,
+            },
+            {
+              href: `/team/${team.slug}/schedule`,
+              label: 'Schedule',
+              icon: Calendar,
             },
             {
               href: `/team/${team.slug}/members`,

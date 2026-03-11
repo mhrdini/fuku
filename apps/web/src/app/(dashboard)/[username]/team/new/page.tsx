@@ -92,7 +92,7 @@ import {
   useFormContext,
 } from 'react-hook-form'
 import { toast } from 'sonner'
-import z from 'zod/v4'
+import { z } from 'zod/v4'
 
 import { useSession } from '~/components/providers/session-provider'
 import { TimeZoneController } from '~/components/timezone-controller'

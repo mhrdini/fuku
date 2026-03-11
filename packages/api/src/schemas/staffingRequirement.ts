@@ -3,8 +3,7 @@ import {
   DayOfWeekKeySchema,
   StaffingRequirementSchema,
 } from '@fuku/domain/schemas'
-import z from 'zod/v4'
-
+import { z } from 'zod/v4'
 
 export const StaffingRequirementCreateInputSchema =
   StaffingRequirementSchema.omit({
