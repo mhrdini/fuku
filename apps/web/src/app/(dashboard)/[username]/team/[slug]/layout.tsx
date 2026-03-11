@@ -25,8 +25,6 @@ export default async function TeamLayout({
   })
 
   if (!team) {
-    // notFound()
-    // console.log()
     redirect(`/${username}`)
   }
 

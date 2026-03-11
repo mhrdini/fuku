@@ -193,8 +193,6 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
   }, [operationalHours, staffingRequirements])
 
   const onSubmit: SubmitHandler<DailyRequirementsFormType> = async values => {
-    // console.log('form values on submit:', values)
-
     try {
       const dirtyOperationalHours = form.formState.dirtyFields.operationalHours
       const dirtyStaffingRequirements =

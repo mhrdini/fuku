@@ -118,11 +118,6 @@ export const TeamSettingsContent = () => {
   })
 
   const onSubmit: SubmitHandler<TeamSettingsFormType> = async values => {
-    // console.log('team settings save values:', values)
-    // console.log('team settings form default:', form.formState.defaultValues)
-    // console.log('team settings form dirty fields:', form.formState.dirtyFields)
-    // console.log('team settings form is dirty:', form.formState.isDirty)
-
     if (!team) return
     if (!isDirty) {
       form.setError('root', { message: 'There are no changes to save.' })

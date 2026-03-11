@@ -242,7 +242,6 @@ export default function NewTeamPage() {
 
   const onSubmit: SubmitHandler<TeamCreateFormType> = values => {
     try {
-      // console.log('new team submit values:', values)
       createTeam(values)
     } catch {}
   }
