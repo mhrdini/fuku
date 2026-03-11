@@ -8,46 +8,150 @@ The scheduling module has the following layers:
    Orchestrates use-case logic
 
 2. `SchedulerEngine` (domain layer)
-   Pure scheduling algorithm / decision making
+   Pure scheduling algorithm / optimization logic, externalizes optimization model solver interaction
 
 Preliminarily, the API module serves as the entry point for any external interactions:
 
-Controller (in API layer): Handles request → orchestrates calls to `SchedulerService`
+Controller (in API layer): Handles request → orchestrates calls to
+`SchedulerService`
+
+## Scheduler Flow
+
+```markdown
+                         ┌─────────────────────────────────┐
+                         │  application/services           │
+                         │  scheduler.service.ts           │
+                         │                                 │
+                         │ Orchestrates scheduling request │
+                         └───────────────┬─────────────────┘
+                                         │
+                                         │ build scheduler context
+                                         ▼
+                         ┌─────────────────────────────────┐
+                         │  application/ports              │
+                         │  team.repository.ts             │
+                         │                                 │
+                         │ Data access interface           │
+                         └───────────────┬─────────────────┘
+                                         │
+                                         │ returns team snapshot
+                                         ▼
+                         ┌─────────────────────────────────┐
+                         │      domain/types               │
+                         │ engine / team / schedule types  │
+                         │                                 │
+                         │ Shared domain data structures   │
+                         └───────────────┬─────────────────┘
+                                         │
+                                         │ scheduler context
+                                         ▼
+                ┌──────────────────────────────────────────────┐
+                │               domain/engine                  │
+                │                                              │
+                │  scheduler.engine.ts                         │
+                │  Core scheduling engine                      │
+                │                                              │
+                │  Coordinates model construction and solving  │
+                └───────────────┬──────────────────────────────┘
+                                │
+                                │
+                                ▼
+        ┌────────────────────────────────────────────────────────────┐
+        │                  Optimization Model Layer                  │
+        │                                                            │
+        │  model.builder.ts                                          │
+        │     Builds optimization model from scheduling context      │
+        │     (variables, constraints, objective)                    │
+        │                                                            │
+        │  variable.builder.ts                                       │
+        │     Generates solver variables (assignments etc.)          │
+        │                                                            │
+        │  optimization.model.ts                                     │
+        │     Internal representation of constraints/objectives      │
+        └───────────────┬────────────────────────────────────────────┘
+                        │
+                        │ solver model
+                        ▼
+                ┌─────────────────────────────────┐
+                │      solver.adapter.ts          │
+                │                                 │
+                │ Adapter to external solver      │
+                │ (Python OR-Tools CP-SAT)        │
+                └───────────────┬─────────────────┘
+                                │
+                                │ solve()
+                                ▼
+                  ┌───────────────────────┐
+                  │   [External service]  │
+                  │         Solver        │
+                  │        (CP-SAT)       │
+                  └─────────────┬─────────┘
+                                │
+                                │ solution variables
+                                ▼
+                ┌─────────────────────────────────┐
+                │      solution.mapper.ts         │
+                │                                 │
+                │ Converts solver output into     │
+                │ domain schedule assignments     │
+                └───────────────┬─────────────────┘
+                                │
+                                │
+                                ▼
+                       Final Schedule Result
+         (back to SchedulerService for return and/or persistence)
+```
 
 ## Layer Responsibilities
 
-### Application Layer (`SchedulerService`)
+### Application Layer: `/application`
+
+### `/services`
+
+`SchedulerService`:
 
 - Validate input
 - Create scheduling context
-- Call `SchedulerEngine`
-- Return structured result
-- Does not persist to DB
+- Call `SchedulerEngine` to generate schedule
+- Return structured result containing schedule team, period, and assignments
+- If mode is `replace`, persists to DB and replaces existing schedule
 
-### Domain Layer (`SchedulerEngine`)
+### `/ports`
 
-### `/engine`
+`TeamRepository`:
 
-Pure logic for generating schedules:
+Interface for:
 
-- Iterates days
-- Iterates required shift slots
-- Filters eligible members (based on availability and constraints)
-- Scores candidates (calling the `/scoring` module)
-- Creates assignments
+- Fetching team snapshot (members, shifts, etc) from DB, used by
+  `SchedulerService` to get current context for scheduling
+- Persisting new schedule to DB if mode is `replace`
 
-### `/constraints`
+### Domain Layer: `/domain/engine`
 
-- Hard constraint logic
-- Isolates each constraint rule
-- Engine iterates through constraints and rejects candidates that fail
+`SchedulerEngine`:
 
-### `/scoring`
+- Core scheduling logic
+- Receives scheduling context, builds optimization model, calls solver adapter, and maps solution back to schedule result
 
-- Soft fairness logic
-- Optimisation
+`ConstraintModelBuilder`:
+
+- Builds the optimization model (variables, constraints, objective) from the scheduling context
+
+`SolverAdapter`:
+
+- Translates internal optimization model to the format required by the external solver
+- Calls the solver and retrieves the solution
+
+`SolutionMapper`:
+
+- Converts the raw solver output into structured schedule assignments
+- Ensures the output is in a format that can be easily consumed by the application layer and persisted to the database
 
 ## Helpers
+
+### `/domain/types`
+
+- Define types for team snapshot and scheduler context
 
 ### `/shared/date-utils.ts`
 
@@ -57,5 +161,9 @@ Pure logic for generating schedules:
 
 ### `SchedulerContext`
 
-- Encapsulates all data needed for scheduling (members, shifts, constraints)
+- Encapsulate all data needed for scheduling (members, shifts, constraints)
 - Passed to `SchedulerEngine` for processing
+
+### `/domain/engine/optimization.model.ts`
+
+- Define internal representation of optimization model (variables, constraints, objective)
