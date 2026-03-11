@@ -1,5 +1,5 @@
 import { db as PrismaClient } from '@fuku/db'
-import { Period, TeamRepository } from '@fuku/scheduling'
+import { Assignment, Period, TeamRepository } from '@fuku/scheduling'
 
 export class PrismaTeamRepository implements TeamRepository {
   constructor(private db: typeof PrismaClient) {}
@@ -113,8 +113,6 @@ export class PrismaTeamRepository implements TeamRepository {
       },
     })
 
-    console.log('Fetched team snapshot from DB for teamId:', teamId)
-
     return {
       team: { id: team.id },
       teamMembers: team.teamMembers.map(m => ({
@@ -146,5 +144,23 @@ export class PrismaTeamRepository implements TeamRepository {
       })),
       period: period,
     }
+  }
+  async persistSchedule(
+    teamId: string,
+    period: Period,
+    assignments: Assignment[],
+  ) {
+    await this.db.dayAssignment.createMany({
+      data: assignments.map(a => ({
+        teamMemberId: a.teamMemberId,
+        date: a.date,
+        shiftAssignment: {
+          create: {
+            teamId,
+            shiftTypeId: a.shiftTypeId!,
+          },
+        },
+      })),
+    })
   }
 }

@@ -17,6 +17,7 @@ import {
 import {
   getPeriod,
   parseTimeString,
+  Period,
   toJSDate,
   toZonedDateTime,
   toZonedPeriod,
@@ -47,17 +48,22 @@ export interface GenerateScheduleOptions {
 
 export interface GenerateScheduleOutput {
   teamId: string
-  year: number
-  month: number
+  period: Period
   assignments: Assignment[]
 }
 
 export class DefaultSchedulerService implements SchedulerService {
-  constructor(private teamRepository: TeamRepository) {}
-
   schedulerEngine: SchedulerEngine = new DefaultSchedulerEngine()
   mode: SchedulerMode = 'dry-run'
 
+  constructor(
+    private teamRepository: TeamRepository,
+    mode: SchedulerMode = 'dry-run',
+  ) {
+    if (mode) {
+      this.mode = mode
+    }
+  }
   async generateMonthly(
     input: GenerateScheduleInput,
     options?: GenerateScheduleOptions,
@@ -71,16 +77,21 @@ export class DefaultSchedulerService implements SchedulerService {
     if (options) this.setOptions(options)
 
     const context = await this.buildContext(input)
-    console.log('\n\nContext built!')
 
     const engineResult = await this.schedulerEngine.run(context)
-    console.log('\n\nEngine run completed!')
 
     const serviceResult = {
       teamId: input.teamId,
-      year: input.year,
-      month: input.month,
+      period: getPeriod(input.year, input.month, input.timeZone),
       assignments: engineResult.proposedAssignments.map(this.toAssignment),
+    }
+
+    if (this.mode === 'replace') {
+      await this.teamRepository.persistSchedule(
+        serviceResult.teamId,
+        serviceResult.period,
+        serviceResult.assignments,
+      )
     }
 
     return serviceResult
