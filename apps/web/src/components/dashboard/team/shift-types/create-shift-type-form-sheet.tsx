@@ -110,7 +110,6 @@ export const CreateShiftTypeFormSheet = () => {
 
   const onSubmit = async (data: ShiftTypeCreateFormType) => {
     try {
-      // console.log('create shift type submit values:', data)
       await createShiftType(data)
     } catch {
       // handled in onError
