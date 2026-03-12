@@ -75,6 +75,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
   }
 
   const onSelectTeam = async (id: string, slug: string) => {
+    if (id === activeTeamId) return
     setActiveTeamId(id)
     await setLastActiveTeam({ teamId: id })
     router.push(`/${username}/team/${slug}`)
