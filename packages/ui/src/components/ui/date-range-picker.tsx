@@ -1,11 +1,11 @@
 'use client'
 
-import type { FC } from 'react'
+import type { VariantProps } from 'class-variance-authority'
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@fuku/ui/lib/utils'
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 
-import { Button } from './button'
+import { Button, buttonVariants } from './button'
 import { Calendar } from './calendar'
 import { DateInput } from './date-input'
 import { Label } from './label'
@@ -84,9 +84,7 @@ const PRESETS: Preset[] = [
 ]
 
 /** The DateRangePicker component allows a user to select a range of dates */
-export const DateRangePicker: FC<DateRangePickerProps> & {
-  filePath: string
-} = ({
+export function DateRangePicker({
   initialDateFrom = new Date(new Date().setHours(0, 0, 0, 0)),
   initialDateTo,
   initialCompareFrom,
@@ -95,7 +93,9 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
   align = 'end',
   locale = 'en-US',
   showCompare = true,
-}) => {
+  variant = 'outline',
+  size,
+}: DateRangePickerProps & VariantProps<typeof buttonVariants>) {
   const [isOpen, setIsOpen] = useState(false)
 
   const [range, setRange] = useState<DateRange>({
@@ -345,7 +345,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
       }}
     >
       <PopoverTrigger asChild>
-        <Button variant='outline'>
+        <Button size={size} variant={variant}>
           <div className='text-right'>
             <div className='py-1'>
               <div>{`${formatDate(range.from, locale)}${
@@ -572,4 +572,3 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 }
 
 DateRangePicker.displayName = 'DateRangePicker'
-DateRangePicker.filePath = 'packages/ui/src/components/ui/date-range-picker.tsx'

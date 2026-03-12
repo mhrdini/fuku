@@ -12,13 +12,8 @@ import {
   CardTitle,
   Separator,
 } from '@fuku/ui/components'
-import {
-  useMutation,
-  useQueries,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query'
-import { ArrowRight, Calendar } from 'lucide-react'
+import { useQueries, useQuery } from '@tanstack/react-query'
+import { ArrowRight, CalendarPlus } from 'lucide-react'
 
 import { useSession } from '~/components/providers/session-provider'
 import { isEntity } from '~/lib/db'
@@ -85,33 +80,14 @@ export const SummarySection = () => {
 
   const router = useRouter()
   const trpc = useTRPC()
-  const queryClient = useQueryClient()
 
   const { data: team } = useQuery({
     ...trpc.team.bySlug.queryOptions({ slug: slug! }),
     enabled: !!slug,
   })
 
-  const { mutateAsync: generateMonthly } = useMutation({
-    ...trpc.schedule.generateMonthly.mutationOptions(),
-    onSuccess: schedule => {
-      console.log(schedule)
-      queryClient
-    },
-  })
-
   const handleGenerateSchedule = async () => {
-    if (!team) return
-
-    try {
-      await generateMonthly({
-        teamId: team.id,
-        year: new Date().getFullYear(),
-        month: new Date().getMonth() + 1,
-      })
-    } catch (err) {
-      // handle in onError
-    }
+    router.push(`/${session?.user.username}/team/${slug}/schedule`)
   }
 
   const [
@@ -294,7 +270,7 @@ export const SummarySection = () => {
       <div className='flex flex-row'>
         <h2>Summary</h2>
         <Button size='sm' className='ml-auto' onClick={handleGenerateSchedule}>
-          <Calendar />
+          <CalendarPlus />
           Generate Schedule
         </Button>
       </div>
