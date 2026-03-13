@@ -1,6 +1,8 @@
 import { db as PrismaClient } from '@fuku/db'
 import { Assignment, Period, TeamRepository } from '@fuku/scheduling'
 
+import { RuleConditionOutputSchema } from '../schemas/ruleCondition'
+
 export class PrismaTeamRepository implements TeamRepository {
   constructor(private db: typeof PrismaClient) {}
   async getTeamSnapshot(teamId: string, period: Period) {
@@ -41,14 +43,14 @@ export class PrismaTeamRepository implements TeamRepository {
         },
         operationalHours: {
           select: {
-            dayOfWeek: true,
+            weekday: true,
             startTime: true,
             endTime: true,
           },
         },
         staffingRequirements: {
           select: {
-            dayOfWeek: true,
+            weekday: true,
             minMembers: true,
             maxMembers: true,
           },
@@ -77,7 +79,9 @@ export class PrismaTeamRepository implements TeamRepository {
           payGradeId: rule.payGradeId ?? null,
           shiftTypeId: rule.shiftTypeId ?? null,
           teamMemberId: rule.teamMemberId ?? null,
-          ruleConditions: rule.ruleConditions,
+          ruleConditions: rule.ruleConditions.map(rc =>
+            RuleConditionOutputSchema.parse(rc),
+          ),
         })),
       )
 

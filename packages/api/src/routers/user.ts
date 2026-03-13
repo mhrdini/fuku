@@ -1,5 +1,5 @@
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 import { UserTeam } from '../schemas'
 import { protectedProcedure } from '../trpc'
@@ -210,7 +210,7 @@ export const userRouter = {
     const member: UserTeam[] = user.memberships
       .filter(m => m.team)
       .map(m => ({
-        id: m.team!.id,
+        id: m.team?.id ?? '',
         slug: m.team!.slug,
         name: m.team!.name,
         description: m.team!.description,

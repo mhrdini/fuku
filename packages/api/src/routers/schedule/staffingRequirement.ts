@@ -1,6 +1,6 @@
-import { DayOfWeek, DayOfWeekSchema } from '@fuku/domain/schemas'
+import { Weekday, WeekdaySchema } from '@fuku/domain/schemas'
 import { TRPCRouterRecord } from '@trpc/server'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 import {
   StaffingRequirementsOutput,
@@ -22,7 +22,7 @@ export const staffingRequirementRouter = {
         },
         select: {
           teamId: true,
-          dayOfWeek: true,
+          weekday: true,
           minMembers: true,
           maxMembers: true,
         },
@@ -30,7 +30,7 @@ export const staffingRequirementRouter = {
 
       const result: StaffingRequirementsOutput = staffingRequirements.reduce(
         (acc, sr) => {
-          const day = sr.dayOfWeek as DayOfWeek
+          const day = sr.weekday as Weekday
           acc[day] = {
             teamId: sr.teamId,
             minMembers: sr.minMembers,
@@ -53,14 +53,14 @@ export const staffingRequirementRouter = {
     )
     .mutation(async ({ ctx, input }) => {
       for (const [day, st] of Object.entries(input.staffingRequirements)) {
-        const dayOfWeek = parseInt(day) as DayOfWeek
+        const weekday = parseInt(day) as Weekday
 
         if (st) {
           await ctx.db.staffingRequirement.upsert({
             where: {
-              teamId_dayOfWeek: {
+              teamId_weekday: {
                 teamId: input.teamId,
-                dayOfWeek,
+                weekday,
               },
             },
             update: {
@@ -69,7 +69,7 @@ export const staffingRequirementRouter = {
             },
             create: {
               teamId: input.teamId,
-              dayOfWeek,
+              weekday,
               ...(st.minMembers ? { minMembers: st.minMembers } : {}),
               ...(st.maxMembers ? { maxMembers: st.maxMembers } : {}),
             },
@@ -82,15 +82,15 @@ export const staffingRequirementRouter = {
     .input(
       z.object({
         teamId: z.string(),
-        dayOfWeek: DayOfWeekSchema,
+        weekday: WeekdaySchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const deleted = await ctx.db.staffingRequirement.delete({
         where: {
-          teamId_dayOfWeek: {
+          teamId_weekday: {
             teamId: input.teamId,
-            dayOfWeek: input.dayOfWeek,
+            weekday: input.weekday,
           },
         },
       })

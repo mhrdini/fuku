@@ -344,10 +344,10 @@ export class ConstraintModelBuilder {
   private addOperationalCoverageConstraints(model: OptimizationModel) {
     const slotSizeMinutes = 15
     for (let dayIndex = 0; dayIndex < this.numDays; dayIndex++) {
-      const dayOfWeek = this.ctx.period.start.plus({ days: dayIndex }).weekday
+      const weekday = this.ctx.period.start.plus({ days: dayIndex }).weekday
       const operationalHours =
         this.ctx.operationalHours[
-          dayOfWeek as keyof typeof this.ctx.operationalHours
+          weekday as keyof typeof this.ctx.operationalHours
         ]
       if (!operationalHours) continue
 

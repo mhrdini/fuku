@@ -1,4 +1,4 @@
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 import { LeaveAssignmentSchema } from './leaveAssignment'
 import { ShiftAssignmentSchema } from './shiftAssignment'

@@ -8,13 +8,13 @@ export interface PayGrade {
 }
 
 export interface StaffingRequirement {
-  dayOfWeek: number // 1 = Monday, 7 = Sunday
+  weekday: number // 1 = Monday, 7 = Sunday
   minMembers: number
   maxMembers: number
 }
 
 export interface StaffingRequirements {
-  [dayOfWeek: number]: {
+  [weekday: number]: {
     minMembers: number
     maxMembers: number
   }
@@ -35,13 +35,13 @@ export interface PayGradeShiftType {
 export type ZonedShiftType = Zoned<ShiftType, 'startTime' | 'endTime'>
 
 export interface OperationalHour {
-  dayOfWeek: number // 1 = Monday, 7 = Sunday
+  weekday: number // 1 = Monday, 7 = Sunday
   startTime: string
   endTime: string
 }
 
 export type ZonedOperationalHours = {
-  [dayOfWeek: number]: {
+  [weekday: number]: {
     startTime: DateTime
     endTime: DateTime
   }

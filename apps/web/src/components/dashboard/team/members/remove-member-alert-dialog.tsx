@@ -48,7 +48,7 @@ export const RemoveMemberAlertDialog = () => {
         queryKey: trpc.teamMember.byId.queryKey({ id: data.id }),
       })
       queryClient.invalidateQueries(
-        trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
+        trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
       )
       const toastId = toast('Team Member', {
         description: `${data.givenNames} ${data.familyName} has been removed.`,
@@ -74,7 +74,7 @@ export const RemoveMemberAlertDialog = () => {
         data,
       )
       queryClient.invalidateQueries(
-        trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
+        trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
       )
       toast.success('Team Member', {
         description: `${data.givenNames} ${data.familyName} has been restored.`,
@@ -85,7 +85,7 @@ export const RemoveMemberAlertDialog = () => {
   const onRemove = async () => {
     if (!currentTeamMemberId) return
     try {
-      await removeMember({ id: currentTeamMemberId, teamId: team!.id })
+      await removeMember({ id: currentTeamMemberId, teamId: team?.id ?? '' })
     } catch {
       // Handled in onError
     }

@@ -59,7 +59,7 @@ export const CreateShiftTypeFormSheet = () => {
   })
 
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
+    ...trpc.payGrade.list.queryOptions({ teamId: team?.id ?? '' }),
     enabled: !!team,
   })
 
@@ -97,10 +97,10 @@ export const CreateShiftTypeFormSheet = () => {
         data,
       )
       queryClient.invalidateQueries(
-        trpc.shiftType.listIds.queryOptions({ teamId: team!.id }),
+        trpc.shiftType.listIds.queryOptions({ teamId: team?.id ?? '' }),
       )
       queryClient.invalidateQueries(
-        trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
+        trpc.shiftType.list.queryOptions({ teamId: team?.id ?? '' }),
       )
       toast.success('Shift Type', {
         description: `${data.name} has been created.`,

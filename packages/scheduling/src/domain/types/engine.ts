@@ -25,7 +25,7 @@ import { Team, TeamMember } from './team'
 export interface RuleCondition {
   field: RuleConditionField
   operator: RuleConditionOperator
-  value: string | number | boolean | object | string[] | number[] | null
+  value: string | number | string[] | number[]
 }
 export interface Rule
   extends Omit<

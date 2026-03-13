@@ -60,12 +60,12 @@ export const TeamPayGradesContent = () => {
   })
 
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
+    ...trpc.payGrade.list.queryOptions({ teamId: team?.id ?? '' }),
     enabled: !!team,
   })
 
   const { data: shiftTypes } = useQuery({
-    ...trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
+    ...trpc.shiftType.list.queryOptions({ teamId: team?.id ?? '' }),
     enabled: !!team,
   })
 
@@ -77,7 +77,7 @@ export const TeamPayGradesContent = () => {
         data,
       )
       queryClient.invalidateQueries(
-        trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
+        trpc.payGrade.list.queryOptions({ teamId: team?.id ?? '' }),
       )
     },
   })

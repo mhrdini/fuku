@@ -1,9 +1,9 @@
 import {
-  DayOfWeekKey,
-  DayOfWeekKeySchema,
   StaffingRequirementSchema,
+  WeekdayKey,
+  WeekdayKeySchema,
 } from '@fuku/domain/schemas'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 export const StaffingRequirementCreateInputSchema =
   StaffingRequirementSchema.omit({
@@ -18,7 +18,7 @@ export type StaffingRequirementCreateInput = z.infer<
 export const StaffingRequirementUpdateInputSchema =
   StaffingRequirementCreateInputSchema.partial().extend({
     teamId: StaffingRequirementCreateInputSchema.shape.teamId,
-    dayOfWeek: StaffingRequirementCreateInputSchema.shape.dayOfWeek,
+    weekday: StaffingRequirementCreateInputSchema.shape.weekday,
   })
 
 export type StaffingRequirementUpdateInput = z.infer<
@@ -34,11 +34,11 @@ const StaffingRequirementOutputValueSchema = StaffingRequirementSchema.pick({
 export const StaffingRequirementsOutputSchema = z
   .object(
     Object.fromEntries(
-      DayOfWeekKeySchema.options.map(day => [
+      WeekdayKeySchema.options.map(day => [
         day,
         StaffingRequirementOutputValueSchema,
       ]),
-    ) as Record<DayOfWeekKey, typeof StaffingRequirementOutputValueSchema>,
+    ) as Record<WeekdayKey, typeof StaffingRequirementOutputValueSchema>,
   )
   .partial()
 
