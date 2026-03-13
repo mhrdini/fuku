@@ -49,7 +49,7 @@ export const TeamLocationsContent = () => {
   })
 
   const { data: locations } = useQuery({
-    ...trpc.location.listDetailed.queryOptions({ teamId: team!.id }),
+    ...trpc.location.list.queryOptions({ teamId: team?.id ?? '' }),
     enabled: !!team,
   })
 
@@ -61,7 +61,7 @@ export const TeamLocationsContent = () => {
         data,
       )
       queryClient.invalidateQueries(
-        trpc.location.listDetailed.queryOptions({ teamId: team?.id! }),
+        trpc.location.list.queryOptions({ teamId: team?.id! }),
       )
     },
   })

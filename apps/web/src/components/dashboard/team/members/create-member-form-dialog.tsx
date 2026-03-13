@@ -94,7 +94,7 @@ export const CreateMemberFormDialog = () => {
   }, [id, team])
 
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
+    ...trpc.payGrade.list.queryOptions({ teamId: team?.id ?? '' }),
     enabled: !!team,
   })
 
@@ -112,7 +112,7 @@ export const CreateMemberFormDialog = () => {
         data,
       )
       queryClient.invalidateQueries(
-        trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
+        trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
       )
 
       toast.success('Team Member', {

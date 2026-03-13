@@ -1,18 +1,32 @@
-import { DayOfWeekKey, supportedTimeZones } from '@fuku/domain/schemas'
+import { MonthKey, supportedTimeZones, WeekdayKey } from '@fuku/domain/schemas'
 import { DateTime, WeekdayNumbers } from 'luxon'
 
-export const WEEKDAY_MAP: Record<DayOfWeekKey, string> = Array.from(
+export const WEEKDAY_MAP: Record<WeekdayKey, string> = Array.from(
   { length: 7 },
   (_, i) => i + 1,
 ).reduce(
   (acc, day) => {
-    const key = String(day) as DayOfWeekKey
+    const key = String(day) as WeekdayKey
     acc[key] = DateTime.fromObject({
       weekday: day as WeekdayNumbers,
     }).weekdayLong!
     return acc
   },
-  {} as Record<DayOfWeekKey, string>,
+  {} as Record<WeekdayKey, string>,
+)
+
+export const MONTH_MAP: Record<MonthKey, string> = Array.from(
+  { length: 12 },
+  (_, i) => i + 1,
+).reduce(
+  (acc, month) => {
+    const key = String(month) as MonthKey
+    acc[key] = DateTime.fromObject({
+      month,
+    }).monthLong!
+    return acc
+  },
+  {} as Record<MonthKey, string>,
 )
 
 function generateTimeOptions(minuteInterval: number = 30): string[] {

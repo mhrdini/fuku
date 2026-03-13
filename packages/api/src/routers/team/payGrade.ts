@@ -1,5 +1,5 @@
 import type { TRPCRouterRecord } from '@trpc/server'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 import { protectedProcedure } from '../../trpc'
 import { numberFromInput } from '../../utils/numberFromInput'
@@ -45,7 +45,7 @@ export const payGradeRouter = {
       })
     }),
 
-  listDetailed: protectedProcedure
+  list: protectedProcedure
     .input(
       z.object({
         teamId: z.string(),

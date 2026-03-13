@@ -1,10 +1,10 @@
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
-import { DayOfWeekSchema } from './helpers'
+import { WeekdaySchema } from './helpers'
 
 export const StaffingRequirementSchema = z.object({
   teamId: z.string(),
-  dayOfWeek: DayOfWeekSchema,
+  weekday: WeekdaySchema,
   minMembers: z.number().int().nonnegative(),
   maxMembers: z.number().int().nonnegative(),
   createdAt: z.date(),

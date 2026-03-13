@@ -1,6 +1,6 @@
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
 import { customAlphabet } from 'nanoid'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 import {
   TeamCreateInputSchema,
@@ -133,7 +133,7 @@ export const teamRouter = {
     const member: UserTeam[] = user.memberships
       .filter(m => m.team)
       .map(m => ({
-        id: m.team!.id,
+        id: m.team?.id ?? '',
         slug: m.team!.slug,
         name: m.team!.name,
         description: m.team!.description,
@@ -209,7 +209,7 @@ export const teamRouter = {
           ctx.db.staffingRequirement.create({
             data: {
               teamId: newTeam.id,
-              dayOfWeek: day,
+              weekday: day,
             },
           }),
         ),

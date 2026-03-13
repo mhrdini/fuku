@@ -5,7 +5,7 @@ import {
   StaffingRequirementsOutput,
   StaffingRequirementsOutputSchema,
 } from '@fuku/api/schemas'
-import { DayOfWeekKey } from '@fuku/domain/schemas'
+import { WeekdayKey } from '@fuku/domain/schemas'
 import {
   Button,
   Checkbox,
@@ -33,7 +33,7 @@ import {
   useForm,
 } from 'react-hook-form'
 import { toast } from 'sonner'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 import { NumberStepperInput } from '~/components/ui/number-stepper-input'
 import { TIME_OPTIONS, WEEKDAY_MAP } from '~/lib/date'
@@ -168,7 +168,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
     }
 
     if (operationalHours) {
-      for (const day of Object.keys(operationalHours) as DayOfWeekKey[]) {
+      for (const day of Object.keys(operationalHours) as WeekdayKey[]) {
         updatedOpHours[day] = {
           ...createDefaultDay(),
           ...operationalHours[day],
@@ -177,7 +177,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
     }
 
     if (staffingRequirements) {
-      for (const day of Object.keys(staffingRequirements) as DayOfWeekKey[]) {
+      for (const day of Object.keys(staffingRequirements) as WeekdayKey[]) {
         updatedStaffingReqs[day] = {
           ...createDefaultStaffing(),
           ...staffingRequirements[day],
@@ -215,7 +215,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
           hoursUpdated = false
         } else {
           const operationalHours = dirtyDays.reduce((acc, day) => {
-            acc[day as DayOfWeekKey] =
+            acc[day as WeekdayKey] =
               values.operationalHours[
                 day as keyof typeof values.operationalHours
               ]
@@ -241,7 +241,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
           staffingUpdated = false
         } else {
           const staffingRequirements = dirtyDays.reduce((acc, day) => {
-            acc[day as DayOfWeekKey] =
+            acc[day as WeekdayKey] =
               values.staffingRequirements[
                 day as keyof typeof values.staffingRequirements
               ]
@@ -271,7 +271,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
         className='flex flex-col gap-4'
       >
         <FieldSet className='flex flex-col gap-4 col-span-2 md:col-span-1'>
-          {(Object.keys(WEEKDAY_MAP) as DayOfWeekKey[]).map(day => {
+          {(Object.keys(WEEKDAY_MAP) as WeekdayKey[]).map(day => {
             const weekday = WEEKDAY_MAP[day]
             return (
               <Item size='xs' key={day} className='flex items-center gap-4 '>

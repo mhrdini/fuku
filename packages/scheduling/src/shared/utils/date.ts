@@ -59,7 +59,7 @@ export function toZonedPeriod(period: Period): ZonedPeriod {
 export function parseTimeString(
   timeStr: string,
   timeZone: string,
-  dayOfWeek?: WeekdayNumbers,
+  weekday?: WeekdayNumbers,
 ): DateTime {
   const [hour, minute] = timeStr.split(':').map(Number)
 
@@ -67,7 +67,7 @@ export function parseTimeString(
     {
       hour,
       minute,
-      ...(dayOfWeek ? { weekday: dayOfWeek } : {}),
+      ...(weekday ? { weekday: weekday } : {}),
     },
     { zone: timeZone },
   )

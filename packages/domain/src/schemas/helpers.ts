@@ -1,4 +1,4 @@
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 /** Common fields */
 export const ColorHex = z.string().regex(/^#([0-9A-Fa-f]{6})$/)
@@ -6,7 +6,7 @@ export const Time = z
   .string()
   .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'invalid_time_format')
 
-export const DayOfWeekSchema = z.union([
+export const WeekdaySchema = z.union([
   z.literal(1),
   z.literal(2),
   z.literal(3),
@@ -15,10 +15,28 @@ export const DayOfWeekSchema = z.union([
   z.literal(6),
   z.literal(7),
 ]) // 1 = Monday, 7 = Sunday
-export type DayOfWeek = z.infer<typeof DayOfWeekSchema>
+export type Weekday = z.infer<typeof WeekdaySchema>
 
-export const DayOfWeekKeySchema = z.enum(['1', '2', '3', '4', '5', '6', '7'])
-export type DayOfWeekKey = z.infer<typeof DayOfWeekKeySchema>
+export const Weekdays = ['1', '2', '3', '4', '5', '6', '7'] as const
+export const WeekdayKeySchema = z.enum(Weekdays)
+export type WeekdayKey = z.infer<typeof WeekdayKeySchema>
+
+export const Months = [
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '10',
+  '11',
+  '12',
+] as const
+export const MonthKeySchema = z.enum(Months)
+export type MonthKey = z.infer<typeof MonthKeySchema>
 
 export const supportedTimeZones = Intl.supportedValuesOf('timeZone')
 

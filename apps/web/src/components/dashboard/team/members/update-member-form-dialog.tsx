@@ -69,7 +69,7 @@ export const UpdateMemberFormDialog = () => {
   })
 
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
+    ...trpc.payGrade.list.queryOptions({ teamId: team?.id ?? '' }),
     enabled: !!team,
   })
 

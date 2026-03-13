@@ -1,4 +1,4 @@
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 export function enumToSelfMap<T extends z.ZodEnum<any>>(
   schema: T,

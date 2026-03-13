@@ -1,10 +1,10 @@
 import {
-  DayOfWeekKey,
-  DayOfWeekKeySchema,
-  DayOfWeekSchema,
   OperationalHourSchema,
+  WeekdayKey,
+  WeekdayKeySchema,
+  WeekdaySchema,
 } from '@fuku/domain/schemas'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 export const OperationalHourCreateInputSchema = OperationalHourSchema.omit({
   createdAt: true,
@@ -21,7 +21,7 @@ export type OperationalHourCreateInput = z.infer<
 export const OperationalHourUpdateInputSchema =
   OperationalHourSchema.partial().extend({
     teamId: z.string(),
-    dayOfWeek: DayOfWeekSchema,
+    weekday: WeekdaySchema,
   })
 
 export type OperationalHourUpdateInput = z.infer<
@@ -38,11 +38,11 @@ const OperationalHourOutputValueSchema = OperationalHourSchema.pick({
 export const OperationalHoursOutputSchema = z
   .object(
     Object.fromEntries(
-      DayOfWeekKeySchema.options.map(day => [
+      WeekdayKeySchema.options.map(day => [
         day,
         OperationalHourOutputValueSchema,
       ]),
-    ) as Record<DayOfWeekKey, typeof OperationalHourOutputValueSchema>,
+    ) as Record<WeekdayKey, typeof OperationalHourOutputValueSchema>,
   )
   .partial()
 

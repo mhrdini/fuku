@@ -1,5 +1,5 @@
 import { ColorHex, LocationSchema } from '@fuku/domain/schemas'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 export const LocationOutputSchema = LocationSchema.extend({
   color: ColorHex,

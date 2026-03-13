@@ -55,7 +55,7 @@ export default function TeamMembersContent() {
   const { openDialog, openAlertDialog } = useDialogStore()
 
   const { data: memberIds } = useQuery({
-    ...trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
+    ...trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
     enabled: !!team,
   })
 

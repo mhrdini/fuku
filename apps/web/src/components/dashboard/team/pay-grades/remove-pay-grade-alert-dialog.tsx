@@ -45,10 +45,10 @@ export const RemovePayGradeAlertDialog = () => {
         queryKey: trpc.payGrade.byId.queryKey({ id: data.id }),
       })
       queryClient.invalidateQueries(
-        trpc.payGrade.listIds.queryOptions({ teamId: team!.id }),
+        trpc.payGrade.listIds.queryOptions({ teamId: team?.id ?? '' }),
       )
       queryClient.invalidateQueries(
-        trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
+        trpc.payGrade.list.queryOptions({ teamId: team?.id ?? '' }),
       )
       toast('Pay Grade', { description: `${data.name} has been removed.` })
     },
@@ -57,7 +57,7 @@ export const RemovePayGradeAlertDialog = () => {
   const onRemove = async () => {
     if (!currentPayGradeId) return
     try {
-      await removePayGrade({ id: currentPayGradeId, teamId: team!.id })
+      await removePayGrade({ id: currentPayGradeId, teamId: team?.id ?? '' })
     } catch {
       // Handled in onError
     }

@@ -87,12 +87,12 @@ export const CreateLocationFormSheet = () => {
       )
       queryClient.invalidateQueries(
         trpc.location.listIds.queryOptions({
-          teamId: team!.id,
+          teamId: team?.id ?? '',
         }),
       )
       queryClient.invalidateQueries(
-        trpc.location.listDetailed.queryOptions({
-          teamId: team!.id,
+        trpc.location.list.queryOptions({
+          teamId: team?.id ?? '',
         }),
       )
       toast.success('Location', {

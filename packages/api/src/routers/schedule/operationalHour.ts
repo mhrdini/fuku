@@ -1,6 +1,6 @@
-import { DayOfWeek } from '@fuku/domain/schemas'
+import { Weekday } from '@fuku/domain/schemas'
 import { TRPCRouterRecord } from '@trpc/server'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 import {
   OperationalHourCreateInputSchema,
@@ -22,7 +22,7 @@ export const operationalHourRouter = {
         where: { teamId: input.teamId },
         select: {
           teamId: true,
-          dayOfWeek: true,
+          weekday: true,
           startTime: true,
           endTime: true,
           deletedAt: true,
@@ -30,7 +30,7 @@ export const operationalHourRouter = {
       })
       const result: OperationalHoursOutput = operationalHours.reduce(
         (acc, oh) => {
-          const day = oh.dayOfWeek as DayOfWeek
+          const day = oh.weekday as Weekday
           acc[day] = {
             teamId: oh.teamId,
             startTime: oh.startTime,
@@ -58,14 +58,14 @@ export const operationalHourRouter = {
         },
         select: {
           teamId: true,
-          dayOfWeek: true,
+          weekday: true,
           startTime: true,
           endTime: true,
         },
       })
       const result: OperationalHoursOutput = operationalHours.reduce(
         (acc, oh) => {
-          const day = oh.dayOfWeek as DayOfWeek
+          const day = oh.weekday as Weekday
           acc[day] = {
             teamId: oh.teamId,
             startTime: oh.startTime,
@@ -94,9 +94,9 @@ export const operationalHourRouter = {
       const { ...data } = input
       const updated = await ctx.db.operationalHour.update({
         where: {
-          teamId_dayOfWeek: {
+          teamId_weekday: {
             teamId: input.teamId,
-            dayOfWeek: input.dayOfWeek,
+            weekday: input.weekday,
           },
         },
         data: { ...data },
@@ -113,13 +113,13 @@ export const operationalHourRouter = {
     )
     .mutation(async ({ ctx, input }) => {
       for (const [day, oh] of Object.entries(input.operationalHours)) {
-        const dayOfWeek = parseInt(day) as DayOfWeek
+        const weekday = parseInt(day) as Weekday
 
         if (!oh) {
           await ctx.db.operationalHour.updateMany({
             where: {
               teamId: input.teamId,
-              dayOfWeek,
+              weekday,
             },
             data: {
               deletedAt: new Date(),
@@ -129,9 +129,9 @@ export const operationalHourRouter = {
         } else {
           await ctx.db.operationalHour.upsert({
             where: {
-              teamId_dayOfWeek: {
+              teamId_weekday: {
                 teamId: oh.teamId,
-                dayOfWeek: dayOfWeek,
+                weekday: weekday,
               },
             },
             update: {
@@ -144,7 +144,7 @@ export const operationalHourRouter = {
             },
             create: {
               teamId: oh.teamId,
-              dayOfWeek: dayOfWeek,
+              weekday: weekday,
               startTime: oh.startTime,
               endTime: oh.endTime,
               deletedAt: oh.deletedAt ? new Date() : null,

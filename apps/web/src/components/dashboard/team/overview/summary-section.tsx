@@ -98,19 +98,19 @@ export const SummarySection = () => {
   ] = useQueries({
     queries: [
       {
-        ...trpc.teamMember.listIds.queryOptions({ teamId: team!.id }),
+        ...trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
         enabled: !!team,
       },
       {
-        ...trpc.location.listIds.queryOptions({ teamId: team!.id }),
+        ...trpc.location.listIds.queryOptions({ teamId: team?.id ?? '' }),
         enabled: !!team,
       },
       {
-        ...trpc.payGrade.listIds.queryOptions({ teamId: team!.id }),
+        ...trpc.payGrade.listIds.queryOptions({ teamId: team?.id ?? '' }),
         enabled: !!team,
       },
       {
-        ...trpc.shiftType.listIds.queryOptions({ teamId: team!.id }),
+        ...trpc.shiftType.listIds.queryOptions({ teamId: team?.id ?? '' }),
         enabled: !!team,
       },
     ],

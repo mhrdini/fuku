@@ -58,7 +58,7 @@ export const CreatePayGradeFormSheet = () => {
   })
 
   const { data: shiftTypes } = useQuery({
-    ...trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
+    ...trpc.shiftType.list.queryOptions({ teamId: team?.id ?? '' }),
     enabled: !!team,
   })
 
@@ -95,10 +95,10 @@ export const CreatePayGradeFormSheet = () => {
         data,
       )
       queryClient.invalidateQueries(
-        trpc.payGrade.listIds.queryOptions({ teamId: team!.id }),
+        trpc.payGrade.listIds.queryOptions({ teamId: team?.id ?? '' }),
       )
       queryClient.invalidateQueries(
-        trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
+        trpc.payGrade.list.queryOptions({ teamId: team?.id ?? '' }),
       )
       toast.success('Pay Grade', {
         description: `${data.name} has been created.`,
