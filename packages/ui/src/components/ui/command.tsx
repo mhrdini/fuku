@@ -143,7 +143,7 @@ function CommandItem({
   noDefaultStyles = false,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Item> & {
-  noDefaultStyles: boolean
+  noDefaultStyles?: boolean
 }) {
   return (
     <CommandPrimitive.Item

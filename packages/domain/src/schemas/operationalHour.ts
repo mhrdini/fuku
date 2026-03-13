@@ -1,10 +1,10 @@
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
-import { DayOfWeekSchema, Time } from './helpers'
+import { Time, WeekdaySchema } from './helpers'
 
 export const OperationalHourSchema = z.object({
   teamId: z.string(),
-  dayOfWeek: DayOfWeekSchema,
+  weekday: WeekdaySchema,
   startTime: Time,
   endTime: Time,
 

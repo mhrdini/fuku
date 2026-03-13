@@ -60,12 +60,12 @@ export const TeamShiftTypesContent = () => {
   } | null>(null)
 
   const { data: shiftTypes } = useQuery({
-    ...trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
+    ...trpc.shiftType.list.queryOptions({ teamId: team?.id ?? '' }),
     enabled: !!team,
   })
 
   const { data: payGrades } = useQuery({
-    ...trpc.payGrade.listDetailed.queryOptions({ teamId: team!.id }),
+    ...trpc.payGrade.list.queryOptions({ teamId: team?.id ?? '' }),
     enabled: !!team,
   })
 
@@ -77,7 +77,7 @@ export const TeamShiftTypesContent = () => {
         data,
       )
       queryClient.invalidateQueries(
-        trpc.shiftType.listDetailed.queryOptions({ teamId: team!.id }),
+        trpc.shiftType.list.queryOptions({ teamId: team?.id ?? '' }),
       )
     },
   })

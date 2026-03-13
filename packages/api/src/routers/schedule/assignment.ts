@@ -1,5 +1,5 @@
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 import { protectedProcedure } from '../../trpc'
 

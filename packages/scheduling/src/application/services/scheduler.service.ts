@@ -132,23 +132,23 @@ export class DefaultSchedulerService implements SchedulerService {
       })),
 
       operationalHours: snapshot.operationalHours.reduce((acc, oh) => {
-        acc[oh.dayOfWeek] = {
+        acc[oh.weekday] = {
           startTime: parseTimeString(
             oh.startTime,
             timeZone,
-            oh.dayOfWeek as WeekdayNumbers,
+            oh.weekday as WeekdayNumbers,
           ),
           endTime: parseTimeString(
             oh.endTime,
             timeZone,
-            oh.dayOfWeek as WeekdayNumbers,
+            oh.weekday as WeekdayNumbers,
           ),
         }
         return acc
       }, {} as ZonedOperationalHours),
 
       staffingRequirements: snapshot.staffingRequirements.reduce((acc, sr) => {
-        acc[sr.dayOfWeek] = {
+        acc[sr.weekday] = {
           minMembers: sr.minMembers,
           maxMembers: sr.maxMembers,
         }

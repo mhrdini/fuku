@@ -43,7 +43,7 @@ model ShiftType {
 }
 
 model OperationalHour {
-  dayOfWeek Int    @map("day_of_week") // 1 = Monday, 7 = Sunday
+  weekday   Int    @map("day_of_week") // 1 = Monday, 7 = Sunday
   startTime String @map("start_time") // in 24-hr, zero-padded "HH:MM" format (e.g., "09:00") 
   endTime   String @map("end_time") // same format as startTime
   teamId    String @map("team_id")
@@ -54,9 +54,9 @@ model OperationalHour {
   deletedAt   DateTime? @map("deleted_at")
   deletedById String?   @map("deleted_by_id")
 
-  @@id([teamId, dayOfWeek])
+  @@id([teamId, weekday])
   @@index([teamId])
-  @@index([dayOfWeek])
+  @@index([weekday])
   @@map("operational_hour")
 }
 
@@ -73,9 +73,9 @@ model PayGradeShiftType {
 }
 
 model StaffingRequirement {
-  dayOfWeek Int    @map("day_of_week") // 1 = Monday, 7 = Sunday
-  teamId    String @map("team_id")
-  team      Team   @relation(fields: [teamId], references: [id])
+  weekday Int    @map("day_of_week") // 1 = Monday, 7 = Sunday
+  teamId  String @map("team_id")
+  team    Team   @relation(fields: [teamId], references: [id])
 
   minMembers Int @default(1) @map("min_members")
   maxMembers Int @default(4) @map("max_members")
@@ -83,9 +83,9 @@ model StaffingRequirement {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@id([teamId, dayOfWeek])
+  @@id([teamId, weekday])
   @@index([teamId])
-  @@index([dayOfWeek])
+  @@index([weekday])
   @@map("staffing_requirement")
 }
 

@@ -1,5 +1,5 @@
 import { ColorHex, ShiftTypeSchema } from '@fuku/domain/schemas'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 import { PayGradeShiftTypeOutputSchema } from './payGradeShiftType'
 

@@ -1,6 +1,6 @@
 import type { TRPCRouterRecord } from '@trpc/server'
 import { ColorHex } from '@fuku/domain/schemas'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 import { protectedProcedure } from '../../trpc'
 
@@ -43,7 +43,7 @@ export const locationRouter = {
       })
     }),
 
-  listDetailed: protectedProcedure
+  list: protectedProcedure
     .input(
       z.object({
         teamId: z.string(),

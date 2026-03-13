@@ -1,6 +1,6 @@
 import { TeamMemberRoleValues, TeamMemberSchema } from '@fuku/domain/schemas'
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 import { TeamMemberCreateInputSchema } from '../../schemas'
 import { protectedProcedure } from '../../trpc'
@@ -51,7 +51,7 @@ export const teamMemberRouter = {
     }),
 
   // UI snapshot -> never invalidated
-  listDetailed: protectedProcedure
+  list: protectedProcedure
     .input(
       z.object({
         teamId: z.string(),

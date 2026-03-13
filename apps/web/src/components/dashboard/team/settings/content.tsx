@@ -25,7 +25,7 @@ import {
   useForm,
 } from 'react-hook-form'
 import { toast } from 'sonner'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 import { TimeZoneController } from '~/components/timezone-controller'
 import { useTRPC } from '~/trpc/client'
