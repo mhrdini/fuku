@@ -128,7 +128,7 @@ export class DefaultSchedulerService implements SchedulerService {
    * Convert all JS dates and HH:mm strings into Luxon DateTime in team timezone
    */
   private toSchedulerContext(snapshot: TeamSnapshot): SchedulerContext {
-    const timeZone = 'UTC'
+    const timeZone = snapshot.period.timeZone
 
     return {
       ...snapshot,

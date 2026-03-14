@@ -42,7 +42,7 @@ export const supportedTimeZones = Intl.supportedValuesOf('timeZone')
 
 export const TimeZoneSchema = z
   .string()
-  .refine(tz => supportedTimeZones.includes(tz), {
+  .refine(tz => tz === 'UTC' || supportedTimeZones.includes(tz), {
     message: 'invalid_time_zone',
   })
 

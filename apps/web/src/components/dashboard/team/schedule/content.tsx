@@ -219,13 +219,15 @@ export const TeamScheduleContent = () => {
   const handleGenerateSchedule = () => {
     if (!team) return
 
+    const timeZone = 'UTC' // team.timeZone
+
     const startUTC = DateTime.fromJSDate(start)
-      .setZone('UTC', { keepLocalTime: true })
+      .setZone(timeZone, { keepLocalTime: true })
       .startOf('day')
       .toUTC()
 
     const endUTC = DateTime.fromJSDate(end)
-      .setZone('UTC', { keepLocalTime: true })
+      .setZone(timeZone, { keepLocalTime: true })
       .endOf('day')
       .toUTC()
 
@@ -238,7 +240,7 @@ export const TeamScheduleContent = () => {
       teamId: team.id,
       start: startUTC.toJSDate(),
       end: endUTC.toJSDate(),
-      timeZone: team.timeZone,
+      timeZone,
     })
   }
 
