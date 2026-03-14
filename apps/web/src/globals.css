@@ -19,6 +19,22 @@
   }
 }
 
+@layer utilities {
+  @keyframes rule-flash {
+    0% {
+      background-color: var(--input);
+    }
+
+    100% {
+      background-color: transparent;
+    }
+  }
+
+  .animate-rule-flash {
+    animation: rule-flash 1.2s ease-out;
+  }
+}
+
 @layer components {
   main.dashboard {
     h2 {

@@ -1,3 +1,4 @@
+import { TimeZoneSchema } from '@fuku/domain/schemas'
 import { TRPCRouterRecord } from '@trpc/server'
 import * as z from 'zod/v4'
 
@@ -8,26 +9,13 @@ export const scheduleRouter = {
     .input(
       z.object({
         teamId: z.string(),
-        year: z.number(),
-        month: z.number(),
+        start: z.date(),
+        end: z.date(),
+        timeZone: TimeZoneSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const team = await ctx.db.team.findUnique({
-        where: { id: input.teamId },
-        select: { timeZone: true },
-      })
-
-      if (!team) {
-        throw new Error('Team not found')
-      }
-
-      const timeZone = team.timeZone
-
-      const result = await ctx.schedulerService.generateMonthly({
-        ...input,
-        timeZone,
-      })
+      const result = await ctx.schedulerService.generateMonthly(input)
       return result
     }),
 } satisfies TRPCRouterRecord

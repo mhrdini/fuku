@@ -41,6 +41,10 @@ import {
   ComboboxList,
   ComboboxTrigger,
   ComboboxValue,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Input,
   Popover,
   PopoverContent,
@@ -53,12 +57,23 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@fuku/ui/components'
-import { ChevronDown, ChevronDownIcon, ListFilter, X } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronDownIcon,
+  ChevronRight,
+  Copy,
+  Ellipsis,
+  ListFilter,
+  Plus,
+  Trash,
+  X,
+} from 'lucide-react'
 
 import { useDebouncedCommit } from '~/hooks/useDebouncedCommit'
 import { useRuleEditor } from '~/hooks/useRuleEditor'
 import { MONTH_MAP, WEEKDAY_MAP } from '~/lib/date'
 import { MutationMode } from '~/lib/query'
+import { TeamOutput } from '../../../../../../../packages/api/src/schemas/team'
 
 const RULE_CONDITION_FIELD_LABELS: Record<RuleConditionField, string> = {
   [RuleConditionFieldValues.MONTH]: 'Month',
@@ -79,7 +94,8 @@ const RULE_CONDITION_VALUE_OPTIONS_BY_FIELD = {
   [RuleConditionFieldValues.WEEKDAY]: WEEKDAY_MAP,
 }
 
-type RulePopoverButtonProps = {
+type RulePanelPopoverButtonProps = {
+  team: TeamOutput
   rules: Record<string, RuleOutput>
   ruleConditions: Record<string, RuleConditionOutput[]>
   teamMembers: TeamMemberOutput[]
@@ -95,7 +111,8 @@ type RulePopoverButtonProps = {
   ) => Promise<RuleConditionOutput>
 }
 
-export const RulePopoverButton = ({
+export const RulePanelPopoverButton = ({
+  team,
   rules: initialRules,
   ruleConditions: initialRuleConditions,
   teamMembers,
@@ -103,7 +120,7 @@ export const RulePopoverButton = ({
   payGrades,
   mutateRule,
   mutateRuleCondition,
-}: RulePopoverButtonProps) => {
+}: RulePanelPopoverButtonProps) => {
   const {
     rules,
     ruleConditions,
@@ -124,6 +141,22 @@ export const RulePopoverButton = ({
     mutateRuleCondition,
   })
 
+  const handleCreateRule = () => {
+    if (team.id === undefined) return
+    createRule({
+      teamId: team.id,
+      target: RuleTargetValues.GLOBAL,
+      payGradeId: null,
+      shiftTypeId: null,
+      teamMemberId: null,
+      metric: MetricValues.DAYS_WORKED,
+      operator: RuleOperatorValues.MIN,
+      threshold: 1,
+      timeWindow: TimeWindowValues.WEEK,
+      hardConstraint: false,
+    })
+  }
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -135,10 +168,10 @@ export const RulePopoverButton = ({
       </PopoverTrigger>
       <PopoverContent
         align='start'
-        className='min-w-fit max-h-[40rem] p-0 border border-input shadow-2xl overflow-y-auto'
+        className='min-w-fit min-h-0 flex flex-col max-h-[40rem] p-0 border border-input shadow-2xl '
       >
-        <div className='flex flex-col'>
-          {rules ? (
+        <div className='flex flex-col min-w-fit overflow-y-auto'>
+          {rules && Object.keys(rules).length ? (
             Object.entries(rules).map(([ruleId, rule]) => (
               <RulePanelItem
                 key={rule.id}
@@ -147,6 +180,7 @@ export const RulePopoverButton = ({
                   ruleConditions ? ruleConditions[rule.id] || [] : []
                 }
                 targetOptions={targetOptions}
+                createRule={createRule}
                 updateRule={updateRule}
                 deleteRule={deleteRule}
                 createRuleCondition={createRuleCondition}
@@ -155,10 +189,20 @@ export const RulePopoverButton = ({
               />
             ))
           ) : (
-            <div className='p-4 text-sm text-muted-foreground'>
+            <div className='text-sm text-muted-foreground p-4'>
               No rules found.
             </div>
           )}
+        </div>
+        <div className='border-t border-input p-2 w-full flex'>
+          <Button
+            className='w-full'
+            variant='secondary'
+            onClick={handleCreateRule}
+          >
+            <Plus />
+            Add rule
+          </Button>
         </div>
       </PopoverContent>
     </Popover>
@@ -169,6 +213,7 @@ const RulePanelItem = ({
   rule,
   ruleConditions,
   targetOptions,
+  createRule,
   updateRule,
   deleteRule,
   createRuleCondition,
@@ -178,12 +223,18 @@ const RulePanelItem = ({
   rule: RuleOutput
   ruleConditions: RuleConditionOutput[]
   targetOptions: Record<string, { value: string; label: string }[]>
-  updateRule: (rule: RuleUpdateInput) => Promise<void>
-  deleteRule: (ruleId: string) => Promise<void>
-  createRuleCondition: (condition: RuleConditionCreateInput) => Promise<void>
-  updateRuleCondition: (condition: RuleConditionUpdateInput) => Promise<void>
-  deleteRuleCondition: (conditionId: string) => Promise<void>
+  createRule: (rule: RuleCreateInput) => Promise<RuleOutput>
+  updateRule: (rule: RuleUpdateInput) => Promise<RuleOutput>
+  deleteRule: (ruleId: string) => Promise<RuleOutput>
+  createRuleCondition: (
+    condition: RuleConditionCreateInput,
+  ) => Promise<RuleConditionOutput>
+  updateRuleCondition: (
+    condition: RuleConditionUpdateInput,
+  ) => Promise<RuleConditionOutput>
+  deleteRuleCondition: (conditionId: string) => Promise<RuleConditionOutput>
 }) => {
+  // update
   const handleUpdateTargetType = (target: string) => {
     if (target === rule.target) return
 
@@ -309,9 +360,42 @@ const RulePanelItem = ({
   const { schedule: scheduleUpdatePenalty } =
     useDebouncedCommit(handleUpdatePenalty)
 
+  // delete
+  const handleDeleteRule = () => {
+    deleteRule(rule.id)
+  }
+
+  // duplicate
+  const handleDuplicateRule = () => {
+    const { id, ...rest } = rule
+    const newRule = {
+      ...rest,
+      ruleConditions: ruleConditions.map(
+        ({ id, ruleId, ...condition }) => condition,
+      ),
+    }
+    createRule(newRule as RuleCreateInput)
+  }
+
+  // create condition
+  const handleCreateCondition = () => {
+    createRuleCondition({
+      ruleId: rule.id,
+      field: RuleConditionFieldValues.MONTH,
+      operator: RuleConditionOperatorValues.EQ,
+      value: String(
+        RuleConditionFieldDefaultValues[RuleConditionFieldValues.MONTH],
+      ),
+    })
+  }
+
   return (
-    <Collapsible className='group border-b border-input last:border-0 p-4'>
-      <div className='flex flex-col gap-2 items-start *:flex *:flex-row *:gap-2 *:items-center'>
+    <Collapsible
+      id={`rule-${rule.id}`}
+      className='group border-b border-input last:border-0 p-4'
+    >
+      <div className='flex flex-col gap-2 items-start *:flex *:flex-row *:gap-2 *:items-center *:justify-start *:w-full'>
+        {/* first row */}
         <div>
           {/* target type*/}
           <Select value={rule.target} onValueChange={handleUpdateTargetType}>
@@ -357,7 +441,29 @@ const RulePanelItem = ({
               ))}
             </SelectContent>
           </Select>
+          {/* actions */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='ghost' size='icon-chip' className='ml-auto'>
+                <Ellipsis />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side='bottom' align='start'>
+              <DropdownMenuItem
+                variant='destructive'
+                onClick={handleDeleteRule}
+              >
+                <Trash />
+                Remove
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDuplicateRule}>
+                <Copy />
+                Duplicate
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
+        {/* second row */}
         <div>
           {/* metric */}
           <Select value={rule.metric} onValueChange={handleUpdateMetric}>
@@ -416,9 +522,9 @@ const RulePanelItem = ({
             </SelectContent>
           </Select>
         </div>
+        {/* third row */}
         <div>
           {/* hard constraint y/n */}
-
           <ToggleGroup
             type='single'
             size='chip'
@@ -448,13 +554,13 @@ const RulePanelItem = ({
         <div>
           <CollapsibleTrigger asChild>
             <Button variant='link' size='chip'>
+              <ChevronRight className=' transition-transform duration-300 ease-in-out group-data-[state=open]:rotate-90' />
               {ruleConditions.length} conditions
-              <ChevronDown className=' transition-transform duration-300 ease-in-out group-data-[state=open]:rotate-180' />
             </Button>
           </CollapsibleTrigger>
         </div>
       </div>
-      <CollapsibleContent className='p-0 pt-2 flex flex-col items-end w-full min-w-0 rounded-b-lg'>
+      <CollapsibleContent className='p-0 pt-2 flex flex-col w-full min-w-0 rounded-b-lg gap-2 pl-6'>
         {ruleConditions.map(rc => (
           <RuleConditionPanelItem
             key={rc.id}
@@ -463,6 +569,15 @@ const RulePanelItem = ({
             deleteRuleCondition={deleteRuleCondition}
           />
         ))}
+        <Button
+          size='sm'
+          variant='ghost'
+          className='justify-start'
+          onClick={handleCreateCondition}
+        >
+          <Plus />
+          Add condition
+        </Button>
       </CollapsibleContent>
     </Collapsible>
   )
@@ -474,8 +589,10 @@ const RuleConditionPanelItem = ({
   deleteRuleCondition,
 }: {
   ruleCondition: RuleConditionOutput
-  updateRuleCondition: (condition: RuleConditionUpdateInput) => Promise<void>
-  deleteRuleCondition: (conditionId: string) => Promise<void>
+  updateRuleCondition: (
+    condition: RuleConditionUpdateInput,
+  ) => Promise<RuleConditionOutput>
+  deleteRuleCondition: (conditionId: string) => Promise<RuleConditionOutput>
 }) => {
   const [inputValue, setInputValue] = useState('')
 
@@ -580,18 +697,15 @@ const RuleConditionPanelItem = ({
   const handleUpdateValue = (
     value: string | number | (string | number)[] | null,
   ) => {
-    if (value === null) return
-
-    const normalized = normalizeValue(value)
-
+    const updatedValue = value ? normalizeValue(value) : null
     updateRuleCondition({
       ...ruleCondition,
-      value: normalized as RuleConditionUpdateInput['value'],
+      value: updatedValue,
     })
   }
 
   return (
-    <div className='flex w-full min-w-0 items-center gap-2'>
+    <div className='group/condition flex w-full min-w-0 items-center gap-2'>
       {/* field */}
       <Select value={ruleCondition.field} onValueChange={handleUpdateField}>
         <SelectTrigger size='sm'>
@@ -637,7 +751,7 @@ const RuleConditionPanelItem = ({
         <ComboboxTrigger
           render={
             <Button size='chip' variant='outline' className='min-w-fit'>
-              <ComboboxValue placeholder='Value' />
+              <ComboboxValue placeholder='-' />
               <ChevronDownIcon className='ml-auto size-4 opacity-50' />
             </Button>
           }
@@ -660,6 +774,7 @@ const RuleConditionPanelItem = ({
         variant='ghost'
         size='icon-xs'
         onClick={() => deleteRuleCondition(ruleCondition.id)}
+        className='opacity-20 group-hover/condition:opacity-100 transition-opacity duration-75 ease-in-out'
       >
         <X />
       </Button>

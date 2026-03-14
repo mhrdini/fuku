@@ -1,7 +1,11 @@
 import { TRPCRouterRecord } from '@trpc/server'
 import * as z from 'zod/v4'
 
-import { RuleOutput, RuleUpdateInputSchema } from '../../schemas'
+import {
+  RuleCreateInputSchema,
+  RuleOutput,
+  RuleUpdateInputSchema,
+} from '../../schemas'
 import { protectedProcedure } from '../../trpc'
 
 export const ruleRouter = {
@@ -86,6 +90,28 @@ export const ruleRouter = {
       })
       return rules
     }),
+  create: protectedProcedure
+    .input(RuleCreateInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { ruleConditions, ...ruleData } = input
+      const rule = await ctx.db.rule.create({
+        data: {
+          ...ruleData,
+          // ruleConditions: ruleConditions?.length
+          //   ? {
+          //       create: ruleConditions.map(rc => ({
+          //         ...rc,
+          //         value:
+          //           rc.value === null || rc.value === undefined
+          //             ? Prisma.DbNull
+          //             : rc.value,
+          //       })),
+          //     }
+          //   : undefined,
+        },
+      })
+      return rule
+    }),
   update: protectedProcedure
     .input(RuleUpdateInputSchema)
     .mutation(async ({ ctx, input }) => {
@@ -95,6 +121,21 @@ export const ruleRouter = {
           id,
         },
         data,
+      })
+      return rule
+    }),
+  delete: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id } = input
+      const rule = await ctx.db.rule.delete({
+        where: {
+          id,
+        },
       })
       return rule
     }),
