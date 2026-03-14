@@ -1,6 +1,7 @@
 import { TRPCRouterRecord } from '@trpc/server'
 import * as z from 'zod/v4'
 
+import { RuleOutput, RuleUpdateInputSchema } from '../../schemas'
 import { protectedProcedure } from '../../trpc'
 
 export const ruleRouter = {
@@ -17,6 +18,31 @@ export const ruleRouter = {
         },
       })
       return rules
+    }),
+
+  groupById: protectedProcedure
+    .input(
+      z.object({
+        teamId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const rules = await ctx.db.rule.findMany({
+        where: {
+          teamId: input.teamId,
+        },
+        orderBy: {
+          id: 'asc',
+        },
+      })
+
+      return rules.reduce(
+        (acc, rule) => {
+          acc[rule.id] = rule
+          return acc
+        },
+        {} as Record<string, RuleOutput>,
+      )
     }),
   byPayGrade: protectedProcedure
     .input(
@@ -59,5 +85,17 @@ export const ruleRouter = {
         },
       })
       return rules
+    }),
+  update: protectedProcedure
+    .input(RuleUpdateInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input
+      const rule = await ctx.db.rule.update({
+        where: {
+          id,
+        },
+        data,
+      })
+      return rule
     }),
 } satisfies TRPCRouterRecord

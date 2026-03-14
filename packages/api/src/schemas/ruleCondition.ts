@@ -9,12 +9,10 @@ export type RuleConditionCreateInput = z.infer<
   typeof RuleConditionCreateInputSchema
 >
 
-export const RuleConditionUpdateInputSchema = RuleConditionSchema.omit({
-  ruleId: true,
-})
-  .partial()
-  .extend({
+export const RuleConditionUpdateInputSchema =
+  RuleConditionSchema.partial().extend({
     id: z.string(),
+    ruleId: z.string(),
   })
 
 export type RuleConditionUpdateInput = z.infer<

@@ -1,19 +1,26 @@
 import { useEffect, useRef } from 'react'
 
-export function useDebouncedCommit(fn: () => void, delay = 200) {
+export function useDebouncedCommit<T extends any[]>(
+  fn: (...args: T) => void,
+  delay = 200,
+) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const schedule = () => {
+  const schedule = (...args: T) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    timeoutRef.current = setTimeout(fn, delay)
+
+    timeoutRef.current = setTimeout(() => {
+      fn(...args)
+    }, delay)
   }
 
-  const flush = () => {
+  const flush = (...args: T) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
       timeoutRef.current = null
     }
-    fn()
+
+    fn(...args)
   }
 
   useEffect(() => {
