@@ -10,6 +10,7 @@ import {
   RuleOutput,
   RuleUpdateInput,
   TeamMemberOutput,
+  TeamOutput,
 } from '@fuku/api/schemas'
 import {
   Button,
@@ -28,9 +29,10 @@ import {
 import { cn } from '@fuku/ui/lib/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, Cog, Plus, RefreshCcw, SlidersHorizontal } from 'lucide-react'
+import { DateTime } from 'luxon'
 
 import { useTRPC } from '~/trpc/client'
-import { RulePopoverButton } from './rule-popover-button'
+import { RulePanelPopoverButton } from './rule-panel-popover-button'
 
 export const TeamScheduleContent = () => {
   const trpc = useTRPC()
@@ -83,6 +85,19 @@ export const TeamScheduleContent = () => {
     enabled: !!team,
   })
 
+  const { mutateAsync: createRule } = useMutation({
+    ...trpc.rule.create.mutationOptions(),
+    onSuccess: data => {
+      queryClient.setQueryData(
+        trpc.rule.groupById.queryKey({ teamId: team?.id ?? '' }),
+        (oldData: Record<string, RuleOutput> | undefined) => {
+          if (!oldData) return oldData
+          return { ...oldData, [data.id]: data }
+        },
+      )
+    },
+  })
+
   const { mutateAsync: updateRule } = useMutation({
     ...trpc.rule.update.mutationOptions(),
     onSuccess: data => {
@@ -96,17 +111,65 @@ export const TeamScheduleContent = () => {
     },
   })
 
+  const { mutateAsync: deleteRule } = useMutation({
+    ...trpc.rule.delete.mutationOptions(),
+    onSuccess: data => {
+      queryClient.setQueryData(
+        trpc.rule.groupById.queryKey({ teamId: team?.id ?? '' }),
+        (oldData: Record<string, RuleOutput> | undefined) => {
+          if (!oldData) return oldData
+          const newData = { ...oldData }
+          delete newData[data.id]
+          return newData
+        },
+      )
+    },
+  })
+
+  const { mutateAsync: createRuleCondition } = useMutation({
+    ...trpc.ruleCondition.create.mutationOptions(),
+    onSuccess: data => {
+      queryClient.setQueryData(
+        trpc.ruleCondition.groupByRules.queryKey({ teamId: team?.id ?? '' }),
+        oldData => {
+          if (!oldData) return oldData
+          const ruleConditions = oldData[data.ruleId] ?? []
+          return {
+            ...oldData,
+            [data.ruleId]: [...ruleConditions, data],
+          }
+        },
+      )
+    },
+  })
+
   const { mutateAsync: updateRuleCondition } = useMutation({
     ...trpc.ruleCondition.update.mutationOptions(),
     onSuccess: data => {
       queryClient.setQueryData(
         trpc.ruleCondition.groupByRules.queryKey({ teamId: team?.id ?? '' }),
-        (oldData: Record<string, RuleConditionOutput[]> | undefined) => {
+        oldData => {
           if (!oldData) return oldData
-          // TODO: optimize
           const ruleConditions = oldData[data.ruleId] ?? []
           const updatedRuleConditions = ruleConditions.map(rc =>
             rc.id === data.id ? data : rc,
+          )
+          return { ...oldData, [data.ruleId]: updatedRuleConditions }
+        },
+      )
+    },
+  })
+
+  const { mutateAsync: deleteRuleCondition } = useMutation({
+    ...trpc.ruleCondition.delete.mutationOptions(),
+    onSuccess: data => {
+      queryClient.setQueryData(
+        trpc.ruleCondition.groupByRules.queryKey({ teamId: team?.id ?? '' }),
+        oldData => {
+          if (!oldData) return oldData
+          const ruleConditions = oldData[data.ruleId] ?? []
+          const updatedRuleConditions = ruleConditions.filter(
+            rc => rc.id !== data.id,
           )
           return { ...oldData, [data.ruleId]: updatedRuleConditions }
         },
@@ -119,14 +182,12 @@ export const TeamScheduleContent = () => {
     rule: RuleCreateInput | RuleUpdateInput | string,
   ): Promise<RuleOutput> => {
     switch (mode) {
+      case 'create':
+        return await createRule(rule as RuleCreateInput)
       case 'update':
         return await updateRule(rule as RuleUpdateInput)
-      case 'create':
-        // await createRule(rule as RuleCreateInput)
-        return {} as RuleOutput
       case 'delete':
-        // await deleteRule(rule.id)
-        return {} as RuleOutput
+        return await deleteRule({ id: rule as string })
     }
   }
 
@@ -135,18 +196,50 @@ export const TeamScheduleContent = () => {
     ruleCondition: RuleConditionCreateInput | RuleConditionUpdateInput | string,
   ): Promise<RuleConditionOutput> => {
     switch (mode) {
+      case 'create':
+        return await createRuleCondition(
+          ruleCondition as RuleConditionCreateInput,
+        )
       case 'update':
         return await updateRuleCondition(
           ruleCondition as RuleConditionUpdateInput,
         )
-
-      case 'create':
-        // await createRuleCondition(ruleCondition as RuleConditionCreateInput)
-        return {} as RuleConditionOutput
       case 'delete':
-        // await deleteRuleCondition(ruleCondition.id)
-        return {} as RuleConditionOutput
+        return await deleteRuleCondition({ id: ruleCondition as string })
     }
+  }
+
+  const { mutateAsync: generateSchedule } = useMutation({
+    ...trpc.schedule.generateMonthly.mutationOptions(),
+    onSuccess: data => {
+      console.log(data)
+    },
+  })
+
+  const handleGenerateSchedule = () => {
+    if (!team) return
+
+    const startUTC = DateTime.fromJSDate(start)
+      .setZone('UTC', { keepLocalTime: true })
+      .startOf('day')
+      .toUTC()
+
+    const endUTC = DateTime.fromJSDate(end)
+      .setZone('UTC', { keepLocalTime: true })
+      .endOf('day')
+      .toUTC()
+
+    // console.log({
+    //   startUTC: startUTC.toFormat("yyyy-MM-dd'T'HH:mm:ss ZZZZ"),
+    //   endUTC: endUTC.toFormat("yyyy-MM-dd'T'HH:mm:ss ZZZZ"),
+    // })
+
+    generateSchedule({
+      teamId: team.id,
+      start: startUTC.toJSDate(),
+      end: endUTC.toJSDate(),
+      timeZone: team.timeZone,
+    })
   }
 
   return (
@@ -165,7 +258,8 @@ export const TeamScheduleContent = () => {
             setEnd(range.to || range.from)
           }}
         />
-        <RulePopoverButton
+        <RulePanelPopoverButton
+          team={team ?? ({} as TeamOutput)}
           rules={rules ?? {}}
           ruleConditions={ruleConditions ?? {}}
           teamMembers={teamMembers ?? []}
@@ -174,7 +268,7 @@ export const TeamScheduleContent = () => {
           mutateRule={handleMutateRule}
           mutateRuleCondition={handleMutateRuleCondition}
         />
-        <Button className='ml-auto'>
+        <Button className='ml-auto' onClick={handleGenerateSchedule}>
           <RefreshCcw />
           <span className='hidden md:flex'>Auto-Schedule</span>
         </Button>
@@ -209,7 +303,7 @@ export const TeamScheduleContent = () => {
           </Command>
           <div className='p-2 border-t border-input'>
             <Button className='w-full' variant='secondary'>
-              <Plus /> Add Member
+              <Plus /> Add member
             </Button>
           </div>
         </div>

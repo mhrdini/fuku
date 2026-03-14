@@ -1,7 +1,10 @@
 import { db as PrismaClient } from '@fuku/db'
 import { Assignment, Period, TeamRepository } from '@fuku/scheduling'
 
-import { RuleConditionOutputSchema } from '../schemas/ruleCondition'
+import {
+  RuleConditionOutput,
+  RuleConditionOutputSchema,
+} from '../schemas/ruleCondition'
 
 export class PrismaTeamRepository implements TeamRepository {
   constructor(private db: typeof PrismaClient) {}
@@ -65,26 +68,27 @@ export class PrismaTeamRepository implements TeamRepository {
       })),
     )
 
-    const rules = await this.db.rule
-      .findMany({
-        where: {
-          teamId,
-        },
-        include: { ruleConditions: true },
-      })
-      .then(rules =>
-        rules.map(rule => ({
-          ...rule,
-          penalty: rule.penalty ?? null,
-          payGradeId: rule.payGradeId ?? null,
-          shiftTypeId: rule.shiftTypeId ?? null,
-          teamMemberId: rule.teamMemberId ?? null,
-          ruleConditions: rule.ruleConditions.map(rc =>
-            RuleConditionOutputSchema.parse(rc),
-          ),
-        })),
-      )
+    const rulesRaw = await this.db.rule.findMany({
+      where: { teamId },
+      include: { ruleConditions: true },
+    })
 
+    const rules = rulesRaw.map(rule => ({
+      ...rule,
+      penalty: rule.penalty ?? null,
+      payGradeId: rule.payGradeId ?? null,
+      shiftTypeId: rule.shiftTypeId ?? null,
+      teamMemberId: rule.teamMemberId ?? null,
+      ruleConditions: rule.ruleConditions
+        .map(rc => RuleConditionOutputSchema.parse(rc))
+        .filter(
+          (
+            rc,
+          ): rc is RuleConditionOutput & {
+            value: NonNullable<typeof rc.value>
+          } => rc.value !== null,
+        ), // only include conditions with non-null value
+    }))
     const unavailabilities = await this.db.unavailability.findMany({
       where: {
         teamMember: {

@@ -1,4 +1,5 @@
 import {
+  JsonValue,
   RuleConditionField,
   RuleConditionOperator,
   Rule as RuleType,
@@ -25,7 +26,7 @@ import { Team, TeamMember } from './team'
 export interface RuleCondition {
   field: RuleConditionField
   operator: RuleConditionOperator
-  value: string | number | string[] | number[]
+  value: JsonValue
 }
 export interface Rule
   extends Omit<
