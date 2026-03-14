@@ -3,7 +3,7 @@
 import type { VariantProps } from 'class-variance-authority'
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@fuku/ui/lib/utils'
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
+import { CheckIcon, ChevronDownIcon } from 'lucide-react'
 
 import { Button, buttonVariants } from './button'
 import { Calendar } from './calendar'
@@ -345,7 +345,7 @@ export function DateRangePicker({
       }}
     >
       <PopoverTrigger asChild>
-        <Button size={size} variant={variant}>
+        <Button size={size} variant={variant} className='group'>
           <div className='text-right'>
             <div className='py-1'>
               <div>{`${formatDate(range.from, locale)}${
@@ -363,12 +363,8 @@ export function DateRangePicker({
               </div>
             )}
           </div>
-          <div className='pl-1 opacity-60 -mr-2 scale-125'>
-            {isOpen ? (
-              <ChevronUpIcon width={24} />
-            ) : (
-              <ChevronDownIcon width={24} />
-            )}
+          <div className='pl-1 -mr-2'>
+            <ChevronDownIcon className='transition-transform ease-in-out duration-300 group-data-[state=open]:rotate-180' />
           </div>
         </Button>
       </PopoverTrigger>

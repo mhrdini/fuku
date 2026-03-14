@@ -49,6 +49,14 @@ export const RuleConditionFieldSchema = z.enum(['MONTH', 'WEEKDAY'])
 export const RuleConditionFieldValues = enumToSelfMap(RuleConditionFieldSchema)
 export type RuleConditionField = z.infer<typeof RuleConditionFieldSchema>
 
+export const RuleConditionFieldDefaultValues: Record<
+  RuleConditionField,
+  string | number
+> = {
+  MONTH: 1,
+  WEEKDAY: 1,
+}
+
 export const RuleConditionOperatorSchema = z.enum([
   'EQ',
   'NEQ',
