@@ -1,7 +1,9 @@
+import { Prisma } from '@fuku/db'
 import { TRPCRouterRecord } from '@trpc/server'
 import * as z from 'zod/v4'
 
 import {
+  RuleConditionCreateInputSchema,
   RuleConditionOutputSchema,
   RuleConditionUpdateInputSchema,
 } from '../../schemas/ruleCondition'
@@ -43,17 +45,56 @@ export const ruleConditionRouter = {
       return groupBy(parsed, c => c.ruleId)
     }),
 
+  create: protectedProcedure
+    .input(RuleConditionCreateInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const created = await ctx.db.ruleCondition.create({
+        data: {
+          ...input,
+          ...(input.value === null || input.value === undefined
+            ? { value: Prisma.DbNull }
+            : { value: input.value }),
+        },
+      })
+
+      return RuleConditionOutputSchema.parse(created)
+    }),
+
   update: protectedProcedure
     .input(RuleConditionUpdateInputSchema)
     .mutation(async ({ ctx, input }) => {
       const { id, ...data } = input
+
       const updated = await ctx.db.ruleCondition.update({
         where: {
           id,
         },
-        data,
+        data: {
+          ...data,
+          ...(data.value === null || data.value === undefined
+            ? { value: Prisma.DbNull }
+            : { value: data.value }),
+        },
       })
 
       return RuleConditionOutputSchema.parse(updated)
+    }),
+
+  delete: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id } = input
+
+      const deleted = await ctx.db.ruleCondition.delete({
+        where: {
+          id,
+        },
+      })
+
+      return RuleConditionOutputSchema.parse(deleted)
     }),
 } satisfies TRPCRouterRecord

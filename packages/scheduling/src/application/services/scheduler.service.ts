@@ -15,7 +15,6 @@ import {
   ZonedOperationalHours,
 } from '../../domain/types/schedule'
 import {
-  getPeriod,
   parseTimeString,
   Period,
   toJSDate,
@@ -37,8 +36,8 @@ export interface SchedulerService {
 
 export interface GenerateScheduleInput {
   teamId: string
-  year: number
-  month: number
+  start: Date
+  end: Date
   timeZone: string
 }
 
@@ -82,7 +81,11 @@ export class DefaultSchedulerService implements SchedulerService {
 
     const serviceResult = {
       teamId: input.teamId,
-      period: getPeriod(input.year, input.month, input.timeZone),
+      period: {
+        start: toJSDate(context.period.start),
+        end: toJSDate(context.period.end),
+        timeZone: context.period.timeZone,
+      },
       assignments: engineResult.proposedAssignments.map(this.toAssignment),
     }
 
@@ -106,7 +109,12 @@ export class DefaultSchedulerService implements SchedulerService {
   private async buildContext(
     input: GenerateScheduleInput,
   ): Promise<SchedulerContext> {
-    const period = getPeriod(input.year, input.month, input.timeZone)
+    // UTC start and end (no timezone at all)
+    const period = {
+      start: input.start,
+      end: input.end,
+      timeZone: input.timeZone,
+    }
 
     const snapshot = await this.teamRepository.getTeamSnapshot(
       input.teamId,
@@ -120,7 +128,7 @@ export class DefaultSchedulerService implements SchedulerService {
    * Convert all JS dates and HH:mm strings into Luxon DateTime in team timezone
    */
   private toSchedulerContext(snapshot: TeamSnapshot): SchedulerContext {
-    const timeZone = snapshot.period.timeZone
+    const timeZone = 'UTC'
 
     return {
       ...snapshot,

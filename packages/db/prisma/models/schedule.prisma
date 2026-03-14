@@ -227,7 +227,7 @@ model RuleCondition {
 
   field    ConditionField
   operator ConditionOperator
-  value    Json
+  value    Json?
 
   @@index([ruleId])
   @@map("rule_condition")

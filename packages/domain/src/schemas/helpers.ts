@@ -40,8 +40,17 @@ export type MonthKey = z.infer<typeof MonthKeySchema>
 
 export const supportedTimeZones = Intl.supportedValuesOf('timeZone')
 
-export const TimeZone = z
+export const TimeZoneSchema = z
   .string()
   .refine(tz => supportedTimeZones.includes(tz), {
     message: 'invalid_time_zone',
   })
+
+export const JsonValueSchema = z.union([
+  z.number(),
+  z.array(z.number()),
+  z.string(),
+  z.array(z.string()),
+])
+
+export type JsonValue = z.infer<typeof JsonValueSchema>
