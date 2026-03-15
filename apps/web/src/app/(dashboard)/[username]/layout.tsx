@@ -1,10 +1,8 @@
 import { redirect } from 'next/navigation'
-import { SidebarProvider } from '@fuku/ui/components'
 
 import { getSession } from '~/auth/server'
 import { DashboardContentLayout } from '~/components/dashboard/content-layout'
 import { DashboardHeader } from '~/components/dashboard/header'
-import { DashboardSidebar } from '~/components/dashboard/sidebar'
 import { DialogManager } from '~/components/providers/dialog-manager'
 import { SessionProvider } from '~/components/providers/session-provider'
 import { SheetManager } from '~/components/providers/sheet-manager'
@@ -33,13 +31,13 @@ export default async function DashboardLayout({
         <SessionProvider session={session}>
           <DialogManager />
           <SheetManager />
-          <SidebarProvider>
-            <DashboardSidebar username={username} />
-            <div className='flex flex-1 flex-col'>
-              <DashboardHeader />
-              <DashboardContentLayout>{children}</DashboardContentLayout>
-            </div>
-          </SidebarProvider>
+          {/* <SidebarProvider> */}
+          {/* <DashboardSidebar username={username} /> */}
+          <div className='flex flex-1 flex-col'>
+            <DashboardHeader />
+            <DashboardContentLayout>{children}</DashboardContentLayout>
+          </div>
+          {/* </SidebarProvider> */}
         </SessionProvider>
       </HydrateClient>
     </div>

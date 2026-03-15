@@ -5,6 +5,10 @@
   --font-sans: var(--font-geist);
 }
 
+@theme {
+  --spacing-4.5: 1.125rem;
+}
+
 @layer base {
   /* Chrome, Edge, Safari */
   input[type='number']::-webkit-inner-spin-button,
@@ -40,6 +44,10 @@
     h2 {
       @apply text-xl font-semibold;
     }
+  }
+
+  .breakpoint-container {
+    @apply mx-auto w-full flex-1 px-10 sm:px-14;
   }
 
   .table-container {

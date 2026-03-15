@@ -1,5 +1,16 @@
+import { useMemo } from 'react'
+import { useParams } from 'next/navigation'
 import { UserTeam } from '@fuku/api/schemas'
-import { Calendar, Cog, LucideIcon, UserCircle2, Users2 } from 'lucide-react'
+import {
+  BadgeDollarSign,
+  Calendar,
+  Clock,
+  Cog,
+  LucideIcon,
+  MapPin,
+  UserCircle2,
+  Users2,
+} from 'lucide-react'
 
 export type MenuGroup = {
   label: string
@@ -11,44 +22,105 @@ export type Menu = {
   label: string
   active?: boolean
   icon: LucideIcon
-  submenus?: Submenu[]
+  submenus?: Menu[]
 }
 
-export type Submenu = {
-  href: string
-  label: string
-  active?: boolean
-  icon?: LucideIcon
-}
+export const useSidebarMenu = (team: UserTeam | null): MenuGroup[] => {
+  const params = useParams()
+  const username = params.username as string
 
-export const useMenu = (team: UserTeam | null): MenuGroup[] => {
-  return !team
+  return !team || !username
     ? []
     : [
         {
-          label: 'Teams',
+          label: 'Team',
           menus: [
             {
-              href: `/team/${team.slug}`,
+              href: `/${username}/team/${team.slug}`,
               label: 'Overview',
               icon: Users2,
             },
             {
-              href: `/team/${team.slug}/schedule`,
+              href: `/${username}/team/${team.slug}/schedule`,
               label: 'Schedule',
               icon: Calendar,
             },
             {
-              href: `/team/${team.slug}/members`,
+              href: `/${username}/team/${team.slug}/members`,
               label: 'Members',
               icon: UserCircle2,
             },
             {
-              href: `/team/${team.slug}/settings`,
+              href: `/${username}/team/${team.slug}/settings`,
               label: 'Settings',
               icon: Cog,
             },
           ],
         },
       ]
+}
+
+export const useNavigationMenu = (team: UserTeam | null): Menu[] => {
+  const params = useParams()
+  const username = params.username as string
+
+  const menu = useMemo(
+    () => [
+      {
+        label: 'Team',
+        href: '',
+        icon: Users2,
+        submenus: [
+          {
+            label: 'Overview',
+            href: team && username ? `/${username}/team/${team.slug}` : '',
+            icon: Users2,
+          },
+          {
+            label: 'Members',
+            href:
+              team && username ? `/${username}/team/${team.slug}/members` : '',
+            icon: UserCircle2,
+          },
+          {
+            label: 'Pay Grades',
+            href:
+              team && username
+                ? `/${username}/team/${team.slug}/pay-grades`
+                : '',
+            icon: BadgeDollarSign,
+          },
+          {
+            label: 'Shift Types',
+            href:
+              team && username
+                ? `/${username}/team/${team.slug}/shift-types`
+                : '',
+            icon: Clock,
+          },
+          {
+            label: 'Locations',
+            href:
+              team && username
+                ? `/${username}/team/${team.slug}/locations`
+                : '',
+            icon: MapPin,
+          },
+        ],
+      },
+      {
+        label: 'Schedule',
+        href: team && username ? `/${username}/team/${team.slug}/schedule` : '',
+        icon: Calendar,
+      },
+      {
+        label: 'Settings',
+        href: team && username ? `/${username}/team/${team.slug}/settings` : '',
+        icon: Cog,
+      },
+    ],
+    [team, username],
+  )
+
+  return menu
 }

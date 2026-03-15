@@ -262,7 +262,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
   }
 
   return (
-    <div className='flex flex-col gap-4 md:w-md'>
+    <div className='flex flex-col gap-4 @[50rem]:w-fit'>
       <div className='container grid grid-cols-2 gap-3'>
         <h2>Daily Requirements</h2>
       </div>
@@ -270,14 +270,16 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
         onSubmit={form.handleSubmit(onSubmit, onError)}
         className='flex flex-col gap-4'
       >
-        <FieldSet className='flex flex-col gap-4 col-span-2 md:col-span-1'>
+        <FieldSet className='flex flex-col gap-4 *:data-'>
           {(Object.keys(WEEKDAY_MAP) as WeekdayKey[]).map(day => {
             const weekday = WEEKDAY_MAP[day]
             return (
-              <Item size='xs' key={day} className='flex items-center gap-4 '>
-                <ItemContent className='gap-3'>
-                  <ItemTitle>{weekday}</ItemTitle>
-                  <ItemActions className='gap-3 grid grid-cols-4 *:items-center'>
+              <Item size='xs' key={day} className='flex gap-4 '>
+                <ItemContent className='gap-3 @[50rem]:grid @[50rem]:grid-cols-3 @[50rem]:grid-rows-4 @[50rem]:items-start'>
+                  <ItemTitle className='@[50rem]:col-span-1'>
+                    {weekday}
+                  </ItemTitle>
+                  <ItemActions className='gap-3 grid grid-cols-4 @[50rem]:col-span-3 @[50rem]:contents items-start'>
                     {/* CLOSED CHECKBOX */}
                     <Controller
                       control={form.control}
@@ -286,7 +288,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                         <Field
                           id={`closed-${day}`}
                           orientation='horizontal'
-                          className='col-span-4'
+                          className='col-span-4 @[50rem]:col-span-1 @[50rem]:col-start-1 @[50rem]:row-start-2'
                         >
                           <Checkbox
                             {...field}
@@ -312,7 +314,10 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                       control={form.control}
                       name={`operationalHours.${day}.startTime`}
                       render={({ field }) => (
-                        <Field id={`start-time-${day}`} className='col-span-2'>
+                        <Field
+                          id={`start-time-${day}`}
+                          className='col-span-2 @[50rem]:col-start-2 @[50rem]:row-start-1 @[50rem]:col-span-1 @[50rem]:row-span-2 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'
+                        >
                           <FieldLabel htmlFor={`start-time-${day}`}>
                             Start Time
                           </FieldLabel>
@@ -347,7 +352,10 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                       control={form.control}
                       name={`operationalHours.${day}.endTime`}
                       render={({ field }) => (
-                        <Field id={`end-time-${day}`} className='col-span-2'>
+                        <Field
+                          id={`end-time-${day}`}
+                          className='col-span-2 @[50rem]:col-span-1 @[50rem]:col-start-3 @[50rem]:row-start-1 @[50rem]:row-span-2 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'
+                        >
                           <FieldLabel htmlFor={`end-time-${day}`}>
                             End Time
                           </FieldLabel>
@@ -382,8 +390,8 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                       control={form.control}
                       name={`staffingRequirements.${day}.minMembers`}
                       render={({ field }) => (
-                        <Field className='col-span-2'>
-                          <FieldLabel>Minimum Members</FieldLabel>
+                        <Field className='col-span-2 @[50rem]:col-span-1 @[50rem]:col-start-2 @[50rem]:row-start-3@ @[50rem]:row-span-2 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'>
+                          <FieldLabel>Min Staff</FieldLabel>
                           <NumberStepperInput
                             value={field.value ?? NON_NEGATIVE_MIN}
                             onValueChange={minValue => {
@@ -419,8 +427,8 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                       control={form.control}
                       name={`staffingRequirements.${day}.maxMembers`}
                       render={({ field }) => (
-                        <Field className='col-span-2'>
-                          <FieldLabel>Maximum Members</FieldLabel>
+                        <Field className='col-span-2 @[50rem]:col-span-1 @[50rem]:col-start-3 @[50rem]:row-start-3 @[50rem]:row-span-2 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'>
+                          <FieldLabel>Max Staff</FieldLabel>
                           <NumberStepperInput
                             value={
                               field.value ??

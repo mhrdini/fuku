@@ -13,6 +13,7 @@ import {
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { useQuery } from '@tanstack/react-query'
+import { Home } from 'lucide-react'
 
 import { useTRPC } from '~/trpc/client'
 import { useSession } from '../providers/session-provider'
@@ -48,20 +49,24 @@ export function Breadcrumbs() {
         if (!segment) return null
         if (segment === '…') return { href: '', label: '…' }
 
-        let label = decodeURIComponent(segment)
-          .replace(/-/g, ' ')
-          .replace(/\b\w/g, c => c.toUpperCase())
-
-        if (segment === session?.user.username) label = 'Home'
-        if (segment === team?.slug) label = team ? team.name : ''
-        if (segment === 'team') return null
-
-        const href =
+        let href =
           '/' +
           arr
             .slice(0, idx + 1)
             .filter(s => s !== '…')
             .join('/')
+
+        let label = decodeURIComponent(segment)
+          .replace(/-/g, ' ')
+          .replace(/\b\w/g, c => c.toUpperCase())
+
+        if (segment === session?.user.username) label = 'Home'
+        if (segment === team?.slug) label = team ? 'Overview' : ''
+        if (segment === 'team') {
+          if (!team) return null
+          label = team.name
+          href = ''
+        }
 
         return { href, label }
       })
@@ -73,20 +78,35 @@ export function Breadcrumbs() {
       <BreadcrumbList>
         {crumbs.map((crumb, idx) => (
           <Fragment key={crumb.href}>
-            {idx !== 0 && <BreadcrumbSeparator />}
+            {idx === 0 ? (
+              crumbs.length === 1 ? (
+                <>
+                  <BreadcrumbLink asChild>
+                    <Link href={crumb.href}>
+                      <Home className='size-4.5' />
+                    </Link>
+                  </BreadcrumbLink>
+                  <BreadcrumbSeparator />
+                </>
+              ) : null
+            ) : (
+              <BreadcrumbSeparator />
+            )}
             <BreadcrumbItem>
               {idx === crumbs.length - 1 || !crumb.href ? (
                 <BreadcrumbPage
                   className={cn(
                     idx === crumbs.length - 1 && 'font-semibold',
-                    'cursor-default',
+                    'cursor-default whitespace-nowrap w-max flex gap-2 items-center',
                   )}
                 >
                   {crumb.label}
                 </BreadcrumbPage>
               ) : (
                 <BreadcrumbLink asChild>
-                  <Link href={crumb.href}>{crumb.label}</Link>
+                  <Link href={crumb.href}>
+                    {idx === 0 ? <Home className='size-4.5' /> : crumb.label}
+                  </Link>
                 </BreadcrumbLink>
               )}
             </BreadcrumbItem>

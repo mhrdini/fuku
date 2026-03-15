@@ -38,7 +38,7 @@ import {
   Users2,
 } from 'lucide-react'
 
-import { useMenu } from '~/lib/menu'
+import { useSidebarMenu } from '~/lib/menu'
 import { useTeamStore } from '~/store/team.store'
 import { useTRPC } from '~/trpc/client'
 
@@ -61,14 +61,13 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
   })
 
   const router = useRouter()
-  const menuGroups = useMenu(sidebarState ? sidebarState.activeTeam : null)
-
-  const onMenuButtonClick = useCallback(
-    (url: string) => {
-      router.push('/' + username + url)
-    },
-    [username],
+  const menuGroups = useSidebarMenu(
+    sidebarState ? sidebarState.activeTeam : null,
   )
+
+  const onMenuButtonClick = useCallback((url: string) => {
+    router.push(url)
+  }, [])
 
   const onNewTeam = () => {
     router.push(`/${username}/team/new`)
