@@ -195,7 +195,7 @@ export function UserAuthForm({
           </form>
         </CardContent>
         <CardFooter>
-          <Field orientation='responsive'>
+          <Field orientation='responsive' className='w-full justify-stretch'>
             <LoadingButton
               type='submit'
               form='form-user-auth'
