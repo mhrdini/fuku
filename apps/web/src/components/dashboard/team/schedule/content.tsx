@@ -145,9 +145,10 @@ export const TeamScheduleContent = () => {
         break
       }
       case 'week': {
-        const nextWeek = DateTime.fromJSDate(start).plus({ weeks: 1 })
-        setStart(nextWeek.startOf('week').toJSDate())
-        setEnd(nextWeek.endOf('week').toJSDate())
+        const nextWeek = DateTime.fromJSDate(start).plus({ days: 7 })
+        const nextWeekEnd = nextWeek.plus({ days: 6 })
+        setStart(nextWeek.startOf('day').toJSDate())
+        setEnd(nextWeekEnd.endOf('day').toJSDate())
         break
       }
       case 'month': {
@@ -168,9 +169,10 @@ export const TeamScheduleContent = () => {
         break
       }
       case 'week': {
-        const prevWeek = DateTime.fromJSDate(start).minus({ weeks: 1 })
-        setStart(prevWeek.startOf('week').toJSDate())
-        setEnd(prevWeek.endOf('week').toJSDate())
+        const prevWeek = DateTime.fromJSDate(start).minus({ days: 7 })
+        const prevWeekEnd = prevWeek.plus({ days: 6 })
+        setStart(prevWeek.startOf('day').toJSDate())
+        setEnd(prevWeekEnd.endOf('day').toJSDate())
         break
       }
       case 'month': {
