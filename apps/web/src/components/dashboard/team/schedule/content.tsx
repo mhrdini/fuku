@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import {
   RuleConditionCreateInput,
@@ -17,22 +17,52 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-  Command,
-  CommandEmpty,
-  CommandInput,
-  CommandItem,
-  CommandList,
   DateRangePicker,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
   Item,
   ItemTitle,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, Cog, Plus, RefreshCcw, SlidersHorizontal } from 'lucide-react'
-import { DateTime } from 'luxon'
+import {
+  Check,
+  Cog,
+  Plus,
+  RefreshCcw,
+  Search,
+  SlidersHorizontal,
+  X,
+} from 'lucide-react'
+import { DateTime, MonthNumbers } from 'luxon'
 
 import { useTRPC } from '~/trpc/client'
 import { RulePanelPopoverButton } from './rule-panel-popover-button'
+
+type ViewOption = 'day' | 'week' | 'month'
+
+const daysByView = (view: ViewOption, month?: number): number => {
+  switch (view) {
+    case 'day':
+      return 1
+    case 'week':
+      return 7
+    case 'month':
+      if (!month) {
+        const now = DateTime.now()
+        month = now.month as MonthNumbers
+      }
+      return DateTime.local(DateTime.now().year, month).daysInMonth!
+  }
+}
+
+const widthsByView: Record<ViewOption, string> = {
+  day: '1fr',
+  week: '1fr',
+  month: '120px',
+}
 
 export const TeamScheduleContent = () => {
   const trpc = useTRPC()
@@ -41,8 +71,15 @@ export const TeamScheduleContent = () => {
   const params = useParams()
   const slug = params?.slug as string
 
+  const [view, setView] = useState<ViewOption>('month')
+
   const [start, setStart] = useState(new Date())
   const [end, setEnd] = useState(new Date())
+
+  const daysArray = useMemo(() => {
+    const numDays = daysByView(view)
+    return Array.from({ length: numDays }, (_, i) => i + 1)
+  }, [view])
 
   const { data: team } = useQuery({
     ...trpc.team.bySlug.queryOptions({ slug: slug! }),
@@ -209,6 +246,14 @@ export const TeamScheduleContent = () => {
     }
   }
 
+  const [search, setSearch] = useState('')
+  const filteredMembers: TeamMemberOutput[] = useMemo(() => {
+    if (!teamMembers) return []
+    return teamMembers.filter(tm =>
+      tm.givenNames.toLowerCase().includes(search.toLowerCase()),
+    )
+  }, [teamMembers, search])
+
   const { mutateAsync: generateSchedule } = useMutation({
     ...trpc.schedule.generateMonthly.mutationOptions(),
     onSuccess: data => {
@@ -284,32 +329,115 @@ export const TeamScheduleContent = () => {
       {/* sm breakpoint */}
       <div className='hidden sm:flex md:hidden'></div>
       {/* md+ breakpoint */}
-      <div className='h-[600px] hidden md:grid grid-flow-col grid-cols-[250px_auto] border rounded-md border-input'>
-        <div className='flex flex-col min-h-0 rounded-l-md gap-0 border-r border-input'>
-          <Command className='bg-inherit border-none rounded-none p-0'>
-            <div className='p-2 border-b border-input flex items-center gap-2'>
-              <CommandInput placeholder='Search' className='flex-1' />
-              <Button variant='secondary' size='icon'>
-                <SlidersHorizontal />
-              </Button>
+      <div className='h-[600px] hidden md:block border rounded-md border-input overflow-auto overscroll-none'>
+        <div
+          className='grid min-w-max min-h-full'
+          style={{
+            gridTemplateColumns: `250px repeat(${daysByView(view)}, minmax(120px, 1fr))`,
+            gridTemplateRows: `min-content repeat(${filteredMembers.length || 1}, minmax(min-content, 1fr)) min-content`,
+          }}
+        >
+          {/* team member input + filter header */}
+          <div className='sticky left-0 top-0 z-20 p-2 border-b border-r border-input bg-background flex items-center gap-2'>
+            <InputGroup className='flex-1 bg-input/30'>
+              <InputGroupAddon>
+                <Search className='size-4 shrink-0 opacity-50' />
+              </InputGroupAddon>
+
+              <InputGroupInput
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder='Search'
+              />
+              <InputGroupAddon
+                align='inline-end'
+                className={cn(!search && 'hidden')}
+              >
+                <InputGroupButton
+                  size='icon-xs'
+                  variant='ghost'
+                  onClick={() => setSearch('')}
+                >
+                  <X />
+                </InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+
+            <Button variant='secondary' size='icon'>
+              <SlidersHorizontal />
+            </Button>
+          </div>
+
+          {/* day headers */}
+          {daysArray.map(day => (
+            <div
+              key={day}
+              className='sticky top-0 z-10 border-b border-r border-input text-center bg-background p-2'
+            >
+              {day}
             </div>
-            <CommandList className='flex-1 min-h-0 h-full'>
-              <CommandEmpty className='p-4 text-sm text-muted-foreground'>
-                No team members found.
-              </CommandEmpty>
-              {teamMembers &&
-                teamMembers.map(tm => (
-                  <TeamMemberPanelItem key={tm.id} teamMember={tm} />
-                ))}
-            </CommandList>
-          </Command>
-          <div className='p-2 border-t border-input'>
+          ))}
+
+          {/* member rows */}
+          {filteredMembers.length === 0 ? (
+            <>
+              <div className='sticky left-0 p-4 flex items-start text-sm text-muted-foreground bg-background border-r border-input'>
+                No members found.
+              </div>
+
+              {daysArray.map(day => (
+                <div key={`empty-${day}`} className='' />
+              ))}
+            </>
+          ) : (
+            filteredMembers.map((tm, idx) => {
+              const isLastRow = idx === filteredMembers.length - 1
+              return (
+                <Fragment key={tm.id}>
+                  {/* member cell */}
+                  <div
+                    className={cn(
+                      'sticky left-0 z-10 w-[250px] bg-background border-r border-input p-2',
+                      !isLastRow && 'border-b',
+                    )}
+                  >
+                    <TeamMemberPanelItem teamMember={tm} />
+                  </div>
+
+                  {/* shift cells */}
+                  {daysArray.map((day, idx) => {
+                    const isLastCol = idx === daysArray.length - 1
+                    return (
+                      <div
+                        key={`${tm.id}-${day}`}
+                        className={cn(
+                          'border-input p-1',
+                          !isLastRow && 'border-b',
+                          !isLastCol && 'border-r',
+                        )}
+                      >
+                        {tm.givenNames} {day}
+                      </div>
+                    )
+                  })}
+                </Fragment>
+              )
+            })
+          )}
+
+          {/* add member button */}
+          <div className='sticky left-0 bottom-0 z-10 border-t border-r border-input text-center bg-background p-2'>
             <Button className='w-full' variant='secondary'>
               <Plus /> Add member
             </Button>
           </div>
+          {daysArray.map(day => (
+            <div
+              key={`empty-${day}`}
+              className='sticky bottom-0 z-10 border-t border-input text-center bg-background p-2'
+            />
+          ))}
         </div>
-        <div>calendar</div>
       </div>
       <div className='flex gap-2 justify-end'>
         <Button disabled>
@@ -327,14 +455,7 @@ const TeamMemberPanelItem = ({
   teamMember: TeamMemberOutput
 }) => {
   return (
-    <CommandItem
-      value={
-        teamMember.givenNames +
-        (teamMember.familyName ? ' ' + teamMember.familyName : '')
-      }
-      noDefaultStyles
-      className='not-last:border-b border-input'
-    >
+    <div className='not-last:border-b border-input'>
       <Collapsible>
         <CollapsibleTrigger className='w-full flex items-center justify-start'>
           <Item className='w-full'>
@@ -351,6 +472,6 @@ const TeamMemberPanelItem = ({
         </CollapsibleTrigger>
         <CollapsibleContent>{teamMember.payGrade?.name}</CollapsibleContent>
       </Collapsible>
-    </CommandItem>
+    </div>
   )
 }
