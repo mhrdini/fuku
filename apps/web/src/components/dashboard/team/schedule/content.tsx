@@ -14,6 +14,8 @@ import {
 } from '@fuku/api/schemas'
 import {
   Button,
+  ButtonGroup,
+  ButtonGroupSeparator,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -24,11 +26,20 @@ import {
   InputGroupInput,
   Item,
   ItemTitle,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Check,
+  ChevronLeft,
+  ChevronRight,
   Cog,
   Plus,
   RefreshCcw,
@@ -36,32 +47,73 @@ import {
   SlidersHorizontal,
   X,
 } from 'lucide-react'
-import { DateTime, MonthNumbers } from 'luxon'
+import { DateTime } from 'luxon'
 
 import { useTRPC } from '~/trpc/client'
 import { RulePanelPopoverButton } from './rule-panel-popover-button'
 
-type ViewOption = 'day' | 'week' | 'month'
+const VIEW_OPTIONS = ['day', 'week', 'month'] as const
+type ViewOption = (typeof VIEW_OPTIONS)[number]
 
-const daysByView = (view: ViewOption, month?: number): number => {
-  switch (view) {
-    case 'day':
-      return 1
-    case 'week':
-      return 7
-    case 'month':
-      if (!month) {
-        const now = DateTime.now()
-        month = now.month as MonthNumbers
-      }
-      return DateTime.local(DateTime.now().year, month).daysInMonth!
-  }
+type Day = {
+  date: Date
+  value: string
+  label: string
 }
 
 const widthsByView: Record<ViewOption, string> = {
   day: '1fr',
   week: '1fr',
   month: '120px',
+}
+
+const defaultDateRangesByView: Record<ViewOption, { from: Date; to: Date }> = {
+  day: {
+    from: DateTime.now().startOf('day').toJSDate(),
+    to: DateTime.now().endOf('day').toJSDate(),
+  },
+  week: {
+    // always start on monday regardless of locale
+    from: DateTime.now().startOf('week').toJSDate(),
+    to: DateTime.now().endOf('week').toJSDate(),
+  },
+  month: {
+    from: DateTime.now().startOf('month').toJSDate(),
+    to: DateTime.now().endOf('month').toJSDate(),
+  },
+}
+
+const getDefaultDateRangeByView = (view: ViewOption, currentStart?: Date) => {
+  switch (view) {
+    case 'day':
+      const day = currentStart
+        ? DateTime.fromJSDate(currentStart)
+        : DateTime.now()
+      return {
+        from: day.startOf('day').toJSDate(),
+        to: day.endOf('day').toJSDate(),
+      }
+    case 'week': {
+      // always start on monday regardless of locale
+      // even though date range picker has option to start on sunday (monday by default)
+      const start = currentStart
+        ? DateTime.fromJSDate(currentStart).startOf('week')
+        : DateTime.now().startOf('week')
+      return {
+        from: start.toJSDate(),
+        to: start.endOf('week').toJSDate(),
+      }
+    }
+    case 'month': {
+      const start = currentStart
+        ? DateTime.fromJSDate(currentStart).startOf('month')
+        : DateTime.now().startOf('month')
+      return {
+        from: start.toJSDate(),
+        to: start.endOf('month').toJSDate(),
+      }
+    }
+  }
 }
 
 export const TeamScheduleContent = () => {
@@ -72,14 +124,83 @@ export const TeamScheduleContent = () => {
   const slug = params?.slug as string
 
   const [view, setView] = useState<ViewOption>('month')
+  const [start, setStart] = useState(defaultDateRangesByView[view].from)
+  const [end, setEnd] = useState(defaultDateRangesByView[view].to)
 
-  const [start, setStart] = useState(new Date())
-  const [end, setEnd] = useState(new Date())
+  const locale = 'en-GB' // to set the date format, TBD: make dynamic
 
-  const daysArray = useMemo(() => {
-    const numDays = daysByView(view)
-    return Array.from({ length: numDays }, (_, i) => i + 1)
-  }, [view])
+  const handleViewChange = (view: ViewOption) => {
+    setView(view)
+    const { from, to } = getDefaultDateRangeByView(view, start)
+    setStart(from)
+    setEnd(to)
+  }
+
+  const handleNextRange = () => {
+    switch (view) {
+      case 'day': {
+        const nextDay = DateTime.fromJSDate(start).plus({ days: 1 })
+        setStart(nextDay.startOf('day').toJSDate())
+        setEnd(nextDay.endOf('day').toJSDate())
+        break
+      }
+      case 'week': {
+        const nextWeek = DateTime.fromJSDate(start).plus({ weeks: 1 })
+        setStart(nextWeek.startOf('week').toJSDate())
+        setEnd(nextWeek.endOf('week').toJSDate())
+        break
+      }
+      case 'month': {
+        const nextMonth = DateTime.fromJSDate(start).plus({ months: 1 })
+        setStart(nextMonth.startOf('month').toJSDate())
+        setEnd(nextMonth.endOf('month').toJSDate())
+        break
+      }
+    }
+  }
+
+  const handlePrevRange = () => {
+    switch (view) {
+      case 'day': {
+        const prevDay = DateTime.fromJSDate(start).minus({ days: 1 })
+        setStart(prevDay.startOf('day').toJSDate())
+        setEnd(prevDay.endOf('day').toJSDate())
+        break
+      }
+      case 'week': {
+        const prevWeek = DateTime.fromJSDate(start).minus({ weeks: 1 })
+        setStart(prevWeek.startOf('week').toJSDate())
+        setEnd(prevWeek.endOf('week').toJSDate())
+        break
+      }
+      case 'month': {
+        const prevMonth = DateTime.fromJSDate(start).minus({ months: 1 })
+        setStart(prevMonth.startOf('month').toJSDate())
+        setEnd(prevMonth.endOf('month').toJSDate())
+        break
+      }
+    }
+  }
+
+  const daysList = useMemo<Day[]>(() => {
+    const startDT = DateTime.fromJSDate(start).startOf('day')
+    const endDT = DateTime.fromJSDate(end).endOf('day')
+
+    const days: Day[] = []
+    let current = startDT
+
+    while (current <= endDT) {
+      days.push({
+        date: current.toJSDate(),
+        value: current.toISODate()!,
+        label: current.toFormat('ccc dd LLL'),
+      })
+
+      current = current.plus({ days: 1 })
+    }
+
+    return days
+  }, [start, end])
 
   const { data: team } = useQuery({
     ...trpc.team.bySlug.queryOptions({ slug: slug! }),
@@ -246,14 +367,6 @@ export const TeamScheduleContent = () => {
     }
   }
 
-  const [search, setSearch] = useState('')
-  const filteredMembers: TeamMemberOutput[] = useMemo(() => {
-    if (!teamMembers) return []
-    return teamMembers.filter(tm =>
-      tm.givenNames.toLowerCase().includes(search.toLowerCase()),
-    )
-  }, [teamMembers, search])
-
   const { mutateAsync: generateSchedule } = useMutation({
     ...trpc.schedule.generateMonthly.mutationOptions(),
     onSuccess: data => {
@@ -289,22 +402,43 @@ export const TeamScheduleContent = () => {
     })
   }
 
+  const [search, setSearch] = useState('')
+  const filteredMembers: TeamMemberOutput[] = useMemo(() => {
+    if (!teamMembers) return []
+    return teamMembers.filter(tm =>
+      tm.givenNames.toLowerCase().includes(search.toLowerCase()),
+    )
+  }, [teamMembers, search])
+
   return (
     <div className='flex flex-col gap-4'>
       <h2>Schedule</h2>
       {/* header */}
       <div className='flex gap-2'>
-        <DateRangePicker
-          align='start'
-          variant='secondary'
-          showCompare={false}
-          initialDateFrom={start}
-          initialDateTo={end}
-          onUpdate={({ range }) => {
-            setStart(range.from)
-            setEnd(range.to || range.from)
-          }}
-        />
+        <ButtonGroup>
+          <Button variant='secondary' size='icon' onClick={handlePrevRange}>
+            <ChevronLeft />
+          </Button>
+          <ButtonGroupSeparator />
+          <DateRangePicker
+            align='start'
+            variant='secondary'
+            showCompare={false}
+            initialDateFrom={start}
+            initialDateTo={end}
+            value={{ from: start, to: end }}
+            view={view}
+            locale={locale}
+            onUpdate={({ range }) => {
+              setStart(range.from)
+              setEnd(range.to || range.from)
+            }}
+          />
+          <ButtonGroupSeparator />
+          <Button variant='secondary' size='icon' onClick={handleNextRange}>
+            <ChevronRight />
+          </Button>
+        </ButtonGroup>
         <RulePanelPopoverButton
           team={team ?? ({} as TeamOutput)}
           rules={rules ?? {}}
@@ -315,6 +449,26 @@ export const TeamScheduleContent = () => {
           mutateRule={handleMutateRule}
           mutateRuleCondition={handleMutateRuleCondition}
         />
+        <Select value={view} onValueChange={handleViewChange}>
+          <SelectTrigger variant='secondary'>
+            <span className='flex gap-1'>
+              View by
+              <span className='capitalize'>
+                <SelectValue />
+              </span>
+            </span>
+          </SelectTrigger>
+          <SelectContent align='start' position='popper'>
+            <SelectGroup>
+              <SelectLabel>View by</SelectLabel>
+              {VIEW_OPTIONS.map(option => (
+                <SelectItem key={option} value={option} className='capitalize'>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
         <Button className='ml-auto' onClick={handleGenerateSchedule}>
           <RefreshCcw />
           <span className='hidden md:flex'>Auto-Schedule</span>
@@ -333,7 +487,7 @@ export const TeamScheduleContent = () => {
         <div
           className='grid min-w-max min-h-full'
           style={{
-            gridTemplateColumns: `250px repeat(${daysByView(view)}, minmax(120px, 1fr))`,
+            gridTemplateColumns: `250px repeat(${daysList.length}, minmax(120px, 1fr))`,
             gridTemplateRows: `min-content repeat(${filteredMembers.length || 1}, minmax(min-content, 1fr)) min-content`,
           }}
         >
@@ -369,12 +523,12 @@ export const TeamScheduleContent = () => {
           </div>
 
           {/* day headers */}
-          {daysArray.map(day => (
+          {daysList.map(day => (
             <div
-              key={day}
+              key={day.value}
               className='sticky top-0 z-10 border-b border-r border-input text-center bg-background p-2'
             >
-              {day}
+              {day.label}
             </div>
           ))}
 
@@ -385,8 +539,8 @@ export const TeamScheduleContent = () => {
                 No members found.
               </div>
 
-              {daysArray.map(day => (
-                <div key={`empty-${day}`} className='' />
+              {daysList.map(day => (
+                <div key={`no-members-${day.value}`} className='' />
               ))}
             </>
           ) : (
@@ -405,18 +559,19 @@ export const TeamScheduleContent = () => {
                   </div>
 
                   {/* shift cells */}
-                  {daysArray.map((day, idx) => {
-                    const isLastCol = idx === daysArray.length - 1
+                  {daysList.map((day, idx) => {
+                    const isLastCol = idx === daysList.length - 1
                     return (
                       <div
-                        key={`${tm.id}-${day}`}
+                        key={`${tm.id}-${day.value}`}
                         className={cn(
                           'border-input p-1',
                           !isLastRow && 'border-b',
                           !isLastCol && 'border-r',
                         )}
                       >
-                        {tm.givenNames} {day}
+                        {tm.givenNames}{' '}
+                        {DateTime.fromJSDate(day.date).toFormat('dd LLL')}
                       </div>
                     )
                   })}
@@ -431,9 +586,9 @@ export const TeamScheduleContent = () => {
               <Plus /> Add member
             </Button>
           </div>
-          {daysArray.map(day => (
+          {daysList.map(day => (
             <div
-              key={`empty-${day}`}
+              key={`empty-${day.value}`}
               className='sticky bottom-0 z-10 border-t border-input text-center bg-background p-2'
             />
           ))}
