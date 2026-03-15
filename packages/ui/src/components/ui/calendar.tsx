@@ -1,6 +1,6 @@
 'use client'
 
-import type { DayButton } from 'react-day-picker'
+import type { DateRange, DayButton } from 'react-day-picker'
 import * as React from 'react'
 import { Button, buttonVariants } from '@fuku/ui/components/ui/button'
 import { cn } from '@fuku/ui/lib/utils'
@@ -19,9 +19,11 @@ function Calendar({
   buttonVariant = 'ghost',
   formatters,
   components,
+  hoveredRange,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>['variant']
+  hoveredRange?: DateRange
 }) {
   const defaultClassNames = getDefaultClassNames()
 
@@ -158,7 +160,9 @@ function Calendar({
             <ChevronDownIcon className={cn('size-4', className)} {...props} />
           )
         },
-        DayButton: CalendarDayButton,
+        DayButton: props => (
+          <CalendarDayButton {...props} hoveredRange={hoveredRange} />
+        ),
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
@@ -179,14 +183,38 @@ function CalendarDayButton({
   className,
   day,
   modifiers,
+  hoveredRange,
   ...props
-}: React.ComponentProps<typeof DayButton>) {
+}: React.ComponentProps<typeof DayButton> & {
+  hoveredRange?: DateRange
+}) {
   const defaultClassNames = getDefaultClassNames()
-
   const ref = React.useRef<HTMLButtonElement>(null)
+
   React.useEffect(() => {
     if (modifiers.focused) ref.current?.focus()
   }, [modifiers.focused])
+
+  // React.useEffect(() => {
+  //   console.log(
+  //     hoveredRange?.from?.toLocaleDateString(),
+  //     hoveredRange?.to?.toLocaleDateString(),
+  //   )
+  // }, [hoveredRange])
+
+  // Check if this day is inside the hovered range
+  const isInHovered =
+    hoveredRange?.from &&
+    ((hoveredRange.to &&
+      day.date >= hoveredRange.from &&
+      day.date <= hoveredRange.to) ||
+      (!hoveredRange.to && day.date.getTime() === hoveredRange.from.getTime()))
+
+  // Check if it's the start or end of the hovered range
+  const isHoveredStart =
+    hoveredRange?.from && day.date.getTime() === hoveredRange.from.getTime()
+  const isHoveredEnd =
+    hoveredRange?.to && day.date.getTime() === hoveredRange.to.getTime()
 
   return (
     <Button
@@ -206,6 +234,20 @@ function CalendarDayButton({
       className={cn(
         'flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-accent-foreground [&>span]:text-xs [&>span]:opacity-70',
         defaultClassNames.day,
+        // Apply hover range styling
+        isInHovered &&
+          !modifiers.selected &&
+          'rounded-none bg-accent text-accent-foreground dark:bg-accent/50 dark:text-accent-foreground',
+        isHoveredStart &&
+          !modifiers.selected &&
+          'rounded-l-md rounded-r-none bg-accent text-accent-foreground dark:bg-accent/50 dark:text-accent-foreground',
+        isHoveredEnd &&
+          !modifiers.selected &&
+          'rounded-r-md rounded-l-none bg-accent text-accent-foreground dark:bg-accent/50 dark:text-accent-foreground',
+        isHoveredStart &&
+          isHoveredEnd &&
+          !modifiers.selected &&
+          'rounded-md bg-accent text-accent-foreground dark:bg-accent/50 dark:text-accent-foreground',
         className,
       )}
       {...props}
