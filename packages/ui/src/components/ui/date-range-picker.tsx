@@ -597,7 +597,9 @@ export function DateRangePicker({
                         clickedDate = value.to
                       } else {
                         // If inside current range, default to from
-                        clickedDate = value.from
+                        clickedDate = hoveredRange
+                          ? hoveredRange.from
+                          : value.from
                       }
                     } else if (value.from) {
                       clickedDate = value.from
