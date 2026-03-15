@@ -266,15 +266,15 @@ export const SummarySection = () => {
   )
 
   return (
-    <div className='flex flex-col gap-4'>
-      <div className='flex flex-row'>
+    <div className='flex flex-col gap-4 w-full'>
+      <div className='flex flex-row w-full'>
         <h2>Summary</h2>
         <Button size='sm' className='ml-auto' onClick={handleGenerateSchedule}>
           <CalendarPlus />
           Generate Schedule
         </Button>
       </div>
-      <div className='grid grid-cols-1 @[24rem]/main:grid-cols-2 @[760px]/main:grid-cols-3 gap-4'>
+      <div className='grid grid-cols-1 @[24rem]/main:grid-cols-2 @[50rem]/main:grid-cols-4 gap-4'>
         {teamMembersSummary}
         {locationSummary}
         {shiftTypesSummary}
