@@ -431,9 +431,10 @@ export const TeamScheduleContent = () => {
             value={{ from: start, to: end }}
             view={view}
             locale={locale}
-            onUpdate={({ range }) => {
+            onUpdate={({ range, view }) => {
               setStart(range.from)
               setEnd(range.to || range.from)
+              if (view) setView(view)
             }}
           />
           <ButtonGroupSeparator />
