@@ -106,17 +106,18 @@ export const useNavigationMenu = (team: UserTeam | null): Menu[] => {
                 : '',
             icon: MapPin,
           },
+          {
+            label: 'Settings',
+            href:
+              team && username ? `/${username}/team/${team.slug}/settings` : '',
+            icon: Cog,
+          },
         ],
       },
       {
         label: 'Schedule',
         href: team && username ? `/${username}/team/${team.slug}/schedule` : '',
         icon: Calendar,
-      },
-      {
-        label: 'Settings',
-        href: team && username ? `/${username}/team/${team.slug}/settings` : '',
-        icon: Cog,
       },
     ],
     [team, username],
