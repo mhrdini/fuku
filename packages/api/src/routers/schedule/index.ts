@@ -2,10 +2,11 @@ import { TimeZoneSchema } from '@fuku/domain/schemas'
 import { TRPCRouterRecord } from '@trpc/server'
 import * as z from 'zod/v4'
 
+import { GenerateScheduleOutputSchema } from '../../schemas'
 import { protectedProcedure } from '../../trpc'
 
 export const scheduleRouter = {
-  generateMonthly: protectedProcedure
+  generate: protectedProcedure
     .input(
       z.object({
         teamId: z.string(),
@@ -15,7 +16,7 @@ export const scheduleRouter = {
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.schedulerService.generateMonthly(input)
-      return result
+      const result = await ctx.schedulerService.generate(input)
+      return GenerateScheduleOutputSchema.parse(result)
     }),
 } satisfies TRPCRouterRecord

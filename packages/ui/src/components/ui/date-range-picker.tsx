@@ -4,6 +4,8 @@ import type { VariantProps } from 'class-variance-authority'
 import { useEffect, useRef, useState } from 'react'
 import { useDebouncedCommit } from '@fuku/ui/hooks/use-debounced-commit'
 import { cn } from '@fuku/ui/lib/utils'
+import { format, Locale } from 'date-fns'
+import * as locales from 'date-fns/locale'
 import { CheckIcon } from 'lucide-react'
 
 import { Button, buttonVariants } from './button'
@@ -45,8 +47,8 @@ export interface DateRangePickerProps {
   initialCompareTo?: Date | string
   /** Alignment of popover */
   align?: 'start' | 'center' | 'end'
-  /** Option for locale */
-  locale?: string
+  /** Option for locale, must be date-fns Locale */
+  locale?: Locale
   /** Option for showing compare feature */
   showCompare?: boolean
   // Option for view, modifies hover
@@ -54,12 +56,8 @@ export interface DateRangePickerProps {
   weekStartsOn?: 'sunday' | 'monday'
 }
 
-const formatDate = (date: Date, locale: string = 'en-us'): string => {
-  return date.toLocaleDateString(locale, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+const formatDate = (date: Date, locale: Locale): string => {
+  return format(date, 'PPP', { locale })
 }
 
 const getDateAdjustedForTimezone = (dateInput: Date | string): Date => {
@@ -107,7 +105,7 @@ export function DateRangePicker({
   initialCompareTo,
   onUpdate,
   align = 'end',
-  locale = 'en-US',
+  locale = locales.enGB,
   showCompare = true,
   variant = 'outline',
   size,
@@ -619,6 +617,7 @@ export function DateRangePicker({
               )}
               <div>
                 <Calendar
+                  locale={locale}
                   mode='range'
                   weekStartsOn={weekStartsOn === 'monday' ? 1 : 0}
                   onDayMouseEnter={handleMouseEnter}

@@ -28,7 +28,7 @@ export type SchedulerMode =
   | 'replace' // persist to db, replacing existing assignments for the period
 export interface SchedulerService {
   mode: SchedulerMode
-  generateMonthly(
+  generate(
     input: GenerateScheduleInput,
     options?: GenerateScheduleOptions,
   ): Promise<GenerateScheduleOutput>
@@ -63,7 +63,7 @@ export class DefaultSchedulerService implements SchedulerService {
       this.mode = mode
     }
   }
-  async generateMonthly(
+  async generate(
     input: GenerateScheduleInput,
     options?: GenerateScheduleOptions,
   ): Promise<GenerateScheduleOutput> {
