@@ -22,12 +22,19 @@ import { Switch } from './switch'
 
 const getMondayOffset = (date: Date) => (date.getDay() + 6) % 7
 
+// TODO: should be the same as view option in schedule content, need to unify
+type ViewOption = 'day' | 'week' | 'month'
+
 export interface DateRangePickerProps {
   // controller
   value?: DateRange
   compareValue?: DateRange
   /** Click handler for applying the updates from DateRangePicker. */
-  onUpdate?: (values: { range: DateRange; rangeCompare?: DateRange }) => void
+  onUpdate?: (values: {
+    range: DateRange
+    rangeCompare?: DateRange
+    view?: ViewOption
+  }) => void
   /** Initial value for start date */
   initialDateFrom?: Date | string
   /** Initial value for end date */
@@ -83,9 +90,9 @@ interface Preset {
 const PRESETS: Preset[] = [
   { name: 'today', label: 'Today' },
   { name: 'yesterday', label: 'Yesterday' },
-  { name: 'last7', label: 'Last 7 days' },
-  { name: 'last14', label: 'Last 14 days' },
-  { name: 'last30', label: 'Last 30 days' },
+  // { name: 'last7', label: 'Last 7 days' },
+  // { name: 'last14', label: 'Last 14 days' },
+  // { name: 'last30', label: 'Last 30 days' },
   { name: 'thisWeek', label: 'This Week' },
   { name: 'lastWeek', label: 'Last Week' },
   { name: 'thisMonth', label: 'This Month' },
@@ -112,7 +119,7 @@ export function DateRangePicker({
   const [isOpen, setIsOpen] = useState(false)
 
   // Compute a dynamic range based on the view
-  const getRangeFromDate = (date: Date | string) => {
+  const getRangeFromDate = (date: Date | string, isToDate?: boolean) => {
     const start = new Date(date)
     let end = new Date(date)
 
@@ -120,7 +127,11 @@ export function DateRangePicker({
       // const day =
       //   weekStartsOn === 'monday' ? getMondayOffset(start) : start.getDay()
       // start.setDate(start.getDate() - day)
-      end.setDate(start.getDate() + 6)
+      if (isToDate) {
+        start.setDate(start.getDate() - 6)
+      } else {
+        end.setDate(start.getDate() + 6)
+      }
     } else if (view === 'month') {
       start.setDate(1)
       end = new Date(start.getFullYear(), start.getMonth() + 1, 0)
@@ -175,18 +186,18 @@ export function DateRangePicker({
   const [hoveredDate, setHoveredDate] = useState<Date | undefined>(undefined)
   const hoveredDateRef = useRef<Date | undefined>(undefined)
 
-  const onMouseEnterFn = (date: Date) => {
+  const { schedule, flush } = useDebouncedCommit((date?: Date) => {
     hoveredDateRef.current = date
     setHoveredDate(date)
+  })
+
+  const handleMouseEnter = (date: Date) => {
+    flush(date) // immediate
   }
 
-  const onMouseLeaveFn = () => {
-    hoveredDateRef.current = undefined
-    setHoveredDate(undefined)
+  const handleMouseLeave = () => {
+    schedule(undefined) // delayed clear
   }
-
-  const { flush: handleMouseEnter } = useDebouncedCommit(onMouseEnterFn)
-  const { schedule: handleMouseLeave } = useDebouncedCommit(onMouseLeaveFn)
 
   const hoveredRange = hoveredDate ? getRangeFromDate(hoveredDate) : undefined
 
@@ -281,7 +292,25 @@ export function DateRangePicker({
 
   const setPreset = (preset: string): void => {
     const range = getPresetRange(preset)
-    setRange(range)
+
+    let updatedView = view
+
+    switch (preset) {
+      case 'today':
+      case 'yesterday':
+        updatedView = 'day'
+        break
+      case 'thisWeek':
+      case 'lastWeek':
+        updatedView = 'week'
+        break
+      case 'thisMonth':
+      case 'lastMonth':
+        updatedView = 'month'
+        break
+    }
+    onUpdate?.({ range, rangeCompare, view: updatedView })
+
     if (rangeCompare) {
       const rangeCompare = {
         from: new Date(
@@ -297,6 +326,8 @@ export function DateRangePicker({
             )
           : undefined,
       }
+
+      setRange(range)
       setRangeCompare(rangeCompare)
     }
   }
@@ -488,11 +519,17 @@ export function DateRangePicker({
                     <DateInput
                       value={range.from}
                       onChange={date => {
-                        const toDate =
+                        let fromDate = date
+                        let toDate =
                           range.to == null || date > range.to ? date : range.to
+                        if (view) {
+                          const newRange = getRangeFromDate(date)
+                          fromDate = newRange.from
+                          toDate = newRange.to
+                        }
                         setRange(prevRange => ({
                           ...prevRange,
-                          from: date,
+                          from: fromDate,
                           to: toDate,
                         }))
                       }}
@@ -501,11 +538,18 @@ export function DateRangePicker({
                     <DateInput
                       value={range.to}
                       onChange={date => {
-                        const fromDate = date < range.from ? date : range.from
+                        console.log('to date change', date)
+                        let fromDate = date < range.from ? date : range.from
+                        let toDate = date
+                        if (view) {
+                          const newRange = getRangeFromDate(date, true)
+                          fromDate = newRange.from
+                          toDate = newRange.to
+                        }
                         setRange(prevRange => ({
                           ...prevRange,
                           from: fromDate,
-                          to: date,
+                          to: toDate,
                         }))
                       }}
                     />
@@ -578,7 +622,7 @@ export function DateRangePicker({
                   mode='range'
                   weekStartsOn={weekStartsOn === 'monday' ? 1 : 0}
                   onDayMouseEnter={handleMouseEnter}
-                  // onDayMouseLeave={handleMouseLeave}
+                  onDayMouseLeave={handleMouseLeave}
                   hoveredRange={hoveredRange}
                   onSelect={(value: { from?: Date; to?: Date } | undefined) => {
                     // if clicked date is before range.from, the clicked date =
@@ -586,6 +630,8 @@ export function DateRangePicker({
                     // if clicked date is after range.to, the clicked date = value.to
 
                     if (!value) return
+                    if (value.from === range.from && value.to === range.to)
+                      return
 
                     // Determine the actual clicked date
                     let clickedDate: Date
