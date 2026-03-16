@@ -632,15 +632,10 @@ export const TeamScheduleContent = () => {
           disabled={isGenerating}
         >
           {isGenerating ? <Spinner /> : <RefreshCcw />}
-          <span className={cn('hidden md:flex', isGenerating && 'hidden')}>
+          <span className={cn('hidden md:flex', isGenerating && 'md:hidden')}>
             Auto-Schedule
           </span>
-          <span
-            className={cn(
-              isGenerating && 'hidden md:flex',
-              !isGenerating && 'hidden',
-            )}
-          >
+          <span className={cn('hidden', isGenerating && 'md:flex')}>
             Generating...
           </span>
         </Button>
