@@ -1,9 +1,10 @@
 'use client'
 
-import type { DateRange, DayButton } from 'react-day-picker'
+import type { DateRange, DayButton, DayPickerLocale } from 'react-day-picker'
 import * as React from 'react'
 import { Button, buttonVariants } from '@fuku/ui/components/ui/button'
 import { cn } from '@fuku/ui/lib/utils'
+import { enGB } from 'date-fns/locale'
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -20,6 +21,7 @@ function Calendar({
   formatters,
   components,
   hoveredRange,
+  locale = enGB,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>['variant']
@@ -29,6 +31,7 @@ function Calendar({
 
   return (
     <DayPicker
+      locale={locale}
       showOutsideDays={showOutsideDays}
       className={cn(
         'group/calendar bg-background p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
@@ -39,7 +42,7 @@ function Calendar({
       captionLayout={captionLayout}
       formatters={{
         formatMonthDropdown: date =>
-          date.toLocaleString('default', { month: 'short' }),
+          date.toLocaleString(locale.code, { month: 'short' }),
         ...formatters,
       }}
       classNames={{
@@ -161,7 +164,11 @@ function Calendar({
           )
         },
         DayButton: props => (
-          <CalendarDayButton {...props} hoveredRange={hoveredRange} />
+          <CalendarDayButton
+            {...props}
+            hoveredRange={hoveredRange}
+            locale={locale}
+          />
         ),
         WeekNumber: ({ children, ...props }) => {
           return (
@@ -184,9 +191,11 @@ function CalendarDayButton({
   day,
   modifiers,
   hoveredRange,
+  locale,
   ...props
 }: React.ComponentProps<typeof DayButton> & {
   hoveredRange?: DateRange
+  locale?: Partial<DayPickerLocale>
 }) {
   const defaultClassNames = getDefaultClassNames()
   const ref = React.useRef<HTMLButtonElement>(null)
@@ -194,13 +203,6 @@ function CalendarDayButton({
   React.useEffect(() => {
     if (modifiers.focused) ref.current?.focus()
   }, [modifiers.focused])
-
-  // React.useEffect(() => {
-  //   console.log(
-  //     hoveredRange?.from?.toLocaleDateString(),
-  //     hoveredRange?.to?.toLocaleDateString(),
-  //   )
-  // }, [hoveredRange])
 
   // Check if this day is inside the hovered range
   const isInHovered =
@@ -221,7 +223,7 @@ function CalendarDayButton({
       ref={ref}
       variant='ghost'
       size='icon'
-      data-day={day.date.toLocaleDateString()}
+      data-day={day.date.toLocaleDateString(locale?.code)}
       data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&

@@ -1,18 +1,23 @@
 'use client'
 
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import {
+  GenerateScheduleOutput,
+  PayGradeOutput,
   RuleConditionCreateInput,
   RuleConditionOutput,
   RuleConditionUpdateInput,
   RuleCreateInput,
   RuleOutput,
   RuleUpdateInput,
-  TeamMemberOutput,
+  SchedulerAssignment,
+  SchedulerAssignmentSchema,
+  ShiftTypeOutput,
   TeamOutput,
 } from '@fuku/api/schemas'
 import {
+  Badge,
   Button,
   ButtonGroup,
   ButtonGroupSeparator,
@@ -25,6 +30,8 @@ import {
   InputGroupButton,
   InputGroupInput,
   Item,
+  ItemContent,
+  ItemDescription,
   ItemTitle,
   Select,
   SelectContent,
@@ -33,9 +40,11 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
+  Spinner,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { format } from 'date-fns'
 import {
   Check,
   ChevronLeft,
@@ -48,73 +57,25 @@ import {
   X,
 } from 'lucide-react'
 import { DateTime } from 'luxon'
+import * as z from 'zod/v4'
 
+import { I18nLocaleCode, locales } from '~/lib/i18n'
+import {
+  CellData,
+  Day,
+  DayMetrics,
+  defaultDateRangesByView,
+  getDefaultDateRangeByView,
+  getInitialCellData,
+  SchedulerMetrics,
+  TeamMemberData,
+  TeamMemberMetrics,
+  ViewOption,
+  ViewOptionValues,
+} from '~/lib/schedule'
+import { useScheduleStore } from '~/store/schedule.store'
 import { useTRPC } from '~/trpc/client'
 import { RulePanelPopoverButton } from './rule-panel-popover-button'
-
-const VIEW_OPTIONS = ['day', 'week', 'month'] as const
-type ViewOption = (typeof VIEW_OPTIONS)[number]
-
-type Day = {
-  date: Date
-  value: string
-  label: string
-}
-
-const widthsByView: Record<ViewOption, string> = {
-  day: '1fr',
-  week: '1fr',
-  month: '120px',
-}
-
-const defaultDateRangesByView: Record<ViewOption, { from: Date; to: Date }> = {
-  day: {
-    from: DateTime.now().startOf('day').toJSDate(),
-    to: DateTime.now().endOf('day').toJSDate(),
-  },
-  week: {
-    // always start on monday regardless of locale
-    from: DateTime.now().startOf('week').toJSDate(),
-    to: DateTime.now().endOf('week').toJSDate(),
-  },
-  month: {
-    from: DateTime.now().startOf('month').toJSDate(),
-    to: DateTime.now().endOf('month').toJSDate(),
-  },
-}
-
-const getDefaultDateRangeByView = (view: ViewOption, currentStart?: Date) => {
-  switch (view) {
-    case 'day':
-      const day = currentStart
-        ? DateTime.fromJSDate(currentStart)
-        : DateTime.now()
-      return {
-        from: day.startOf('day').toJSDate(),
-        to: day.endOf('day').toJSDate(),
-      }
-    case 'week': {
-      // always start on monday regardless of locale
-      // even though date range picker has option to start on sunday (monday by default)
-      const start = currentStart
-        ? DateTime.fromJSDate(currentStart).startOf('week')
-        : DateTime.now().startOf('week')
-      return {
-        from: start.toJSDate(),
-        to: start.endOf('week').toJSDate(),
-      }
-    }
-    case 'month': {
-      const start = currentStart
-        ? DateTime.fromJSDate(currentStart).startOf('month')
-        : DateTime.now().startOf('month')
-      return {
-        from: start.toJSDate(),
-        to: start.endOf('month').toJSDate(),
-      }
-    }
-  }
-}
 
 export const TeamScheduleContent = () => {
   const trpc = useTRPC()
@@ -123,11 +84,14 @@ export const TeamScheduleContent = () => {
   const params = useParams()
   const slug = params?.slug as string
 
+  // Date range and view state
+
   const [view, setView] = useState<ViewOption>('month')
   const [start, setStart] = useState(defaultDateRangesByView[view].from)
   const [end, setEnd] = useState(defaultDateRangesByView[view].to)
 
-  const locale = 'en-GB' // to set the date format, TBD: make dynamic
+  const localeCode: I18nLocaleCode = 'enGB' // TODO: add as part of user settings
+  const locale = locales[localeCode]
 
   const handleViewChange = (view: ViewOption) => {
     setView(view)
@@ -184,7 +148,17 @@ export const TeamScheduleContent = () => {
     }
   }
 
-  const daysList = useMemo<Day[]>(() => {
+  // Day and cell utils
+
+  const getDayId = (date: Date | string) => {
+    const d = typeof date === 'string' ? new Date(date) : date
+    return DateTime.fromJSDate(d).toFormat('yyyy-MM-dd')
+  }
+
+  const getCellKey = (teamMemberId: string, date: Date) =>
+    `${teamMemberId}-${getDayId(date)}`
+
+  const daysRowList = useMemo<Day[]>(() => {
     const startDT = DateTime.fromJSDate(start).startOf('day')
     const endDT = DateTime.fromJSDate(end).endOf('day')
 
@@ -193,9 +167,8 @@ export const TeamScheduleContent = () => {
 
     while (current <= endDT) {
       days.push({
+        id: getDayId(current.toJSDate()),
         date: current.toJSDate(),
-        value: current.toISODate()!,
-        label: current.toFormat('ccc dd LLL'),
       })
 
       current = current.plus({ days: 1 })
@@ -203,6 +176,8 @@ export const TeamScheduleContent = () => {
 
     return days
   }, [start, end])
+
+  // API queries
 
   const { data: team } = useQuery({
     ...trpc.team.bySlug.queryOptions({ slug: slug! }),
@@ -244,6 +219,8 @@ export const TeamScheduleContent = () => {
     }),
     enabled: !!team,
   })
+
+  // API mutations
 
   const { mutateAsync: createRule } = useMutation({
     ...trpc.rule.create.mutationOptions(),
@@ -337,6 +314,8 @@ export const TeamScheduleContent = () => {
     },
   })
 
+  // Unified handlers for rules and rule conditions for RulePanelPopoverButton
+
   const handleMutateRule = async (
     mode: 'create' | 'update' | 'delete',
     rule: RuleCreateInput | RuleUpdateInput | string,
@@ -369,12 +348,121 @@ export const TeamScheduleContent = () => {
     }
   }
 
-  const { mutateAsync: generateSchedule } = useMutation({
-    ...trpc.schedule.generateMonthly.mutationOptions(),
-    onSuccess: data => {
-      console.log(data)
-    },
-  })
+  // Lookup maps for API-fetched data
+
+  const teamMemberMap = useMemo(() => {
+    if (!teamMembers) return new Map<string, TeamMemberData>()
+    const map = new Map<string, TeamMemberData>()
+    for (const tm of teamMembers) {
+      const teamMemberData = {
+        ...tm,
+        totalAssignedShifts: 0,
+        totalHours: 0,
+      }
+      map.set(tm.id, teamMemberData)
+    }
+    return map
+  }, [teamMembers])
+
+  const shiftTypeMap = useMemo(() => {
+    if (!shiftTypes) return new Map<string, ShiftTypeOutput>()
+    const map = new Map<string, ShiftTypeOutput>()
+    for (const st of shiftTypes) {
+      map.set(st.id, st)
+    }
+    return map
+  }, [shiftTypes])
+
+  const payGradeMap = useMemo(() => {
+    if (!payGrades) return new Map<string, PayGradeOutput>()
+    const map = new Map<string, PayGradeOutput>()
+    for (const pg of payGrades) {
+      map.set(pg.id, pg)
+    }
+    return map
+  }, [payGrades])
+
+  // Scheduler assignments and metrics state and logic
+
+  const {
+    schedulerAssignments,
+    setSchedulerAssignments,
+    teamMemberMetricsMap,
+    dayMetricsMap,
+    setSchedulerMetrics,
+  } = useScheduleStore()
+
+  const computeShiftDurationHours = (shiftTypeId: string) => {
+    const shiftType = shiftTypeMap.get(shiftTypeId)
+
+    if (!shiftType) {
+      return 0
+    }
+
+    const shiftStart = DateTime.fromFormat(shiftType.startTime, 'HH:mm')
+    const shiftEnd = DateTime.fromFormat(shiftType.endTime, 'HH:mm')
+    return shiftEnd.diff(shiftStart, 'hours').hours
+  }
+
+  const computeSchedulerMetrics = (
+    assignments: SchedulerAssignment[],
+  ): SchedulerMetrics => {
+    const teamMemberMetricsMap = new Map<string, TeamMemberMetrics>()
+    const dayMetricsMap = new Map<string, DayMetrics>()
+
+    assignments = z.array(SchedulerAssignmentSchema).parse(assignments)
+
+    for (const assignment of assignments) {
+      const shiftDurationHours = computeShiftDurationHours(
+        assignment.shiftTypeId,
+      )
+
+      const teamMemberId = assignment.teamMemberId
+      const dayId = getDayId(assignment.date)
+
+      const currentMemberMetrics = teamMemberMetricsMap.get(teamMemberId) ?? {
+        totalAssignedShifts: 0,
+        totalHours: 0,
+      }
+
+      const currentDayMetrics = dayMetricsMap.get(dayId) ?? {
+        totalScheduledTeamMembers: 0,
+      }
+
+      teamMemberMetricsMap.set(teamMemberId, {
+        totalAssignedShifts: currentMemberMetrics.totalAssignedShifts + 1,
+        totalHours: currentMemberMetrics.totalHours + shiftDurationHours,
+      })
+
+      dayMetricsMap.set(dayId, {
+        totalScheduledTeamMembers:
+          // because scheduler can only create 1 assignment
+          // per team member per day, we can just increment by 1
+          currentDayMetrics.totalScheduledTeamMembers + 1,
+      })
+    }
+
+    return { teamMemberMetricsMap, dayMetricsMap }
+  }
+
+  useEffect(() => {
+    if (schedulerAssignments.length > 0 && shiftTypeMap.size > 0) {
+      console.log('scheduler assignments changed:', schedulerAssignments)
+      const metrics = computeSchedulerMetrics(schedulerAssignments)
+      console.log('computed metrics:', metrics)
+      setSchedulerMetrics(metrics)
+    }
+  }, [schedulerAssignments, shiftTypeMap])
+
+  // Schedule generation mutation
+
+  const { mutateAsync: generateSchedule, isPending: isGenerating } =
+    useMutation({
+      ...trpc.schedule.generate.mutationOptions(),
+      onSuccess: (data: GenerateScheduleOutput) => {
+        setSchedulerAssignments(data.assignments)
+      },
+    })
 
   const handleGenerateSchedule = () => {
     if (!team) return
@@ -391,11 +479,6 @@ export const TeamScheduleContent = () => {
       .endOf('day')
       .toUTC()
 
-    // console.log({
-    //   startUTC: startUTC.toFormat("yyyy-MM-dd'T'HH:mm:ss ZZZZ"),
-    //   endUTC: endUTC.toFormat("yyyy-MM-dd'T'HH:mm:ss ZZZZ"),
-    // })
-
     generateSchedule({
       teamId: team.id,
       start: startUTC.toJSDate(),
@@ -404,13 +487,39 @@ export const TeamScheduleContent = () => {
     })
   }
 
+  // Search state to filter team members by name
+
   const [search, setSearch] = useState('')
-  const filteredMembers: TeamMemberOutput[] = useMemo(() => {
+  const filteredTeamMembers: TeamMemberData[] = useMemo(() => {
     if (!teamMembers) return []
-    return teamMembers.filter(tm =>
-      tm.givenNames.toLowerCase().includes(search.toLowerCase()),
-    )
-  }, [teamMembers, search])
+    return teamMembers
+      .map(tm => ({
+        ...tm,
+        ...(teamMemberMetricsMap?.get(tm.id) || {
+          totalAssignedShifts: 0,
+          totalHours: 0,
+        }),
+      }))
+      .filter(tm => tm.givenNames.toLowerCase().includes(search.toLowerCase()))
+  }, [teamMembers, search, teamMemberMetricsMap])
+
+  const cellMap = useMemo(() => {
+    const map = new Map<string, CellData>()
+
+    const ensure = (cellKey: string) => {
+      if (!map.has(cellKey)) {
+        map.set(cellKey, getInitialCellData())
+      }
+      return map.get(cellKey)!
+    }
+
+    for (const a of schedulerAssignments) {
+      const cellKey = getCellKey(a.teamMemberId, a.date)
+      ensure(cellKey).schedulerAssignments.push(a)
+    }
+
+    return map
+  }, [schedulerAssignments])
 
   return (
     <div className='flex flex-col gap-4'>
@@ -464,17 +573,36 @@ export const TeamScheduleContent = () => {
           <SelectContent align='start' position='popper'>
             <SelectGroup>
               <SelectLabel>View by</SelectLabel>
-              {VIEW_OPTIONS.map(option => (
-                <SelectItem key={option} value={option} className='capitalize'>
+              {ViewOptionValues.map(option => (
+                <SelectItem
+                  id={option}
+                  key={option}
+                  value={option}
+                  className='capitalize'
+                >
                   {option}
                 </SelectItem>
               ))}
             </SelectGroup>
           </SelectContent>
         </Select>
-        <Button className='ml-auto' onClick={handleGenerateSchedule}>
-          <RefreshCcw />
-          <span className='hidden md:flex'>Auto-Schedule</span>
+        <Button
+          className='ml-auto'
+          onClick={handleGenerateSchedule}
+          disabled={isGenerating}
+        >
+          {isGenerating ? <Spinner /> : <RefreshCcw />}
+          <span className={cn('hidden md:flex', isGenerating && 'hidden')}>
+            Auto-Schedule
+          </span>
+          <span
+            className={cn(
+              isGenerating && 'hidden md:flex',
+              !isGenerating && 'hidden',
+            )}
+          >
+            Generating...
+          </span>
         </Button>
         <Button variant='secondary'>
           <Cog />
@@ -488,14 +616,14 @@ export const TeamScheduleContent = () => {
       {/* md+ breakpoint */}
       <div className='h-[600px] hidden md:block border rounded-md border-input overflow-auto overscroll-none'>
         <div
-          className='grid min-w-max min-h-full'
+          className='grid min-w-max min-h-full isolate'
           style={{
-            gridTemplateColumns: `250px repeat(${daysList.length}, minmax(120px, 1fr))`,
-            gridTemplateRows: `min-content repeat(${filteredMembers.length || 1}, minmax(min-content, 1fr)) min-content`,
+            gridTemplateColumns: `250px repeat(${daysRowList.length}, minmax(120px, 1fr))`,
+            gridTemplateRows: `min-content repeat(${filteredTeamMembers.length || 1}, auto) min-content`,
           }}
         >
           {/* team member input + filter header */}
-          <div className='sticky left-0 top-0 z-20 p-2 border-b border-r border-input bg-background flex items-center gap-2'>
+          <div className='sticky left-0 top-0 z-40 p-2 border-b border-r border-input bg-background flex items-center gap-2'>
             <InputGroup className='flex-1 bg-input/30'>
               <InputGroupAddon>
                 <Search className='size-4 shrink-0 opacity-50' />
@@ -526,35 +654,43 @@ export const TeamScheduleContent = () => {
           </div>
 
           {/* day headers */}
-          {daysList.map(day => (
+          {daysRowList.map(day => (
             <div
-              key={day.value}
-              className='sticky top-0 z-10 border-b border-r border-input text-center bg-background p-2'
+              id={day.id}
+              key={day.id}
+              className='sticky top-0 z-30 border-b border-r border-input flex items-center bg-background py-2 px-4 gap-1.5'
             >
-              {day.label}
+              <span className='font-bold'>
+                {format(day.date, 'ccc', { locale })}
+              </span>
+              <span>{format(day.date, 'd', { locale })}</span>
             </div>
           ))}
 
           {/* member rows */}
-          {filteredMembers.length === 0 ? (
+          {filteredTeamMembers.length === 0 ? (
             <>
-              <div className='sticky left-0 p-4 flex items-start text-sm text-muted-foreground bg-background border-r border-input'>
+              <div className='sticky left-0 z-20 p-4 flex items-start text-sm text-muted-foreground bg-background border-r border-input'>
                 No members found.
               </div>
 
-              {daysList.map(day => (
-                <div key={`no-members-${day.value}`} className='' />
+              {daysRowList.map(day => (
+                <div
+                  id={`no-members-${day.id}`}
+                  key={`no-members-${day.id}`}
+                  className=''
+                />
               ))}
             </>
           ) : (
-            filteredMembers.map((tm, idx) => {
-              const isLastRow = idx === filteredMembers.length - 1
+            filteredTeamMembers.map((tm, idx) => {
+              const isLastRow = idx === filteredTeamMembers.length - 1
               return (
                 <Fragment key={tm.id}>
                   {/* member cell */}
                   <div
                     className={cn(
-                      'sticky left-0 z-10 w-[250px] bg-background border-r border-input p-2',
+                      'sticky left-0 z-20 w-[250px] bg-background border-r border-input',
                       !isLastRow && 'border-b',
                     )}
                   >
@@ -562,19 +698,43 @@ export const TeamScheduleContent = () => {
                   </div>
 
                   {/* shift cells */}
-                  {daysList.map((day, idx) => {
-                    const isLastCol = idx === daysList.length - 1
+                  {daysRowList.map((day, idx) => {
+                    const cellKey = getCellKey(tm.id, day.date)
+                    const cellData = cellMap.get(cellKey)
+                    const isLastCol = idx === daysRowList.length - 1
                     return (
                       <div
-                        key={`${tm.id}-${day.value}`}
+                        id={cellKey}
+                        key={cellKey}
                         className={cn(
                           'border-input p-1',
                           !isLastRow && 'border-b',
                           !isLastCol && 'border-r',
+                          'gap-1.5',
                         )}
                       >
-                        {tm.givenNames}{' '}
-                        {DateTime.fromJSDate(day.date).toFormat('dd LLL')}
+                        {/* Add assignments, unavailabilities, etc here */}
+                        {cellData?.schedulerAssignments.map(a => {
+                          const shiftType = shiftTypeMap?.get(a.shiftTypeId)
+                          if (!shiftType) return null
+                          return (
+                            <div
+                              id={cellKey + '-' + a.shiftTypeId}
+                              key={cellKey + '-' + a.shiftTypeId}
+                              className='rounded-md py-1 px-2 border border-input bg-muted flex flex-col'
+                            >
+                              <div className='font-bold text-sm'>
+                                {shiftType?.name ?? ''}
+                              </div>
+                              <div className='text-xs text-muted-foreground'>
+                                {shiftType?.startTime ?? ''}
+                                {shiftType?.endTime
+                                  ? ' - ' + shiftType.endTime
+                                  : ''}
+                              </div>
+                            </div>
+                          )
+                        })}
                       </div>
                     )
                   })}
@@ -584,16 +744,22 @@ export const TeamScheduleContent = () => {
           )}
 
           {/* add member button */}
-          <div className='sticky left-0 bottom-0 z-10 border-t border-r border-input text-center bg-background p-2'>
+          <div className='sticky left-0 bottom-0 z-30 border-t border-r border-input text-center bg-background p-2'>
             <Button className='w-full' variant='secondary'>
               <Plus /> Add member
             </Button>
           </div>
-          {daysList.map(day => (
+          {daysRowList.map(day => (
             <div
-              key={`empty-${day.value}`}
-              className='sticky bottom-0 z-10 border-t border-input text-center bg-background p-2'
-            />
+              id={`day-summary-${day.id}`}
+              key={`day-summary-${day.id}`}
+              className='sticky bottom-0 z-10 border-t border-input flex items-center bg-background'
+            >
+              <Badge variant='outline' className='mx-auto'>
+                {dayMetricsMap.get(day.id)?.totalScheduledTeamMembers ?? 0}{' '}
+                assigned
+              </Badge>
+            </div>
           ))}
         </div>
       </div>
@@ -610,13 +776,13 @@ export const TeamScheduleContent = () => {
 const TeamMemberPanelItem = ({
   teamMember,
 }: {
-  teamMember: TeamMemberOutput
+  teamMember: TeamMemberData
 }) => {
   return (
-    <div className='not-last:border-b border-input'>
-      <Collapsible>
-        <CollapsibleTrigger className='w-full flex items-center justify-start'>
-          <Item className='w-full'>
+    <Collapsible className='group/panel not-last:border-b border-input'>
+      <CollapsibleTrigger className='w-full flex items-center min-h-16 px-2'>
+        <Item className='size-full py-0 px-2'>
+          <ItemContent className='items-start'>
             <ItemTitle>
               <span>{teamMember.givenNames}</span>
               <span
@@ -626,10 +792,27 @@ const TeamMemberPanelItem = ({
                 {teamMember.familyName}
               </span>
             </ItemTitle>
-          </Item>
-        </CollapsibleTrigger>
-        <CollapsibleContent>{teamMember.payGrade?.name}</CollapsibleContent>
-      </Collapsible>
-    </div>
+            <ItemDescription className='group-data-[state=open]/panel:hidden'>
+              {teamMember.totalAssignedShifts} shifts, {teamMember.totalHours}{' '}
+              hours
+            </ItemDescription>
+          </ItemContent>
+        </Item>
+      </CollapsibleTrigger>
+      <CollapsibleContent className='px-2 pb-2'>
+        <div className='*:text-sm **:py-0.5 grid grid-cols-[auto_1fr] gap-2 items-start justify-items-start-safe'>
+          <Badge variant='outline'>Pay Grade</Badge>
+          <div>{teamMember.payGrade?.name}</div>
+          <Badge variant='outline'>Shift Hours</Badge>
+          <div className='grid grid-flow-row'>
+            <div>{teamMember.totalHours} hours</div>
+            <div>
+              {teamMember.totalHours *
+                (teamMember.payGrade ? teamMember.payGrade.baseRate : 0)}
+            </div>
+          </div>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }
