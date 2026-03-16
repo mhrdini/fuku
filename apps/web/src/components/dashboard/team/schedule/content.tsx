@@ -33,6 +33,8 @@ import {
   ItemContent,
   ItemDescription,
   ItemTitle,
+  ScrollArea,
+  ScrollBar,
   Select,
   SelectContent,
   SelectGroup,
@@ -522,7 +524,7 @@ export const TeamScheduleContent = () => {
   }, [schedulerAssignments])
 
   return (
-    <div className='flex flex-col gap-4'>
+    <div className='flex flex-col gap-4 **:overscroll-none'>
       <h2>Schedule</h2>
       {/* header */}
       <div className='flex gap-2'>
@@ -614,12 +616,15 @@ export const TeamScheduleContent = () => {
       {/* sm breakpoint */}
       <div className='hidden sm:flex md:hidden'></div>
       {/* md+ breakpoint */}
-      <div className='h-[600px] hidden md:block border rounded-md border-input overflow-auto overscroll-none'>
+      <ScrollArea className='h-[600px] hidden md:block border rounded-md border-input'>
         <div
-          className='grid min-w-max min-h-full isolate'
+          className='grid min-w-max h-[600px] isolate'
           style={{
             gridTemplateColumns: `250px repeat(${daysRowList.length}, minmax(120px, 1fr))`,
-            gridTemplateRows: `min-content repeat(${filteredTeamMembers.length || 1}, auto) min-content`,
+            gridTemplateRows:
+              filteredTeamMembers.length > 1
+                ? `min-content repeat(${filteredTeamMembers.length - 1}, min-content) 1fr min-content`
+                : 'min-content 1fr min-content',
           }}
         >
           {/* team member input + filter header */}
@@ -762,7 +767,8 @@ export const TeamScheduleContent = () => {
             </div>
           ))}
         </div>
-      </div>
+        <ScrollBar orientation='horizontal' />
+      </ScrollArea>
       <div className='flex gap-2 justify-end'>
         <Button disabled>
           Save
