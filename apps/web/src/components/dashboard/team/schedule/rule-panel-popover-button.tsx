@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   PayGradeOutput,
   RuleConditionCreateInput,
@@ -11,6 +11,7 @@ import {
   RuleUpdateInput,
   ShiftTypeOutput,
   TeamMemberOutput,
+  TeamOutput,
 } from '@fuku/api/schemas'
 import {
   MetricSchema,
@@ -69,11 +70,9 @@ import {
   X,
 } from 'lucide-react'
 
-import { useDebouncedCommit } from '~/hooks/useDebouncedCommit'
 import { useRuleEditor } from '~/hooks/useRuleEditor'
 import { MONTH_MAP, WEEKDAY_MAP } from '~/lib/date'
 import { MutationMode } from '~/lib/query'
-import { TeamOutput } from '../../../../../../../packages/api/src/schemas/team'
 
 const RULE_CONDITION_FIELD_LABELS: Record<RuleConditionField, string> = {
   [RuleConditionFieldValues.MONTH]: 'Month',
@@ -153,7 +152,7 @@ export const RulePanelPopoverButton = ({
       operator: RuleOperatorValues.MIN,
       threshold: 1,
       timeWindow: TimeWindowValues.WEEK,
-      hardConstraint: false,
+      hardConstraint: true,
     })
   }
 
@@ -234,6 +233,27 @@ const RulePanelItem = ({
   ) => Promise<RuleConditionOutput>
   deleteRuleCondition: (conditionId: string) => Promise<RuleConditionOutput>
 }) => {
+  // local state
+  const [thresholdInput, setThresholdInput] = useState(String(rule.threshold))
+
+  const [penaltyInput, setPenaltyInput] = useState(
+    rule.penalty !== null && rule.penalty !== undefined
+      ? String(rule.penalty)
+      : '',
+  )
+
+  useEffect(() => {
+    setThresholdInput(String(rule.threshold))
+  }, [rule.threshold])
+
+  useEffect(() => {
+    setPenaltyInput(
+      rule.penalty !== null && rule.penalty !== undefined
+        ? String(rule.penalty)
+        : '',
+    )
+  }, [rule.penalty])
+
   // update
   const handleUpdateTargetType = (target: string) => {
     if (target === rule.target) return
@@ -314,15 +334,19 @@ const RulePanelItem = ({
     } as RuleUpdateInput)
   }
 
-  const handleUpdateThreshold = (threshold: string) => {
-    const thresholdNumber = parseInt(threshold)
-    if (isNaN(thresholdNumber)) return
+  const commitThreshold = () => {
+    if (thresholdInput.trim() === '') return
+
+    const num = Number(thresholdInput)
+    if (Number.isNaN(num)) return
+    if (num === rule.threshold) return
+    if (num < 0) return
+
     updateRule({
       ...rule,
-      threshold: thresholdNumber,
+      threshold: num,
     } as RuleUpdateInput)
   }
-
   const handleUpdateTimeWindow = (timeWindow: string) => {
     if (timeWindow === rule.timeWindow) return
 
@@ -345,20 +369,25 @@ const RulePanelItem = ({
     } as RuleUpdateInput)
   }
 
-  const handleUpdatePenalty = (penalty: string) => {
-    const penaltyNumber = parseInt(penalty)
-    if (isNaN(penaltyNumber)) return
+  const commitPenalty = () => {
+    if (penaltyInput.trim() === '') {
+      updateRule({
+        ...rule,
+        penalty: null,
+      } as RuleUpdateInput)
+      return
+    }
+
+    const num = Number(penaltyInput)
+    if (Number.isNaN(num)) return
+    if (num === rule.penalty) return
+    if (num < 0) return
+
     updateRule({
       ...rule,
-      penalty: penaltyNumber,
+      penalty: num,
     } as RuleUpdateInput)
   }
-
-  const { schedule: scheduleUpdateThreshold } = useDebouncedCommit(
-    handleUpdateThreshold,
-  )
-  const { schedule: scheduleUpdatePenalty } =
-    useDebouncedCommit(handleUpdatePenalty)
 
   // delete
   const handleDeleteRule = () => {
@@ -498,9 +527,13 @@ const RulePanelItem = ({
             type='number'
             placeholder='Value'
             size='chip'
-            value={rule.threshold}
-            onChange={e => {
-              scheduleUpdateThreshold(e.target.value)
+            value={thresholdInput}
+            onChange={e => setThresholdInput(e.target.value)}
+            onBlur={commitThreshold}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === 'Escape') {
+                commitThreshold()
+              }
             }}
           />
           {/* per */}
@@ -544,9 +577,14 @@ const RulePanelItem = ({
             className='w-[8ch]'
             size='chip'
             placeholder='Penalty'
-            value={rule.penalty ?? undefined}
-            onChange={e => {
-              scheduleUpdatePenalty(e.target.value)
+            value={penaltyInput}
+            onChange={e => setPenaltyInput(e.target.value)}
+            onBlur={commitPenalty}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === 'Escape') {
+                e.stopPropagation()
+                commitPenalty()
+              }
             }}
             disabled={rule.hardConstraint}
           />

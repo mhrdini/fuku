@@ -1,14 +1,14 @@
 import {
-  Metric,
   MetricValues,
   RuleConditionOperatorValues,
   RuleOperator,
   RuleOperatorValues,
+  RuleTargetValues,
   TimeWindow,
   TimeWindowValues,
 } from '@fuku/domain/schemas'
 
-import { Rule, SchedulerContext, TeamMember } from '../types'
+import { Rule, SchedulerContext, TeamMember, ZonedShiftType } from '../types'
 import {
   CoefficientMap,
   Operator,
@@ -202,23 +202,37 @@ export class ConstraintModelBuilder {
 
   private addRuleConstraints(model: OptimizationModel) {
     for (const rule of this.ctx.rules) {
+      // =========================================================
+      // 1. CONSECUTIVE DAYS WORKED
+      // =========================================================
       if (rule.metric === MetricValues.CONSECUTIVE_DAYS_WORKED) {
-        const windowLength = rule.threshold + 1 // exclusive
+        const windowLength = rule.threshold + 1
+
         for (const tm of this.ctx.teamMembers) {
           if (!this.isRuleTargetMember(rule, tm)) continue
+
+          const shiftTypes = this.getRelevantShiftTypes(rule)
 
           for (
             let startDay = 0;
             startDay <= this.numDays - windowLength;
             startDay++
           ) {
-            if (!this.hasValidConditions(rule, startDay)) continue
+            const windowDays: number[] = []
+
+            for (let d = startDay; d < startDay + windowLength; d++) {
+              if (!this.hasValidConditions(rule, d)) continue
+              windowDays.push(d)
+            }
+
+            if (windowDays.length !== windowLength) continue
 
             const coefficients: CoefficientMap = {}
-            for (let d = startDay; d < startDay + windowLength; d++) {
-              for (const st of this.ctx.shiftTypes) {
+
+            for (const d of windowDays) {
+              for (const st of shiftTypes) {
                 const varName = getAssignmentVariableName(tm.id, d, st.id)
-                coefficients[varName] = 1
+                coefficients[varName] = (coefficients[varName] ?? 0) + 1
               }
             }
 
@@ -232,9 +246,13 @@ export class ConstraintModelBuilder {
             )
           }
         }
+
         continue
       }
 
+      // =========================================================
+      // 2. UNIQUE MEMBERS ASSIGNED
+      // =========================================================
       if (rule.metric === MetricValues.UNIQUE_MEMBERS_ASSIGNED) {
         const windows =
           rule.timeWindow === TimeWindowValues.MONTH
@@ -244,56 +262,65 @@ export class ConstraintModelBuilder {
               )
 
         windows.forEach((dayIndices, windowIndex) => {
+          const validDays = this.getValidDays(rule, dayIndices)
+          if (validDays.length === 0) return
+
+          const shiftTypes = this.getRelevantShiftTypes(rule)
           const auxVariables: string[] = []
 
           for (const tm of this.ctx.teamMembers) {
             if (!this.isRuleTargetMember(rule, tm)) continue
+
             const auxVarName = `uniqueMember__${rule.id}__${tm.id}__${windowIndex}`
             auxVariables.push(auxVarName)
+
             model.variables.push({ name: auxVarName, type: 'binary' })
 
-            for (const d of dayIndices) {
-              if (!this.hasValidConditions(rule, d)) continue
-              for (const st of this.ctx.shiftTypes) {
-                if (!this.isRuleTargetMember(rule, tm)) continue
-                const shiftVarName = getAssignmentVariableName(tm.id, d, st.id)
+            // forward: y >= x
+            for (const d of validDays) {
+              for (const st of shiftTypes) {
+                const shiftVar = getAssignmentVariableName(tm.id, d, st.id)
+
                 this.addRuleConstraint(
                   model,
                   rule,
-                  `link_${auxVarName}__${shiftVarName}`,
-                  { [auxVarName]: 1, [shiftVarName]: -1 },
+                  `link_${auxVarName}__${shiftVar}`,
+                  { [auxVarName]: 1, [shiftVar]: -1 },
                   '>=',
                   0,
                 )
               }
             }
 
-            const reverseCoefficients: CoefficientMap = { [auxVarName]: 1 }
-            for (const d of dayIndices) {
-              for (const st of this.ctx.shiftTypes) {
-                const shiftVarName = getAssignmentVariableName(tm.id, d, st.id)
-                reverseCoefficients[shiftVarName] =
-                  (reverseCoefficients[shiftVarName] ?? 0) - 1
+            // reverse: y <= sum(x)
+            const reverse: CoefficientMap = { [auxVarName]: 1 }
+
+            for (const d of validDays) {
+              for (const st of shiftTypes) {
+                const shiftVar = getAssignmentVariableName(tm.id, d, st.id)
+                reverse[shiftVar] = (reverse[shiftVar] ?? 0) - 1
               }
             }
 
             this.addRuleConstraint(
               model,
               rule,
-              `reverse_link_${auxVarName}`,
-              reverseCoefficients,
+              `reverse_${auxVarName}`,
+              reverse,
               '<=',
               0,
             )
           }
 
           const windowCoefficients: CoefficientMap = {}
-          for (const auxVar of auxVariables) windowCoefficients[auxVar] = 1
+          for (const aux of auxVariables) {
+            windowCoefficients[aux] = 1
+          }
 
           this.addRuleConstraint(
             model,
             rule,
-            `rule__${rule.id}__uniqueMembers_window_${windowIndex}`,
+            `rule__${rule.id}__unique__${windowIndex}`,
             windowCoefficients,
             this.getOperatorForRule(rule.operator),
             rule.threshold,
@@ -303,6 +330,9 @@ export class ConstraintModelBuilder {
         continue
       }
 
+      // =========================================================
+      // 3. GENERIC METRICS (DAYS_WORKED, HOURS_WORKED, DAYS_OFF)
+      // =========================================================
       const windows =
         rule.timeWindow === TimeWindowValues.MONTH
           ? [this.getDaysForTimeWindow(rule.timeWindow, 0)]
@@ -311,14 +341,16 @@ export class ConstraintModelBuilder {
             )
 
       let windowIndex = 0
+
       for (const dayIndices of windows) {
-        const dayIndex = dayIndices[0]
-        if (!this.hasValidConditions(rule, dayIndex)) continue
+        const validDays = this.getValidDays(rule, dayIndices)
+        if (validDays.length === 0) continue
 
         for (const tm of this.ctx.teamMembers) {
           if (!this.isRuleTargetMember(rule, tm)) continue
+
           const { coefficients, adjustRhs, flipOperator } =
-            this.computeMetricExpression(rule.metric, tm.id, dayIndices)
+            this.computeMetricExpression(rule, tm.id, validDays)
 
           const operator = flipOperator
             ? this.flipOperator(this.getOperatorForRule(rule.operator))
@@ -659,36 +691,36 @@ export class ConstraintModelBuilder {
   }
 
   private computeMetricExpression(
-    metric: Metric,
+    rule: Rule,
     teamMemberId: string,
     dayIndices: number[],
-  ): MetricExpression {
+  ): {
+    coefficients: CoefficientMap
+    adjustRhs?: (rhs: number) => number
+    flipOperator?: boolean
+  } {
     const coefficients: CoefficientMap = {}
-    let adjustRhs
+    const validDays = this.getValidDays(rule, dayIndices)
+    const shiftTypes = this.getRelevantShiftTypes(rule)
+
+    let adjustRhs: ((rhs: number) => number) | undefined
     let flipOperator = false
 
-    switch (metric) {
+    switch (rule.metric) {
       case MetricValues.DAYS_WORKED: {
-        for (const dayIndex of dayIndices) {
-          for (const st of this.ctx.shiftTypes) {
-            const varName = getAssignmentVariableName(
-              teamMemberId,
-              dayIndex,
-              st.id,
-            )
-            coefficients[varName] = 1
+        for (const d of validDays) {
+          for (const st of shiftTypes) {
+            const varName = getAssignmentVariableName(teamMemberId, d, st.id)
+            coefficients[varName] = (coefficients[varName] ?? 0) + 1
           }
         }
         break
       }
+
       case MetricValues.HOURS_WORKED: {
-        for (const dayIndex of dayIndices) {
-          for (const st of this.ctx.shiftTypes) {
-            const varName = getAssignmentVariableName(
-              teamMemberId,
-              dayIndex,
-              st.id,
-            )
+        for (const d of validDays) {
+          for (const st of shiftTypes) {
+            const varName = getAssignmentVariableName(teamMemberId, d, st.id)
             coefficients[varName] = st.endTime
               .diff(st.startTime, 'hours')
               .as('hours')
@@ -696,24 +728,23 @@ export class ConstraintModelBuilder {
         }
         break
       }
+
       case MetricValues.DAYS_OFF: {
-        for (const dayIndex of dayIndices) {
-          for (const st of this.ctx.shiftTypes) {
-            const varName = getAssignmentVariableName(
-              teamMemberId,
-              dayIndex,
-              st.id,
-            )
-            coefficients[varName] = 1
+        for (const d of validDays) {
+          for (const st of shiftTypes) {
+            const varName = getAssignmentVariableName(teamMemberId, d, st.id)
+            coefficients[varName] = (coefficients[varName] ?? 0) + 1
           }
         }
-        adjustRhs = (rhs: number) => dayIndices.length - rhs
+
+        // DAYS_OFF = validDays - DAYS_WORKED
+        adjustRhs = (rhs: number) => validDays.length - rhs
         flipOperator = true
         break
       }
-      default: {
-        break
-      }
+
+      default:
+        throw new Error(`Unsupported metric: ${rule.metric}`)
     }
 
     return { coefficients, adjustRhs, flipOperator }
@@ -787,6 +818,17 @@ export class ConstraintModelBuilder {
     return false
   }
 
+  private getValidDays(rule: Rule, dayIndices: number[]): number[] {
+    return dayIndices.filter(d => this.hasValidConditions(rule, d))
+  }
+
+  private getRelevantShiftTypes(rule: Rule): ZonedShiftType[] {
+    if (rule.target === RuleTargetValues.SHIFT_TYPE && rule.shiftTypeId) {
+      return this.ctx.shiftTypes.filter(st => st.id === rule.shiftTypeId)
+    }
+    return this.ctx.shiftTypes
+  }
+
   private hasValidConditions(rule: Rule, dayIndex: number): boolean {
     if (!rule.ruleConditions?.length) return true
 
@@ -795,33 +837,43 @@ export class ConstraintModelBuilder {
     const weekday = day.weekday
 
     for (const cond of rule.ruleConditions) {
+      let intValue: number | undefined
+      let stringValue: string | undefined
+      let intSetValue: Set<number> | undefined
+      let stringSetValue: Set<string> | undefined
+
+      if (typeof cond.value === 'number') intValue = cond.value
+      if (this.isIntArray(cond.value)) intSetValue = new Set(cond.value)
+      if (typeof cond.value === 'string') stringValue = cond.value
+      if (this.isStringArray(cond.value)) stringSetValue = new Set(cond.value)
+
       switch (cond.field) {
         case 'MONTH': {
-          if (typeof cond.value === 'number') {
+          if (intValue) {
             switch (cond.operator) {
               case RuleConditionOperatorValues.EQ:
-                if (month !== cond.value) return false
+                if (month !== intValue) return false
                 break
               case RuleConditionOperatorValues.NEQ:
-                if (month === cond.value) return false
+                if (month === intValue) return false
                 break
               case RuleConditionOperatorValues.GTE:
-                if (month < cond.value) return false
+                if (month < intValue) return false
                 break
               case RuleConditionOperatorValues.LTE:
-                if (month > cond.value) return false
+                if (month > intValue) return false
                 break
               default:
                 return false
             }
           }
-          if (this.isIntArray(cond.value)) {
+          if (intSetValue) {
             switch (cond.operator) {
               case RuleConditionOperatorValues.IN:
-                if (!cond.value.includes(month)) return false
+                if (!intSetValue.has(month)) return false
                 break
               case RuleConditionOperatorValues.NOT_IN:
-                if (cond.value.includes(month)) return false
+                if (intSetValue.has(month)) return false
                 break
               default:
                 return false
@@ -830,31 +882,31 @@ export class ConstraintModelBuilder {
           break
         }
         case 'WEEKDAY': {
-          if (typeof cond.value === 'number') {
+          if (intValue) {
             switch (cond.operator) {
               case RuleConditionOperatorValues.EQ:
-                if (weekday !== cond.value) return false
+                if (weekday !== intValue) return false
                 break
               case RuleConditionOperatorValues.NEQ:
-                if (weekday === cond.value) return false
+                if (weekday === intValue) return false
                 break
               case RuleConditionOperatorValues.GTE:
-                if (weekday < cond.value) return false
+                if (weekday < intValue) return false
                 break
               case RuleConditionOperatorValues.LTE:
-                if (weekday > cond.value) return false
+                if (weekday > intValue) return false
                 break
               default:
                 return false
             }
           }
-          if (this.isIntArray(cond.value)) {
+          if (intSetValue) {
             switch (cond.operator) {
               case RuleConditionOperatorValues.IN:
-                if (!cond.value.includes(weekday)) return false
+                if (!intSetValue.has(weekday)) return false
                 break
               case RuleConditionOperatorValues.NOT_IN:
-                if (cond.value.includes(weekday)) return false
+                if (intSetValue.has(weekday)) return false
                 break
               default:
                 return false
