@@ -424,6 +424,8 @@ export const TeamScheduleContent = () => {
 
   const computeSchedulerMetrics = (
     assignments: SchedulerAssignment[],
+    // start?: Date,
+    // end?: Date,
   ): SchedulerMetrics => {
     const teamMemberMetricsMap = new Map<string, TeamMemberMetrics>()
     const dayMetricsMap = new Map<string, DayMetrics>()
@@ -431,6 +433,10 @@ export const TeamScheduleContent = () => {
     assignments = z.array(SchedulerAssignmentSchema).parse(assignments)
 
     for (const assignment of assignments) {
+      if (assignment.date < start || assignment.date > end) {
+        continue
+      }
+
       const shiftDurationHours = computeShiftDurationHours(
         assignment.shiftTypeId,
       )
@@ -470,7 +476,7 @@ export const TeamScheduleContent = () => {
       console.log('computed metrics:', metrics)
       setSchedulerMetrics(metrics)
     }
-  }, [schedulerAssignments, shiftTypeMap])
+  }, [schedulerAssignments, shiftTypeMap, start, end])
 
   // Schedule generation mutation
 
@@ -584,6 +590,8 @@ export const TeamScheduleContent = () => {
               setStart(range.from)
               setEnd(range.to || range.from)
               if (view) setView(view)
+              const metrics = computeSchedulerMetrics(schedulerAssignments)
+              setSchedulerMetrics(metrics)
             }}
           />
           <ButtonGroupSeparator />
@@ -925,8 +933,8 @@ const TeamMemberPanelItem = ({
           </ItemContent>
         </Item>
       </CollapsibleTrigger>
-      <CollapsibleContent className='px-2 pb-2'>
-        <div className='*:text-sm **:py-0.5 grid grid-cols-[auto_1fr] gap-2 items-start justify-items-start-safe'>
+      <CollapsibleContent className='p-1.5 px-2'>
+        <div className='*:text-sm grid grid-cols-[auto_1fr] gap-2 **:justify-self-start *:self-center *:odd:self-start'>
           <Badge variant='outline'>Pay Grade</Badge>
           <div>{teamMember.payGrade?.name}</div>
           <Badge variant='outline'>Shift Hours</Badge>
