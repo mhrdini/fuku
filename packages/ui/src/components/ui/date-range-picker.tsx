@@ -696,7 +696,7 @@ export function DateRangePicker({
                   defaultMonth={
                     new Date(
                       new Date().setMonth(
-                        new Date().getMonth() - (isSmallScreen ? 0 : 1),
+                        range.from.getMonth() - (isSmallScreen ? 0 : 1),
                       ),
                     )
                   }

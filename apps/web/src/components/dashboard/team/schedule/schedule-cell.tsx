@@ -29,7 +29,7 @@ export const ScheduleCell = ({
         'border-input p-1',
         !isLastRow && 'border-b',
         !isLastCol && 'border-r',
-        'gap-1.5',
+        'flex flex-col gap-1.5',
         className,
       )}
     >
@@ -39,7 +39,8 @@ export const ScheduleCell = ({
         if (!shiftType) return null
         return (
           <ScheduleAssignmentCard
-            key={cellKey + '-' + a.shiftTypeId}
+            key={a.id}
+            assignment={a}
             shiftType={shiftType}
           />
         )
