@@ -1,8 +1,10 @@
 'use client'
 
 import { ShiftTypeOutput } from '@fuku/api/schemas'
+import { SchedulerAssignment } from '@fuku/domain/schemas'
 
 interface ScheduleAssignmentCardProps {
+  assignment: SchedulerAssignment
   shiftType: ShiftTypeOutput
 }
 

@@ -1,4 +1,5 @@
-import { SchedulerAssignment, TeamMemberOutput } from '@fuku/api/schemas'
+import { TeamMemberOutput } from '@fuku/api/schemas'
+import { SchedulerAssignment } from '@fuku/domain/schemas'
 import { DateTime } from 'luxon'
 
 export const ViewOptionValues = ['day', 'week', 'month'] as const

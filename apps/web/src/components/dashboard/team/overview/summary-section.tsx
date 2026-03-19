@@ -276,9 +276,9 @@ export const SummarySection = () => {
       </div>
       <div className='grid grid-cols-1 @[24rem]/main:grid-cols-2 @[50rem]/main:grid-cols-4 gap-4'>
         {teamMembersSummary}
-        {locationSummary}
-        {shiftTypesSummary}
         {payGradeSummary}
+        {shiftTypesSummary}
+        {locationSummary}
       </div>
     </div>
   )

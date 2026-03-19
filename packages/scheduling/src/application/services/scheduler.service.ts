@@ -1,3 +1,4 @@
+import { SchedulerAssignment } from '@fuku/domain/schemas'
 import { WeekdayNumbers } from 'luxon'
 
 import {
@@ -10,7 +11,6 @@ import {
   TeamSnapshot,
 } from '../../domain/types/engine'
 import {
-  Assignment,
   StaffingRequirements,
   ZonedOperationalHours,
 } from '../../domain/types/schedule'
@@ -48,7 +48,7 @@ export interface GenerateScheduleOptions {
 export interface GenerateScheduleOutput {
   teamId: string
   period: Period
-  assignments: Assignment[]
+  assignments: SchedulerAssignment[]
 }
 
 export class DefaultSchedulerService implements SchedulerService {
@@ -86,7 +86,9 @@ export class DefaultSchedulerService implements SchedulerService {
         end: toJSDate(context.period.end),
         timeZone: context.period.timeZone,
       },
-      assignments: engineResult.proposedAssignments.map(this.toAssignment),
+      assignments: engineResult.proposedAssignments.map(
+        this.toSchedulerAssignment,
+      ),
     }
 
     if (this.mode === 'replace') {
@@ -178,8 +180,9 @@ export class DefaultSchedulerService implements SchedulerService {
     }
   }
 
-  private toAssignment(pa: ProposedAssignment): Assignment {
+  private toSchedulerAssignment(pa: ProposedAssignment): SchedulerAssignment {
     return {
+      id: crypto.randomUUID(),
       teamMemberId: pa.teamMemberId,
       shiftTypeId: pa.shiftTypeId,
       date: toJSDate(pa.date),

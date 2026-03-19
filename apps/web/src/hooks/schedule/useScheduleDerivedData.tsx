@@ -1,11 +1,13 @@
 import { useEffect, useMemo } from 'react'
 import {
   PayGradeOutput,
-  SchedulerAssignment,
-  SchedulerAssignmentSchema,
   ShiftTypeOutput,
   TeamMemberOutput,
 } from '@fuku/api/schemas'
+import {
+  SchedulerAssignment,
+  SchedulerAssignmentSchema,
+} from '@fuku/domain/schemas'
 import { DateTime } from 'luxon'
 import z from 'zod'
 
