@@ -90,6 +90,14 @@ export type CellData = {
   // unavailabilities: Unavailability[]
 }
 
+export const getDayId = (date: Date | string) => {
+  const d = typeof date === 'string' ? new Date(date) : date
+  return DateTime.fromJSDate(d).toFormat('yyyy-MM-dd')
+}
+
+export const getCellKey = (teamMemberId: string, date: Date) =>
+  `${teamMemberId}-${getDayId(date)}`
+
 export const getInitialCellData = (): CellData => ({
   schedulerAssignments: [],
 })
