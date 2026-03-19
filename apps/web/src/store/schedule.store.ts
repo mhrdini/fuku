@@ -1,4 +1,4 @@
-import { SchedulerAssignment } from '@fuku/api/schemas'
+import { SchedulerAssignment } from '@fuku/domain/schemas'
 import { DateRange } from '@fuku/ui/components'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'

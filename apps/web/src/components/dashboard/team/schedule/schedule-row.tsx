@@ -4,7 +4,7 @@ import { cn } from '@fuku/ui/lib/utils'
 
 import { CellData, Day, getCellKey, TeamMemberData } from '~/lib/schedule'
 import { ScheduleCell } from './schedule-cell'
-import { ScheduleTeamMemberCell } from './team-member-cell'
+import { ScheduleTeamMemberCell } from './schedule-team-member-cell'
 
 interface ScheduleRowProps {
   teamMember: TeamMemberData
