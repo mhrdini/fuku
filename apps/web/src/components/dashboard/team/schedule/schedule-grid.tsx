@@ -54,7 +54,7 @@ export const ScheduleGrid = ({
           <div
             id={day.id}
             key={day.id}
-            className='sticky top-0 z-30 border-b not-last:border-r border-input flex items-center bg-background py-2 px-4 gap-1.5'
+            className='sticky top-0 z-30 border-b border-input flex items-center bg-background py-2 px-4 gap-1.5'
           >
             <span className='font-bold'>
               {format(day.date, 'ccc', { locale })}

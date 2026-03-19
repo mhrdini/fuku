@@ -97,7 +97,15 @@ export const getDayId = (date: Date | string) => {
 }
 
 export const getCellKey = (teamMemberId: string, date: Date) =>
-  `${teamMemberId}-${getDayId(date)}`
+  `${teamMemberId}|${getDayId(date)}`
+
+export const parseCellKey = (cellKey: string) => {
+  const [teamMemberId, dateStr] = cellKey.split('|')
+  return {
+    teamMemberId,
+    date: DateTime.fromFormat(dateStr, 'yyyy-MM-dd').toJSDate(),
+  }
+}
 
 export const getInitialCellData = (): CellData => ({
   schedulerAssignments: [],

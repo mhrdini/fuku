@@ -16,6 +16,19 @@ type ScheduleStore = {
   teamMemberMetricsMap: Map<string, TeamMemberMetrics> // teamMemberId -> metrics
   dayMetricsMap: Map<string, DayMetrics> // date string (e.g. '2024-01-01') -> metrics
   setSchedulerMetrics: (metrics: Partial<SchedulerMetrics>) => void
+  moveAssignment: (params: {
+    assignmentId: string
+    toTeamMemberId: string
+    toDate: Date
+  }) => void
+
+  createAssignment: (input: {
+    teamMemberId: string
+    date: Date
+    shiftTypeId: string
+  }) => void
+
+  deleteAssignment: (assignmentId: string) => void
 }
 
 type PersistedScheduleStore = Pick<
@@ -49,6 +62,33 @@ export const useScheduleStore = create<
               : state.dayMetricsMap,
           }
         }),
+      moveAssignment: ({ assignmentId, toTeamMemberId, toDate }) =>
+        set(state => {
+          const schedulerAssignments = state.schedulerAssignments.map(a =>
+            a.id === assignmentId
+              ? { ...a, teamMemberId: toTeamMemberId, date: toDate }
+              : a,
+          )
+          return { ...state, schedulerAssignments }
+        }),
+      createAssignment: ({ teamMemberId, date, shiftTypeId }) =>
+        set(state => ({
+          schedulerAssignments: [
+            ...state.schedulerAssignments,
+            {
+              id: crypto.randomUUID(),
+              teamMemberId,
+              date,
+              shiftTypeId,
+            },
+          ],
+        })),
+      deleteAssignment: assignmentId =>
+        set(state => ({
+          schedulerAssignments: state.schedulerAssignments.filter(
+            a => a.id !== assignmentId,
+          ),
+        })),
     }),
     {
       name: 'schedule',
