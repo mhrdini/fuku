@@ -71,13 +71,7 @@ export const useScheduleDerivedData = ({
     return map
   }, [payGrades])
 
-  const {
-    schedulerAssignments,
-    setSchedulerAssignments,
-    teamMemberMetricsMap,
-    dayMetricsMap,
-    setSchedulerMetrics,
-  } = useScheduleStore()
+  const { schedulerAssignments, setSchedulerMetrics } = useScheduleStore()
 
   const computeShiftDurationHours = (shiftTypeId: string) => {
     const shiftType = shiftTypeMap.get(shiftTypeId)
@@ -178,7 +172,8 @@ export const useScheduleDerivedData = ({
 
     for (const a of schedulerAssignments) {
       const cellKey = getCellKey(a.teamMemberId, a.date)
-      ensure(cellKey).schedulerAssignments.push(a)
+      const cellData = ensure(cellKey)
+      cellData.schedulerAssignments = [...cellData.schedulerAssignments, a]
     }
 
     return map
