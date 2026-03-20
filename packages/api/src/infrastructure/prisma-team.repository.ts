@@ -1,5 +1,10 @@
 import { db as PrismaClient } from '@fuku/db'
-import { Assignment, Period, TeamRepository } from '@fuku/scheduling'
+import {
+  Assignment,
+  Period,
+  TeamRepository,
+  Unavailability,
+} from '@fuku/scheduling'
 
 import {
   RuleConditionOutput,
@@ -8,7 +13,14 @@ import {
 
 export class PrismaTeamRepository implements TeamRepository {
   constructor(private db: typeof PrismaClient) {}
-  async getTeamSnapshot(teamId: string, period: Period) {
+  async getTeamSnapshot(
+    teamId: string,
+    period: Period,
+    preloaded?: {
+      assignments?: Assignment[]
+      unavailabilities?: Unavailability[]
+    },
+  ) {
     const team = await this.db.team.findUniqueOrThrow({
       where: { id: teamId },
       select: {
@@ -89,37 +101,58 @@ export class PrismaTeamRepository implements TeamRepository {
           } => rc.value !== null,
         ), // only include conditions with non-null value
     }))
-    const unavailabilities = await this.db.unavailability.findMany({
-      where: {
-        teamMember: {
-          teamId,
-        },
-        date: {
-          gte: period.start,
-          lte: period.end,
-        },
-      },
-    })
 
-    const assignments = await this.db.dayAssignment.findMany({
-      where: {
-        teamMember: {
-          teamId,
-        },
-        shiftAssignment: {
-          isNot: null,
-        },
-        date: {
-          gte: period.start,
-          lte: period.end,
-        },
-      },
-      select: {
-        date: true,
-        teamMemberId: true,
-        shiftAssignment: true,
-      },
-    })
+    const unavailabilities: Unavailability[] = preloaded?.unavailabilities
+      ? preloaded.unavailabilities
+      : await this.db.unavailability
+          .findMany({
+            where: {
+              teamMember: {
+                teamId,
+              },
+              date: {
+                gte: period.start,
+                lte: period.end,
+              },
+            },
+          })
+          .then(unavailabilities =>
+            unavailabilities.map(u => ({
+              teamMemberId: u.teamMemberId,
+              date: u.date,
+            })),
+          )
+
+    const assignments: Assignment[] = preloaded?.assignments
+      ? preloaded.assignments
+      : await this.db.dayAssignment
+          .findMany({
+            where: {
+              teamMember: {
+                teamId,
+              },
+              shiftAssignment: {
+                isNot: null,
+              },
+              date: {
+                gte: period.start,
+                lte: period.end,
+              },
+            },
+            select: {
+              date: true,
+              teamMemberId: true,
+              shiftAssignment: true,
+              leaveAssignment: true,
+            },
+          })
+          .then(assignments =>
+            assignments.map(a => ({
+              date: a.date,
+              teamMemberId: a.teamMemberId,
+              shiftTypeId: a.shiftAssignment!.shiftTypeId,
+            })),
+          )
 
     return {
       team: { id: team.id },
@@ -141,15 +174,8 @@ export class PrismaTeamRepository implements TeamRepository {
       rules,
       operationalHours: team.operationalHours,
       staffingRequirements: team.staffingRequirements,
-      unavailabilities: unavailabilities.map(u => ({
-        teamMemberId: u.teamMemberId,
-        date: u.date,
-      })),
-      assignments: assignments.map(a => ({
-        date: a.date,
-        teamMemberId: a.teamMemberId,
-        shiftTypeId: a.shiftAssignment!.shiftTypeId, // TODO: handle this better
-      })),
+      unavailabilities,
+      assignments,
       period: period,
     }
   }

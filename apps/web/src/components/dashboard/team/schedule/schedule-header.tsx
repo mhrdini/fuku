@@ -21,6 +21,7 @@ import { ChevronLeft, ChevronRight, Cog, RefreshCcw } from 'lucide-react'
 
 import { ScheduleData } from '~/hooks/schedule/useScheduleData'
 import { ScheduleDerivedData } from '~/hooks/schedule/useScheduleDerivedData'
+import { ScheduleMutations } from '~/hooks/schedule/useScheduleMutations'
 import { ScheduleViewState } from '~/hooks/schedule/useScheduleView'
 import { ViewOptionValues } from '~/lib/schedule'
 import { useScheduleStore } from '~/store/schedule.store'
@@ -29,6 +30,7 @@ import { RulePanelPopoverButton } from './rule-panel-popover-button'
 type ScheduleHeaderProps = {
   viewState: ScheduleViewState
   data: ScheduleData
+  mutations: ScheduleMutations
   derivedData: ScheduleDerivedData
 }
 
@@ -44,13 +46,8 @@ export const ScheduleHeader = ({
     handleNextRange,
     handleViewChange,
   },
-  data: {
-    team,
-    rules,
-    ruleConditions,
-    teamMembers,
-    shiftTypes,
-    payGrades,
+  data: { team, rules, ruleConditions, teamMembers, shiftTypes, payGrades },
+  mutations: {
     handleMutateRule,
     handleMutateRuleCondition,
     handleGenerateSchedule,

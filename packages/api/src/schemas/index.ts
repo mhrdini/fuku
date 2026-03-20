@@ -3,14 +3,18 @@
  */
 
 export * from './auth'
+export * from './dayAssignment'
+export * from './leaveAssignment'
 export * from './location'
 export * from './operationalHour'
 export * from './payGrade'
 export * from './payGradeShiftType'
 export * from './rule'
 export * from './ruleCondition'
+export * from './shiftAssignment'
 export * from './shiftType'
 export * from './staffingRequirement'
 export * from './team'
 export * from './teamMember'
 export * from './unavailability'
+export * from './workHour'

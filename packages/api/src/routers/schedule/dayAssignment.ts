@@ -1,9 +1,10 @@
 import { TRPCError, TRPCRouterRecord } from '@trpc/server'
 import * as z from 'zod/v4'
 
+import { DayAssignmentOutputSchema } from '../../schemas/dayAssignment'
 import { protectedProcedure } from '../../trpc'
 
-export const assignmentRouter = {
+export const dayAssignmentRouter = {
   list: protectedProcedure
     .input(
       z.object({
@@ -43,8 +44,12 @@ export const assignmentRouter = {
             lte: end,
           },
         },
+        include: {
+          shiftAssignment: true,
+          leaveAssignment: true,
+        },
       })
 
-      return assignments
+      return assignments.map(a => DayAssignmentOutputSchema.parse(a))
     }),
 } satisfies TRPCRouterRecord

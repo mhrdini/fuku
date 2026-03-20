@@ -6,7 +6,6 @@ export const ShiftAssignmentSchema = z.object({
   id: z.string(),
   locationId: z.string().optional(),
   shiftTypeId: z.string(),
-  teamMemberId: z.string().nullable(),
   dayAssignmentId: z.string(),
   workHour: WorkHourSchema.optional(),
 })

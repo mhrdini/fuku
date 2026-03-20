@@ -4,11 +4,7 @@ import { DateRange } from '@fuku/ui/components'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import {
-  DayMetrics,
-  SchedulerMetrics,
-  TeamMemberMetrics,
-} from '~/lib/schedule'
+import { DayMetrics, SchedulerMetrics, TeamMemberMetrics } from '~/lib/schedule'
 import { mapStorage } from '~/lib/store'
 
 // import { mapStorage } from '~/lib/store'
