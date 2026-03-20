@@ -3,7 +3,7 @@ import {
   GenerateScheduleOutput,
   SchedulerAssignment,
 } from '@fuku/domain/schemas'
-import { DateTime, WeekdayNumbers } from 'luxon'
+import { WeekdayNumbers } from 'luxon'
 
 import {
   DefaultSchedulerEngine,
@@ -107,72 +107,25 @@ export class DefaultSchedulerService implements SchedulerService {
       timeZone: input.timeZone,
     }
 
-    let snapshot = await this.teamRepository.getTeamSnapshot(
+    const snapshot = await this.teamRepository.getTeamSnapshot(
       input.teamId,
       period,
+      {
+        assignments: input.assignments
+          ? input.assignments.map(a => ({
+              teamMemberId: a.teamMemberId,
+              shiftTypeId: a.shiftTypeId,
+              date: a.date,
+            }))
+          : [],
+        unavailabilities: input.unavailabilities
+          ? input.unavailabilities.map(u => ({
+              teamMemberId: u.teamMemberId,
+              date: u.date,
+            }))
+          : [],
+      },
     )
-
-    if (input.assignments) {
-      // merge assignments from input with the ones from snapshot (which is from db)
-      const existingAssignments = snapshot.assignments
-      const inputAssignments = input.assignments.map(a => ({
-        teamMemberId: a.teamMemberId,
-        shiftTypeId: a.shiftTypeId,
-        date: a.date,
-      }))
-
-      // override existing assignments with input assignments for the same team member and date
-      const mergedAssignments = [
-        ...existingAssignments.filter(
-          ea =>
-            !inputAssignments.some(
-              ia =>
-                ia.teamMemberId === ea.teamMemberId &&
-                DateTime.fromJSDate(ia.date).hasSame(
-                  DateTime.fromJSDate(ea.date),
-                  'day',
-                ),
-            ),
-        ),
-        ...inputAssignments,
-      ]
-
-      snapshot = {
-        ...snapshot,
-        assignments: mergedAssignments,
-      }
-    }
-
-    if (input.unavailabilities) {
-      // merge unavailabilities from input with the ones from snapshot (which is from db)
-      const existingUnavailabilities = snapshot.unavailabilities
-      const inputUnavailabilities = input.unavailabilities.map(u => ({
-        teamMemberId: u.teamMemberId,
-        date: u.date,
-      }))
-
-      // override existing unavailabilities with input unavailabilities for the same team member and date
-      // if there are duplicate unavailabilities for the same team member and date, we can just keep one of them since they represent the same thing
-      const mergedUnavailabilities = [
-        ...existingUnavailabilities.filter(
-          eu =>
-            !inputUnavailabilities.some(
-              iu =>
-                iu.teamMemberId === eu.teamMemberId &&
-                DateTime.fromJSDate(iu.date).hasSame(
-                  DateTime.fromJSDate(eu.date),
-                  'day',
-                ),
-            ),
-        ),
-        ...inputUnavailabilities,
-      ]
-
-      snapshot = {
-        ...snapshot,
-        unavailabilities: mergedUnavailabilities,
-      }
-    }
 
     return this.toSchedulerContext(snapshot)
   }

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo } from 'react'
 import {
   PayGradeOutput,
   ShiftTypeOutput,
-  TeamMemberOutput,
   UnavailabilityOutput,
 } from '@fuku/api/schemas'
 import { SchedulerAssignment } from '@fuku/domain/schemas'
@@ -20,28 +19,30 @@ import {
   TeamMemberMetrics,
 } from '~/lib/schedule'
 import { useScheduleStore } from '~/store/schedule.store'
+import { ScheduleData } from './useScheduleData'
+import { ScheduleViewState } from './useScheduleView'
 
 interface ScheduleDerivedDataProps {
-  start: Date
-  end: Date
-  teamMembers: TeamMemberOutput[] | undefined
-  shiftTypes: ShiftTypeOutput[] | undefined
-  payGrades: PayGradeOutput[] | undefined
-  unavailabilities: UnavailabilityOutput[] | undefined
+  viewState: ScheduleViewState
+  data: ScheduleData
 }
 
 export const useScheduleDerivedData = ({
-  start,
-  end,
-  teamMembers,
-  shiftTypes,
-  payGrades,
-  unavailabilities,
+  viewState: { start, end },
+  data: {
+    teamMembers,
+    shiftTypes,
+    payGrades,
+    dbAssignments,
+    dbUnavailabilities,
+  },
 }: ScheduleDerivedDataProps) => {
   const {
     schedulerAssignments,
     schedulerUnavailabilities,
     setSchedulerMetrics,
+    setSchedulerAssignments,
+    setSchedulerUnavailabilities,
   } = useScheduleStore()
 
   const teamMemberMap = useMemo(() => {
@@ -148,6 +149,53 @@ export const useScheduleDerivedData = ({
     },
     [shiftDurationMap, start, end],
   )
+
+  useEffect(() => {
+    if (dbAssignments && dbAssignments.length > 0) {
+      const updatedAssignments = new Map<string, SchedulerAssignment>()
+
+      for (const a of schedulerAssignments) {
+        const cellKey = getCellKey(a.teamMemberId, a.date)
+        updatedAssignments.set(cellKey, a)
+      }
+
+      for (const da of dbAssignments) {
+        // TODO: only shift assignments, deal with leave assignments
+        if (!da.shiftAssignment) continue
+        const a: SchedulerAssignment = {
+          id: da.id,
+          teamMemberId: da.teamMemberId,
+          date: da.date,
+          shiftTypeId: da.shiftAssignment.shiftTypeId,
+        }
+        const cellKey = getCellKey(a.teamMemberId, a.date)
+        updatedAssignments.set(cellKey, a)
+      }
+      setSchedulerAssignments(Array.from(updatedAssignments.values()))
+    }
+  }, [dbAssignments])
+
+  useEffect(() => {
+    if (dbUnavailabilities && dbUnavailabilities.length > 0) {
+      const updatedUnavailabilities = new Map<string, UnavailabilityOutput>()
+
+      for (const u of schedulerUnavailabilities) {
+        const cellKey = getCellKey(u.teamMemberId, u.date)
+        updatedUnavailabilities.set(cellKey, u)
+      }
+
+      for (const du of dbUnavailabilities) {
+        const u: UnavailabilityOutput = {
+          id: du.id,
+          teamMemberId: du.teamMemberId,
+          date: du.date,
+        }
+        const cellKey = getCellKey(u.teamMemberId, u.date)
+        updatedUnavailabilities.set(cellKey, u)
+      }
+      setSchedulerUnavailabilities(Array.from(updatedUnavailabilities.values()))
+    }
+  }, [dbUnavailabilities])
 
   useEffect(() => {
     if (shiftTypeMap.size > 0) {
