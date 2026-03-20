@@ -20,6 +20,7 @@ export const TeamScheduleContent = () => {
     teamMembers: schedule.teamMembers || [],
     shiftTypes: schedule.shiftTypes || [],
     payGrades: schedule.payGrades || [],
+    unavailabilities: schedule.unavailabilities || [],
   })
 
   return (
