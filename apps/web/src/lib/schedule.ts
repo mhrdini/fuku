@@ -1,4 +1,4 @@
-import { TeamMemberOutput } from '@fuku/api/schemas'
+import { TeamMemberOutput, UnavailabilityOutput } from '@fuku/api/schemas'
 import { SchedulerAssignment } from '@fuku/domain/schemas'
 import { DateTime } from 'luxon'
 
@@ -88,7 +88,7 @@ export type SchedulerMetrics = {
 
 export type CellData = {
   schedulerAssignments: SchedulerAssignment[]
-  // unavailabilities: Unavailability[]
+  schedulerUnavailabilities: UnavailabilityOutput[]
 }
 
 export const getDayId = (date: Date | string) => {
@@ -96,17 +96,23 @@ export const getDayId = (date: Date | string) => {
   return DateTime.fromJSDate(d).toFormat('yyyy-MM-dd')
 }
 
-export const getCellKey = (teamMemberId: string, date: Date) =>
-  `${teamMemberId}|${getDayId(date)}`
+export const getCellKey = (teamMemberId: string, date: Date | string) =>
+  `${teamMemberId}_${getDayId(date)}`
 
-export const parseCellKey = (cellKey: string) => {
-  const [teamMemberId, dateStr] = cellKey.split('|')
+export const splitCellKey = (cellKey: string) => {
+  const [teamMemberId, date] = cellKey.split('_')
+  return { teamMemberId, date }
+}
+
+export const parseCellKey = (cellKey: string, asString: boolean = false) => {
+  const { teamMemberId, date } = splitCellKey(cellKey)
   return {
     teamMemberId,
-    date: DateTime.fromFormat(dateStr, 'yyyy-MM-dd').toJSDate(),
+    date: DateTime.fromFormat(date, 'yyyy-MM-dd').toJSDate(),
   }
 }
 
 export const getInitialCellData = (): CellData => ({
   schedulerAssignments: [],
+  schedulerUnavailabilities: [],
 })
