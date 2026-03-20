@@ -60,68 +60,58 @@ export const useSidebarMenu = (team: UserTeam | null): MenuGroup[] => {
       ]
 }
 
-export const useNavigationMenu = (team: UserTeam | null): Menu[] => {
-  const params = useParams()
-  const username = params.username as string
+export const useNavigationMenu = (
+  username: string | null,
+  team: UserTeam | null,
+): Menu[] => {
+  const menu = useMemo(() => {
+    if (!username || !team) return []
 
-  const menu = useMemo(
-    () => [
+    return [
       {
         label: 'Team',
-        href: '',
+        href: `/${username}/team`,
         icon: Users2,
         submenus: [
           {
             label: 'Overview',
-            href: team && username ? `/${username}/team/${team.slug}` : '',
+            href: `/${username}/team/${team.slug}`,
             icon: Users2,
           },
           {
             label: 'Members',
-            href:
-              team && username ? `/${username}/team/${team.slug}/members` : '',
+            href: `/${username}/team/${team.slug}/members`,
             icon: UserCircle2,
           },
           {
             label: 'Pay Grades',
-            href:
-              team && username
-                ? `/${username}/team/${team.slug}/pay-grades`
-                : '',
+            href: `/${username}/team/${team.slug}/pay-grades`,
             icon: BadgeDollarSign,
           },
           {
             label: 'Shift Types',
-            href:
-              team && username
-                ? `/${username}/team/${team.slug}/shift-types`
-                : '',
+            href: `/${username}/team/${team.slug}/shift-types`,
             icon: Clock,
           },
           {
             label: 'Locations',
-            href:
-              team && username
-                ? `/${username}/team/${team.slug}/locations`
-                : '',
+            href: `/${username}/team/${team.slug}/locations`,
             icon: MapPin,
           },
           {
             label: 'Settings',
-            href:
-              team && username ? `/${username}/team/${team.slug}/settings` : '',
+            href: `/${username}/team/${team.slug}/settings`,
             icon: Cog,
           },
         ],
       },
       {
         label: 'Schedule',
-        href: team && username ? `/${username}/team/${team.slug}/schedule` : '',
+        href: `/${username}/team/${team.slug}/schedule`,
         icon: Calendar,
       },
-    ],
-    [team, username],
-  )
+    ]
+  }, [username, team])
 
   return menu
 }

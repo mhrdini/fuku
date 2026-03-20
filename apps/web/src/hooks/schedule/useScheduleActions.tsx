@@ -2,10 +2,26 @@ import { parseCellKey } from '~/lib/schedule'
 import { useScheduleStore } from '~/store/schedule.store'
 
 export const useScheduleActions = () => {
-  const { moveAssignment, createAssignment, deleteAssignment } =
-    useScheduleStore()
+  const {
+    updateAssignment,
+    moveAssignment,
+    createAssignment,
+    deleteAssignment,
+    createUnavailability,
+    deleteUnavailability,
+  } = useScheduleStore()
 
-  // MOVE
+  // ASSIGNMENTS
+  const updateAssignmentShiftType = ({
+    assignmentId,
+    shiftTypeId,
+  }: {
+    assignmentId: string
+    shiftTypeId: string
+  }) => {
+    updateAssignment({ assignmentId, updatedFields: { shiftTypeId } })
+  }
+
   const moveAssignmentToCell = ({
     assignmentId,
     toCellKey,
@@ -22,7 +38,6 @@ export const useScheduleActions = () => {
     })
   }
 
-  // CREATE (click cell)
   const createAssignmentInCell = ({
     cellKey,
     shiftTypeId,
@@ -32,6 +47,8 @@ export const useScheduleActions = () => {
   }) => {
     const { teamMemberId, date } = parseCellKey(cellKey)
 
+    console.log('Creating assignment for', { teamMemberId, date, shiftTypeId })
+
     createAssignment({
       teamMemberId,
       date,
@@ -39,14 +56,32 @@ export const useScheduleActions = () => {
     })
   }
 
-  // DELETE (card action)
   const deleteAssignmentById = (assignmentId: string) => {
     deleteAssignment(assignmentId)
   }
 
+  // UNAVAILABILITIES
+  const addUnavailabilityToCell = (cellKey: string) => {
+    const { teamMemberId, date } = parseCellKey(cellKey)
+
+    console.log('Adding unavailability for', { teamMemberId, date })
+
+    createUnavailability({
+      teamMemberId,
+      date,
+    })
+  }
+
+  const removeUnavailabilityById = (unavailabilityId: string) => {
+    deleteUnavailability(unavailabilityId)
+  }
+
   return {
+    updateAssignmentShiftType,
     moveAssignmentToCell,
     createAssignmentInCell,
     deleteAssignmentById,
+    addUnavailabilityToCell,
+    removeUnavailabilityById,
   }
 }

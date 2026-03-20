@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -13,12 +14,18 @@ import { Menu, useNavigationMenu } from '~/lib/menu'
 import { useTRPC } from '~/trpc/client'
 
 export const DashboardNavigationMenu = () => {
+  const params = useParams()
+  const username = params.username as string
   const trpc = useTRPC()
 
   const { data: sidebarState } = useQuery({
     ...trpc.user.getSidebarState.queryOptions(),
   })
-  const menu = useNavigationMenu(sidebarState ? sidebarState.activeTeam : null)
+
+  const menu = useNavigationMenu(
+    username ? username : null,
+    sidebarState ? sidebarState.activeTeam : null,
+  )
 
   return (
     <NavigationMenu>
