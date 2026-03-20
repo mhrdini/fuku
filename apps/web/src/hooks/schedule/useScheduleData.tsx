@@ -256,13 +256,23 @@ export const useScheduleData = (start: Date, end: Date) => {
 
     const timeZone = team.timeZone
 
+    const assignments = schedulerAssignments.map(a => ({
+      ...a,
+      date: new Date(a.date),
+    }))
+
+    const unavailabilities = schedulerUnavailabilities.map(u => ({
+      ...u,
+      date: new Date(u.date),
+    }))
+
     const input: GenerateScheduleInput = {
       teamId: team.id,
       start,
       end,
       timeZone,
-      assignments: schedulerAssignments,
-      unavailabilities: schedulerUnavailabilities,
+      assignments,
+      unavailabilities,
     }
 
     console.log('Generating schedule with parameters:', input)
