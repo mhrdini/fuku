@@ -32,6 +32,7 @@ export function Breadcrumbs() {
   const { data: team } = useQuery({
     ...trpc.team.bySlug.queryOptions({ slug: slug! }),
     enabled: !!slug,
+    refetchOnWindowFocus: false,
   })
 
   const crumbs = useMemo(() => {
