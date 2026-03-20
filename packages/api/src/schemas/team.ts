@@ -1,6 +1,5 @@
 import {
-  TeamMember,
-  TeamMemberRole,
+  TeamMemberRoleSchema,
   TeamMemberSchema,
   TeamSchema,
 } from '@fuku/domain/schemas'
@@ -74,13 +73,18 @@ export const TeamCreateInputSchema = TeamSchema.extend({
 
 export type TeamCreateInput = z.infer<typeof TeamCreateInputSchema>
 
-export type UserTeam = Pick<
-  z.infer<typeof TeamSchema>,
-  'id' | 'slug' | 'name' | 'description' | 'createdAt'
-> & {
-  role: TeamMemberRole
-  teamMembers: TeamMember[]
-}
+export const UserTeamSchema = TeamSchema.pick({
+  id: true,
+  slug: true,
+  name: true,
+  description: true,
+  createdAt: true,
+}).extend({
+  role: TeamMemberRoleSchema,
+  teamMembers: z.array(TeamMemberSchema),
+})
+
+export type UserTeam = z.infer<typeof UserTeamSchema>
 
 export const TeamUpdateInputSchema = TeamSchema.pick({
   id: true,

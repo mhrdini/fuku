@@ -60,7 +60,11 @@ export const ScheduleHeader = ({
 }: ScheduleHeaderProps) => {
   const locale = enGB
 
-  const { schedulerAssignments, setSchedulerMetrics } = useScheduleStore()
+  const {
+    schedulerAssignments,
+    schedulerUnavailabilities,
+    setSchedulerMetrics,
+  } = useScheduleStore()
 
   return (
     <div className='flex gap-2'>
@@ -82,7 +86,10 @@ export const ScheduleHeader = ({
             setStart(range.from)
             setEnd(range.to || range.from)
             if (view) setView(view)
-            const metrics = computeSchedulerMetrics(schedulerAssignments)
+            const metrics = computeSchedulerMetrics(
+              schedulerAssignments,
+              schedulerUnavailabilities,
+            )
             setSchedulerMetrics(metrics)
           }}
         />

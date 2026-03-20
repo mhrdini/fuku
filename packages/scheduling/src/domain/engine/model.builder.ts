@@ -101,16 +101,29 @@ export class ConstraintModelBuilder {
   }
 
   private addAvailabilityConstraints(model: OptimizationModel) {
+    console.log(
+      'UNAV',
+      this.ctx.unavailabilities.map(u => u.date.toISODate()),
+    )
+
+    console.log(
+      'DAYS',
+      Array.from({ length: this.numDays }, (_, i) =>
+        this.ctx.period.start.plus({ days: i }).toISODate(),
+      ),
+    )
+
     for (const tm of this.ctx.teamMembers) {
       const unavailabilities = new Set(
         this.ctx.unavailabilities
           .filter(u => u.teamMemberId === tm.id)
-          .map(u => u.date.toISODate()),
+          .map(u => u.date.startOf('day').toISODate()),
       )
 
       for (let dayIndex = 0; dayIndex < this.numDays; dayIndex++) {
         const currentDate = this.ctx.period.start
           .plus({ days: dayIndex })
+          .startOf('day')
           .toISODate()
         if (unavailabilities.has(currentDate)) {
           for (const st of this.ctx.shiftTypes) {

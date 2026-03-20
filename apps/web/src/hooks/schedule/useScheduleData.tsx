@@ -1,6 +1,5 @@
 import { useParams } from 'next/navigation'
 import {
-  GenerateScheduleOutput,
   RuleConditionCreateInput,
   RuleConditionOutput,
   RuleConditionUpdateInput,
@@ -8,8 +7,11 @@ import {
   RuleOutput,
   RuleUpdateInput,
 } from '@fuku/api/schemas'
+import {
+  GenerateScheduleInput,
+  GenerateScheduleOutput,
+} from '@fuku/domain/schemas'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { DateTime } from 'luxon'
 
 import { useScheduleStore } from '~/store/schedule.store'
 import { useTRPC } from '~/trpc/client'
@@ -20,7 +22,11 @@ export const useScheduleData = (start: Date, end: Date) => {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  const { setSchedulerAssignments } = useScheduleStore()
+  const {
+    setSchedulerAssignments,
+    schedulerAssignments,
+    schedulerUnavailabilities,
+  } = useScheduleStore()
 
   // API queries
 
@@ -47,8 +53,8 @@ export const useScheduleData = (start: Date, end: Date) => {
   const { data: dbAssignments } = useQuery({
     ...trpc.assignment.list.queryOptions({
       teamId: team?.id ?? '',
-      start,
-      end,
+      start: start,
+      end: end,
     }),
     enabled: !!team,
   })
@@ -61,6 +67,15 @@ export const useScheduleData = (start: Date, end: Date) => {
   const { data: ruleConditions } = useQuery({
     ...trpc.ruleCondition.groupByRules.queryOptions({
       teamId: team?.id ?? '',
+    }),
+    enabled: !!team,
+  })
+
+  const { data: unavailabilities } = useQuery({
+    ...trpc.unavailability.list.queryOptions({
+      teamId: team?.id ?? '',
+      start: start,
+      end: end,
     }),
     enabled: !!team,
   })
@@ -159,6 +174,39 @@ export const useScheduleData = (start: Date, end: Date) => {
     },
   })
 
+  const { mutateAsync: createUnavailability } = useMutation({
+    ...trpc.unavailability.create.mutationOptions(),
+    onSuccess: data => {
+      queryClient.setQueryData(
+        trpc.unavailability.list.queryKey({
+          teamId: team?.id ?? '',
+          start: start,
+          end: end,
+        }),
+        (oldData: any) => {
+          if (!oldData) return oldData
+        },
+      )
+    },
+  })
+
+  const { mutateAsync: deleteUnavailability } = useMutation({
+    ...trpc.unavailability.deleteById.mutationOptions(),
+    onSuccess: data => {
+      queryClient.setQueryData(
+        trpc.unavailability.list.queryKey({
+          teamId: team?.id ?? '',
+          start: start,
+          end: end,
+        }),
+        (oldData: any) => {
+          if (!oldData) return oldData
+          return oldData.filter((u: any) => u.id !== data.id)
+        },
+      )
+    },
+  })
+
   // Unified handlers for rules and rule conditions for RulePanelPopoverButton
 
   const handleMutateRule = async (
@@ -206,24 +254,20 @@ export const useScheduleData = (start: Date, end: Date) => {
   const handleGenerateSchedule = () => {
     if (!team) return
 
-    const timeZone = 'UTC' // team.timeZone
+    const timeZone = team.timeZone
 
-    const startUTC = DateTime.fromJSDate(start)
-      .setZone(timeZone, { keepLocalTime: true })
-      .startOf('day')
-      .toUTC()
-
-    const endUTC = DateTime.fromJSDate(end)
-      .setZone(timeZone, { keepLocalTime: true })
-      .endOf('day')
-      .toUTC()
-
-    generateSchedule({
+    const input: GenerateScheduleInput = {
       teamId: team.id,
-      start: startUTC.toJSDate(),
-      end: endUTC.toJSDate(),
+      start,
+      end,
       timeZone,
-    })
+      assignments: schedulerAssignments,
+      unavailabilities: schedulerUnavailabilities,
+    }
+
+    console.log('Generating schedule with parameters:', input)
+
+    generateSchedule(input)
   }
 
   return {
@@ -233,11 +277,14 @@ export const useScheduleData = (start: Date, end: Date) => {
     payGrades,
     rules,
     ruleConditions,
+    unavailabilities,
     generateSchedule,
     handleGenerateSchedule,
     isGenerating,
     handleMutateRule,
     handleMutateRuleCondition,
+    createUnavailability,
+    deleteUnavailability,
   }
 }
 

@@ -1,7 +1,12 @@
-import { ShiftTypeOutput } from '@fuku/api/schemas'
+import { useMemo } from 'react'
+import { ShiftTypeOutput, UnavailabilityOutput } from '@fuku/api/schemas'
+import { Button, buttonVariants, Toggle } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
+import { Ban, Plus } from 'lucide-react'
+import { DateTime } from 'luxon'
 
-import { CellData } from '~/lib/schedule'
+import { useScheduleActions } from '~/hooks/schedule/useScheduleActions'
+import { CellData, parseCellKey } from '~/lib/schedule'
 import { ScheduleAssignmentCard } from './schedule-assignment-card'
 
 interface ScheduleCellProps {
@@ -22,6 +27,35 @@ export const ScheduleCell = ({
   data: { cellData, shiftTypeMap },
   className,
 }: ScheduleCellProps) => {
+  const {
+    createAssignmentInCell,
+    addUnavailabilityToCell,
+    removeUnavailabilityById,
+  } = useScheduleActions()
+
+  const unavailability = useMemo(() => {
+    const { teamMemberId, date } = parseCellKey(cellKey)
+    const unavailability = cellData?.schedulerUnavailabilities?.find(
+      ua =>
+        ua.teamMemberId === teamMemberId &&
+        DateTime.fromJSDate(ua.date).hasSame(DateTime.fromJSDate(date), 'day'),
+    )
+    return unavailability ? (unavailability as UnavailabilityOutput) : null
+  }, [cellData?.schedulerUnavailabilities])
+
+  const handleCreateAssignment = () => {
+    const getDefaultShiftTypeId = shiftTypeMap.keys().next().value!
+    createAssignmentInCell({ cellKey, shiftTypeId: getDefaultShiftTypeId })
+  }
+
+  const handleToggleUnavailability = () => {
+    if (unavailability) {
+      removeUnavailabilityById(unavailability.id)
+    } else {
+      addUnavailabilityToCell(cellKey)
+    }
+  }
+
   return (
     <div
       id={cellKey}
@@ -30,21 +64,77 @@ export const ScheduleCell = ({
         !isLastRow && 'border-b',
         !isLastCol && 'border-r',
         'flex flex-col gap-1.5',
+        'transition-colors',
+        'hover:bg-muted/50', // desktop hover
+        'focus-visible:bg-muted/50', // keyboard focus
+        // 'active:bg-muted/70', // mobile tap feedback
+        // 'outline-none focus-visible:border-ring focus-visible:ring-ring/50
+        // focus-visible:ring-[3px] focus-visible:outline-1
+        // focus-visible:-ring-offset-1',
+        'group',
+        unavailability &&
+          'hover:bg-transparent *:not-only:not-last:opacity-40 *:not-only:not-last:pointer-events-none',
         className,
       )}
+      // tabIndex={0}
     >
-      {/* Add assignments, unavailabilities, per cell etc here */}
       {cellData?.schedulerAssignments.map(a => {
-        const shiftType = shiftTypeMap?.get(a.shiftTypeId)
-        if (!shiftType) return null
         return (
           <ScheduleAssignmentCard
             key={a.id}
             assignment={a}
-            shiftType={shiftType}
+            shiftTypeMap={shiftTypeMap}
           />
         )
       })}
+      <div
+        className={cn(
+          'pointer-events-none opacity-0 md:pointer-events-auto md:flex size-full items-end *:flex-1 *:h-6 transition-opacity text-xs text-muted-foreground group-hover:opacity-100 group-focus-visible:opacity-100',
+          'has-[*[data-state=on]]:opacity-100',
+          'has-[*[data-state=on]]:[&>*]:hidden',
+          'has-[*[data-state=on]]:[&>*[data-state=on]]:flex',
+          'has-[*[data-state=on]]:[&>*[data-state=on]]:flex-1',
+        )}
+      >
+        {/* Add assignments, unavailabilities, per cell etc here */}
+        <Toggle
+          asChild
+          className={cn(
+            buttonVariants({
+              variant: 'error-secondary',
+              size: 'icon-chip',
+            }),
+            // on state
+            'data-[state=on]:bg-error data-[state=on]:text-error-foreground',
+            // hover state
+            'data-[state=on]:hover:bg-error/90',
+          )}
+          pressed={!!unavailability}
+          onPressedChange={handleToggleUnavailability}
+        >
+          <Button
+            variant='error-secondary'
+            size='icon-chip'
+            className='rounded-r-none data-[state=on]:rounded-md'
+          >
+            <Ban />
+          </Button>
+        </Toggle>
+        <Button
+          disabled={
+            !!unavailability ||
+            !cellKey ||
+            shiftTypeMap.size === 0 ||
+            cellData?.schedulerAssignments.length === 1
+          }
+          variant='success-secondary'
+          size='icon-chip'
+          className='rounded-l-none'
+          onClick={handleCreateAssignment}
+        >
+          <Plus />
+        </Button>
+      </div>
     </div>
   )
 }
