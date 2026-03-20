@@ -20,6 +20,7 @@ export const DashboardNavigationMenu = () => {
 
   const { data: sidebarState } = useQuery({
     ...trpc.user.getSidebarState.queryOptions(),
+    refetchOnWindowFocus: false,
   })
 
   const menu = useNavigationMenu(

@@ -72,8 +72,8 @@ export const ScheduleCell = ({
         // focus-visible:ring-[3px] focus-visible:outline-1
         // focus-visible:-ring-offset-1',
         'group',
-        unavailability &&
-          'hover:bg-transparent *:not-only:not-last:opacity-40 *:not-only:not-last:pointer-events-none',
+        unavailability && 'hover:bg-transparent *:not-only:not-last:opacity-40',
+
         className,
       )}
       // tabIndex={0}

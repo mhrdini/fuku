@@ -101,17 +101,7 @@ export class ConstraintModelBuilder {
   }
 
   private addAvailabilityConstraints(model: OptimizationModel) {
-    console.log(
-      'UNAV',
-      this.ctx.unavailabilities.map(u => u.date.toISODate()),
-    )
-
-    console.log(
-      'DAYS',
-      Array.from({ length: this.numDays }, (_, i) =>
-        this.ctx.period.start.plus({ days: i }).toISODate(),
-      ),
-    )
+    const PENALTY = 1000 // very high penalty for violating availability
 
     for (const tm of this.ctx.teamMembers) {
       const unavailabilities = new Set(
@@ -125,17 +115,29 @@ export class ConstraintModelBuilder {
           .plus({ days: dayIndex })
           .startOf('day')
           .toISODate()
-        if (unavailabilities.has(currentDate)) {
-          for (const st of this.ctx.shiftTypes) {
-            const varName = getAssignmentVariableName(tm.id, dayIndex, st.id)
-            // forbid assignment if member unavailable on date
-            model.constraints.push({
-              name: `availability__${tm.id}__${dayIndex}__${st.id}`,
-              coefficients: { [varName]: 1 },
-              operator: '==',
-              rhs: 0,
-            })
-          }
+
+        if (!unavailabilities.has(currentDate)) continue
+
+        for (const st of this.ctx.shiftTypes) {
+          const varName = getAssignmentVariableName(tm.id, dayIndex, st.id)
+          const violationVar = `availabilityViolation__${tm.id}__${dayIndex}__${st.id}`
+
+          // add violation variable
+          model.variables.push({ name: violationVar, type: 'integer', min: 0 })
+
+          // constraint: x <= violationVar
+          model.constraints.push({
+            name: `availabilitySoft__${tm.id}__${dayIndex}__${st.id}`,
+            coefficients: { [varName]: 1, [violationVar]: -1 },
+            operator: '<=',
+            rhs: 0,
+          })
+
+          // add to objective with high penalty
+          model.objective!.terms.push({
+            variable: violationVar,
+            coefficient: PENALTY,
+          })
         }
       }
     }
