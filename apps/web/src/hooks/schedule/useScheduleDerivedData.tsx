@@ -5,9 +5,7 @@ import {
   TeamMemberOutput,
   UnavailabilityOutput,
 } from '@fuku/api/schemas'
-import {
-  SchedulerAssignment,
-} from '@fuku/domain/schemas'
+import { SchedulerAssignment } from '@fuku/domain/schemas'
 import { DateTime } from 'luxon'
 
 import {
@@ -105,10 +103,15 @@ export const useScheduleDerivedData = ({
         unavailabilities.map(u => getCellKey(u.teamMemberId, u.date)),
       )
 
+      const startDate = DateTime.fromJSDate(start).startOf('day').toMillis()
+      const endDate = DateTime.fromJSDate(end).endOf('day').toMillis()
+
       for (const assignment of assignments) {
-        if (assignment.date < start || assignment.date > end) {
-          continue
-        }
+        const assignmentDate = DateTime.fromJSDate(
+          new Date(assignment.date),
+        ).toMillis()
+
+        if (assignmentDate < startDate || assignmentDate > endDate) continue
 
         const shiftDurationHours =
           shiftDurationMap.get(assignment.shiftTypeId) ?? 0
@@ -143,7 +146,7 @@ export const useScheduleDerivedData = ({
 
       return { teamMemberMetricsMap, dayMetricsMap }
     },
-    [shiftDurationMap],
+    [shiftDurationMap, start, end],
   )
 
   useEffect(() => {
