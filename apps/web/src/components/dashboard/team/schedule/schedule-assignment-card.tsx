@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
+import { useDraggable } from '@dnd-kit/react'
 import { ShiftTypeOutput } from '@fuku/api/schemas'
 import { SchedulerAssignment } from '@fuku/domain/schemas'
 import {
@@ -13,19 +14,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@fuku/ui/components'
+import { cn } from '@fuku/ui/lib/utils'
 import { ChevronDown, Trash } from 'lucide-react'
 
 import { useScheduleActions } from '~/hooks/schedule/useScheduleActions'
+import { getCellKey } from '~/lib/schedule'
 
 interface ScheduleAssignmentCardProps {
   assignment: SchedulerAssignment
   shiftTypeMap: Map<string, ShiftTypeOutput>
+  className?: string
 }
 
 export const ScheduleAssignmentCard = ({
   assignment,
   shiftTypeMap,
+  className,
 }: ScheduleAssignmentCardProps) => {
+  const { ref } = useDraggable({
+    id: assignment.id,
+    type: 'assignment',
+    data: {
+      assignment,
+      cellKey: getCellKey(assignment.teamMemberId, assignment.date),
+    },
+  })
+
   const { updateAssignmentShiftType, deleteAssignmentById } =
     useScheduleActions()
 
@@ -47,7 +61,13 @@ export const ScheduleAssignmentCard = ({
   }, [shiftTypes, assignment.shiftTypeId])
 
   return (
-    <div className='relative group/assignment rounded-md py-1 px-2 border border-input bg-muted flex flex-col'>
+    <div
+      ref={ref}
+      className={cn(
+        'relative group/assignment rounded-md py-1 px-2 border border-input bg-muted flex flex-col',
+        className,
+      )}
+    >
       <div className='font-bold text-sm'>{shiftType?.name ?? ''}</div>
       <div className='text-xs text-muted-foreground'>
         {shiftType?.startTime ?? ''}

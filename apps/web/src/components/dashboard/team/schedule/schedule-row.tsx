@@ -45,7 +45,10 @@ export const ScheduleRow = ({
             cellKey={cellKey}
             isLastCol={isLastCol}
             isLastRow={isLastRow}
-            data={{ cellData, shiftTypeMap }}
+            data={{
+              cellData,
+              shiftTypeMap,
+            }}
           />
         )
       })}
