@@ -51,10 +51,19 @@ type MetricsSlice = {
   setSchedulerMetrics: (metrics: Partial<SchedulerMetrics>) => void
 }
 
+type DragAndDropSlice = {
+  activeAssignment: SchedulerAssignment | null
+  overCellAssignment: SchedulerAssignment | null
+  setActiveAssignment: (active: SchedulerAssignment | null) => void
+  setOverCellAssignment: (over: SchedulerAssignment | null) => void
+  clearDragState: () => void
+}
+
 type ScheduleStore = DateRangeSlice &
   AssignmentSlice &
   UnavailabilitySlice &
-  MetricsSlice
+  MetricsSlice &
+  DragAndDropSlice
 
 type PersistedScheduleStore = Pick<
   ScheduleStore,
@@ -144,6 +153,18 @@ export const useScheduleStore = create<
               : state.dayMetricsMap,
           }
         }),
+      activeAssignment: null,
+      overCellAssignment: null,
+      setActiveAssignment: active =>
+        set(state => ({ ...state, activeAssignment: active })),
+      setOverCellAssignment: over =>
+        set(state => ({ ...state, overCellAssignment: over })),
+      clearDragState: () =>
+        set(state => ({
+          ...state,
+          activeAssignment: null,
+          overCellAssignment: null,
+        })),
     }),
     {
       name: 'schedule',
