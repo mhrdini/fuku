@@ -9,6 +9,7 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
+    "@dnd-kit/react": "^0.3.2",
     "@fuku/api": "workspace:*",
     "@fuku/auth": "workspace:*",
     "@fuku/db": "workspace:*",
@@ -23,8 +24,8 @@
     "@trpc/server": "catalog:",
     "@trpc/tanstack-react-query": "catalog:",
     "better-auth": "catalog:",
-    "lucide-react": "catalog:",
     "date-fns": "catalog:",
+    "lucide-react": "catalog:",
     "luxon": "catalog:",
     "next": "latest",
     "next-themes": "catalog:",
