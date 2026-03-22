@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
-import { useDraggable } from '@dnd-kit/react'
+import { useSortable } from '@dnd-kit/react/sortable'
 import { ShiftTypeOutput } from '@fuku/api/schemas'
 import { SchedulerAssignment } from '@fuku/domain/schemas'
 import {
@@ -18,25 +18,27 @@ import { cn } from '@fuku/ui/lib/utils'
 import { ChevronDown, Trash } from 'lucide-react'
 
 import { useScheduleActions } from '~/hooks/schedule/useScheduleActions'
-import { getCellKey } from '~/lib/schedule'
 
 interface ScheduleAssignmentCardProps {
+  cellKey: string
   assignment: SchedulerAssignment
   shiftTypeMap: Map<string, ShiftTypeOutput>
   className?: string
 }
 
 export const ScheduleAssignmentCard = ({
+  cellKey,
   assignment,
   shiftTypeMap,
   className,
 }: ScheduleAssignmentCardProps) => {
-  const { ref } = useDraggable({
+  const { ref } = useSortable({
     id: assignment.id,
+    index: 0,
     type: 'assignment',
     data: {
       assignment,
-      cellKey: getCellKey(assignment.teamMemberId, assignment.date),
+      cellKey,
     },
   })
 
