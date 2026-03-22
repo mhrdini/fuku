@@ -1,14 +1,15 @@
 import { useMemo } from 'react'
+import { CollisionPriority } from '@dnd-kit/abstract'
 import { useDroppable } from '@dnd-kit/react'
 import { ShiftTypeOutput, UnavailabilityOutput } from '@fuku/api/schemas'
+import { SchedulerAssignment } from '@fuku/domain/schemas'
 import { Button, buttonVariants, Toggle } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { Ban, Plus } from 'lucide-react'
 import { DateTime } from 'luxon'
 
 import { useScheduleActions } from '~/hooks/schedule/useScheduleActions'
-import { CellData, parseCellKey } from '~/lib/schedule'
-import { useScheduleStore } from '~/store/schedule.store'
+import { CellData, getCellKey, parseCellKey } from '~/lib/schedule'
 import { ScheduleAssignmentCard } from './schedule-assignment-card'
 
 interface ScheduleCellProps {
@@ -18,6 +19,7 @@ interface ScheduleCellProps {
   data: {
     cellData: CellData | undefined
     shiftTypeMap: Map<string, ShiftTypeOutput>
+    previewAssignment: SchedulerAssignment | null
   }
   className?: string
 }
@@ -26,7 +28,7 @@ export const ScheduleCell = ({
   cellKey,
   isLastRow,
   isLastCol,
-  data: { cellData, shiftTypeMap },
+  data: { cellData, shiftTypeMap, previewAssignment },
   className,
 }: ScheduleCellProps) => {
   const { isDropTarget, ref } = useDroppable({
@@ -36,16 +38,19 @@ export const ScheduleCell = ({
     data: {
       cellKey,
     },
+    collisionPriority: CollisionPriority.Highest,
   })
 
   const {
-    moveAssignmentToCell,
     createAssignmentInCell,
     addUnavailabilityToCell,
     removeUnavailabilityById,
   } = useScheduleActions()
 
-  const { activeAssignment, overCellAssignment } = useScheduleStore()
+  const assignments = useMemo(
+    () => cellData && cellData.schedulerAssignments,
+    [cellData?.schedulerAssignments],
+  )
 
   const unavailability = useMemo(() => {
     const { teamMemberId, date } = parseCellKey(cellKey)
@@ -71,16 +76,23 @@ export const ScheduleCell = ({
   }
 
   const hasAssignments = useMemo(
-    () => cellData && cellData?.schedulerAssignments.length > 0,
+    () => (cellData && cellData?.schedulerAssignments.length > 0) || false,
     [cellData?.schedulerAssignments],
   )
 
-  const handleMoveAssignment = (assignmentId: string, toCellKey: string) => {}
-
-  const overCellAssignmentShiftType = useMemo(
+  const previewAssignmentCellKey = useMemo(
     () =>
-      overCellAssignment && shiftTypeMap.get(overCellAssignment.shiftTypeId)!,
-    [shiftTypeMap, overCellAssignment],
+      previewAssignment &&
+      getCellKey(previewAssignment.teamMemberId, previewAssignment.date),
+    [previewAssignment],
+  )
+
+  const previewAssignmentShiftType = useMemo(
+    () =>
+      previewAssignment
+        ? (shiftTypeMap.get(previewAssignment.shiftTypeId) ?? null)
+        : null,
+    [previewAssignment, shiftTypeMap],
   )
 
   return (
@@ -108,11 +120,9 @@ export const ScheduleCell = ({
       // tabIndex={0}
     >
       {/* preview assignment as swap intent */}
-      {/* {overCellAssignment &&
-        activeAssignment &&
-        overCellAssignmentShiftType &&
-        cellKey ===
-          getCellKey(activeAssignment.teamMemberId, activeAssignment.date) && (
+      {previewAssignment &&
+        previewAssignmentCellKey !== cellKey &&
+        previewAssignmentShiftType && (
           <div
             className={cn(
               'absolute left-1 right-1',
@@ -121,33 +131,28 @@ export const ScheduleCell = ({
             )}
           >
             <div className='font-bold text-sm'>
-              {overCellAssignmentShiftType.name ?? ''}
+              {previewAssignmentShiftType.name ?? ''}
             </div>
             <div className='text-xs text-muted-foreground'>
-              {overCellAssignmentShiftType.startTime ?? ''}
-              {overCellAssignmentShiftType.endTime
-                ? ' - ' + overCellAssignmentShiftType.endTime
+              {previewAssignmentShiftType.startTime ?? ''}
+              {previewAssignmentShiftType.endTime
+                ? ' - ' + previewAssignmentShiftType.endTime
                 : ''}
             </div>
           </div>
-        )} */}
+        )}
       {/* real assignments */}
-      {cellData &&
-        cellData.schedulerAssignments.length > 0 &&
-        cellData.schedulerAssignments.map(a => {
+      {assignments &&
+        assignments.length > 0 &&
+        assignments.map(a => {
           return (
             <ScheduleAssignmentCard
               key={a.id}
               cellKey={cellKey}
               assignment={a}
-              shiftTypeMap={shiftTypeMap}
-              // className={cn(
-              //   'transition-all opacity-100',
-              //   isDropTarget &&
-              //     activeAssignment &&
-              //     a.id !== activeAssignment.id &&
-              //     'opacity-0',
-              // )}
+              data={{
+                shiftTypeMap,
+              }}
             />
           )
         })}

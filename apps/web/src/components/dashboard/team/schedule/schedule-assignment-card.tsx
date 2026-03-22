@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
+import { CollisionPriority } from '@dnd-kit/abstract'
 import { useSortable } from '@dnd-kit/react/sortable'
 import { ShiftTypeOutput } from '@fuku/api/schemas'
 import { SchedulerAssignment } from '@fuku/domain/schemas'
@@ -22,14 +23,16 @@ import { useScheduleActions } from '~/hooks/schedule/useScheduleActions'
 interface ScheduleAssignmentCardProps {
   cellKey: string
   assignment: SchedulerAssignment
-  shiftTypeMap: Map<string, ShiftTypeOutput>
+  data: {
+    shiftTypeMap: Map<string, ShiftTypeOutput>
+  }
   className?: string
 }
 
 export const ScheduleAssignmentCard = ({
   cellKey,
   assignment,
-  shiftTypeMap,
+  data: { shiftTypeMap },
   className,
 }: ScheduleAssignmentCardProps) => {
   const { ref } = useSortable({
@@ -40,6 +43,7 @@ export const ScheduleAssignmentCard = ({
       assignment,
       cellKey,
     },
+    collisionPriority: CollisionPriority.Lowest,
   })
 
   const { updateAssignmentShiftType, deleteAssignmentById } =
@@ -67,6 +71,7 @@ export const ScheduleAssignmentCard = ({
       ref={ref}
       className={cn(
         'relative group/assignment rounded-md py-1 px-2 border border-input bg-muted flex flex-col',
+        'transition-all opacity-100',
         className,
       )}
     >
