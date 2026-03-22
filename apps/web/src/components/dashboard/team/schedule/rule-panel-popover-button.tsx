@@ -42,6 +42,10 @@ import {
   ComboboxList,
   ComboboxTrigger,
   ComboboxValue,
+  Command,
+  CommandInput,
+  CommandItem,
+  CommandSeparator,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -91,6 +95,38 @@ const RULE_CONDITION_OPERATOR_LABELS: Record<RuleConditionOperator, string> = {
 const RULE_CONDITION_VALUE_OPTIONS_BY_FIELD = {
   [RuleConditionFieldValues.MONTH]: MONTH_MAP,
   [RuleConditionFieldValues.WEEKDAY]: WEEKDAY_MAP,
+}
+
+function getRuleSearchValue(
+  rule: RuleOutput,
+  conditions: RuleConditionOutput[],
+  targetOptions: Record<string, { value: string; label: string }[]>,
+) {
+  const targetLabel =
+    rule.target === 'GLOBAL'
+      ? 'global'
+      : (targetOptions[rule.target].find(
+          opt =>
+            opt.value ===
+            (rule.teamMemberId ?? rule.payGradeId ?? rule.shiftTypeId),
+        )?.label ?? '')
+
+  // const conditionText = conditions
+  //   .map(c => `${c.field} ${c.operator} ${JSON.stringify(c.value)}`)
+  //   .join(' ')
+
+  return [
+    rule.metric,
+    rule.timeWindow,
+    rule.operator,
+    rule.target,
+    targetLabel,
+    rule.hardConstraint ? 'hard required' : 'soft preferred',
+    // rule.threshold,
+    // conditionText,
+  ]
+    .join(' ')
+    .toLowerCase()
 }
 
 type RulePanelPopoverButtonProps = {
@@ -167,42 +203,60 @@ export const RulePanelPopoverButton = ({
       </PopoverTrigger>
       <PopoverContent
         align='start'
-        className='min-w-fit min-h-0 flex flex-col max-h-[40rem] p-0 border border-input shadow-2xl '
+        className='min-w-fit min-h-0 flex flex-col max-h-[40rem] p-0 border border-border shadow-2xl '
       >
-        <div className='flex flex-col min-w-fit overflow-y-auto'>
-          {rules && Object.keys(rules).length ? (
-            Object.entries(rules).map(([ruleId, rule]) => (
-              <RulePanelItem
-                key={rule.id}
-                rule={rule}
-                ruleConditions={
-                  ruleConditions ? ruleConditions[rule.id] || [] : []
-                }
-                targetOptions={targetOptions}
-                createRule={createRule}
-                updateRule={updateRule}
-                deleteRule={deleteRule}
-                createRuleCondition={createRuleCondition}
-                updateRuleCondition={updateRuleCondition}
-                deleteRuleCondition={deleteRuleCondition}
-              />
-            ))
-          ) : (
-            <div className='text-sm text-muted-foreground p-4'>
-              No rules found.
-            </div>
-          )}
-        </div>
-        <div className='border-t border-input p-2 w-full flex'>
-          <Button
-            className='w-full'
-            variant='secondary'
-            onClick={handleCreateRule}
-          >
-            <Plus />
-            Add rule
-          </Button>
-        </div>
+        <Command>
+          <div className='p-2 flex gap-2 w-full'>
+            <CommandInput className='w-full' placeholder='Search rules...' />
+          </div>
+          <CommandSeparator />
+          <div className='group/rules flex flex-col min-w-fit overflow-y-auto'>
+            {rules && Object.keys(rules).length ? (
+              Object.entries(rules).map(([ruleId, rule]) => (
+                <div key={ruleId}>
+                  <CommandItem
+                    value={getRuleSearchValue(
+                      rule,
+                      ruleConditions ? ruleConditions[rule.id] || [] : [],
+                      targetOptions,
+                    )}
+                    asChild
+                  >
+                    <RulePanelItem
+                      rule={rule}
+                      ruleConditions={
+                        ruleConditions ? ruleConditions[rule.id] || [] : []
+                      }
+                      targetOptions={targetOptions}
+                      createRule={createRule}
+                      updateRule={updateRule}
+                      deleteRule={deleteRule}
+                      createRuleCondition={createRuleCondition}
+                      updateRuleCondition={updateRuleCondition}
+                      deleteRuleCondition={deleteRuleCondition}
+                    />
+                  </CommandItem>
+                  <CommandSeparator />
+                </div>
+              ))
+            ) : (
+              <div className='text-sm text-muted-foreground p-4'>
+                No rules found.
+              </div>
+            )}
+          </div>
+          <CommandSeparator />
+          <div className='p-2 w-full flex'>
+            <Button
+              className='w-full'
+              variant='secondary'
+              onClick={handleCreateRule}
+            >
+              <Plus />
+              Add rule
+            </Button>
+          </div>
+        </Command>
       </PopoverContent>
     </Popover>
   )
@@ -419,10 +473,7 @@ const RulePanelItem = ({
   }
 
   return (
-    <Collapsible
-      id={`rule-${rule.id}`}
-      className='group border-b border-input last:border-0 p-4'
-    >
+    <Collapsible id={`rule-${rule.id}`} className='group p-4'>
       <div className='flex flex-col gap-2 items-start *:flex *:flex-row *:gap-2 *:items-center *:justify-start *:w-full'>
         {/* first row */}
         <div>
