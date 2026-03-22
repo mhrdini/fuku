@@ -7,7 +7,7 @@ import { Ban, Plus } from 'lucide-react'
 import { DateTime } from 'luxon'
 
 import { useScheduleActions } from '~/hooks/schedule/useScheduleActions'
-import { CellData, getCellKey, parseCellKey } from '~/lib/schedule'
+import { CellData, parseCellKey } from '~/lib/schedule'
 import { useScheduleStore } from '~/store/schedule.store'
 import { ScheduleAssignmentCard } from './schedule-assignment-card'
 
@@ -32,6 +32,10 @@ export const ScheduleCell = ({
   const { isDropTarget, ref } = useDroppable({
     id: cellKey,
     type: 'cell',
+    accept: 'assignment',
+    data: {
+      cellKey,
+    },
   })
 
   const {
@@ -104,7 +108,7 @@ export const ScheduleCell = ({
       // tabIndex={0}
     >
       {/* preview assignment as swap intent */}
-      {overCellAssignment &&
+      {/* {overCellAssignment &&
         activeAssignment &&
         overCellAssignmentShiftType &&
         cellKey ===
@@ -126,22 +130,24 @@ export const ScheduleCell = ({
                 : ''}
             </div>
           </div>
-        )}
+        )} */}
       {/* real assignments */}
       {cellData &&
+        cellData.schedulerAssignments.length > 0 &&
         cellData.schedulerAssignments.map(a => {
           return (
             <ScheduleAssignmentCard
               key={a.id}
+              cellKey={cellKey}
               assignment={a}
               shiftTypeMap={shiftTypeMap}
-              className={cn(
-                'transition-all opacity-100',
-                isDropTarget &&
-                  activeAssignment &&
-                  a.id !== activeAssignment.id &&
-                  'opacity-0',
-              )}
+              // className={cn(
+              //   'transition-all opacity-100',
+              //   isDropTarget &&
+              //     activeAssignment &&
+              //     a.id !== activeAssignment.id &&
+              //     'opacity-0',
+              // )}
             />
           )
         })}
