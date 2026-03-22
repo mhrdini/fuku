@@ -1,6 +1,5 @@
 'use client'
 
-import { useRef } from 'react'
 import { DragDropProvider } from '@dnd-kit/react'
 import { SchedulerAssignment } from '@fuku/domain/schemas'
 import { Badge, Button, ScrollArea, ScrollBar } from '@fuku/ui/components'
@@ -13,7 +12,6 @@ import { useScheduleActions } from '~/hooks/schedule/useScheduleActions'
 import { ScheduleData } from '~/hooks/schedule/useScheduleData'
 import { ScheduleDerivedData } from '~/hooks/schedule/useScheduleDerivedData'
 import { ScheduleFilters } from '~/hooks/schedule/useScheduleFilters'
-import { getCellKey } from '~/lib/schedule'
 import { useScheduleStore } from '~/store/schedule.store'
 import { ScheduleRow } from './schedule-row'
 import { ScheduleTeamMemberHeaderCell } from './schedule-team-member-header-cell'
@@ -31,16 +29,7 @@ export const ScheduleGrid = ({
   derivedData: { daysRowList, cellMap, shiftTypeMap, payGradeMap },
   className,
 }: ScheduleGridProps) => {
-  const frameRef = useRef<number | null>(null)
-
-  const {
-    dayMetricsMap,
-    activeAssignment,
-    overCellAssignment,
-    setActiveAssignment,
-    setOverCellAssignment,
-    clearDragState,
-  } = useScheduleStore()
+  const { dayMetricsMap } = useScheduleStore()
 
   const { moveAssignmentToCell } = useScheduleActions()
 
@@ -48,63 +37,53 @@ export const ScheduleGrid = ({
 
   return (
     <DragDropProvider
-      onDragStart={event => {
-        const assignment = event.operation.source?.data
-          .assignment as SchedulerAssignment
-        setActiveAssignment(assignment)
-      }}
-      onDragOver={event => {
-        if (frameRef.current) return
+      onDragEnd={event => {
+        const active = event.operation.source
+        const over = event.operation.target
 
-        frameRef.current = requestAnimationFrame(() => {
-          frameRef.current = null
+        if (!active || !over) return
 
-          const sourceCellKey = event.operation.source?.data.cellKey as string
-          const over = event.operation.target
-          if (
-            !over ||
-            over.type !== 'cell' ||
-            sourceCellKey === (over.id as string)
-          )
-            return
+        const activeCellKey = active.data.cellKey as string
+        let overCellKey: string | null = null
 
-          const overCellAssignment =
-            cellMap.get(over.id as string)?.schedulerAssignments[0] ?? null
-
-          // console.log({
-          //   active: activeAssignment,
-          //   over: overCellAssignment,
-          // })
-
-          setOverCellAssignment(overCellAssignment)
-        })
-      }}
-      onDragEnd={() => {
-        if (frameRef.current) {
-          cancelAnimationFrame(frameRef.current)
-          frameRef.current = null
+        if (over.data?.cellKey) {
+          overCellKey = over.data?.cellKey as string
         }
 
-        if (activeAssignment && overCellAssignment) {
-          const activeCellKey = getCellKey(
-            activeAssignment.teamMemberId,
-            activeAssignment?.date,
-          )
-          const overCellKey = getCellKey(
-            overCellAssignment.teamMemberId,
-            overCellAssignment?.date,
-          )
-          moveAssignmentToCell({
-            assignmentId: activeAssignment.id,
-            toCellKey: overCellKey,
+        if (over.type === 'cell') {
+          overCellKey = over.id as string
+        }
+
+        if (!overCellKey) return
+
+        const activeAssignment = active.data.assignment as SchedulerAssignment
+        console.log('moving active to over:', {
+          assignmentId: activeAssignment.id,
+          toCellKey: overCellKey,
+        })
+
+        moveAssignmentToCell({
+          assignmentId: activeAssignment.id,
+          toCellKey: overCellKey,
+        })
+
+        const overCellAssignment = cellMap.get(overCellKey)
+          ?.schedulerAssignments[0] as SchedulerAssignment
+
+        if (
+          overCellAssignment &&
+          overCellAssignment.id !== activeAssignment.id
+        ) {
+          console.log('moving over to active:', {
+            assignmentId: overCellAssignment.id,
+            toCellKey: activeCellKey,
           })
+
           moveAssignmentToCell({
             assignmentId: overCellAssignment.id,
             toCellKey: activeCellKey,
           })
         }
-
-        clearDragState()
       }}
     >
       <ScrollArea
