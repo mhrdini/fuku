@@ -9,6 +9,7 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
+    "@dnd-kit/abstract": "^0.3.2",
     "@dnd-kit/react": "^0.3.2",
     "@fuku/api": "workspace:*",
     "@fuku/auth": "workspace:*",
