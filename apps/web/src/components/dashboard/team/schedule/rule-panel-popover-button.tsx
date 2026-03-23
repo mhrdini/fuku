@@ -62,6 +62,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@fuku/ui/components'
+import { cn } from '@fuku/ui/lib/utils'
 import {
   ChevronDown,
   ChevronDownIcon,
@@ -97,6 +98,8 @@ const RULE_CONDITION_VALUE_OPTIONS_BY_FIELD = {
   [RuleConditionFieldValues.WEEKDAY]: WEEKDAY_MAP,
 }
 
+const WEEKDAY_CONDITION_ID_PREFIX = 'weekday_condition_'
+
 function getRuleSearchValue(
   rule: RuleOutput,
   conditions: RuleConditionOutput[],
@@ -127,6 +130,23 @@ function getRuleSearchValue(
   ]
     .join(' ')
     .toLowerCase()
+}
+
+function getShiftTypeWeekdayCondition(
+  rule: RuleOutput,
+  shiftType: ShiftTypeOutput,
+) {
+  if (!rule.shiftTypeId) return null
+  if (!shiftType.allowedWeekdays || shiftType.allowedWeekdays.length === 0)
+    return null
+  const weekdayCondition: RuleConditionOutput = {
+    id: WEEKDAY_CONDITION_ID_PREFIX + rule.id,
+    ruleId: rule.id,
+    field: 'WEEKDAY',
+    operator: 'IN',
+    value: shiftType.allowedWeekdays,
+  }
+  return weekdayCondition
 }
 
 type RulePanelPopoverButtonProps = {
@@ -175,6 +195,20 @@ export const RulePanelPopoverButton = ({
     mutateRule,
     mutateRuleCondition,
   })
+
+  const weekdayConditionsMap = useMemo(() => {
+    const map = new Map<string, RuleConditionOutput>()
+    for (const rule of Object.values(rules)) {
+      if (!rule.shiftTypeId) continue
+      const shiftType = shiftTypes.find(st => st.id === rule.shiftTypeId)
+      if (!shiftType) continue
+      const weekdayCondition: RuleConditionOutput | null =
+        getShiftTypeWeekdayCondition(rule, shiftType)
+      if (!weekdayCondition) continue
+      map.set(rule.id, weekdayCondition)
+    }
+    return map
+  }, [shiftTypes, rules])
 
   const handleCreateRule = () => {
     if (team.id === undefined) return
@@ -225,7 +259,16 @@ export const RulePanelPopoverButton = ({
                     <RulePanelItem
                       rule={rule}
                       ruleConditions={
-                        ruleConditions ? ruleConditions[rule.id] || [] : []
+                        ruleConditions
+                          ? weekdayConditionsMap
+                            ? [
+                                ...(weekdayConditionsMap.get(rule.id)
+                                  ? [weekdayConditionsMap.get(rule.id)!]
+                                  : []),
+                                ...(ruleConditions[rule.id] || []),
+                              ]
+                            : ruleConditions[rule.id] || []
+                          : []
                       }
                       targetOptions={targetOptions}
                       createRule={createRule}
@@ -650,14 +693,16 @@ const RulePanelItem = ({
         </div>
       </div>
       <CollapsibleContent className='p-0 pt-2 flex flex-col w-full min-w-0 rounded-b-lg gap-2 pl-6'>
-        {ruleConditions.map(rc => (
-          <RuleConditionPanelItem
-            key={rc.id}
-            ruleCondition={rc}
-            updateRuleCondition={updateRuleCondition}
-            deleteRuleCondition={deleteRuleCondition}
-          />
-        ))}
+        {ruleConditions.map(rc => {
+          return (
+            <RuleConditionPanelItem
+              key={rc.id}
+              ruleCondition={rc}
+              updateRuleCondition={updateRuleCondition}
+              deleteRuleCondition={deleteRuleCondition}
+            />
+          )
+        })}
         <Button
           size='sm'
           variant='ghost'
@@ -793,10 +838,19 @@ const RuleConditionPanelItem = ({
     })
   }
 
+  const isWeekdayCondition = useMemo(
+    () => ruleCondition.id.startsWith(WEEKDAY_CONDITION_ID_PREFIX),
+    [ruleCondition.id],
+  )
+
   return (
     <div className='group/condition flex w-full min-w-0 items-center gap-2'>
       {/* field */}
-      <Select value={ruleCondition.field} onValueChange={handleUpdateField}>
+      <Select
+        disabled={isWeekdayCondition}
+        value={ruleCondition.field}
+        onValueChange={handleUpdateField}
+      >
         <SelectTrigger size='sm'>
           <SelectValue placeholder='Field' />
         </SelectTrigger>
@@ -812,6 +866,7 @@ const RuleConditionPanelItem = ({
 
       {/* operator */}
       <Select
+        disabled={isWeekdayCondition}
         value={ruleCondition.operator}
         onValueChange={handleUpdateOperator}
       >
@@ -830,6 +885,7 @@ const RuleConditionPanelItem = ({
 
       {/* value */}
       <Combobox
+        disabled={isWeekdayCondition}
         items={items as { value: string; label: string }[]}
         multiple={isMulti}
         value={uiValue}
@@ -863,7 +919,10 @@ const RuleConditionPanelItem = ({
         variant='ghost'
         size='icon-xs'
         onClick={() => deleteRuleCondition(ruleCondition.id)}
-        className='opacity-20 group-hover/condition:opacity-100 transition-opacity duration-75 ease-in-out'
+        className={cn(
+          'opacity-20 group-hover/condition:opacity-100 transition-opacity duration-75 ease-in-out',
+          isWeekdayCondition && 'hidden',
+        )}
       >
         <X />
       </Button>

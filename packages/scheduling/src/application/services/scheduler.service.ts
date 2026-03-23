@@ -75,6 +75,7 @@ export class DefaultSchedulerService implements SchedulerService {
         end: toJSDate(context.period.end),
         timeZone: context.period.timeZone,
       },
+      // assignments: [],
       assignments: engineResult.proposedAssignments.map(
         this.toSchedulerAssignment,
       ),
@@ -136,14 +137,70 @@ export class DefaultSchedulerService implements SchedulerService {
   private toSchedulerContext(snapshot: TeamSnapshot): SchedulerContext {
     const timeZone = snapshot.period.timeZone
 
+    const shiftTypes = snapshot.shiftTypes.map(st => ({
+      id: st.id,
+      startTime: parseTimeString(st.startTime, timeZone),
+      endTime: parseTimeString(st.endTime, timeZone),
+      allowedWeekdays: st.allowedWeekdays.map(d => d as WeekdayNumbers),
+    }))
+
+    for (const rule of snapshot.rules) {
+      if (!rule.shiftTypeId) continue
+
+      const shiftType = shiftTypes.find(st => st.id === rule.shiftTypeId)
+      if (!shiftType || !shiftType.allowedWeekdays?.length) continue
+
+      const allowed = new Set<number>(shiftType.allowedWeekdays as number[])
+
+      // find existing WEEKDAY IN condition
+      const existing = rule.ruleConditions.find(
+        c => c.field === 'WEEKDAY' && c.operator === 'IN',
+      )
+
+      if (!existing) {
+        // no condition → just add it
+        rule.ruleConditions.push({
+          field: 'WEEKDAY',
+          operator: 'IN',
+          value: [...allowed],
+        })
+
+        // console.log(`\nCREATED CONDITION FOR RULE ${shiftType.id}`)
+        // console.log(`\nALLOWED WEEKDAYS ${shiftType.allowedWeekdays}`)
+        // console.log(
+        //   `\nCONDITION: ${{
+        //     field: 'WEEKDAY',
+        //     operator: 'IN',
+        //     value: [...allowed],
+        //   }}`,
+        // )
+        continue
+      }
+
+      // normalize existing values
+      const existingSet = new Set<number>(existing.value as number[])
+
+      // check if sets are equal
+      const isSame =
+        existingSet.size === allowed.size &&
+        [...allowed].every(v => existingSet.has(v))
+
+      if (isSame) continue
+
+      // if not, only get the allowed weekdays as the condition value
+      const intersection = [...existingSet].filter(v => allowed.has(v))
+
+      existing.value = intersection
+
+      // console.log(`\nUPDATED CONDITION FOR RULE ${shiftType.id}`)
+      // console.log(`\nALLOWED WEEKDAYS ${shiftType.allowedWeekdays}`)
+      // console.log(`\nCONDITION: ${existing}`)
+    }
+
     return {
       ...snapshot,
-      shiftTypes: snapshot.shiftTypes.map(st => ({
-        id: st.id,
-        startTime: parseTimeString(st.startTime, timeZone),
-        endTime: parseTimeString(st.endTime, timeZone),
-        allowedWeekdays: st.allowedWeekdays.map(d => d as WeekdayNumbers),
-      })),
+
+      shiftTypes,
 
       operationalHours: snapshot.operationalHours.reduce((acc, oh) => {
         acc[oh.weekday] = {
