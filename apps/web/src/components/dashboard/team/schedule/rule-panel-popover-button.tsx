@@ -801,6 +801,9 @@ const RuleConditionPanelItem = ({
     let value = ruleCondition.value
 
     if (nextIsMulti && !Array.isArray(value)) {
+      switch (ruleCondition.field) {
+      }
+
       if (
         ruleCondition.field === RuleConditionFieldValues.MONTH ||
         ruleCondition.field === RuleConditionFieldValues.WEEKDAY
@@ -808,12 +811,12 @@ const RuleConditionPanelItem = ({
         value =
           value !== undefined && value !== null
             ? [Number(value)]
-            : ([] as number[])
+            : [Number(items[0].value)]
       } else {
         value =
           value !== undefined && value !== null
             ? [String(value)]
-            : ([] as string[])
+            : [String(items[0].value)]
       }
     }
 
