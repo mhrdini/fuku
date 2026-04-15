@@ -1,11 +1,16 @@
 'use client'
 
+import { useMemo } from 'react'
 import { TeamOutput } from '@fuku/api/schemas'
 import {
   Button,
   ButtonGroup,
   ButtonGroupSeparator,
   DateRangePicker,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Select,
   SelectContent,
   SelectGroup,
@@ -17,12 +22,22 @@ import {
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { enGB } from 'date-fns/locale'
-import { ChevronLeft, ChevronRight, Cog, RefreshCcw } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Cog,
+  Download,
+  RefreshCcw,
+} from 'lucide-react'
+import { DateTime } from 'luxon'
 
 import { ScheduleData } from '~/hooks/schedule/useScheduleData'
 import { ScheduleDerivedData } from '~/hooks/schedule/useScheduleDerivedData'
 import { ScheduleMutations } from '~/hooks/schedule/useScheduleMutations'
 import { ScheduleViewState } from '~/hooks/schedule/useScheduleView'
+import { convertToCSV } from '~/lib/csv'
+import { getByIdMap } from '~/lib/db'
 import { ViewOptionValues } from '~/lib/schedule'
 import { useScheduleStore } from '~/store/schedule.store'
 import { RulePanelPopoverButton } from './rule-panel-popover-button'
@@ -62,6 +77,43 @@ export const ScheduleHeader = ({
     schedulerUnavailabilities,
     setSchedulerMetrics,
   } = useScheduleStore()
+
+  const teamMemberByIdMap = useMemo(
+    () => getByIdMap(teamMembers ?? []),
+    [teamMembers],
+  )
+  const shiftTypeByIdMap = useMemo(
+    () => getByIdMap(shiftTypes ?? []),
+    [shiftTypes],
+  )
+
+  const downloadCSV = () => {
+    const csv = convertToCSV(
+      schedulerAssignments,
+      teamMemberByIdMap,
+      shiftTypeByIdMap,
+    )
+
+    const startStr = DateTime.fromJSDate(start).toFormat('yyyy-MM-dd')
+    const endStr = DateTime.fromJSDate(end).toFormat('yyyy-MM-dd')
+    const fileName = `${startStr}__${endStr}.csv`
+
+    const blob = new Blob([csv], {
+      type: 'text/csv;charset=utf-8;',
+    })
+
+    const url = URL.createObjectURL(blob)
+
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <div className='flex gap-2'>
@@ -143,9 +195,24 @@ export const ScheduleHeader = ({
           Generating...
         </span>
       </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant='secondary'>
+            <Download />
+            <ChevronDown className='text-muted-foreground' />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align='end'>
+          <DropdownMenuItem
+            className='block whitespace-nowrap'
+            onClick={downloadCSV}
+          >
+            Download as <span className='font-bold'>CSV</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <Button variant='secondary'>
         <Cog />
-        <span className='hidden md:flex'>Customize</span>
       </Button>
     </div>
   )

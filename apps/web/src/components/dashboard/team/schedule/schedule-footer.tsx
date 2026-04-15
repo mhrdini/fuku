@@ -36,7 +36,7 @@ export const ScheduleFooter = () => {
         <DropdownMenuTrigger asChild>
           <Button variant='outline'>
             Clear
-            <ChevronDown />
+            <ChevronDown className='text-muted-foreground' />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>

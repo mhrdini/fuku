@@ -26,3 +26,9 @@ export const toTeamMemberUI = (
   effectiveRate: m.payGrade ? m.payGrade.baseRate * m.rateMultiplier : null,
   username: m.user ? m.user.username : null,
 })
+
+export const getTeamMemberName = (
+  tm: TeamMemberOutput | TeamMemberUI,
+): string => {
+  return tm.givenNames + (tm.familyName ?? '')
+}
