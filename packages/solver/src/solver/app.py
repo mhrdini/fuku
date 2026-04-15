@@ -1,11 +1,16 @@
 """FastAPI app for solver microservice."""
 
+import json
+import queue
+import threading
+
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 from .logging import logger
 from .models import SolverRequest, SolverResponse
+from .progress import ProgressCallback
 from .solver import Solver
 
 app = FastAPI(
@@ -31,6 +36,44 @@ async def solve(request: SolverRequest) -> SolverResponse:
         # log the error and trigger global exception handler
         logger.debug(f"Error solving model: {e}")
         raise
+
+
+@app.post("/solve/stream")
+async def solve_stream(request: SolverRequest):
+    q = queue.Queue()
+
+    def send_event(data):
+        q.put(data)
+
+    def run_solver():
+        send_event({"type": "stage", "message": "Building model..."})
+        solver = Solver()
+        model = solver.create_model(request)
+
+        send_event({"type": "stage", "message": "Solving..."})
+        callback = ProgressCallback(send_event)
+
+        status = solver.solver.Solve(model, callback)
+
+        send_event(
+            {
+                "type": "result",
+                "status": solver.solver.StatusName(status),
+            }
+        )
+
+        q.put(None)
+
+    threading.Thread(target=run_solver).start()
+
+    def stream():
+        while True:
+            item = q.get()
+            if item is None:
+                break
+            yield f"data: {json.dumps(item)}\n\n"
+
+    return StreamingResponse(stream(), media_type="text/event-stream")
 
 
 @app.exception_handler(Exception)

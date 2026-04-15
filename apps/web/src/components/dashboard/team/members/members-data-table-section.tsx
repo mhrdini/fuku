@@ -50,7 +50,7 @@ import {
   Settings2,
 } from 'lucide-react'
 
-import { TeamMemberUI } from '~/lib/member'
+import { TeamMemberUI } from '~/lib/team-member'
 import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 
