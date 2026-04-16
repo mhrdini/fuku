@@ -1,11 +1,11 @@
 import {
-  MetricValues,
   RuleConditionOperatorValues,
+  RuleMetricValues,
   RuleOperator,
   RuleOperatorValues,
   RuleTargetValues,
-  TimeWindow,
-  TimeWindowValues,
+  RuleTimeWindow,
+  RuleTimeWindowValues,
 } from '@fuku/domain/schemas'
 
 import { Rule, SchedulerContext, TeamMember, ZonedShiftType } from '../types'
@@ -220,7 +220,7 @@ export class ConstraintModelBuilder {
       // =========================================================
       // 1. CONSECUTIVE DAYS WORKED
       // =========================================================
-      if (rule.metric === MetricValues.CONSECUTIVE_DAYS_WORKED) {
+      if (rule.metric === RuleMetricValues.CONSECUTIVE_DAYS_WORKED) {
         const windowLength = rule.threshold + 1
 
         for (const tm of this.ctx.teamMembers) {
@@ -268,12 +268,12 @@ export class ConstraintModelBuilder {
       // =========================================================
       // 2. UNIQUE MEMBERS ASSIGNED
       // =========================================================
-      if (rule.metric === MetricValues.UNIQUE_MEMBERS_ASSIGNED) {
+      if (rule.metric === RuleMetricValues.UNIQUE_MEMBERS_ASSIGNED) {
         const windows =
-          rule.timeWindow === TimeWindowValues.MONTH
-            ? [this.getDaysForTimeWindow(rule.timeWindow, 0)]
+          rule.timeWindow === RuleTimeWindowValues.MONTH
+            ? [this.getDaysForRuleTimeWindow(rule.timeWindow, 0)]
             : Array.from({ length: this.numDays }, (_, i) =>
-                this.getDaysForTimeWindow(rule.timeWindow, i),
+                this.getDaysForRuleTimeWindow(rule.timeWindow, i),
               )
 
         windows.forEach((dayIndices, windowIndex) => {
@@ -349,10 +349,10 @@ export class ConstraintModelBuilder {
       // 3. GENERIC METRICS (DAYS_WORKED, HOURS_WORKED, DAYS_OFF)
       // =========================================================
       const windows =
-        rule.timeWindow === TimeWindowValues.MONTH
-          ? [this.getDaysForTimeWindow(rule.timeWindow, 0)]
+        rule.timeWindow === RuleTimeWindowValues.MONTH
+          ? [this.getDaysForRuleTimeWindow(rule.timeWindow, 0)]
           : Array.from({ length: this.numDays }, (_, i) =>
-              this.getDaysForTimeWindow(rule.timeWindow, i),
+              this.getDaysForRuleTimeWindow(rule.timeWindow, i),
             )
 
       let windowIndex = 0
@@ -722,7 +722,7 @@ export class ConstraintModelBuilder {
     let flipOperator = false
 
     switch (rule.metric) {
-      case MetricValues.DAYS_WORKED: {
+      case RuleMetricValues.DAYS_WORKED: {
         for (const d of validDays) {
           for (const st of shiftTypes) {
             const varName = getAssignmentVariableName(teamMemberId, d, st.id)
@@ -732,7 +732,7 @@ export class ConstraintModelBuilder {
         break
       }
 
-      case MetricValues.HOURS_WORKED: {
+      case RuleMetricValues.HOURS_WORKED: {
         for (const d of validDays) {
           for (const st of shiftTypes) {
             const varName = getAssignmentVariableName(teamMemberId, d, st.id)
@@ -744,7 +744,7 @@ export class ConstraintModelBuilder {
         break
       }
 
-      case MetricValues.DAYS_OFF: {
+      case RuleMetricValues.DAYS_OFF: {
         for (const d of validDays) {
           for (const st of shiftTypes) {
             const varName = getAssignmentVariableName(teamMemberId, d, st.id)
@@ -765,8 +765,8 @@ export class ConstraintModelBuilder {
     return { coefficients, adjustRhs, flipOperator }
   }
 
-  private getDaysForTimeWindow(
-    timeWindow: TimeWindow,
+  private getDaysForRuleTimeWindow(
+    timeWindow: RuleTimeWindow,
     startDayIndex: number,
   ): number[] {
     const minDayIndex = 0
@@ -778,26 +778,26 @@ export class ConstraintModelBuilder {
     }).daysInMonth!
     const forwardEndIndex =
       startDayIndex +
-      (timeWindow === TimeWindowValues.MONTH ? daysInMonth : daysInWeek) -
+      (timeWindow === RuleTimeWindowValues.MONTH ? daysInMonth : daysInWeek) -
       1
     const backwardStartIndex =
       startDayIndex -
-      (timeWindow === TimeWindowValues.MONTH ? daysInMonth : daysInWeek) +
+      (timeWindow === RuleTimeWindowValues.MONTH ? daysInMonth : daysInWeek) +
       1
 
     switch (timeWindow) {
-      case TimeWindowValues.DAY: {
+      case RuleTimeWindowValues.DAY: {
         days.push(startDayIndex)
         break
       }
-      case TimeWindowValues.WEEK:
-      case TimeWindowValues.MONTH: {
+      case RuleTimeWindowValues.WEEK:
+      case RuleTimeWindowValues.MONTH: {
         const end = Math.min(forwardEndIndex, maxDayIndex)
         for (let d = startDayIndex; d <= end; d++) days.push(d)
         break
       }
-      case TimeWindowValues.ROLLING_WEEK:
-      case TimeWindowValues.ROLLING_MONTH: {
+      case RuleTimeWindowValues.ROLLING_WEEK:
+      case RuleTimeWindowValues.ROLLING_MONTH: {
         const start = Math.max(backwardStartIndex, minDayIndex)
         for (let d = start; d <= startDayIndex; d++) days.push(d)
         break
