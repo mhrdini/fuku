@@ -14,21 +14,23 @@ import {
   TeamOutput,
 } from '@fuku/api/schemas'
 import {
-  MetricSchema,
-  MetricValues,
+  getRuleConditionDefaultValueByField,
+  normalizeConditionValue,
+  RULE_CONDITION_OPTIONS_CONFIG,
   RuleConditionField,
-  RuleConditionFieldDefaultValues,
   RuleConditionFieldSchema,
   RuleConditionFieldValues,
   RuleConditionOperator,
   RuleConditionOperatorSchema,
   RuleConditionOperatorValues,
+  RuleMetricSchema,
+  RuleMetricValues,
   RuleOperatorSchema,
   RuleOperatorValues,
   RuleTargetSchema,
   RuleTargetValues,
-  TimeWindowSchema,
-  TimeWindowValues,
+  RuleTimeWindowSchema,
+  RuleTimeWindowValues,
 } from '@fuku/domain/schemas'
 import {
   Button,
@@ -82,6 +84,7 @@ import { MutationMode } from '~/lib/query'
 const RULE_CONDITION_FIELD_LABELS: Record<RuleConditionField, string> = {
   [RuleConditionFieldValues.MONTH]: 'Month',
   [RuleConditionFieldValues.WEEKDAY]: 'Weekday',
+  [RuleConditionFieldValues.IS_HOLIDAY]: 'Is Holiday',
 }
 
 const RULE_CONDITION_OPERATOR_LABELS: Record<RuleConditionOperator, string> = {
@@ -96,6 +99,7 @@ const RULE_CONDITION_OPERATOR_LABELS: Record<RuleConditionOperator, string> = {
 const RULE_CONDITION_VALUE_OPTIONS_BY_FIELD = {
   [RuleConditionFieldValues.MONTH]: MONTH_MAP,
   [RuleConditionFieldValues.WEEKDAY]: WEEKDAY_MAP,
+  [RuleConditionFieldValues.IS_HOLIDAY]: { true: 'true', false: 'false' },
 }
 
 const WEEKDAY_CONDITION_ID_PREFIX = 'weekday_condition_'
@@ -218,10 +222,10 @@ export const RulePanelPopoverButton = ({
       payGradeId: null,
       shiftTypeId: null,
       teamMemberId: null,
-      metric: MetricValues.DAYS_WORKED,
+      metric: RuleMetricValues.DAYS_WORKED,
       operator: RuleOperatorValues.MIN,
       threshold: 1,
-      timeWindow: TimeWindowValues.WEEK,
+      timeWindow: RuleTimeWindowValues.WEEK,
       hardConstraint: true,
     })
   }
@@ -413,12 +417,12 @@ const RulePanelItem = ({
     } as RuleUpdateInput)
   }
 
-  const handleUpdateMetric = (metric: string) => {
+  const handleUpdateRuleMetric = (metric: string) => {
     if (metric === rule.metric) return
 
     updateRule({
       ...rule,
-      metric: MetricSchema.parse(metric),
+      metric: RuleMetricSchema.parse(metric),
     } as RuleUpdateInput)
   }
 
@@ -444,12 +448,12 @@ const RulePanelItem = ({
       threshold: num,
     } as RuleUpdateInput)
   }
-  const handleUpdateTimeWindow = (timeWindow: string) => {
+  const handleUpdateRuleTimeWindow = (timeWindow: string) => {
     if (timeWindow === rule.timeWindow) return
 
     updateRule({
       ...rule,
-      timeWindow: TimeWindowSchema.parse(timeWindow),
+      timeWindow: RuleTimeWindowSchema.parse(timeWindow),
     } as RuleUpdateInput)
   }
 
@@ -509,9 +513,9 @@ const RulePanelItem = ({
       ruleId: rule.id,
       field: RuleConditionFieldValues.MONTH,
       operator: RuleConditionOperatorValues.EQ,
-      value: String(
-        RuleConditionFieldDefaultValues[RuleConditionFieldValues.MONTH],
-      ),
+      value: getRuleConditionDefaultValueByField(
+        RuleConditionFieldValues.MONTH,
+      ) as typeof RULE_CONDITION_OPTIONS_CONFIG.MONTH.defaultValue,
     })
   }
 
@@ -589,12 +593,12 @@ const RulePanelItem = ({
         {/* second row */}
         <div>
           {/* metric */}
-          <Select value={rule.metric} onValueChange={handleUpdateMetric}>
+          <Select value={rule.metric} onValueChange={handleUpdateRuleMetric}>
             <SelectTrigger size='chip' variant='secondary'>
-              <SelectValue placeholder='Metric' />
+              <SelectValue placeholder='RuleMetric' />
             </SelectTrigger>
             <SelectContent>
-              {Object.values(MetricValues).map(value => (
+              {Object.values(RuleMetricValues).map(value => (
                 <SelectItem key={value} value={value}>
                   {value}
                 </SelectItem>
@@ -635,13 +639,13 @@ const RulePanelItem = ({
           {/* time window */}
           <Select
             value={rule.timeWindow}
-            onValueChange={handleUpdateTimeWindow}
+            onValueChange={handleUpdateRuleTimeWindow}
           >
             <SelectTrigger size='chip' variant='secondary'>
               <SelectValue placeholder='Time Window' />
             </SelectTrigger>
             <SelectContent>
-              {Object.values(TimeWindowValues).map(value => (
+              {Object.values(RuleTimeWindowValues).map(value => (
                 <SelectItem key={value} value={value}>
                   {value}
                 </SelectItem>
@@ -735,7 +739,8 @@ const RuleConditionPanelItem = ({
     ruleCondition.operator === RuleConditionOperatorValues.NOT_IN
 
   const items = useMemo(() => {
-    const source = RULE_CONDITION_VALUE_OPTIONS_BY_FIELD[ruleCondition.field]
+    const source: Record<string, string> | undefined =
+      RULE_CONDITION_VALUE_OPTIONS_BY_FIELD[ruleCondition.field]
     if (!source) return []
 
     return Object.entries(source).map(([value, label]) => ({
@@ -759,34 +764,33 @@ const RuleConditionPanelItem = ({
     const single = Array.isArray(v) ? v[0] : v
     return single !== undefined && single !== null
       ? String(single)
-      : String(RuleConditionFieldDefaultValues[ruleCondition.field])
+      : String(RULE_CONDITION_OPTIONS_CONFIG[ruleCondition.field].defaultValue)
   }, [ruleCondition.value, ruleCondition.field, isMulti])
-
-  /**
-   * Convert UI value → stored value
-   */
-  const normalizeValue = (
-    value: string | number | (string | number)[],
-  ): string | number | string[] | number[] => {
-    const arr = Array.isArray(value) ? value : [value]
-
-    const parsed =
-      ruleCondition.field === RuleConditionFieldValues.MONTH ||
-      ruleCondition.field === RuleConditionFieldValues.WEEKDAY
-        ? arr.map(v => Number(v))
-        : arr.map(v => String(v))
-
-    return isMulti ? parsed : parsed[0]
-  }
 
   const handleUpdateField = (field: string) => {
     if (field === ruleCondition.field) return
 
-    updateRuleCondition({
-      ...ruleCondition,
-      field: RuleConditionFieldSchema.parse(field),
-      value: isMulti ? [] : '',
-    })
+    const nextField = RuleConditionFieldSchema.parse(field)
+    const config = RULE_CONDITION_OPTIONS_CONFIG[nextField]
+
+    // pick first valid operator
+    const nextOperator = config.operators[0]
+
+    const nextValue = normalizeConditionValue(
+      config.defaultValue,
+      nextField,
+      nextOperator,
+    )
+
+    const update = {
+      id: ruleCondition.id,
+      ruleId: ruleCondition.ruleId,
+      field: nextField,
+      operator: nextOperator,
+      value: nextValue,
+    }
+
+    updateRuleCondition(update)
   }
 
   const handleUpdateOperator = (operator: string) => {
@@ -802,26 +806,16 @@ const RuleConditionPanelItem = ({
 
     if (nextIsMulti && !Array.isArray(value)) {
       switch (ruleCondition.field) {
-      }
-
-      if (
-        ruleCondition.field === RuleConditionFieldValues.MONTH ||
-        ruleCondition.field === RuleConditionFieldValues.WEEKDAY
-      ) {
-        value =
-          value !== undefined && value !== null
-            ? [Number(value)]
-            : [Number(items[0].value)]
-      } else {
-        value =
-          value !== undefined && value !== null
-            ? [String(value)]
-            : [String(items[0].value)]
+        case RuleConditionFieldValues.MONTH:
+        case RuleConditionFieldValues.WEEKDAY:
+          value = [Number(value || items[0].value)]
+          break
       }
     }
 
     if (!nextIsMulti && Array.isArray(value)) {
-      value = value[0] ?? RuleConditionFieldDefaultValues[ruleCondition.field]
+      value =
+        value[0] ?? getRuleConditionDefaultValueByField(ruleCondition.field)
     }
 
     updateRuleCondition({
@@ -831,10 +825,14 @@ const RuleConditionPanelItem = ({
     })
   }
 
-  const handleUpdateValue = (
-    value: string | number | (string | number)[] | null,
-  ) => {
-    const updatedValue = value ? normalizeValue(value) : null
+  const handleUpdateValue = (value: string | string[] | null) => {
+    const updatedValue = value
+      ? normalizeConditionValue(
+          value,
+          ruleCondition.field,
+          ruleCondition.operator,
+        )
+      : null
     updateRuleCondition({
       ...ruleCondition,
       value: updatedValue,
@@ -866,7 +864,6 @@ const RuleConditionPanelItem = ({
           ))}
         </SelectContent>
       </Select>
-
       {/* operator */}
       <Select
         disabled={isWeekdayCondition}
@@ -885,7 +882,6 @@ const RuleConditionPanelItem = ({
           ))}
         </SelectContent>
       </Select>
-
       {/* value */}
       <Combobox
         disabled={isWeekdayCondition}
@@ -917,7 +913,6 @@ const RuleConditionPanelItem = ({
           </ComboboxList>
         </ComboboxContent>
       </Combobox>
-
       <Button
         variant='ghost'
         size='icon-xs'

@@ -1,18 +1,23 @@
-import { RuleConditionSchema } from '@fuku/domain/schemas'
+import {
+  RuleConditionSchema,
+  RuleConditionUndiscriminatedSchema,
+} from '@fuku/domain/schemas'
 import * as z from 'zod/v4'
 
-export const RuleConditionCreateInputSchema = RuleConditionSchema.omit({
-  id: true,
-})
+export const RuleConditionCreateInputSchema =
+  RuleConditionUndiscriminatedSchema.omit({
+    id: true,
+  })
 
 export type RuleConditionCreateInput = z.infer<
   typeof RuleConditionCreateInputSchema
 >
 
 export const RuleConditionUpdateInputSchema =
-  RuleConditionSchema.partial().extend({
-    id: z.string(),
-    ruleId: z.string(),
+  RuleConditionUndiscriminatedSchema.partial({
+    field: true,
+    operator: true,
+    value: true,
   })
 
 export type RuleConditionUpdateInput = z.infer<

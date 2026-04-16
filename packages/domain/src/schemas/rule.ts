@@ -1,10 +1,10 @@
 import * as z from 'zod/v4'
 
 import {
-  MetricSchema,
+  RuleMetricSchema,
   RuleOperatorSchema,
   RuleTargetSchema,
-  TimeWindowSchema,
+  RuleTimeWindowSchema,
 } from './enums'
 
 export const RuleSchema = z.object({
@@ -14,8 +14,8 @@ export const RuleSchema = z.object({
   payGradeId: z.string().nullable(),
   shiftTypeId: z.string().nullable(),
   teamMemberId: z.string().nullable(),
-  metric: MetricSchema,
-  timeWindow: TimeWindowSchema,
+  metric: RuleMetricSchema,
+  timeWindow: RuleTimeWindowSchema,
   operator: RuleOperatorSchema,
   threshold: z.number(),
   hardConstraint: z.boolean(),
