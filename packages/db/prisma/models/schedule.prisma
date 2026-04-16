@@ -209,6 +209,7 @@ model Rule {
 enum ConditionField {
   MONTH
   WEEKDAY
+  IS_HOLIDAY
 }
 
 enum ConditionOperator {

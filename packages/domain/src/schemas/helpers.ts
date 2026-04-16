@@ -49,8 +49,7 @@ export const TimeZoneSchema = z
 export const JsonValueSchema = z.union([
   z.number(),
   z.array(z.number()),
-  z.string(),
-  z.array(z.string()),
+  z.boolean(),
 ])
 
 export type JsonValue = z.infer<typeof JsonValueSchema>
