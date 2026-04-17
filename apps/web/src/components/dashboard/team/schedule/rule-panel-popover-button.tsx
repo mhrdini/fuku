@@ -875,11 +875,13 @@ const RuleConditionPanelItem = ({
         </SelectTrigger>
 
         <SelectContent>
-          {Object.values(RuleConditionOperatorValues).map(value => (
-            <SelectItem key={value} value={value}>
-              {RULE_CONDITION_OPERATOR_LABELS[value]}
-            </SelectItem>
-          ))}
+          {RULE_CONDITION_OPTIONS_CONFIG[ruleCondition.field].operators.map(
+            value => (
+              <SelectItem key={value} value={value}>
+                {RULE_CONDITION_OPERATOR_LABELS[value]}
+              </SelectItem>
+            ),
+          )}
         </SelectContent>
       </Select>
       {/* value */}
