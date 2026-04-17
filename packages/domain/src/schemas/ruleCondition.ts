@@ -69,7 +69,7 @@ export function normalizeConditionValue(
         ? (parsed ?? [config.defaultValue])
         : (parsed[0] ?? config.defaultValue)
     case 'boolean':
-      parsed = arr.map(v => Boolean(v))
+      parsed = arr.map(v => v === 'true' || v === true)
       return parsed[0] ?? config.defaultValue
     default:
       throw new Error(
