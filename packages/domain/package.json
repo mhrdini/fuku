@@ -2,7 +2,8 @@
   "name": "@fuku/domain",
   "version": "1.0.0",
   "exports": {
-    "./schemas": "./src/schemas/index.ts"
+    "./schemas": "./src/schemas/index.ts",
+    "./country": "./src/i18n/country/index.ts"
   },
   "dependencies": {
     "zod": "catalog:"
