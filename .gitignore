@@ -49,4 +49,4 @@ __pycache__/
 *.pyc
 *.egg-info
 *.ipynb
-*.json
+packages/solver/src/**/*.json
