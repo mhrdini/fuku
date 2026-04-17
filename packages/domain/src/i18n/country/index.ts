@@ -1,1 +1,1 @@
-export * from './country.generated'
+export * from './all-countries.generated'
