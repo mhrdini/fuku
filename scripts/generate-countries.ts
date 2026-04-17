@@ -51,9 +51,7 @@ export type CountryCode =
   // -------------------------
   // 3. Normalize to codes only
   // -------------------------
-  const supportedCodes = nagerCountries.map(c => ({
-    code: c.countryCode,
-  }))
+  const supportedCodes = nagerCountries.map(c => c.countryCode)
 
   const supportOutputPath = path.resolve(
     'packages/infrastructure/src/holiday/supported-countries.generated.ts',
