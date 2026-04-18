@@ -4,7 +4,8 @@ model Team {
   name        String
   description String?
 
-  timeZone String @map("time_zone")
+  timeZone String  @map("time_zone")
+  country  String? // ISO 3166-1 alpha-2 code, e.g. JP = Japan
 
   teamMembers          TeamMember[]
   adminUsers           User[]                @relation("UserTeams")

@@ -1,6 +1,6 @@
 import * as z from 'zod/v4'
 
-import { TimeZoneSchema } from './helpers'
+import { CountrySchema, TimeZoneSchema } from './helpers'
 
 export const TeamSchema = z.object({
   id: z.string(),
@@ -14,6 +14,7 @@ export const TeamSchema = z.object({
   deletedById: z.string().nullable(),
 
   timeZone: TimeZoneSchema,
+  country: CountrySchema.nullish(),
 })
 
 export type Team = z.infer<typeof TeamSchema>
