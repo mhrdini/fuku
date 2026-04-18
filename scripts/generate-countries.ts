@@ -1,4 +1,3 @@
-// scripts/generate-countries.ts
 import fs from 'node:fs'
 import path from 'node:path'
 import countries from 'i18n-iso-countries'
