@@ -24,6 +24,12 @@ async function main() {
 
 export const ALL_COUNTRIES = ${JSON.stringify(allCountries, null, 2)} as const;
 
+export const ALL_COUNTRY_CODES = ${JSON.stringify(
+    allCountries.map(c => c.code),
+    null,
+    2,
+  )} as const;
+
 export type CountryCode =
   (typeof ALL_COUNTRIES)[number]['code'];
 `
