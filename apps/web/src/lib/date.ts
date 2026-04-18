@@ -1,4 +1,8 @@
-import { MonthKey, supportedTimeZones, WeekdayKey } from '@fuku/domain/schemas'
+import {
+  MonthKey,
+  SUPPORTED_TIME_ZONES,
+  WeekdayKey,
+} from '@fuku/domain/schemas'
 import { DateTime, WeekdayNumbers } from 'luxon'
 
 export const WEEKDAY_MAP: Record<WeekdayKey, string> = Array.from(
@@ -95,7 +99,7 @@ function getOffsetInfo(timeZone: string) {
 }
 
 export function getGroupedTimeZones(): Record<string, TimeZoneOption[]> {
-  const zones = supportedTimeZones
+  const zones = SUPPORTED_TIME_ZONES
   const result: Record<string, TimeZoneOption[]> = {}
 
   for (const zone of zones) {

@@ -1,5 +1,7 @@
 import * as z from 'zod/v4'
 
+import { ALL_COUNTRY_CODES } from '../i18n/country'
+
 /** Common fields */
 export const ColorHex = z.string().regex(/^#([0-9A-Fa-f]{6})$/)
 export const Time = z
@@ -38,11 +40,11 @@ export const Months = [
 export const MonthKeySchema = z.enum(Months)
 export type MonthKey = z.infer<typeof MonthKeySchema>
 
-export const supportedTimeZones = Intl.supportedValuesOf('timeZone')
+export const SUPPORTED_TIME_ZONES = Intl.supportedValuesOf('timeZone')
 
 export const TimeZoneSchema = z
   .string()
-  .refine(tz => tz === 'UTC' || supportedTimeZones.includes(tz), {
+  .refine(tz => tz === 'UTC' || SUPPORTED_TIME_ZONES.includes(tz), {
     message: 'invalid_time_zone',
   })
 
@@ -53,3 +55,5 @@ export const JsonValueSchema = z.union([
 ])
 
 export type JsonValue = z.infer<typeof JsonValueSchema>
+
+export const CountrySchema = z.enum(ALL_COUNTRY_CODES)
