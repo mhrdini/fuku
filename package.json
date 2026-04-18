@@ -6,6 +6,7 @@
   "packageManager": "pnpm@10.12.4",
   "private": true,
   "scripts": {
+    "prebuild": "tsx/scripts/generate-countries.ts",
     "build": "dotenv -e .env.${NODE_ENV:-production} -- turbo run build",
     "db:migrate:deploy": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:deploy",
     "db:migrate:dev": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:dev",
