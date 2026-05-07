@@ -8,7 +8,8 @@ import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
 import { z, ZodError } from 'zod/v4'
 
-import { PrismaTeamRepository } from './infrastructure/prisma-team.repository'
+import { PrismaTeamRepository } from './adapters/db/prisma-team.repository'
+import { NagerHolidayService } from './adapters/holiday/nager-holiday.service'
 
 /**
  * 1. Context
@@ -33,7 +34,11 @@ export const createTRPCContext = async (options: {
     headers: options.headers,
   })
   const teamRepository = new PrismaTeamRepository(db)
-  const schedulerService = new DefaultSchedulerService(teamRepository)
+  const holidayService = new NagerHolidayService()
+  const schedulerService = new DefaultSchedulerService(
+    teamRepository,
+    holidayService,
+  )
   return {
     authApi,
     session,

@@ -1,5 +1,7 @@
+type ISODateString = string // yyyy-MM-dd
+
 type Holiday = {
-  date: string // YYYY-MM-DD
+  date: ISODateString
 }
 
 const holidayCache = new Map<string, Set<string>>() // key = `${country}-${year}`
@@ -31,14 +33,14 @@ export const preloadHolidays = async (
 }
 
 export const preloadHolidaysForRange = async (input: {
-  startDate: string
-  endDate: string
+  startDate: Date
+  endDate: Date
   country: string
 }): Promise<void> => {
   const { startDate, endDate, country } = input
 
-  const startYear = new Date(startDate).getFullYear()
-  const endYear = new Date(endDate).getFullYear()
+  const startYear = startDate.getFullYear()
+  const endYear = endDate.getFullYear()
 
   const promises: Promise<void>[] = []
   for (let year = startYear; year <= endYear; year++) {

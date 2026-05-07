@@ -1,4 +1,9 @@
 import {
+  addDays,
+  getDaysBetweenInclusive,
+  getDaysDifference,
+} from '../../shared/utils/date'
+import {
   ProposedAssignment,
   SchedulerContext,
   SchedulerMetrics,
@@ -8,15 +13,12 @@ import { SolverResult } from './solver.adapter'
 
 export class SolutionMapper {
   private totalDays: number
+
   constructor(
     private readonly ctx: SchedulerContext,
     private readonly solverResult: SolverResult,
   ) {
-    this.totalDays =
-      ctx.period.end
-        .startOf('day')
-        .diff(ctx.period.start.startOf('day'), 'days')
-        .as('days') + 1
+    this.totalDays = getDaysBetweenInclusive(ctx.period.start, ctx.period.end)
   }
 
   getResult(): SchedulerResult {
@@ -28,24 +30,23 @@ export class SolutionMapper {
       }
     }
 
-    // extract assignments
     const proposedAssignments: ProposedAssignment[] = []
 
     for (const [varName, value] of Object.entries(this.solverResult.values)) {
       if (!varName.startsWith('assign__')) continue
-
-      if (value !== 1) continue // only consider assigned slots
+      if (value !== 1) continue
 
       const [, teamMemberId, dayIndexStr, shiftTypeId] = varName.split('__')
+
       const dayIndex = parseInt(dayIndexStr, 10)
+
       proposedAssignments.push({
-        date: this.ctx.period.start.plus({ days: dayIndex }),
+        date: addDays(this.ctx.period.start, dayIndex),
         teamMemberId,
         shiftTypeId,
       })
     }
 
-    // compute metrics
     const metrics = this.computeMetrics(proposedAssignments)
 
     return {
@@ -57,36 +58,46 @@ export class SolutionMapper {
 
   private computeMetrics(assignments: ProposedAssignment[]): SchedulerMetrics {
     const totalSlotsRequired = this.totalDays * this.ctx.shiftTypes.length
+
     const totalSlotsFilled = assignments.length
 
     // coverage
     const coveragePerDay: number[] = Array(this.totalDays).fill(0)
-    for (const a of assignments) {
-      const dayIndex = a.date.diff(this.ctx.period.start).as('days')
+
+    for (const assignment of assignments) {
+      const dayIndex = getDaysDifference(this.ctx.period.start, assignment.date)
+
       coveragePerDay[dayIndex]++
     }
 
-    const totalOperationalCoverage =
-      coveragePerDay.reduce((acc, v) => acc + (v > 0 ? 1 : 0), 0) /
-      this.totalDays
+    const coveredDays = coveragePerDay.filter(v => v > 0).length
 
-    // fairness: standard deviation of slots per member
+    const totalOperationalCoverage = coveredDays / this.totalDays
+
+    // fairness
     const slotsPerMember: Record<string, number> = {}
+
     const teamMemberIds = this.ctx.teamMembers.map(tm => tm.id)
-    for (const id of teamMemberIds) slotsPerMember[id] = 0
-    for (const a of assignments) slotsPerMember[a.teamMemberId]++
+
+    for (const id of teamMemberIds) {
+      slotsPerMember[id] = 0
+    }
+
+    for (const assignment of assignments) {
+      slotsPerMember[assignment.teamMemberId]++
+    }
+
     const mean = totalSlotsFilled / teamMemberIds.length
+
     const variance =
-      teamMemberIds.reduce(
-        (acc, id) => acc + Math.pow(slotsPerMember[id] - mean, 2),
-        0,
-      ) / teamMemberIds.length
+      teamMemberIds.reduce((acc, id) => {
+        return acc + Math.pow(slotsPerMember[id] - mean, 2)
+      }, 0) / teamMemberIds.length
+
     const fairnessStdDeviation = Math.sqrt(variance)
 
-    // hard constraint violations placeholder
     const totalHardConstraintViolations = 0
 
-    // soft penalty placeholder (sum of objective function penalties if relevant)
     const totalSoftPenalty = this.solverResult.objectiveValue ?? 0
 
     return {

@@ -48,6 +48,8 @@ export const TimeZoneSchema = z
     message: 'invalid_time_zone',
   })
 
+export type TimeZone = z.infer<typeof TimeZoneSchema>
+
 export const JsonValueSchema = z.union([
   z.number(),
   z.array(z.number()),
@@ -57,3 +59,11 @@ export const JsonValueSchema = z.union([
 export type JsonValue = z.infer<typeof JsonValueSchema>
 
 export const CountrySchema = z.enum(ALL_COUNTRY_CODES)
+
+export const ISODateTimeStringSchema = z.iso.datetime()
+
+export type ISODateTimeString = z.infer<typeof ISODateTimeStringSchema>
+
+export const ISODateStringSchema = z.iso.date()
+
+export type ISODateString = z.infer<typeof ISODateStringSchema>

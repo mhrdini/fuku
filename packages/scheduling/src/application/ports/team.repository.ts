@@ -1,3 +1,5 @@
+import { SchedulerAssignment } from '@fuku/domain/schemas'
+
 import { Assignment, Unavailability } from '../../domain/types'
 import { TeamSnapshot } from '../../domain/types/engine'
 import { Period } from '../../shared/utils/date'
@@ -14,6 +16,6 @@ export interface TeamRepository {
   persistSchedule(
     teamId: string,
     period: Period,
-    assignments: Assignment[],
+    assignments: SchedulerAssignment[],
   ): Promise<void>
 }

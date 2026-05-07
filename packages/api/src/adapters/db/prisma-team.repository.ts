@@ -1,15 +1,18 @@
 import { db as PrismaClient } from '@fuku/db'
+import { SchedulerAssignment } from '@fuku/domain/schemas'
 import {
   Assignment,
   Period,
   TeamRepository,
+  toISODateFromJS,
+  toJSDateFromISO,
   Unavailability,
 } from '@fuku/scheduling'
 
 import {
   RuleConditionOutput,
   RuleConditionOutputSchema,
-} from '../schemas/ruleCondition'
+} from '../../schemas/ruleCondition'
 
 export class PrismaTeamRepository implements TeamRepository {
   constructor(private db: typeof PrismaClient) {}
@@ -21,6 +24,10 @@ export class PrismaTeamRepository implements TeamRepository {
       unavailabilities?: Unavailability[]
     },
   ) {
+    const start = toJSDateFromISO(period.start, period.timeZone)
+
+    const end = toJSDateFromISO(period.end, period.timeZone)
+
     const team = await this.db.team.findUniqueOrThrow({
       where: { id: teamId },
       select: {
@@ -111,15 +118,15 @@ export class PrismaTeamRepository implements TeamRepository {
                 teamId,
               },
               date: {
-                gte: period.start,
-                lte: period.end,
+                gte: start,
+                lte: end,
               },
             },
           })
           .then(unavailabilities =>
             unavailabilities.map(u => ({
               teamMemberId: u.teamMemberId,
-              date: u.date,
+              date: toISODateFromJS(u.date, period.timeZone),
             })),
           )
 
@@ -135,8 +142,8 @@ export class PrismaTeamRepository implements TeamRepository {
                 isNot: null,
               },
               date: {
-                gte: period.start,
-                lte: period.end,
+                gte: start,
+                lte: end,
               },
             },
             select: {
@@ -148,7 +155,7 @@ export class PrismaTeamRepository implements TeamRepository {
           })
           .then(assignments =>
             assignments.map(a => ({
-              date: a.date,
+              date: toISODateFromJS(a.date, period.timeZone),
               teamMemberId: a.teamMemberId,
               shiftTypeId: a.shiftAssignment!.shiftTypeId,
             })),
@@ -182,7 +189,7 @@ export class PrismaTeamRepository implements TeamRepository {
   async persistSchedule(
     teamId: string,
     period: Period,
-    assignments: Assignment[],
+    assignments: SchedulerAssignment[],
   ) {
     await this.db.dayAssignment.createMany({
       data: assignments.map(a => ({

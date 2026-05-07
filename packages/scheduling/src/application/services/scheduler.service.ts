@@ -2,6 +2,7 @@ import {
   GenerateScheduleInput,
   GenerateScheduleOutput,
   SchedulerAssignment,
+  TimeZone,
 } from '@fuku/domain/schemas'
 import { WeekdayNumbers } from 'luxon'
 
@@ -15,15 +16,11 @@ import {
   TeamSnapshot,
 } from '../../domain/types/engine'
 import {
+  OperationalHours,
   StaffingRequirements,
-  ZonedOperationalHours,
 } from '../../domain/types/schedule'
-import {
-  parseTimeString,
-  toJSDate,
-  toZonedDateTime,
-  toZonedPeriod,
-} from '../../shared/utils/date'
+import { toISODateFromJS, toJSDateFromISO } from '../../shared/utils/date'
+import { HolidayService } from '../ports/holiday.service'
 import { TeamRepository } from '../ports/team.repository'
 
 export type SchedulerMode =
@@ -46,6 +43,7 @@ export class DefaultSchedulerService implements SchedulerService {
 
   constructor(
     private teamRepository: TeamRepository,
+    private holidayService: HolidayService,
     mode: SchedulerMode = 'dry-run',
   ) {
     if (mode) {
@@ -70,14 +68,10 @@ export class DefaultSchedulerService implements SchedulerService {
 
     const serviceResult = {
       teamId: input.teamId,
-      period: {
-        start: toJSDate(context.period.start),
-        end: toJSDate(context.period.end),
-        timeZone: context.period.timeZone,
-      },
+      period: context.period,
       // assignments: [],
-      assignments: engineResult.proposedAssignments.map(
-        this.toSchedulerAssignment,
+      assignments: engineResult.proposedAssignments.map(a =>
+        this.toSchedulerAssignment(a, context.period.timeZone),
       ),
     }
 
@@ -108,6 +102,19 @@ export class DefaultSchedulerService implements SchedulerService {
       timeZone: input.timeZone,
     }
 
+    let holidays: Set<string>
+
+    if (!input.country) {
+      holidays = new Set<string>()
+    } else {
+      holidays = await this.holidayService.getHolidays({
+        country: input.country,
+        startDate: input.start,
+        endDate: input.end,
+      })
+      console.log('\nHOLIDAYS:\n', holidays, '\n')
+    }
+
     const snapshot = await this.teamRepository.getTeamSnapshot(
       input.teamId,
       period,
@@ -116,31 +123,34 @@ export class DefaultSchedulerService implements SchedulerService {
           ? input.assignments.map(a => ({
               teamMemberId: a.teamMemberId,
               shiftTypeId: a.shiftTypeId,
-              date: a.date,
+              date: toISODateFromJS(a.date, input.timeZone),
             }))
           : [],
         unavailabilities: input.unavailabilities
           ? input.unavailabilities.map(u => ({
               teamMemberId: u.teamMemberId,
-              date: u.date,
+              date: toISODateFromJS(u.date, input.timeZone),
             }))
           : [],
       },
     )
 
-    return this.toSchedulerContext(snapshot)
+    return this.toSchedulerContext(snapshot, holidays)
   }
 
   /**
    * Convert all JS dates and HH:mm strings into Luxon DateTime in team timezone
    */
-  private toSchedulerContext(snapshot: TeamSnapshot): SchedulerContext {
+  private toSchedulerContext(
+    snapshot: TeamSnapshot,
+    holidays: Set<string>,
+  ): SchedulerContext {
     const timeZone = snapshot.period.timeZone
 
     const shiftTypes = snapshot.shiftTypes.map(st => ({
       id: st.id,
-      startTime: parseTimeString(st.startTime, timeZone),
-      endTime: parseTimeString(st.endTime, timeZone),
+      startTime: st.startTime,
+      endTime: st.endTime,
       allowedWeekdays: st.allowedWeekdays.map(d => d as WeekdayNumbers),
     }))
 
@@ -197,26 +207,26 @@ export class DefaultSchedulerService implements SchedulerService {
       // console.log(`\nCONDITION: ${existing}`)
     }
 
-    return {
+    if (snapshot.period.end < snapshot.period.start) {
+      throw new Error(
+        `[SCHEDULER] Invalid period: end < start\nstart=${snapshot.period.start}\nend=${snapshot.period.end}`,
+      )
+    }
+
+    const context = {
       ...snapshot,
+
+      holidays,
 
       shiftTypes,
 
       operationalHours: snapshot.operationalHours.reduce((acc, oh) => {
         acc[oh.weekday] = {
-          startTime: parseTimeString(
-            oh.startTime,
-            timeZone,
-            oh.weekday as WeekdayNumbers,
-          ),
-          endTime: parseTimeString(
-            oh.endTime,
-            timeZone,
-            oh.weekday as WeekdayNumbers,
-          ),
+          startTime: oh.startTime,
+          endTime: oh.endTime,
         }
         return acc
-      }, {} as ZonedOperationalHours),
+      }, {} as OperationalHours),
 
       staffingRequirements: snapshot.staffingRequirements.reduce((acc, sr) => {
         acc[sr.weekday] = {
@@ -228,29 +238,36 @@ export class DefaultSchedulerService implements SchedulerService {
 
       unavailabilities: snapshot.unavailabilities.map(u => ({
         teamMemberId: u.teamMemberId,
-        date: toZonedDateTime(u.date, timeZone).startOf('day'),
+        date: u.date,
       })),
 
       assignments: snapshot.assignments.map(a => ({
         teamMemberId: a.teamMemberId,
         shiftTypeId: a.shiftTypeId,
-        date: toZonedDateTime(a.date, timeZone).startOf('day'),
+        date: a.date,
       })),
-
-      period: {
-        ...toZonedPeriod(snapshot.period),
-        start: toZonedPeriod(snapshot.period).start.startOf('day'),
-        end: toZonedPeriod(snapshot.period).end.startOf('day'),
-      },
     }
+
+    console.log('\n[PERIOD]')
+    console.log('start:', context.period.start)
+    console.log('end  :', context.period.end)
+
+    return context
   }
 
-  private toSchedulerAssignment(pa: ProposedAssignment): SchedulerAssignment {
+  private toSchedulerAssignment(
+    pa: ProposedAssignment,
+    timeZone: TimeZone,
+  ): SchedulerAssignment {
     return {
       id: crypto.randomUUID(),
+
       teamMemberId: pa.teamMemberId,
+
       shiftTypeId: pa.shiftTypeId,
-      date: toJSDate(pa.date),
+
+      date: toJSDateFromISO(pa.date, timeZone),
+
       ...(pa.score !== undefined ? { score: pa.score } : {}),
     }
   }
