@@ -211,6 +211,7 @@ export const useScheduleMutations = ({
   const handleGenerateSchedule = () => {
     if (!team) return
 
+    const country = team.country
     const timeZone = team.timeZone
 
     const startDate = DateTime.fromJSDate(start).startOf('day').toMillis()
@@ -248,8 +249,9 @@ export const useScheduleMutations = ({
 
     const input: GenerateScheduleInput = {
       teamId: team?.id ?? '',
-      start,
-      end,
+      start: DateTime.fromJSDate(start).toISODate()!,
+      end: DateTime.fromJSDate(end).toISODate()!,
+      country,
       timeZone,
       assignments: assignments.length > 0 ? assignments : undefined,
       unavailabilities:

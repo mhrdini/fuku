@@ -1,6 +1,7 @@
 import {
   MonthKey,
   SUPPORTED_TIME_ZONES,
+  TimeZone,
   WeekdayKey,
 } from '@fuku/domain/schemas'
 import { DateTime, WeekdayNumbers } from 'luxon'
@@ -58,7 +59,7 @@ export type TimeZoneOption = {
   region: string
 }
 
-function getOffsetInfo(timeZone: string) {
+function getOffsetInfo(timeZone: TimeZone) {
   const date = new Date()
 
   // Get long offset like "GMT+09:00"

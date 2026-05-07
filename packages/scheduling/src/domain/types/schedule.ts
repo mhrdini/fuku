@@ -1,6 +1,4 @@
-import { DateTime } from 'luxon'
-
-import { Zoned } from '../../shared/utils/date'
+import { ISODateString } from '@fuku/domain/schemas'
 
 export interface PayGrade {
   id: string
@@ -22,7 +20,7 @@ export interface StaffingRequirements {
 
 export interface ShiftType {
   id: string
-  startTime: string
+  startTime: string // HH:mm
   endTime: string
   allowedWeekdays: number[] // array of integers representing allowed days (1 = Monday, 7 = Sunday)
 }
@@ -32,33 +30,31 @@ export interface PayGradeShiftType {
   shiftTypeId: string
 }
 
-export type ZonedShiftType = Zoned<ShiftType, 'startTime' | 'endTime'>
-
 export interface OperationalHour {
   weekday: number // 1 = Monday, 7 = Sunday
   startTime: string
   endTime: string
 }
 
-export type ZonedOperationalHours = {
+export type OperationalHours = {
   [weekday: number]: {
-    startTime: DateTime
-    endTime: DateTime
+    startTime: string
+    endTime: string
   }
 }
 
 export interface Assignment {
   teamMemberId: string
   shiftTypeId: string | null
-  date: Date
+  date: ISODateString
   score?: number
 }
 
-export type ZonedAssignment = Zoned<Assignment, 'date'>
-
 export interface Unavailability {
   teamMemberId: string
-  date: Date
+  date: ISODateString
 }
 
-export type ZonedUnavailability = Zoned<Unavailability, 'date'>
+export interface Holiday {
+  date: ISODateString
+}

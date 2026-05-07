@@ -431,6 +431,9 @@ importers:
       '@fuku/domain':
         specifier: workspace:*
         version: link:../domain
+      '@fuku/infrastructure':
+        specifier: workspace:*
+        version: link:../infrastructure
       '@fuku/scheduling':
         specifier: workspace:*
         version: link:../scheduling
