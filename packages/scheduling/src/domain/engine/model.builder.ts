@@ -8,13 +8,26 @@ import {
   RuleTimeWindowValues,
 } from '@fuku/domain/schemas'
 
-import { Rule, SchedulerContext, TeamMember, ZonedShiftType } from '../types'
+import {
+  addDays,
+  getDaysBetweenInclusive,
+  getMinutesBetweenTimes,
+  getMonth,
+  getWeekday,
+  timeToMinutes,
+} from '../../shared/utils/date'
+import { Rule, SchedulerContext, ShiftType, TeamMember } from '../types'
 import {
   CoefficientMap,
   Operator,
   OptimizationModel,
 } from './optimization.model'
 import { getAssignmentVariableName, VariableBuilder } from './variable.builder'
+
+const DEBUG = true
+const log = (...args: any[]) => {
+  if (DEBUG) console.log(...args)
+}
 
 type MetricExpression = {
   coefficients: CoefficientMap
@@ -59,6 +72,14 @@ export class ConstraintModelBuilder {
     this.addSoftMaxShiftTypePerDayObjective(model)
     this.addFairShiftTypeDistributionObjective(model)
 
+    log('\n================ MODEL SUMMARY ================')
+    log('teamMembers:', this.ctx.teamMembers.length)
+    log('shiftTypes:', this.ctx.shiftTypes.length)
+    log('days:', this.numDays)
+    log('rules:', this.ctx.rules.length)
+    log('holidays:', this.ctx.holidays.size)
+    log('=============================================\n')
+
     return model
   }
 
@@ -66,28 +87,43 @@ export class ConstraintModelBuilder {
   private buildDecisionVariables(model: OptimizationModel) {
     const variableBuilder = new VariableBuilder(model)
 
+    let count = 0
+
     for (const tm of this.ctx.teamMembers) {
       for (let dayIndex = 0; dayIndex < this.numDays; dayIndex++) {
         for (const st of this.ctx.shiftTypes) {
           const varName = getAssignmentVariableName(tm.id, dayIndex, st.id)
           variableBuilder.addVariable(varName, 'binary')
+          count++
         }
       }
     }
+
+    log('[VAR] total decision variables:', count)
   }
 
   // ------ Constraints (Hard) -------
   private addEligibilityConstraints(model: OptimizationModel) {
+    let forbidden = 0
+
     for (const tm of this.ctx.teamMembers) {
       if (!tm.payGradeId) continue
+
       const payGradeShiftTypes = this.payGradeToShiftTypesMap.get(tm.payGradeId)
 
+      if (!payGradeShiftTypes || payGradeShiftTypes.size === 0) {
+        log('[ELIGIBILITY] WARNING: member has NO eligible shift types', tm.id)
+      }
+
       for (const st of this.ctx.shiftTypes) {
-        const isEligible = payGradeShiftTypes!.has(st.id) || false
+        const isEligible = payGradeShiftTypes?.has(st.id) || false
+
         if (!isEligible) {
+          forbidden++
+
           for (let dayIndex = 0; dayIndex < this.numDays; dayIndex++) {
             const varName = getAssignmentVariableName(tm.id, dayIndex, st.id)
-            // forbid assignment if member not eligible for shift type
+
             model.constraints.push({
               name: `eligibility__${tm.id}__${dayIndex}__${st.id}`,
               coefficients: { [varName]: 1 },
@@ -98,6 +134,8 @@ export class ConstraintModelBuilder {
         }
       }
     }
+
+    log('[ELIGIBILITY] forbidden assignments:', forbidden)
   }
 
   private addAvailabilityConstraints(model: OptimizationModel) {
@@ -107,14 +145,11 @@ export class ConstraintModelBuilder {
       const unavailabilities = new Set(
         this.ctx.unavailabilities
           .filter(u => u.teamMemberId === tm.id)
-          .map(u => u.date.startOf('day').toISODate()),
+          .map(u => u.date),
       )
 
       for (let dayIndex = 0; dayIndex < this.numDays; dayIndex++) {
-        const currentDate = this.ctx.period.start
-          .plus({ days: dayIndex })
-          .startOf('day')
-          .toISODate()
+        const currentDate = addDays(this.ctx.period.start, dayIndex)
 
         if (!unavailabilities.has(currentDate)) continue
 
@@ -165,8 +200,14 @@ export class ConstraintModelBuilder {
   private addStaffingRequirementsConstraints(model: OptimizationModel) {
     for (let dayIndex = 0; dayIndex < this.numDays; dayIndex++) {
       const coefficients: Record<string, number> = {}
-      const day = this.ctx.period.start.plus({ days: dayIndex })
-      const staffingRequirement = this.ctx.staffingRequirements[day.weekday]
+      const day = addDays(this.ctx.period.start, dayIndex)
+
+      const staffingRequirement = this.ctx.staffingRequirements[getWeekday(day)]
+
+      if (!staffingRequirement) {
+        log('[STAFFING] MISSING requirement for weekday:', getWeekday(day))
+        continue
+      }
 
       for (const tm of this.ctx.teamMembers) {
         for (const st of this.ctx.shiftTypes) {
@@ -175,14 +216,15 @@ export class ConstraintModelBuilder {
         }
       }
 
-      // enforce minimum staff count per day
+      log('[STAFFING]', day, staffingRequirement)
+
       model.constraints.push({
         name: `minMembersPerDay__${dayIndex}`,
         coefficients,
         operator: '>=',
         rhs: staffingRequirement.minMembers,
       })
-      // enforce maximum staff count per day
+
       model.constraints.push({
         name: `maxMembersPerDay__${dayIndex}`,
         coefficients,
@@ -198,7 +240,8 @@ export class ConstraintModelBuilder {
       const allowedWeekdays = new Set(st.allowedWeekdays)
 
       for (let dayIndex = 0; dayIndex < this.numDays; dayIndex++) {
-        const weekday = this.ctx.period.start.plus({ days: dayIndex }).weekday
+        const day = addDays(this.ctx.period.start, dayIndex)
+        const weekday = getWeekday(day)
         if (!allowedWeekdays.has(weekday)) {
           for (const tm of this.ctx.teamMembers) {
             const varName = getAssignmentVariableName(tm.id, dayIndex, st.id)
@@ -390,53 +433,55 @@ export class ConstraintModelBuilder {
 
   private addOperationalCoverageConstraints(model: OptimizationModel) {
     const slotSizeMinutes = 15
-    for (let dayIndex = 0; dayIndex < this.numDays; dayIndex++) {
-      const weekday = this.ctx.period.start.plus({ days: dayIndex }).weekday
-      const operationalHours =
-        this.ctx.operationalHours[
-          weekday as keyof typeof this.ctx.operationalHours
-        ]
-      if (!operationalHours) continue
 
-      const baseDate = this.ctx.period.start
-        .plus({ days: dayIndex })
-        .startOf('day')
-      const opStart = baseDate.set({
-        hour: operationalHours.startTime.hour,
-        minute: operationalHours.startTime.minute,
-      })
-      const opEnd = baseDate.set({
-        hour: operationalHours.endTime.hour,
-        minute: operationalHours.endTime.minute,
-      })
-      const totalOperationalMinutes = opEnd
-        .diff(opStart, 'minutes')
-        .as('minutes')
-      const totalSlots = Math.ceil(totalOperationalMinutes / slotSizeMinutes)
+    for (let dayIndex = 0; dayIndex < this.numDays; dayIndex++) {
+      const day = addDays(this.ctx.period.start, dayIndex)
+      const weekday = getWeekday(day)
+
+      const operationalHours = this.ctx.operationalHours[weekday]
+
+      if (!operationalHours) {
+        log('[COVERAGE] no operational hours for weekday:', weekday)
+        continue
+      }
+
+      const opStartMinutes = timeToMinutes(operationalHours.startTime)
+      const opEndMinutes = timeToMinutes(operationalHours.endTime)
+
+      const totalMinutes = opEndMinutes - opStartMinutes
+      const totalSlots = Math.ceil(totalMinutes / slotSizeMinutes)
+
+      log('[COVERAGE]', day, 'slots:', totalSlots)
 
       for (let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
-        const slotStart = opStart.plus({ minutes: slotIndex * slotSizeMinutes })
-        const slotEnd = slotStart.plus({ minutes: slotSizeMinutes })
+        const slotStartMinutes = opStartMinutes + slotIndex * slotSizeMinutes
+        const slotEndMinutes = slotStartMinutes + slotSizeMinutes
+
         const coefficients: CoefficientMap = {}
 
         for (const tm of this.ctx.teamMembers) {
           for (const st of this.ctx.shiftTypes) {
-            const shiftStart = baseDate.set({
-              hour: st.startTime.hour,
-              minute: st.startTime.minute,
-            })
-            const shiftEnd = baseDate.set({
-              hour: st.endTime.hour,
-              minute: st.endTime.minute,
-            })
-            if (shiftStart <= slotStart && shiftEnd >= slotEnd) {
+            const shiftStart = timeToMinutes(st.startTime)
+            const shiftEnd = timeToMinutes(st.endTime)
+
+            if (shiftStart <= slotStartMinutes && shiftEnd >= slotEndMinutes) {
               const varName = getAssignmentVariableName(tm.id, dayIndex, st.id)
               coefficients[varName] = 1
             }
           }
         }
 
-        // enforce at least one member covering each operational slot
+        if (Object.keys(coefficients).length === 0) {
+          log(
+            '[COVERAGE][WARNING] NO VARIABLES COVER SLOT',
+            day,
+            slotIndex,
+            slotStartMinutes,
+            '-',
+            slotEndMinutes,
+          )
+        }
+
         model.constraints.push({
           name: `coverage__${dayIndex}__${slotIndex}`,
           coefficients,
@@ -453,7 +498,7 @@ export class ConstraintModelBuilder {
 
     const maxShiftMinutes = Math.max(
       ...this.ctx.shiftTypes.map(st =>
-        st.endTime.diff(st.startTime, 'minutes').as('minutes'),
+        getMinutesBetweenTimes(st.startTime, st.endTime),
       ),
     )
     const maxPossibleMinutes = this.numDays * maxShiftMinutes
@@ -477,9 +522,7 @@ export class ConstraintModelBuilder {
             dayIndex,
             st.id,
           )
-          const shiftMinutes = st.endTime
-            .diff(st.startTime, 'minutes')
-            .as('minutes')
+          const shiftMinutes = getMinutesBetweenTimes(st.startTime, st.endTime)
           coefficients[assignmentVar] = shiftMinutes
         }
       }
@@ -684,12 +727,7 @@ export class ConstraintModelBuilder {
 
   // ------ Helpers ------
   private getNumDays(): number {
-    return (
-      this.ctx.period.end
-        .startOf('day')
-        .diff(this.ctx.period.start.startOf('day'), 'days')
-        .as('days') + 1
-    )
+    return getDaysBetweenInclusive(this.ctx.period.start, this.ctx.period.end)
   }
 
   private buildPayGradeShiftTypeMap() {
@@ -736,9 +774,8 @@ export class ConstraintModelBuilder {
         for (const d of validDays) {
           for (const st of shiftTypes) {
             const varName = getAssignmentVariableName(teamMemberId, d, st.id)
-            coefficients[varName] = st.endTime
-              .diff(st.startTime, 'hours')
-              .as('hours')
+            coefficients[varName] =
+              getMinutesBetweenTimes(st.startTime, st.endTime) / 60
           }
         }
         break
@@ -769,13 +806,19 @@ export class ConstraintModelBuilder {
     timeWindow: RuleTimeWindow,
     startDayIndex: number,
   ): number[] {
+    const currentDay = addDays(this.ctx.period.start, startDayIndex)
+    const currentDate = new Date(currentDay)
+
     const minDayIndex = 0
     const maxDayIndex = this.numDays - 1
     const days: number[] = []
     const daysInWeek = 7
-    const daysInMonth = this.ctx.period.start.plus({
-      days: startDayIndex,
-    }).daysInMonth!
+    const daysInMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0,
+    ).getDate()
+
     const forwardEndIndex =
       startDayIndex +
       (timeWindow === RuleTimeWindowValues.MONTH ? daysInMonth : daysInWeek) -
@@ -834,10 +877,19 @@ export class ConstraintModelBuilder {
   }
 
   private getValidDays(rule: Rule, dayIndices: number[]): number[] {
-    return dayIndices.filter(d => this.hasValidConditions(rule, d))
+    const days = dayIndices.filter(d => this.hasValidConditions(rule, d))
+
+    log('\n[RULE]', rule.id)
+    log(' metric:', rule.metric)
+    log(' operator:', rule.operator)
+    log(' threshold:', rule.threshold)
+    log(' input days:', dayIndices)
+    log(' valid days:', days)
+
+    return days
   }
 
-  private getRelevantShiftTypes(rule: Rule): ZonedShiftType[] {
+  private getRelevantShiftTypes(rule: Rule): ShiftType[] {
     if (rule.target === RuleTargetValues.SHIFT_TYPE && rule.shiftTypeId) {
       return this.ctx.shiftTypes.filter(st => st.id === rule.shiftTypeId)
     }
@@ -847,20 +899,16 @@ export class ConstraintModelBuilder {
   private hasValidConditions(rule: Rule, dayIndex: number): boolean {
     if (!rule.ruleConditions?.length) return true
 
-    const day = this.ctx.period.start.plus({ days: dayIndex })
-    const month = day.month
-    const weekday = day.weekday
+    const day = addDays(this.ctx.period.start, dayIndex)
+    const month = getMonth(day)
+    const weekday = getWeekday(day)
 
     for (const cond of rule.ruleConditions) {
       let intValue: number | undefined
-      let stringValue: string | undefined
       let intSetValue: Set<number> | undefined
-      let stringSetValue: Set<string> | undefined
 
       if (typeof cond.value === 'number') intValue = cond.value
       if (this.isIntArray(cond.value)) intSetValue = new Set(cond.value)
-      if (typeof cond.value === 'string') stringValue = cond.value
-      if (this.isStringArray(cond.value)) stringSetValue = new Set(cond.value)
 
       switch (cond.field) {
         case 'MONTH': {
@@ -929,6 +977,25 @@ export class ConstraintModelBuilder {
           }
           break
         }
+        case 'IS_HOLIDAY': {
+          const isHoliday = this.ctx.holidays.has(day)
+
+          if (typeof cond.value !== 'boolean') return false
+
+          switch (cond.operator) {
+            case RuleConditionOperatorValues.EQ:
+              console.log(day, 'holiday EQ', cond.value, '->', isHoliday)
+              if (isHoliday !== cond.value) return false
+              break
+            case RuleConditionOperatorValues.NEQ:
+              if (isHoliday === cond.value) return false
+              break
+            default:
+              return false
+          }
+
+          break
+        }
       }
     }
 
@@ -940,10 +1007,6 @@ export class ConstraintModelBuilder {
       Array.isArray(value) &&
       value.every(v => typeof v === 'number' && Number.isInteger(v))
     )
-  }
-
-  private isStringArray(value: any): value is string[] {
-    return Array.isArray(value) && value.every(v => typeof v === 'string')
   }
 
   private addRuleConstraint(
