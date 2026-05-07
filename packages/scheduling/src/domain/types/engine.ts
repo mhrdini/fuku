@@ -1,25 +1,22 @@
 import {
+  ISODateString,
   JsonValue,
   RuleConditionField,
   RuleConditionOperator,
   Rule as RuleType,
 } from '@fuku/domain/schemas'
-import { DateTime } from 'luxon'
 
-import { Period, ZonedPeriod } from '../../shared/utils/date'
+import { Period } from '../../shared/utils/date'
 import {
   Assignment,
   OperationalHour,
+  OperationalHours,
   PayGrade,
   PayGradeShiftType,
   ShiftType,
   StaffingRequirement,
   StaffingRequirements,
   Unavailability,
-  ZonedAssignment,
-  ZonedOperationalHours,
-  ZonedShiftType,
-  ZonedUnavailability,
 } from './schedule'
 import { Team, TeamMember } from './team'
 
@@ -55,21 +52,10 @@ export interface TeamSnapshot {
 }
 
 export interface SchedulerContext
-  extends Omit<
-    TeamSnapshot,
-    | 'shiftTypes'
-    | 'operationalHours'
-    | 'staffingRequirements'
-    | 'unavailabilities'
-    | 'assignments'
-    | 'period'
-  > {
-  shiftTypes: ZonedShiftType[]
-  operationalHours: ZonedOperationalHours
+  extends Omit<TeamSnapshot, 'operationalHours' | 'staffingRequirements'> {
+  operationalHours: OperationalHours
   staffingRequirements: StaffingRequirements
-  unavailabilities: ZonedUnavailability[]
-  assignments: ZonedAssignment[]
-  period: ZonedPeriod
+  holidays: Set<ISODateString> // yyyy-MM-dd
 }
 
 export interface SchedulerResult {
@@ -88,7 +74,7 @@ export interface SchedulerMetrics {
 }
 
 export interface ProposedAssignment {
-  date: DateTime
+  date: ISODateString
   teamMemberId: string
   shiftTypeId: string
   score?: number
