@@ -1,4 +1,5 @@
 import {
+  CountrySchema,
   TeamMemberRoleSchema,
   TeamMemberSchema,
   TeamSchema,
@@ -89,6 +90,7 @@ export type UserTeam = z.infer<typeof UserTeamSchema>
 export const TeamUpdateInputSchema = TeamSchema.pick({
   id: true,
   name: true,
+  country: true,
   description: true,
   timeZone: true,
 }).extend({
@@ -103,6 +105,7 @@ export type TeamUpdateInputType = z.infer<typeof TeamUpdateInputSchema>
 
 export const TeamOutputSchema = TeamSchema.extend({
   teamMembers: z.array(TeamMemberSchema),
+  country: CountrySchema.nullable(),
 })
 
 export type TeamOutput = z.infer<typeof TeamOutputSchema>
