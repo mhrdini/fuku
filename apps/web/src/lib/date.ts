@@ -100,6 +100,8 @@ function getOffsetInfo(timeZone: TimeZone) {
 }
 
 export function getGroupedTimeZones(): Record<string, TimeZoneOption[]> {
+  // timezones = region -> cities[]
+
   const zones = SUPPORTED_TIME_ZONES
   const result: Record<string, TimeZoneOption[]> = {}
 

@@ -94,6 +94,7 @@ import {
 import { toast } from 'sonner'
 import * as z from 'zod/v4'
 
+import { CountryController } from '~/components/country-controller'
 import { useSession } from '~/components/providers/session-provider'
 import { TimeZoneController } from '~/components/timezone-controller'
 import { Step } from '~/components/ui/stepper'
@@ -109,6 +110,7 @@ type TeamCreateFormType = TeamCreateInput
 const BasicInfoSectionSchema = TeamCreateFormSchema.pick({
   name: true,
   description: true,
+  country: true,
   timeZone: true,
 })
 
@@ -159,6 +161,7 @@ export default function NewTeamPage() {
     defaultValues: {
       name: '',
       description: '',
+      country: undefined,
       timeZone: '',
       teamMembers: [],
       payGrades: [],
@@ -350,6 +353,7 @@ function BasicInfoSection() {
             </Field>
           )}
         />
+        <CountryController control={control} resetField={resetField} />
         <TimeZoneController control={control} resetField={resetField} />
       </FieldGroup>
     </FieldSet>
