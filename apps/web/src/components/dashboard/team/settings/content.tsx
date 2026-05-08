@@ -27,12 +27,14 @@ import {
 import { toast } from 'sonner'
 import * as z from 'zod/v4'
 
+import { CountryController } from '~/components/country-controller'
 import { TimeZoneController } from '~/components/timezone-controller'
 import { useTRPC } from '~/trpc/client'
 
 const TeamSettingsFormSchema = TeamUpdateInputSchema.pick({
   id: true,
   name: true,
+  country: true,
   description: true,
   timeZone: true,
 })
@@ -54,8 +56,9 @@ export const TeamSettingsContent = () => {
     defaultValues: {
       id: team?.id || '',
       name: team?.name || '',
+      country: team?.country || undefined,
       description: team?.description || null,
-      timeZone: team?.timeZone || '',
+      timeZone: team?.timeZone || undefined,
     },
     resolver: zodResolver(TeamSettingsFormSchema),
   })
@@ -69,6 +72,7 @@ export const TeamSettingsContent = () => {
       form.reset({
         id: team.id,
         name: team.name,
+        country: team.country,
         description: team.description,
         timeZone: team.timeZone,
       })
@@ -201,6 +205,11 @@ export const TeamSettingsContent = () => {
                     )}
                   </Field>
                 )}
+              />
+              <CountryController
+                control={form.control}
+                resetField={form.resetField}
+                disabled={isPending}
               />
               <TimeZoneController
                 control={form.control}

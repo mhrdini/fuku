@@ -4,6 +4,7 @@ import * as z from 'zod/v4'
 
 import {
   TeamCreateInputSchema,
+  TeamOutputSchema,
   TeamUpdateInputSchema,
   UserTeam,
 } from '../../schemas'
@@ -64,7 +65,7 @@ export const teamRouter = {
         throw new TRPCError({ code: 'NOT_FOUND' })
       }
 
-      return team
+      return TeamOutputSchema.parse(team)
     }),
   getAllOwned: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id
