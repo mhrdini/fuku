@@ -1,18 +1,21 @@
+import { useId, useMemo, useState } from 'react'
 import {
-  Combobox,
-  ComboboxCollection,
-  ComboboxContent,
-  ComboboxGroup,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxLabel,
-  ComboboxList,
-  ComboboxSeparator,
+  Button,
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
   Field,
+  FieldError,
   FieldLabel,
-  ItemContent,
-  ItemDescription,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from '@fuku/ui/components'
+import { cn } from '@fuku/ui/lib/utils'
+import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
 import {
   Control,
   Controller,
@@ -22,6 +25,14 @@ import {
 } from 'react-hook-form'
 
 import { getGroupedTimeZones, TimeZoneOption } from '~/lib/date'
+
+const GROUPED_TIMEZONES = getGroupedTimeZones()
+
+const TIMEZONE_LABELS = Object.fromEntries(
+  Object.values(GROUPED_TIMEZONES)
+    .flat()
+    .map(zone => [zone.value, zone.label]),
+) as Record<string, string>
 
 type TimeZoneControllerProps<T extends FieldValues> = {
   control: Control<T>
@@ -36,7 +47,14 @@ export function TimeZoneController<T extends FieldValues>({
   name = 'timeZone' as Path<T>,
   disabled = false,
 }: TimeZoneControllerProps<T>) {
-  const groupedTimeZones = getGroupedTimeZones()
+  const id = useId()
+
+  const [open, setOpen] = useState(false)
+
+  const groupedTimeZones = useMemo(
+    () => Object.entries(getGroupedTimeZones()),
+    [],
+  )
 
   return (
     <Controller
@@ -44,53 +62,99 @@ export function TimeZoneController<T extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => (
         <Field data-invalid={fieldState.invalid}>
-          <FieldLabel>Time Zone</FieldLabel>
-          <Combobox
-            disabled={disabled}
-            value={field.value}
-            onValueChange={field.onChange}
-            items={Object.entries(groupedTimeZones).flatMap(
-              ([region, zones]) =>
-                [
-                  {
-                    value: region,
-                    items: zones,
-                  },
-                ] as const,
-            )}
-          >
-            <ComboboxInput
-              onKeyDown={e => {
-                if (e.key === 'Escape') {
-                  resetField('timeZone' as Path<T>)
-                }
-              }}
-              placeholder='Search timezones...'
-            />
+          <FieldLabel htmlFor={id}>Time Zone</FieldLabel>
 
-            <ComboboxContent>
-              <ComboboxList>
-                {group => (
-                  <div key={group.value} className='group'>
-                    <ComboboxGroup items={group.items as TimeZoneOption[]}>
-                      <ComboboxLabel>{group.value}</ComboboxLabel>
-                      <ComboboxCollection>
-                        {(item: TimeZoneOption) => (
-                          <ComboboxItem key={item.value} value={item.value}>
-                            <ItemDescription className='text-muted-foreground'>
-                              {item.offset}
-                            </ItemDescription>
-                            <ItemContent>{item.label}</ItemContent>
-                          </ComboboxItem>
-                        )}
-                      </ComboboxCollection>
-                    </ComboboxGroup>
-                    <ComboboxSeparator className='group-last:hidden' />
-                  </div>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                id={id}
+                type='button'
+                variant='outline'
+                role='combobox'
+                disabled={disabled}
+                aria-expanded={open}
+                className='w-full justify-between'
+              >
+                <span className='truncate'>
+                  {field.value ? (
+                    TIMEZONE_LABELS[field.value]
+                  ) : (
+                    <span className='text-muted-foreground'>
+                      Select timezone
+                    </span>
+                  )}
+                </span>
+
+                <ChevronsUpDownIcon
+                  className='text-muted-foreground/80 shrink-0'
+                  aria-hidden='true'
+                />
+              </Button>
+            </PopoverTrigger>
+
+            <PopoverContent
+              align='start'
+              side='bottom'
+              sideOffset={4}
+              className='w-(--radix-popper-anchor-width) p-0'
+            >
+              <Command>
+                <CommandInput
+                  className='border-none rounded-none'
+                  placeholder='Search timezone...'
+                  onKeyDown={e => {
+                    if (e.key === 'Escape') {
+                      resetField(name)
+                      setOpen(false)
+                    }
+                  }}
+                />
+
+                <CommandList className='max-h-60 overflow-y-auto'>
+                  <CommandEmpty>No timezone found.</CommandEmpty>
+
+                  {groupedTimeZones.map(([region, zones]) => (
+                    <CommandGroup key={region} heading={region}>
+                      {zones.map((zone: TimeZoneOption) => (
+                        <CommandItem
+                          key={zone.value}
+                          value={`${zone.value} ${zone.label} ${zone.offset}`}
+                          onSelect={() => {
+                            field.onChange(
+                              field.value === zone.value
+                                ? undefined
+                                : zone.value,
+                            )
+
+                            setOpen(false)
+                          }}
+                          className='gap-2'
+                        >
+                          <span className='text-muted-foreground text-xs shrink-0'>
+                            {zone.offset}
+                          </span>
+
+                          <span className='truncate flex-1'>{zone.label}</span>
+
+                          <CheckIcon
+                            size={16}
+                            className={cn(
+                              'ml-auto shrink-0',
+                              field.value === zone.value
+                                ? 'opacity-100'
+                                : 'opacity-0',
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  ))}
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
         </Field>
       )}
     />
