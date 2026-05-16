@@ -1,2 +1,2 @@
 export * from './holiday.service'
-export * from './supported-countries.generated.ts'
+export * from './supported-countries.generated'
