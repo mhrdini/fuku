@@ -204,7 +204,7 @@ export const ScheduleHeader = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
           <DropdownMenuItem
-            className='block whitespace-nowrap'
+            className='block whitespace-nowrap cursor-pointer'
             onClick={downloadCSV}
           >
             Download as <span className='font-bold'>CSV</span>
