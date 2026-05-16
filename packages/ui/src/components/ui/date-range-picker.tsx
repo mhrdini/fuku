@@ -91,10 +91,12 @@ const PRESETS: Preset[] = [
   // { name: 'last7', label: 'Last 7 days' },
   // { name: 'last14', label: 'Last 14 days' },
   // { name: 'last30', label: 'Last 30 days' },
-  { name: 'thisWeek', label: 'This Week' },
   { name: 'lastWeek', label: 'Last Week' },
-  { name: 'thisMonth', label: 'This Month' },
+  { name: 'thisWeek', label: 'This Week' },
+  { name: 'nextWeek', label: 'Next Week' },
   { name: 'lastMonth', label: 'Last Month' },
+  { name: 'thisMonth', label: 'This Month' },
+  { name: 'nextMonth', label: 'Next Month' },
 ]
 
 /** The DateRangePicker component allows a user to select a range of dates */
@@ -268,6 +270,17 @@ export function DateRangePicker({
         to.setHours(23, 59, 59, 999)
         break
       }
+      case 'nextWeek': {
+        const day =
+          weekStartsOn === 'monday' ? getMondayOffset(from) : from.getDay()
+        from.setDate(from.getDate() + (7 - day))
+        const toDay =
+          weekStartsOn === 'monday' ? getMondayOffset(to) : to.getDay()
+        to.setDate(to.getDate() + (13 - toDay))
+        from.setHours(0, 0, 0, 0)
+        to.setHours(23, 59, 59, 999)
+        break
+      }
       case 'thisMonth':
         from.setDate(1)
         from.setHours(0, 0, 0, 0)
@@ -280,6 +293,14 @@ export function DateRangePicker({
         from.setMonth(from.getMonth() - 1)
         from.setDate(1)
         from.setHours(0, 0, 0, 0)
+        to.setDate(0)
+        to.setHours(23, 59, 59, 999)
+        break
+      case 'nextMonth':
+        from.setMonth(from.getMonth() + 1)
+        from.setDate(1)
+        from.setHours(0, 0, 0, 0)
+        to.setMonth(to.getMonth() + 2)
         to.setDate(0)
         to.setHours(23, 59, 59, 999)
         break
@@ -300,10 +321,12 @@ export function DateRangePicker({
         break
       case 'thisWeek':
       case 'lastWeek':
+      case 'nextWeek':
         updatedView = 'week'
         break
       case 'thisMonth':
       case 'lastMonth':
+      case 'nextMonth':
         updatedView = 'month'
         break
     }
