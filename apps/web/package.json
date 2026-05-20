@@ -26,6 +26,8 @@
     "@trpc/tanstack-react-query": "catalog:",
     "better-auth": "catalog:",
     "date-fns": "catalog:",
+    "jspdf": "catalog:",
+    "jspdf-autotable": "catalog:",
     "lucide-react": "catalog:",
     "luxon": "catalog:",
     "next": "latest",
