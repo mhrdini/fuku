@@ -75,8 +75,8 @@ export class ConstraintModelBuilder {
     this.addRuleConstraints(model)
 
     // build objective terms
-    this.addBalanceWorkloadObjective(model)
-    this.addMinimizeShiftTypeChangesObjective(model)
+    // this.addBalanceWorkloadObjective(model)
+    // this.addMinimizeShiftTypeChangesObjective(model)
     this.addSoftMaxShiftTypePerDayObjective(model)
     this.addFairShiftTypeDistributionObjective(model)
 
