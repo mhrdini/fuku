@@ -20,6 +20,7 @@ export const RuleSchema = z.object({
   threshold: z.number(),
   hardConstraint: z.boolean(),
   penalty: z.number().nonnegative().optional(),
+  active: z.boolean().default(false),
 })
 
 export type Rule = z.infer<typeof RuleSchema>
