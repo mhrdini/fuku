@@ -5,11 +5,15 @@ import { DateTime } from 'luxon'
 import { getShiftTypeName } from './shift-types'
 import { getTeamMemberName } from './team-member'
 
-const HEADER_NAME_MAP: Record<string, string> = {
-  id: 'ID',
-  teamMemberId: 'Name',
-  shiftTypeId: 'Shift',
-  date: 'Date',
+function escapeCSV(value: string): string {
+  // Escape quotes
+  const escaped = value.replace(/"/g, '""')
+
+  // Wrap in quotes to safely support:
+  // commas
+  // Japanese text
+  // line breaks
+  return `"${escaped}"`
 }
 
 export function convertToCSV(
@@ -17,45 +21,75 @@ export function convertToCSV(
   teamMemberById: Record<string, TeamMemberOutput>,
   shiftTypeById: Record<string, ShiftTypeOutput>,
 ): string {
-  const headers = ['id', 'date', 'teamMemberId', 'shiftTypeId']
+  // --------------------------------------------
+  // Team members (columns)
+  // --------------------------------------------
 
-  const sortedData = [...data].sort((a, b) => {
-    // compare dates first
-    const dateA = new Date(a.date).getTime()
-    const dateB = new Date(b.date).getTime()
+  const teamMemberIds = Array.from(new Set(data.map(a => a.teamMemberId)))
 
-    if (dateA !== dateB) {
-      return dateA - dateB // ascending
-    }
+  teamMemberIds.sort((a, b) => {
+    const nameA = getTeamMemberName(teamMemberById[a])
 
-    // if same date, compare teamMemberId
-    return a.teamMemberId.localeCompare(b.teamMemberId)
+    const nameB = getTeamMemberName(teamMemberById[b])
+
+    return nameA.localeCompare(nameB)
   })
 
-  const rows = sortedData.map((item, index) =>
-    headers
-      .map(header => {
-        const value = item[header as keyof SchedulerAssignment]
+  // --------------------------------------------
+  // Dates (rows)
+  // --------------------------------------------
 
-        switch (header) {
-          case 'teamMemberId':
-            const tm = teamMemberById[value as string]
-            return getTeamMemberName(tm)
-          case 'shiftTypeId':
-            const st = shiftTypeById[value as string]
-            return getShiftTypeName(st)
-          case 'date':
-            // ISO string
-            return DateTime.fromISO(value as string).toFormat('yyyy/MM/dd')
-          default:
-            return index
-        }
-      })
-      .join(','),
-  )
+  const dates = Array.from(
+    new Set(
+      data.map(a => DateTime.fromISO(String(a.date)).toFormat('yyyy/MM/dd')),
+    ),
+  ).sort()
+
+  // --------------------------------------------
+  // Assignment lookup
+  // --------------------------------------------
+
+  const assignmentMap = new Map<string, string>()
+
+  for (const assignment of data) {
+    const date = DateTime.fromISO(String(assignment.date)).toFormat(
+      'yyyy/MM/dd',
+    )
+
+    const shiftName = getShiftTypeName(shiftTypeById[assignment.shiftTypeId])
+
+    assignmentMap.set(`${date}-${assignment.teamMemberId}`, shiftName)
+  }
+
+  // --------------------------------------------
+  // CSV headers
+  // --------------------------------------------
+
+  const headers = [
+    'Date',
+
+    ...teamMemberIds.map(id => getTeamMemberName(teamMemberById[id])),
+  ]
+
+  // --------------------------------------------
+  // CSV rows
+  // --------------------------------------------
+
+  const rows = dates.map(date => [
+    date,
+
+    ...teamMemberIds.map(teamMemberId => {
+      return assignmentMap.get(`${date}-${teamMemberId}`) ?? ''
+    }),
+  ])
+
+  // --------------------------------------------
+  // Build CSV
+  // --------------------------------------------
 
   return [
-    headers.map(header => HEADER_NAME_MAP[header]).join(','),
-    ...rows,
+    headers.map(escapeCSV).join(','),
+
+    ...rows.map(row => row.map(value => escapeCSV(String(value))).join(',')),
   ].join('\n')
 }
