@@ -37,6 +37,7 @@ import { ScheduleMutations } from '~/hooks/schedule/useScheduleMutations'
 import { ScheduleViewState } from '~/hooks/schedule/useScheduleView'
 import { convertToCSV } from '~/lib/csv'
 import { getByIdMap } from '~/lib/db'
+import { convertToPDF } from '~/lib/pdf'
 import { ViewOptionValues } from '~/lib/schedule'
 import { useScheduleStore } from '~/store/schedule.store'
 import { RulePanelPopoverButton } from './rule-panel-popover-button'
@@ -112,6 +113,20 @@ export const ScheduleHeader = ({
     document.body.removeChild(link)
 
     URL.revokeObjectURL(url)
+  }
+
+  const downloadPDF = async () => {
+    const pdf = await convertToPDF(
+      schedulerAssignments,
+      teamMemberByIdMap,
+      shiftTypeByIdMap,
+    )
+
+    const startStr = DateTime.fromJSDate(start).toFormat('yyyy-MM-dd')
+    const endStr = DateTime.fromJSDate(end).toFormat('yyyy-MM-dd')
+    const fileName = `${startStr}__${endStr}.pdf`
+
+    pdf.save(fileName)
   }
 
   return (
@@ -207,6 +222,12 @@ export const ScheduleHeader = ({
             onClick={downloadCSV}
           >
             Download as <span className='font-bold'>CSV</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className='block whitespace-nowrap cursor-pointer'
+            onClick={downloadPDF}
+          >
+            Download as <span className='font-bold'>PDF</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

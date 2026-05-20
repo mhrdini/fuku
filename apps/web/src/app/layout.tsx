@@ -1,6 +1,6 @@
 import '~/globals.css'
 
-import { Geist, M_PLUS_1 } from 'next/font/google'
+import { Geist, Noto_Sans_JP } from 'next/font/google'
 import { Toaster } from '@fuku/ui/components'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ThemeProvider } from 'next-themes'
@@ -13,9 +13,9 @@ const geist = Geist({
   display: 'swap',
 })
 
-const mPlus = M_PLUS_1({
+const notoSansJP = Noto_Sans_JP({
   subsets: ['latin'],
-  variable: '--font-mplus',
+  variable: '--font-noto',
   display: 'swap',
 })
 
@@ -34,9 +34,9 @@ const RootLayout = ({
     <html
       lang={locale}
       suppressHydrationWarning
-      className={`${geist.variable} ${mPlus.variable}  antialiased`}
+      className={`${geist.variable} ${notoSansJP.variable}  antialiased`}
     >
-      <body className='font-sans'>
+      <body>
         <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
           <TRPCReactProvider>
             {children}
