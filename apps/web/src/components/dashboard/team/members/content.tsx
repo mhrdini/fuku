@@ -115,7 +115,6 @@ export default function TeamMembersContent() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant='destructive'
-                  disabled={teamMember.username === username}
                   onClick={() => {
                     onRemoveMember(teamMember.id)
                   }}

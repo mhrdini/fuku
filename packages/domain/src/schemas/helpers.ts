@@ -58,7 +58,9 @@ export const JsonValueSchema = z.union([
 
 export type JsonValue = z.infer<typeof JsonValueSchema>
 
-export const CountrySchema = z.enum(ALL_COUNTRY_CODES)
+export const CountrySchema = z.enum(ALL_COUNTRY_CODES, {
+  error: 'invalid_country_code',
+})
 
 export const ISODateTimeStringSchema = z.iso.datetime()
 

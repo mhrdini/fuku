@@ -48,10 +48,6 @@ import {
   CommandInput,
   CommandItem,
   CommandSeparator,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
   Input,
   Popover,
   PopoverContent,
@@ -61,6 +57,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Switch,
   ToggleGroup,
   ToggleGroupItem,
 } from '@fuku/ui/components'
@@ -70,7 +67,6 @@ import {
   ChevronDownIcon,
   ChevronRight,
   Copy,
-  Ellipsis,
   ListFilter,
   Plus,
   Trash,
@@ -227,6 +223,7 @@ export const RulePanelPopoverButton = ({
       threshold: 1,
       timeWindow: RuleTimeWindowValues.WEEK,
       hardConstraint: true,
+      active: false,
     })
   }
 
@@ -235,7 +232,7 @@ export const RulePanelPopoverButton = ({
       <PopoverTrigger asChild>
         <Button variant='secondary'>
           <ListFilter />
-          {rules ? Object.keys(rules).length : 0} rules
+          {rules ? Object.values(rules).filter(r => r.active).length : 0} rules
           <ChevronDown />
         </Button>
       </PopoverTrigger>
@@ -356,6 +353,10 @@ const RulePanelItem = ({
   }, [rule.penalty])
 
   // update
+  const handleUpdateActive = (active: boolean) => {
+    updateRule({ ...rule, active })
+  }
+
   const handleUpdateTargetType = (target: string) => {
     if (target === rule.target) return
 
@@ -569,7 +570,7 @@ const RulePanelItem = ({
             </SelectContent>
           </Select>
           {/* actions */}
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant='ghost' size='icon-chip' className='ml-auto'>
                 <Ellipsis />
@@ -588,7 +589,12 @@ const RulePanelItem = ({
                 Duplicate
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
+          <Switch
+            className='ml-auto'
+            checked={rule.active}
+            onCheckedChange={handleUpdateActive}
+          />
         </div>
         {/* second row */}
         <div>
@@ -686,6 +692,13 @@ const RulePanelItem = ({
             }}
             disabled={rule.hardConstraint}
           />
+          {/* actions */}
+          <Button size='icon-xs' variant='ghost' className='ml-auto'>
+            <Copy />
+          </Button>
+          <Button size='icon-xs' variant='error-secondary'>
+            <Trash />
+          </Button>
         </div>
         <div>
           <CollapsibleTrigger asChild>

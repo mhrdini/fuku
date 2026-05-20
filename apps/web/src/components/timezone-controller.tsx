@@ -153,7 +153,6 @@ export function TimeZoneController<T extends FieldValues>({
               </Command>
             </PopoverContent>
           </Popover>
-
           {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
         </Field>
       )}
