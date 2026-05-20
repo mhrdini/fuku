@@ -23,12 +23,31 @@ export async function convertToPDF(
   data: SchedulerAssignment[],
   teamMemberById: Record<string, TeamMemberOutput>,
   shiftTypeById: Record<string, ShiftTypeOutput>,
+  startDate: Date,
+  endDate: Date,
 ) {
+  // --------------------------------------------
+  // Filter assignments by date range
+  // --------------------------------------------
+
+  const filteredData = data.filter(assignment => {
+    const assignmentDate = DateTime.fromISO(String(assignment.date)).startOf(
+      'day',
+    )
+
+    return (
+      assignmentDate >= DateTime.fromJSDate(startDate).startOf('day') &&
+      assignmentDate <= DateTime.fromJSDate(endDate).startOf('day')
+    )
+  })
+
   // --------------------------------------------
   // Team members (columns)
   // --------------------------------------------
 
-  const teamMemberIds = Array.from(new Set(data.map(a => a.teamMemberId)))
+  const teamMemberIds = Array.from(
+    new Set(filteredData.map(a => a.teamMemberId)),
+  )
 
   teamMemberIds.sort((a, b) => {
     const nameA = getTeamMemberName(teamMemberById[a])
@@ -44,7 +63,9 @@ export async function convertToPDF(
 
   const dates = Array.from(
     new Set(
-      data.map(a => DateTime.fromISO(String(a.date)).toFormat('yyyy/MM/dd')),
+      filteredData.map(a =>
+        DateTime.fromISO(String(a.date)).toFormat('yyyy/MM/dd'),
+      ),
     ),
   ).sort()
 
@@ -54,7 +75,7 @@ export async function convertToPDF(
 
   const assignmentMap = new Map<string, string>()
 
-  for (const assignment of data) {
+  for (const assignment of filteredData) {
     const date = DateTime.fromISO(String(assignment.date)).toFormat(
       'yyyy/MM/dd',
     )
@@ -85,8 +106,7 @@ export async function convertToPDF(
   ])
 
   // --------------------------------------------
-  // Load ONE universal font
-  // (recommended approach)
+  // Load font
   // --------------------------------------------
 
   const fontResponse = await fetch('/fonts/NotoSansJP-Regular.ttf')
@@ -110,9 +130,11 @@ export async function convertToPDF(
   // --------------------------------------------
 
   doc.addFileToVFS('NotoSansJP-Regular.ttf', fontBase64)
+
   doc.addFileToVFS('NotoSansJP-Bold.ttf', fontBase64)
 
   doc.addFont('NotoSansJP-Regular.ttf', 'NotoSansJP', 'normal')
+
   doc.addFont('NotoSansJP-Bold.ttf', 'NotoSansJP', 'bold')
 
   doc.setFont('NotoSansJP')
@@ -150,8 +172,6 @@ export async function convertToPDF(
     },
 
     columnStyles: {
-      // Date column
-
       0: {
         cellWidth: 28,
         fontStyle: 'bold',
@@ -161,7 +181,6 @@ export async function convertToPDF(
     didParseCell: data => {
       const text = String(data.cell.raw ?? '')
 
-      // Optional OFF styling
       if (text === 'OFF') {
         data.cell.styles.textColor = [140, 140, 140]
       }
@@ -174,10 +193,6 @@ export async function convertToPDF(
       bottom: 10,
     },
   })
-
-  // --------------------------------------------
-  // Save
-  // --------------------------------------------
 
   return doc
 }

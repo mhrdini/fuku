@@ -6,13 +6,8 @@ import { getShiftTypeName } from './shift-types'
 import { getTeamMemberName } from './team-member'
 
 function escapeCSV(value: string): string {
-  // Escape quotes
   const escaped = value.replace(/"/g, '""')
 
-  // Wrap in quotes to safely support:
-  // commas
-  // Japanese text
-  // line breaks
   return `"${escaped}"`
 }
 
@@ -20,12 +15,31 @@ export function convertToCSV(
   data: SchedulerAssignment[],
   teamMemberById: Record<string, TeamMemberOutput>,
   shiftTypeById: Record<string, ShiftTypeOutput>,
+  startDate: Date,
+  endDate: Date,
 ): string {
+  // --------------------------------------------
+  // Filter assignments by date range
+  // --------------------------------------------
+
+  const filteredData = data.filter(assignment => {
+    const assignmentDate = DateTime.fromISO(String(assignment.date)).startOf(
+      'day',
+    )
+
+    return (
+      assignmentDate >= DateTime.fromJSDate(startDate).startOf('day') &&
+      assignmentDate <= DateTime.fromJSDate(endDate).startOf('day')
+    )
+  })
+
   // --------------------------------------------
   // Team members (columns)
   // --------------------------------------------
 
-  const teamMemberIds = Array.from(new Set(data.map(a => a.teamMemberId)))
+  const teamMemberIds = Array.from(
+    new Set(filteredData.map(a => a.teamMemberId)),
+  )
 
   teamMemberIds.sort((a, b) => {
     const nameA = getTeamMemberName(teamMemberById[a])
@@ -41,7 +55,9 @@ export function convertToCSV(
 
   const dates = Array.from(
     new Set(
-      data.map(a => DateTime.fromISO(String(a.date)).toFormat('yyyy/MM/dd')),
+      filteredData.map(a =>
+        DateTime.fromISO(String(a.date)).toFormat('yyyy/MM/dd'),
+      ),
     ),
   ).sort()
 
@@ -51,7 +67,7 @@ export function convertToCSV(
 
   const assignmentMap = new Map<string, string>()
 
-  for (const assignment of data) {
+  for (const assignment of filteredData) {
     const date = DateTime.fromISO(String(assignment.date)).toFormat(
       'yyyy/MM/dd',
     )
