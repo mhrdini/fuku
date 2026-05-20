@@ -60,11 +60,19 @@ export class ConstraintModelBuilder {
     // build constraints
     this.addEligibilityConstraints(model)
     this.addAvailabilityConstraints(model)
+
+    // step 1: can staffing even be satisfied?
     this.addMaxOneShiftTypePerDayConstraints(model)
     this.addStaffingRequirementsConstraints(model)
+
+    // step 2
     this.addShiftTypeAllowedWeekdaysConstraints(model)
-    this.addRuleConstraints(model)
+
+    // step 3
     this.addOperationalCoverageConstraints(model)
+
+    // step 4
+    this.addRuleConstraints(model)
 
     // build objective terms
     this.addBalanceWorkloadObjective(model)
@@ -259,7 +267,25 @@ export class ConstraintModelBuilder {
   }
 
   private addRuleConstraints(model: OptimizationModel) {
+    // debug on/off rules
+    // step 1
+    // - holiday unique members minimum
+    // step 2
+    // - shift-specific unique members minimum
+    // step 3
+    // - consecutive work days
+    // step 4
+    // - min monthly days off
+    // step 5
+    // - max monthly days off
+    // step 6
+    // - max hours worked per pay grade
+    // step 7
+    // - per member rules
+
     for (const rule of this.ctx.rules) {
+      if (!rule.active) continue
+
       // =========================================================
       // 1. CONSECUTIVE DAYS WORKED
       // =========================================================
@@ -455,7 +481,10 @@ export class ConstraintModelBuilder {
 
       for (let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
         const slotStartMinutes = opStartMinutes + slotIndex * slotSizeMinutes
-        const slotEndMinutes = slotStartMinutes + slotSizeMinutes
+        const slotEndMinutes = Math.min(
+          slotStartMinutes + slotSizeMinutes,
+          opEndMinutes,
+        )
 
         const coefficients: CoefficientMap = {}
 
@@ -472,13 +501,8 @@ export class ConstraintModelBuilder {
         }
 
         if (Object.keys(coefficients).length === 0) {
-          log(
-            '[COVERAGE][WARNING] NO VARIABLES COVER SLOT',
-            day,
-            slotIndex,
-            slotStartMinutes,
-            '-',
-            slotEndMinutes,
+          throw new Error(
+            `[COVERAGE] No shift can cover ${day} slot ${slotIndex}`,
           )
         }
 

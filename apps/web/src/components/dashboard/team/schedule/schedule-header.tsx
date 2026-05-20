@@ -26,7 +26,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Cog,
   Download,
   RefreshCcw,
 } from 'lucide-react'
@@ -211,9 +210,6 @@ export const ScheduleHeader = ({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Button variant='secondary'>
-        <Cog />
-      </Button>
     </div>
   )
 }

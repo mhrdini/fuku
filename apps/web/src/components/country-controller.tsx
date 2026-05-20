@@ -69,7 +69,7 @@ export function CountryController<T extends FieldValues>({
                     COUNTRY_LABELS[field.value]
                   ) : (
                     <span className='text-muted-foreground'>
-                      Select country
+                      Select country (optional)
                     </span>
                   )}
                 </span>
@@ -125,7 +125,6 @@ export function CountryController<T extends FieldValues>({
               </Command>
             </PopoverContent>
           </Popover>
-
           {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
         </Field>
       )}
