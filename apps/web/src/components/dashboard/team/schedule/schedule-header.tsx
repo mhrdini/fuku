@@ -92,6 +92,8 @@ export const ScheduleHeader = ({
       schedulerAssignments,
       teamMemberByIdMap,
       shiftTypeByIdMap,
+      start,
+      end,
     )
 
     const startStr = DateTime.fromJSDate(start).toFormat('yyyy-MM-dd')
@@ -120,6 +122,8 @@ export const ScheduleHeader = ({
       schedulerAssignments,
       teamMemberByIdMap,
       shiftTypeByIdMap,
+      start,
+      end,
     )
 
     const startStr = DateTime.fromJSDate(start).toFormat('yyyy-MM-dd')
