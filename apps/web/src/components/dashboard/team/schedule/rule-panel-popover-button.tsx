@@ -32,6 +32,7 @@ import {
   RuleTimeWindowSchema,
   RuleTimeWindowValues,
 } from '@fuku/domain/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   Collapsible,
@@ -176,6 +177,7 @@ export const RulePanelPopoverButton = ({
   mutateRule,
   mutateRuleCondition,
 }: RulePanelPopoverButtonProps) => {
+  const { t } = useTranslation()
   const {
     rules,
     ruleConditions,
@@ -242,7 +244,10 @@ export const RulePanelPopoverButton = ({
       >
         <Command>
           <div className='p-2 flex gap-2 w-full'>
-            <CommandInput className='w-full' placeholder='Search rules...' />
+            <CommandInput
+              className='w-full'
+              placeholder={t('searchRules', 'Search rules...')}
+            />
           </div>
           <CommandSeparator />
           <div className='group/rules flex flex-col min-w-fit overflow-y-auto'>
@@ -285,7 +290,7 @@ export const RulePanelPopoverButton = ({
               ))
             ) : (
               <div className='text-sm text-muted-foreground p-4'>
-                No rules found.
+                {t('noRulesFound', 'No rules found.')}
               </div>
             )}
           </div>
@@ -297,7 +302,7 @@ export const RulePanelPopoverButton = ({
               onClick={handleCreateRule}
             >
               <Plus />
-              Add rule
+              {t('addRule', 'Add rule')}
             </Button>
           </div>
         </Command>
@@ -331,6 +336,7 @@ const RulePanelItem = ({
   ) => Promise<RuleConditionOutput>
   deleteRuleCondition: (conditionId: string) => Promise<RuleConditionOutput>
 }) => {
+  const { t } = useTranslation()
   // local state
   const [thresholdInput, setThresholdInput] = useState(String(rule.threshold))
 
@@ -601,7 +607,7 @@ const RulePanelItem = ({
           {/* metric */}
           <Select value={rule.metric} onValueChange={handleUpdateRuleMetric}>
             <SelectTrigger size='chip' variant='secondary'>
-              <SelectValue placeholder='RuleMetric' />
+              <SelectValue placeholder={t('rulemetric', 'RuleMetric')} />
             </SelectTrigger>
             <SelectContent>
               {Object.values(RuleMetricValues).map(value => (
@@ -648,7 +654,7 @@ const RulePanelItem = ({
             onValueChange={handleUpdateRuleTimeWindow}
           >
             <SelectTrigger size='chip' variant='secondary'>
-              <SelectValue placeholder='Time Window' />
+              <SelectValue placeholder={t('timeWindow', 'Time Window')} />
             </SelectTrigger>
             <SelectContent>
               {Object.values(RuleTimeWindowValues).map(value => (
@@ -669,11 +675,17 @@ const RulePanelItem = ({
             value={String(rule.hardConstraint)}
             onValueChange={handleToggleHardConstraint}
           >
-            <ToggleGroupItem value='true' aria-label='Toggle hard constraint'>
-              Required
+            <ToggleGroupItem
+              value='true'
+              aria-label={t('toggleHardConstraint', 'Toggle hard constraint')}
+            >
+              {t('required', 'Required')}
             </ToggleGroupItem>
-            <ToggleGroupItem value='false' aria-label='Toggle soft constraint'>
-              Preferred
+            <ToggleGroupItem
+              value='false'
+              aria-label={t('toggleSoftConstraint', 'Toggle soft constraint')}
+            >
+              {t('preferred', 'Preferred')}
             </ToggleGroupItem>
           </ToggleGroup>
           {/* penalty */}
@@ -704,7 +716,9 @@ const RulePanelItem = ({
           <CollapsibleTrigger asChild>
             <Button variant='link' size='chip'>
               <ChevronRight className=' transition-transform duration-300 ease-in-out group-data-[state=open]:rotate-90' />
-              {ruleConditions.length} conditions
+              {t('lengthConditions', '{{length}} conditions', {
+                length: ruleConditions.length,
+              })}
             </Button>
           </CollapsibleTrigger>
         </div>
@@ -727,7 +741,7 @@ const RulePanelItem = ({
           onClick={handleCreateCondition}
         >
           <Plus />
-          Add condition
+          {t('addCondition', 'Add condition')}
         </Button>
       </CollapsibleContent>
     </Collapsible>
@@ -745,6 +759,7 @@ const RuleConditionPanelItem = ({
   ) => Promise<RuleConditionOutput>
   deleteRuleCondition: (conditionId: string) => Promise<RuleConditionOutput>
 }) => {
+  const { t } = useTranslation()
   const [inputValue, setInputValue] = useState('')
 
   const isMulti =
@@ -917,7 +932,9 @@ const RuleConditionPanelItem = ({
         />
 
         <ComboboxContent className='min-w-fit'>
-          <ComboboxEmpty className='px-6'>No options.</ComboboxEmpty>
+          <ComboboxEmpty className='px-6'>
+            {t('noOptions', 'No options.')}
+          </ComboboxEmpty>
 
           <ComboboxList>
             {(item: { value: string; label: string }) => (

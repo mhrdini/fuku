@@ -1,4 +1,5 @@
 import { useId, useMemo, useState } from 'react'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   Command,
@@ -47,6 +48,7 @@ export function TimeZoneController<T extends FieldValues>({
   name = 'timeZone' as Path<T>,
   disabled = false,
 }: TimeZoneControllerProps<T>) {
+  const { t } = useTranslation()
   const id = useId()
 
   const [open, setOpen] = useState(false)
@@ -62,7 +64,7 @@ export function TimeZoneController<T extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => (
         <Field data-invalid={fieldState.invalid}>
-          <FieldLabel htmlFor={id}>Time Zone</FieldLabel>
+          <FieldLabel htmlFor={id}>{t('timeZone', 'Time Zone')}</FieldLabel>
 
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -80,7 +82,7 @@ export function TimeZoneController<T extends FieldValues>({
                     TIMEZONE_LABELS[field.value]
                   ) : (
                     <span className='text-muted-foreground'>
-                      Select timezone
+                      {t('selectTimezone', 'Select timezone')}
                     </span>
                   )}
                 </span>
@@ -101,7 +103,7 @@ export function TimeZoneController<T extends FieldValues>({
               <Command>
                 <CommandInput
                   className='border-none rounded-none'
-                  placeholder='Search timezone...'
+                  placeholder={t('searchTimezone', 'Search timezone...')}
                   onKeyDown={e => {
                     if (e.key === 'Escape') {
                       resetField(name)
@@ -111,14 +113,24 @@ export function TimeZoneController<T extends FieldValues>({
                 />
 
                 <CommandList className='max-h-60 overflow-y-auto'>
-                  <CommandEmpty>No timezone found.</CommandEmpty>
+                  <CommandEmpty>
+                    {t('noTimezoneFound', 'No timezone found.')}
+                  </CommandEmpty>
 
                   {groupedTimeZones.map(([region, zones]) => (
                     <CommandGroup key={region} heading={region}>
                       {zones.map((zone: TimeZoneOption) => (
                         <CommandItem
                           key={zone.value}
-                          value={`${zone.value} ${zone.label} ${zone.offset}`}
+                          value={t(
+                            'valueLabelOffset',
+                            '{{value}} {{label}} {{offset}}',
+                            {
+                              value: zone.value,
+                              label: zone.label,
+                              offset: zone.offset,
+                            },
+                          )}
                           onSelect={() => {
                             field.onChange(
                               field.value === zone.value

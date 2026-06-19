@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Badge,
   Button,
@@ -43,6 +44,7 @@ const getMultiSortIcon = (column: Column<any, any>) => {
 }
 
 export default function TeamMembersContent() {
+  const { t } = useTranslation()
   const trpc = useTRPC()
   const params = useParams()
   const username = params?.username as string
@@ -91,7 +93,7 @@ export default function TeamMembersContent() {
         enableHiding: false,
         header: () => (
           <div>
-            <span className='sr-only'>Actions</span>
+            <span className='sr-only'>{t('actions', 'Actions')}</span>
           </div>
         ),
         cell: ({ row }) => {
@@ -100,7 +102,7 @@ export default function TeamMembersContent() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant='ghost' className='size-8 -mx-1 -my-1'>
-                  <span className='sr-only'>Open menu</span>
+                  <span className='sr-only'>{t('openMenu', 'Open menu')}</span>
                   <Ellipsis />
                 </Button>
               </DropdownMenuTrigger>
@@ -110,7 +112,7 @@ export default function TeamMembersContent() {
                     onUpdateMember(teamMember.id)
                   }}
                 >
-                  <Pencil /> Edit
+                  <Pencil /> {t('edit', 'Edit')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -119,7 +121,7 @@ export default function TeamMembersContent() {
                     onRemoveMember(teamMember.id)
                   }}
                 >
-                  <Trash /> Remove
+                  <Trash /> {t('remove', 'Remove')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -149,7 +151,7 @@ export default function TeamMembersContent() {
         accessorKey: 'payGradeName',
         filterFn: 'arrIncludesSome',
         meta: {
-          label: 'Pay Grade',
+          label: t('payGrade', 'Pay Grade'),
         },
         header: ({ column }) => {
           return (
@@ -158,7 +160,7 @@ export default function TeamMembersContent() {
               className='-ml-3'
               onClick={() => column.toggleSorting()}
             >
-              Pay Grade
+              {t('payGrade', 'Pay Grade')}
               {getMultiSortIcon(column)}
             </Button>
           )
@@ -169,18 +171,18 @@ export default function TeamMembersContent() {
       },
       {
         accessorKey: 'baseRate',
-        meta: { label: 'Base Rate' },
+        meta: { label: t('baseRate', 'Base Rate') },
         header: ({ column }) => column.columnDef.meta?.label,
       },
       {
         accessorKey: 'rateMultiplier',
-        meta: { label: 'Rate Multiplier' },
+        meta: { label: t('rateMultiplier', 'Rate Multiplier') },
         header: ({ column }) => column.columnDef.meta?.label,
         cell: info => info.getValue<number>().toFixed(2),
       },
       {
         accessorKey: 'effectiveRate',
-        meta: { label: 'Effective Rate' },
+        meta: { label: t('effectiveRate', 'Effective Rate') },
         header: ({ column }) => column.columnDef.meta?.label,
         cell: info =>
           info.getValue<number>() != null

@@ -5,6 +5,7 @@ import { CollisionPriority } from '@dnd-kit/abstract'
 import { useSortable } from '@dnd-kit/react/sortable'
 import { ShiftTypeOutput } from '@fuku/api/schemas'
 import { SchedulerAssignment } from '@fuku/domain/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   DropdownMenu,
@@ -35,6 +36,8 @@ export const ScheduleAssignmentCard = ({
   data: { shiftTypeMap },
   className,
 }: ScheduleAssignmentCardProps) => {
+  const { t } = useTranslation()
+
   const { ref } = useSortable({
     id: assignment.id,
     index: 0,
@@ -78,7 +81,7 @@ export const ScheduleAssignmentCard = ({
       <div className='font-bold text-sm'>{shiftType?.name ?? ''}</div>
       <div className='text-xs text-muted-foreground'>
         {shiftType?.startTime ?? ''}
-        {shiftType?.endTime ? ' - ' + shiftType?.endTime : ''}
+        {shiftType?.endTime ? t('key', ' - ') + shiftType?.endTime : ''}
       </div>
       <DropdownMenu>
         <div className='absolute top-2 right-2 opacity-0 group-hover/assignment:opacity-100 transition-opacity'>
@@ -108,7 +111,7 @@ export const ScheduleAssignmentCard = ({
             variant='destructive'
           >
             <Trash />
-            Delete
+            {t('delete', 'Delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

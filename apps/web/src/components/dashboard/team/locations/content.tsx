@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   DropdownMenu,
@@ -33,6 +34,7 @@ import { useSheetStore } from '~/store/sheet.store'
 import { useTRPC } from '~/trpc/client'
 
 export const TeamLocationsContent = () => {
+  const { t } = useTranslation()
   const params = useParams()
   const slug = params.slug as string
   const queryClient = useQueryClient()
@@ -85,7 +87,7 @@ export const TeamLocationsContent = () => {
       enableHiding: false,
       header: () => (
         <div>
-          <span className='sr-only'>Actions</span>
+          <span className='sr-only'>{t('actions', 'Actions')}</span>
         </div>
       ),
       cell: ({ row }) => {
@@ -94,7 +96,7 @@ export const TeamLocationsContent = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant='ghost' className='size-8 -mx-1 -my-1'>
-                <span className='sr-only'>Open menu</span>
+                <span className='sr-only'>{t('openMenu', 'Open menu')}</span>
                 <Ellipsis />
               </Button>
             </DropdownMenuTrigger>
@@ -105,7 +107,7 @@ export const TeamLocationsContent = () => {
                   onRemoveLocation(location.id)
                 }}
               >
-                <Trash /> Remove
+                <Trash /> {t('remove', 'Remove')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -129,7 +131,7 @@ export const TeamLocationsContent = () => {
     },
     {
       accessorKey: 'address',
-      header: 'Address',
+      header: t('address', 'Address'),
       cell: ({ row, renderValue }) => (
         <EditableCell
           row={row.original}
@@ -193,7 +195,7 @@ export const TeamLocationsContent = () => {
                   colSpan={columns.length}
                   className='h-24 text-center'
                 >
-                  No results.
+                  {t('noResults', 'No results.')}
                 </TableCell>
               </TableRow>
             )}
@@ -207,7 +209,9 @@ export const TeamLocationsContent = () => {
           onClick={onNewLocation}
         >
           <Plus />
-          <span className='hidden sm:inline'>New location</span>
+          <span className='hidden sm:inline'>
+            {t('newLocation', 'New location')}
+          </span>
         </Button>
       </div>
     </div>

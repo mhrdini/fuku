@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   Combobox,
@@ -44,6 +45,7 @@ import { useSheetStore } from '~/store/sheet.store'
 import { useTRPC } from '~/trpc/client'
 
 export const TeamPayGradesContent = () => {
+  const { t } = useTranslation()
   const [editingCell, setEditingCell] = useState<{
     rowId: string
     columnKey: string
@@ -101,7 +103,7 @@ export const TeamPayGradesContent = () => {
       enableHiding: false,
       header: () => (
         <div>
-          <span className='sr-only'>Actions</span>
+          <span className='sr-only'>{t('actions', 'Actions')}</span>
         </div>
       ),
       cell: ({ row }) => {
@@ -110,7 +112,7 @@ export const TeamPayGradesContent = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant='ghost' className='size-8 -mx-1 -my-1'>
-                <span className='sr-only'>Open menu</span>
+                <span className='sr-only'>{t('openMenu', 'Open menu')}</span>
                 <Ellipsis />
               </Button>
             </DropdownMenuTrigger>
@@ -121,7 +123,7 @@ export const TeamPayGradesContent = () => {
                   onRemovePayGrade(payGrade.id)
                 }}
               >
-                <Trash /> Remove
+                <Trash /> {t('remove', 'Remove')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -130,7 +132,7 @@ export const TeamPayGradesContent = () => {
     },
     {
       accessorKey: 'name',
-      header: 'Pay Grade Name',
+      header: t('payGradeName', 'Pay Grade Name'),
       cell: ({ row, renderValue }) => (
         <EditableCell
           row={row.original}
@@ -202,7 +204,9 @@ export const TeamPayGradesContent = () => {
               </ComboboxValue>
             </ComboboxChips>
             <ComboboxContent anchor={anchor}>
-              <ComboboxEmpty>No pay grades found.</ComboboxEmpty>
+              <ComboboxEmpty>
+                {t('noPayGradesFound', 'No pay grades found.')}
+              </ComboboxEmpty>
               <ComboboxList>
                 {item => (
                   <ComboboxItem key={item.id} value={item.id}>
@@ -223,7 +227,7 @@ export const TeamPayGradesContent = () => {
                     })
                   }
                 >
-                  Select all
+                  {t('selectAll', 'Select all')}
                 </Button>
                 <Button
                   variant='link'
@@ -238,7 +242,7 @@ export const TeamPayGradesContent = () => {
                     })
                   }
                 >
-                  Clear all
+                  {t('clearAll', 'Clear all')}
                 </Button>
               </div>
             </ComboboxContent>
@@ -297,7 +301,7 @@ export const TeamPayGradesContent = () => {
                   colSpan={columns.length}
                   className='h-24 text-center'
                 >
-                  No results.
+                  {t('noResults', 'No results.')}
                 </TableCell>
               </TableRow>
             )}
@@ -311,7 +315,9 @@ export const TeamPayGradesContent = () => {
           onClick={onNewPayGrade}
         >
           <Plus />
-          <span className='hidden sm:inline'>New pay grade</span>
+          <span className='hidden sm:inline'>
+            {t('newPayGrade', 'New pay grade')}
+          </span>
         </Button>
       </div>
     </div>

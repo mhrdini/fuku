@@ -1,3 +1,4 @@
+import { useTranslation } from '@fuku/i18n/react'
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -17,17 +18,23 @@ interface DiscardChangesAlertDialogProps {
 export const DiscardChangesAlertDialogContent = ({
   onDiscard,
 }: DiscardChangesAlertDialogProps) => {
+  const { t } = useTranslation()
   const { closeDialog } = useDialogStore()
 
   return (
     <AlertDialogContent>
-      <AlertDialogTitle>Discard changes?</AlertDialogTitle>
+      <AlertDialogTitle>
+        {t('discardChanges', 'Discard changes?')}
+      </AlertDialogTitle>
       <AlertDialogDescription>
-        You have unsaved changes. If you discard them, your edits will be lost.
+        {t(
+          'youHaveUnsavedChangesIfYouDiscardThemYourEditsWillBeLost',
+          'You have unsaved changes. If you discard them, your edits will be lost.',
+        )}
       </AlertDialogDescription>
       <AlertDialogFooter>
         <AlertDialogCancel asChild>
-          <Button variant='outline'>Keep editing</Button>
+          <Button variant='outline'>{t('keepEditing', 'Keep editing')}</Button>
         </AlertDialogCancel>
         <AlertDialogAction asChild>
           <Button
@@ -35,7 +42,7 @@ export const DiscardChangesAlertDialogContent = ({
             variant='destructive'
             className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
           >
-            Discard
+            {t('discard', 'Discard')}
           </Button>
         </AlertDialogAction>
       </AlertDialogFooter>

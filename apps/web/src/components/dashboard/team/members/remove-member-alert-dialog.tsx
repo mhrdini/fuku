@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -17,6 +18,7 @@ import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 
 export const RemoveMemberAlertDialog = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const trpc = useTRPC()
 
@@ -40,7 +42,10 @@ export const RemoveMemberAlertDialog = () => {
     ...trpc.teamMember.delete.mutationOptions(),
     onError: error => {
       toast.error(
-        `ERROR${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+        t('errorvalMessage', 'ERROR{{val}}: {{message}}', {
+          val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
+          message: error.message,
+        }),
       )
     },
     onSuccess: data => {
@@ -51,9 +56,13 @@ export const RemoveMemberAlertDialog = () => {
         trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
       )
       const toastId = toast('Team Member', {
-        description: `${data.givenNames} ${data.familyName} has been removed.`,
+        description: t(
+          'givennamesFamilynameHasBeenRemoved',
+          '{{givenNames}} {{familyName}} has been removed.',
+          { givenNames: data.givenNames, familyName: data.familyName },
+        ),
         action: {
-          label: 'Undo',
+          label: t('undo', 'Undo'),
           onClick: async () => {
             await restoreMember({ id: data.id })
             toast.dismiss(toastId)
@@ -66,7 +75,9 @@ export const RemoveMemberAlertDialog = () => {
   const { mutateAsync: restoreMember } = useMutation({
     ...trpc.teamMember.restore.mutationOptions(),
     onError: error => {
-      toast.error('Error', { description: `${error.message}` })
+      toast.error('Error', {
+        description: t('message', '{{message}}', { message: error.message }),
+      })
     },
     onSuccess: data => {
       queryClient.setQueryData(
@@ -77,7 +88,11 @@ export const RemoveMemberAlertDialog = () => {
         trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
       )
       toast.success('Team Member', {
-        description: `${data.givenNames} ${data.familyName} has been restored.`,
+        description: t(
+          'givennamesFamilynameHasBeenRestored',
+          '{{givenNames}} {{familyName}} has been restored.',
+          { givenNames: data.givenNames, familyName: data.familyName },
+        ),
       })
     },
   })
@@ -93,7 +108,9 @@ export const RemoveMemberAlertDialog = () => {
 
   return (
     <>
-      <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
+      <AlertDialogTitle>
+        {t('removeTeamMember', 'Remove Team Member')}
+      </AlertDialogTitle>
       {isLoadingTeamMember ? (
         <AlertDialogDescription asChild>
           <Skeleton className='inline-block h-4 w-10' />
@@ -101,15 +118,24 @@ export const RemoveMemberAlertDialog = () => {
       ) : (
         <AlertDialogDescription asChild>
           <div>
-            <div>Are you sure you want to remove {teamMember?.givenNames}?</div>
+            <div>
+              {t(
+                'areYouSureYouWantToRemove',
+                'Are you sure you want to remove',
+              )}{' '}
+              {teamMember?.givenNames}?
+            </div>
             <div className='font-semibold'>
-              You can restore it after deletion.
+              {t(
+                'youCanRestoreItAfterDeletion',
+                'You can restore it after deletion.',
+              )}
             </div>
           </div>
         </AlertDialogDescription>
       )}
       <AlertDialogFooter>
-        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogCancel>{t('cancel', 'Cancel')}</AlertDialogCancel>
         <AlertDialogAction asChild>
           <LoadingButton
             variant='destructive'
@@ -118,7 +144,7 @@ export const RemoveMemberAlertDialog = () => {
             disabled={isLoadingTeamMember || isPending}
             className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
           >
-            Remove
+            {t('remove', 'Remove')}
           </LoadingButton>
         </AlertDialogAction>
       </AlertDialogFooter>

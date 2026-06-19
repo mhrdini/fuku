@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -17,6 +18,7 @@ import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 
 export const RemoveLocationAlertDialog = () => {
+  const { t } = useTranslation()
   const params = useParams()
   const slug = params?.slug as string
 
@@ -37,7 +39,10 @@ export const RemoveLocationAlertDialog = () => {
     ...trpc.location.delete.mutationOptions(),
     onError: error => {
       toast.error('Error', {
-        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+        description: t('valMessage', '{{val}}: {{message}}', {
+          val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
+          message: error.message,
+        }),
       })
     },
     onSuccess: data => {
@@ -51,9 +56,11 @@ export const RemoveLocationAlertDialog = () => {
         trpc.location.list.queryOptions({ teamId: team?.id ?? '' }),
       )
       const toastId = toast('Location', {
-        description: `${data.name} has been removed.`,
+        description: t('nameHasBeenRemoved', '{{name}} has been removed.', {
+          name: data.name,
+        }),
         action: {
-          label: 'Undo',
+          label: t('undo', 'Undo'),
           onClick: async () => {
             await restoreLocation({ id: data.id })
             toast.dismiss(toastId)
@@ -66,7 +73,9 @@ export const RemoveLocationAlertDialog = () => {
   const { mutateAsync: restoreLocation } = useMutation({
     ...trpc.location.restore.mutationOptions(),
     onError: error => {
-      toast.error('Error', { description: `${error.message}` })
+      toast.error('Error', {
+        description: t('message', '{{message}}', { message: error.message }),
+      })
     },
     onSuccess: data => {
       queryClient.setQueryData(
@@ -80,7 +89,9 @@ export const RemoveLocationAlertDialog = () => {
         trpc.location.list.queryOptions({ teamId: team?.id ?? '' }),
       )
       toast.success('Location', {
-        description: `${data.name} has been restored.`,
+        description: t('nameHasBeenRestored', '{{name}} has been restored.', {
+          name: data.name,
+        }),
       })
     },
   })
@@ -96,7 +107,9 @@ export const RemoveLocationAlertDialog = () => {
 
   return (
     <>
-      <AlertDialogTitle>Remove Location</AlertDialogTitle>
+      <AlertDialogTitle>
+        {t('removeLocation', 'Remove Location')}
+      </AlertDialogTitle>
       {isLoadingLocation ? (
         <AlertDialogDescription asChild>
           <Skeleton className='inline-block h-4 w-10' />
@@ -104,15 +117,24 @@ export const RemoveLocationAlertDialog = () => {
       ) : (
         <AlertDialogDescription asChild>
           <div>
-            <div>Are you sure you want to remove {location?.name}?</div>
+            <div>
+              {t(
+                'areYouSureYouWantToRemove',
+                'Are you sure you want to remove',
+              )}{' '}
+              {location?.name}?
+            </div>
             <div className='font-semibold'>
-              You can restore it after deletion.
+              {t(
+                'youCanRestoreItAfterDeletion',
+                'You can restore it after deletion.',
+              )}
             </div>
           </div>
         </AlertDialogDescription>
       )}
       <AlertDialogFooter>
-        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogCancel>{t('cancel', 'Cancel')}</AlertDialogCancel>
         <AlertDialogAction asChild>
           <LoadingButton
             variant='destructive'
@@ -121,7 +143,7 @@ export const RemoveLocationAlertDialog = () => {
             disabled={isLoadingLocation || isPending}
             className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
           >
-            Remove
+            {t('remove', 'Remove')}
           </LoadingButton>
         </AlertDialogAction>
       </AlertDialogFooter>

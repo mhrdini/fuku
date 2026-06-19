@@ -1,4 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table'
+import i18next from '@fuku/i18n/server'
 
 export const getHiddenColumns = (
   visibleColumnKeys: string[],
@@ -7,7 +8,7 @@ export const getHiddenColumns = (
   return allColumns
     .filter(
       (col): col is ColumnDef<any> & { accessorKey: string } =>
-        'accessorKey' in col,
+        i18next.t('accessorkey', 'accessorKey') in col,
     )
     .map(col => col.accessorKey)
     .filter(key => !visibleColumnKeys.includes(key))

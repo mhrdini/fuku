@@ -1,11 +1,8 @@
 import '~/globals.css'
 
 import { Geist, Noto_Sans_JP } from 'next/font/google'
-import { Toaster } from '@fuku/ui/components'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { ThemeProvider } from 'next-themes'
 
-import { TRPCReactProvider } from '~/trpc/client'
+import { Providers } from './providers'
 
 const geist = Geist({
   subsets: ['latin'],
@@ -23,27 +20,14 @@ export const metadata = {
   title: 'fuku',
 }
 
-const RootLayout = ({
-  children,
-  params: { locale },
-}: {
-  children: React.ReactNode
-  params: { locale: string }
-}) => {
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html
-      lang={locale}
       suppressHydrationWarning
       className={`${geist.variable} ${notoSansJP.variable}  antialiased`}
     >
       <body>
-        <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
-          <TRPCReactProvider>
-            {children}
-            <ReactQueryDevtools initialIsOpen={false} />
-            <Toaster />
-          </TRPCReactProvider>
-        </ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )

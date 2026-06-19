@@ -6,6 +6,7 @@ import {
   PayGradeCreateInput,
   PayGradeCreateInputSchema,
 } from '@fuku/api/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   Combobox,
@@ -44,7 +45,8 @@ const PayGradeCreateFormSchema = PayGradeCreateInputSchema
 type PayGradeCreateFormGrade = PayGradeCreateInput
 
 export const CreatePayGradeFormSheet = () => {
-  const title = 'Create New Pay Grade'
+  const { t } = useTranslation()
+  const title = t('createNewPayGrade', 'Create New Pay Grade')
   const { id, closeSheet } = useSheetStore()
   const anchor = useComboboxAnchor()
 
@@ -85,7 +87,10 @@ export const CreatePayGradeFormSheet = () => {
     ...trpc.payGrade.create.mutationOptions(),
     onError: error => {
       toast.error('Error', {
-        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+        description: t('valMessage', '{{val}}: {{message}}', {
+          val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
+          message: error.message,
+        }),
       })
     },
     onSuccess: data => {
@@ -101,7 +106,9 @@ export const CreatePayGradeFormSheet = () => {
         trpc.payGrade.list.queryOptions({ teamId: team?.id ?? '' }),
       )
       toast.success('Pay Grade', {
-        description: `${data.name} has been created.`,
+        description: t('nameHasBeenCreated', '{{name}} has been created.', {
+          name: data.name,
+        }),
       })
     },
   })
@@ -137,7 +144,7 @@ export const CreatePayGradeFormSheet = () => {
                     {...field}
                     id='form-create-pay-grade-name'
                     aria-invalid={fieldState.invalid}
-                    placeholder='e.g. Full-time'
+                    placeholder={t('egFulltime', 'e.g. Full-time')}
                     autoComplete='off'
                   />
                   {fieldState.invalid && (
@@ -152,7 +159,7 @@ export const CreatePayGradeFormSheet = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='form-create-pay-grade-base-rate'>
-                    Base Rate
+                    {t('baseRate', 'Base Rate')}
                   </FieldLabel>
                   <Input
                     {...field}
@@ -161,7 +168,7 @@ export const CreatePayGradeFormSheet = () => {
                     step='0.01'
                     min='0'
                     aria-invalid={fieldState.invalid}
-                    placeholder='Base Rate'
+                    placeholder={t('baseRate', 'Base Rate')}
                     autoComplete='off'
                     onChange={e =>
                       field.onChange(
@@ -181,7 +188,7 @@ export const CreatePayGradeFormSheet = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='form-create-pay-grade-connect-shift-types'>
-                    Eligible Shift Types
+                    {t('eligibleShiftTypes', 'Eligible Shift Types')}
                   </FieldLabel>
                   <Combobox
                     id='form-create-pay-grade-connect-shift-types'
@@ -209,7 +216,9 @@ export const CreatePayGradeFormSheet = () => {
                       </ComboboxValue>
                     </ComboboxChips>
                     <ComboboxContent anchor={anchor}>
-                      <ComboboxEmpty>No shift types found.</ComboboxEmpty>
+                      <ComboboxEmpty>
+                        {t('noShiftTypesFound', 'No shift types found.')}
+                      </ComboboxEmpty>
                       <ComboboxList>
                         {item => (
                           <ComboboxItem key={item.id} value={item.id}>
@@ -230,7 +239,7 @@ export const CreatePayGradeFormSheet = () => {
                             )
                           }
                         >
-                          Select all
+                          {t('selectAll', 'Select all')}
                         </Button>
                         <Button
                           variant='link'
@@ -238,7 +247,7 @@ export const CreatePayGradeFormSheet = () => {
                           type='button'
                           onClick={() => form.setValue('connectShiftTypes', [])}
                         >
-                          Clear all
+                          {t('clearAll', 'Clear all')}
                         </Button>
                       </div>
                     </ComboboxContent>
@@ -250,11 +259,11 @@ export const CreatePayGradeFormSheet = () => {
         </FieldSet>
         <SheetFooter>
           <LoadingButton form='form-create-pay-grade' loading={isPending}>
-            Create
+            {t('create', 'Create')}
           </LoadingButton>
           <SheetClose asChild>
             <Button variant='outline' disabled={isPending}>
-              Close
+              {t('close', 'Close')}
             </Button>
           </SheetClose>
         </SheetFooter>

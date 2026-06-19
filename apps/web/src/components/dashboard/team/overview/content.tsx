@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   Empty,
@@ -18,6 +19,7 @@ import { DailyRequirementsSection } from './daily-requirements'
 import { SummarySection } from './summary-section'
 
 export default function TeamOverviewContent() {
+  const { t } = useTranslation()
   const trpc = useTRPC()
   const params = useParams()
   const slug = params?.slug as string
@@ -37,15 +39,17 @@ export default function TeamOverviewContent() {
         <EmptyMedia variant='icon'>
           <Users />
         </EmptyMedia>
-        <EmptyTitle>No Teams Yet</EmptyTitle>
+        <EmptyTitle>{t('noTeamsYet', 'No Teams Yet')}</EmptyTitle>
         <EmptyDescription>
-          You haven&apos;t created any teams yet. Get started by creating your
-          first team.
+          {t(
+            'youHavenapostCreatedAnyTeamsYetGetStartedByCreatingYourFirstTeam',
+            'You haven&apos;t created any teams yet. Get started by creating your\n          first team.',
+          )}
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <div className='flex gap-2'>
-          <Button>Create Team</Button>
+          <Button>{t('createTeam', 'Create Team')}</Button>
         </div>
       </EmptyContent>
     </Empty>

@@ -1,4 +1,5 @@
 import { PayGradeOutput } from '@fuku/api/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Badge,
   Button,
@@ -54,6 +55,7 @@ export const ScheduleTeamMemberHeaderCell = ({
   },
   derivedData: { payGradeMap },
 }: ScheduleTeamMemberHeaderCellProps) => {
+  const { t } = useTranslation()
   return (
     <div className='sticky left-0 top-0 z-40 p-2 border-b border-r border-input bg-background flex items-center gap-2'>
       <InputGroup className='flex-1 bg-input/30'>
@@ -64,7 +66,7 @@ export const ScheduleTeamMemberHeaderCell = ({
         <InputGroupInput
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder='Search'
+          placeholder={t('search', 'Search')}
         />
         <InputGroupAddon align='inline-end' className={cn(!search && 'hidden')}>
           <InputGroupButton
@@ -87,9 +89,9 @@ export const ScheduleTeamMemberHeaderCell = ({
         <PopoverContent side='right' align='start'>
           <FieldGroup>
             <FieldSet className='gap-3'>
-              <FieldLegend>Filter</FieldLegend>
+              <FieldLegend>{t('filter', 'Filter')}</FieldLegend>
               <Field>
-                <FieldLabel>By Pay Grade</FieldLabel>
+                <FieldLabel>{t('byPayGrade', 'By Pay Grade')}</FieldLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -129,7 +131,7 @@ export const ScheduleTeamMemberHeaderCell = ({
                           })
                         ) : (
                           <span className='text-muted-foreground'>
-                            Select pay grades
+                            {t('selectPayGrades', 'Select pay grades')}
                           </span>
                         )}
                       </div>
@@ -141,9 +143,13 @@ export const ScheduleTeamMemberHeaderCell = ({
                   </PopoverTrigger>
                   <PopoverContent className='w-(--radix-popper-anchor-width) p-0'>
                     <Command>
-                      <CommandInput placeholder='Search pay grade...' />
+                      <CommandInput
+                        placeholder={t('searchPayGrade', 'Search pay grade...')}
+                      />
                       <CommandList>
-                        <CommandEmpty>No pay grade found.</CommandEmpty>
+                        <CommandEmpty>
+                          {t('noPayGradeFound', 'No pay grade found.')}
+                        </CommandEmpty>
                         <CommandGroup>
                           {payGrades?.map(pg => (
                             <CommandItem

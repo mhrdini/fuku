@@ -1,5 +1,6 @@
 import { useId, useState } from 'react'
 import { ALL_COUNTRIES } from '@fuku/domain/country'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   Command,
@@ -42,6 +43,7 @@ export function CountryController<T extends FieldValues>({
   name = 'country' as Path<T>,
   disabled = false,
 }: CountryControllerProps<T>) {
+  const { t } = useTranslation()
   const id = useId()
   const [open, setOpen] = useState(false)
 
@@ -51,7 +53,7 @@ export function CountryController<T extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => (
         <Field data-invalid={fieldState.invalid}>
-          <FieldLabel htmlFor={id}>Country</FieldLabel>
+          <FieldLabel htmlFor={id}>{t('country', 'Country')}</FieldLabel>
 
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -69,7 +71,7 @@ export function CountryController<T extends FieldValues>({
                     COUNTRY_LABELS[field.value]
                   ) : (
                     <span className='text-muted-foreground'>
-                      Select country (optional)
+                      {t('selectCountryOptional', 'Select country (optional)')}
                     </span>
                   )}
                 </span>
@@ -89,18 +91,23 @@ export function CountryController<T extends FieldValues>({
             >
               <Command className='max-h-80'>
                 <CommandInput
-                  placeholder='Search country...'
+                  placeholder={t('searchCountry', 'Search country...')}
                   className='border-none rounded-none'
                 />
 
                 <CommandList className='max-h-60 overflow-y-auto'>
-                  <CommandEmpty>No country found.</CommandEmpty>
+                  <CommandEmpty>
+                    {t('noCountryFound', 'No country found.')}
+                  </CommandEmpty>
 
                   <CommandGroup>
                     {ALL_COUNTRIES.map(({ code, name }) => (
                       <CommandItem
                         key={code}
-                        value={`${code} ${name}`}
+                        value={t('codeName', '{{code}} {{name}}', {
+                          code,
+                          name,
+                        })}
                         onSelect={() => {
                           field.onChange(
                             field.value === code ? undefined : code,

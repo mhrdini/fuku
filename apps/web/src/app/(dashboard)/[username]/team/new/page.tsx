@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { TeamCreateInput, TeamCreateInputSchema } from '@fuku/api/schemas'
+import { useTranslation } from '@fuku/i18n/react'
+import i18next from '@fuku/i18n/server'
 import {
   Badge,
   Button,
@@ -137,18 +139,22 @@ type AdditionalDetailsSectionType = z.infer<
 >
 
 const steps: Step[] = [
-  { label: 'Basic Info', schema: BasicInfoSectionSchema },
   {
-    label: 'Team Members',
+    label: i18next.t('basicInfo', 'Basic Info'),
+    schema: BasicInfoSectionSchema,
+  },
+  {
+    label: i18next.t('teamMembers', 'Team Members'),
     schema: TeamMembersSectionSchema,
   },
   {
-    label: 'Additional Details',
+    label: i18next.t('additionalDetails', 'Additional Details'),
     schema: AdditionalDetailsSectionSchema,
   },
 ]
 
 export default function NewTeamPage() {
+  const { t } = useTranslation()
   const { setOpenTeamSelect } = useTeamStore()
 
   const router = useRouter()
@@ -238,7 +244,9 @@ export default function NewTeamPage() {
       queryClient.invalidateQueries(trpc.user.getSidebarState.queryOptions())
       router.push(`/${session?.user.username}/team/${data.slug}`)
       toast.success('Team', {
-        description: `${data.name} has been created.`,
+        description: t('nameHasBeenCreated', '{{name}} has been created.', {
+          name: data.name,
+        }),
       })
     },
   })
@@ -262,7 +270,7 @@ export default function NewTeamPage() {
 
   return (
     <div className='flex flex-col gap-6 max-w-lg mx-auto'>
-      <h2>Create a new team</h2>
+      <h2>{t('createANewTeam', 'Create a new team')}</h2>
       {stepper}
       <FormProvider {...form}>
         <form
@@ -276,7 +284,7 @@ export default function NewTeamPage() {
               variant='outline'
               className={cn(index > 0 && 'hidden', 'ml-auto')}
             >
-              Cancel
+              {t('cancel', 'Cancel')}
             </Button>
             <Button
               type='button'
@@ -284,21 +292,21 @@ export default function NewTeamPage() {
               className={cn(index === 0 && 'hidden', 'ml-auto')}
               onClick={prevStep}
             >
-              Back
+              {t('back', 'Back')}
             </Button>
             <Button
               type='button'
               className={cn(index === steps.length - 1 && 'hidden')}
               onClick={onNext}
             >
-              Next
+              {t('next', 'Next')}
             </Button>
 
             <Button
               type='submit'
               className={cn(index !== steps.length - 1 && 'hidden')}
             >
-              Create
+              {t('create', 'Create')}
             </Button>
           </Field>
         </form>
@@ -308,13 +316,17 @@ export default function NewTeamPage() {
 }
 
 function BasicInfoSection() {
+  const { t } = useTranslation()
   const { control, resetField } = useFormContext<BasicInfoSectionType>()
 
   return (
     <FieldSet>
       <FieldGroup>
         <FieldDescription>
-          Start with a name, description, and time zone for your team.
+          {t(
+            'startWithANameDescriptionAndTimeZoneForYourTeam',
+            'Start with a name, description, and time zone for your team.',
+          )}
         </FieldDescription>
         <Controller
           name='name'
@@ -325,7 +337,7 @@ function BasicInfoSection() {
               <Input
                 {...field}
                 id='form-new-team-name'
-                placeholder='My Team'
+                placeholder={t('myTeam', 'My Team')}
                 aria-invalid={fieldState.invalid}
                 autoComplete='off'
               />
@@ -339,14 +351,14 @@ function BasicInfoSection() {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor='form-new-team-description'>
-                Description
+                {t('description', 'Description')}
               </FieldLabel>
               <Input
                 {...field}
                 value={field.value || ''}
                 id='form-new-team-description'
                 aria-invalid={fieldState.invalid}
-                placeholder='Description (optional)'
+                placeholder={t('descriptionOptional', 'Description (optional)')}
                 autoComplete='off'
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -361,6 +373,7 @@ function BasicInfoSection() {
 }
 
 function TeamMembersSection() {
+  const { t } = useTranslation()
   const [isPayGradeSheetOpen, setIsPayGradeSheetOpen] = useState(false)
   const [isTeamMemberSheetOpen, setIsTeamMemberSheetOpen] = useState(false)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
@@ -427,12 +440,14 @@ function TeamMembersSection() {
         }}
       />
       <FieldGroup>
-        <FieldDescription>Add members to your team.</FieldDescription>
+        <FieldDescription>
+          {t('addMembersToYourTeam', 'Add members to your team.')}
+        </FieldDescription>
       </FieldGroup>
       <Field orientation='horizontal'>
         <Button type='button' variant='outline' onClick={openPayGradeSheet}>
           <Layers />
-          Pay Grades
+          {t('payGrades', 'Pay Grades')}
         </Button>
         <Button
           type='button'
@@ -441,7 +456,7 @@ function TeamMembersSection() {
           onClick={openAddMember}
         >
           <UserRoundPlus />
-          Add member
+          {t('addMember', 'Add member')}
         </Button>
       </Field>
       <FieldGroup>
@@ -454,18 +469,23 @@ function TeamMembersSection() {
                     {field.givenNames} {field.familyName}
                   </ItemTitle>
                   <ItemDescription>
-                    {'Pay Grade: '}
+                    {t('payGrade2', 'Pay Grade: ')}
                     {(() => {
                       const pg = payGradeFields.find(
                         pg => pg.id === field.payGradeClientId,
                       )
-                      return pg ? `${pg.name} (${pg.baseRate})` : 'Unassigned'
+                      return pg
+                        ? t('nameBaserate', '{{name}} ({{baseRate}})', {
+                            name: pg.name,
+                            baseRate: pg.baseRate,
+                          })
+                        : 'Unassigned'
                     })()}
                   </ItemDescription>
                 </ItemContent>
                 <ItemActions>
                   {field.teamMemberRole === 'ADMIN' && (
-                    <Badge variant='outline'>Admin</Badge>
+                    <Badge variant='outline'>{t('admin', 'Admin')}</Badge>
                   )}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -485,7 +505,7 @@ function TeamMembersSection() {
                           }
                         >
                           <Pencil />
-                          Edit
+                          {t('edit', 'Edit')}
                         </DropdownMenuItem>
                         <DropdownMenuCheckboxItem
                           disabled={index === 0}
@@ -503,7 +523,7 @@ function TeamMembersSection() {
                           }
                         >
                           <Shield />
-                          Make admin
+                          {t('makeAdmin', 'Make admin')}
                         </DropdownMenuCheckboxItem>
                       </DropdownMenuGroup>
                       <DropdownMenuSeparator />
@@ -511,18 +531,23 @@ function TeamMembersSection() {
                         <DropdownMenuSub>
                           <DropdownMenuSubTrigger>
                             <Layers />
-                            Assign pay grade
+                            {t('assignPayGrade', 'Assign pay grade')}
                           </DropdownMenuSubTrigger>
                           <DropdownMenuPortal>
                             <DropdownMenuSubContent>
                               <DropdownMenuGroup>
-                                <DropdownMenuLabel>Pay Grade</DropdownMenuLabel>
+                                <DropdownMenuLabel>
+                                  {t('payGrade', 'Pay Grade')}
+                                </DropdownMenuLabel>
                                 <DropdownMenuRadioGroup
                                   value={field.payGradeClientId || undefined}
                                 >
                                   {payGradeFields.length === 0 && (
                                     <DropdownMenuItem disabled>
-                                      No pay grades available
+                                      {t(
+                                        'noPayGradesAvailable',
+                                        'No pay grades available',
+                                      )}
                                     </DropdownMenuItem>
                                   )}
                                   {payGradeFields.map(pg => (
@@ -547,14 +572,21 @@ function TeamMembersSection() {
                                         }
                                       }}
                                     >
-                                      {pg.name} ({pg.baseRate})
+                                      {t(
+                                        'nameBaserate',
+                                        '{{name}} ({{baseRate}})',
+                                        {
+                                          name: pg.name,
+                                          baseRate: pg.baseRate,
+                                        },
+                                      )}
                                     </DropdownMenuRadioItem>
                                   ))}
                                 </DropdownMenuRadioGroup>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem onSelect={openPayGradeSheet}>
                                   <SlidersHorizontal />
-                                  Manage
+                                  {t('manage', 'Manage')}
                                 </DropdownMenuItem>
                               </DropdownMenuGroup>
                             </DropdownMenuSubContent>
@@ -576,7 +608,7 @@ function TeamMembersSection() {
                               }
                             >
                               <Trash2 />
-                              Remove
+                              {t('remove', 'Remove')}
                             </DropdownMenuItem>
                           </DropdownMenuGroup>
                         </>
@@ -609,6 +641,7 @@ function TeamMemberSheet({
   payGrades: { id: string; name?: string; baseRate?: number }[]
   editingIndex: number | null
 }) {
+  const { t } = useTranslation()
   const { fields, append, update, remove } = teamMembers
 
   const [payGradeOpen, setPayGradeOpen] = useState(false)
@@ -662,7 +695,9 @@ function TeamMemberSheet({
       <SheetContent className='flex flex-col gap-6'>
         <SheetHeader>
           <SheetTitle>
-            {editingIndex !== null ? 'Edit team member' : 'Add team member'}
+            {editingIndex !== null
+              ? t('editTeamMember2', 'Edit team member')
+              : t('addTeamMember', 'Add team member')}
           </SheetTitle>
         </SheetHeader>
 
@@ -674,13 +709,13 @@ function TeamMemberSheet({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='form-create-member-given-names'>
-                    Given Name(s)
+                    {t('givenNames', 'Given Name(s)')}
                   </FieldLabel>
                   <Input
                     {...field}
                     id='form-create-member-given-names'
                     aria-invalid={fieldState.invalid}
-                    placeholder='Given Name(s)'
+                    placeholder={t('givenNames', 'Given Name(s)')}
                     autoComplete='off'
                   />
                   {fieldState.invalid && (
@@ -695,13 +730,13 @@ function TeamMemberSheet({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='form-create-member-family-name'>
-                    Last Name
+                    {t('lastName', 'Last Name')}
                   </FieldLabel>
                   <Input
                     {...field}
                     id='form-create-member-family-name'
                     aria-invalid={fieldState.invalid}
-                    placeholder='Last Name'
+                    placeholder={t('lastName', 'Last Name')}
                     autoComplete='off'
                   />
                   {fieldState.invalid && (
@@ -721,7 +756,7 @@ function TeamMemberSheet({
                     className='col-span-2 sm:col-span-2'
                   >
                     <FieldLabel htmlFor='form-create-member-pay-grade-id'>
-                      Pay Grade
+                      {t('payGrade', 'Pay Grade')}
                     </FieldLabel>
                     <Popover open={payGradeOpen} onOpenChange={setPayGradeOpen}>
                       <PopoverTrigger asChild>
@@ -734,14 +769,16 @@ function TeamMemberSheet({
                         >
                           {field.value && payGrades
                             ? payGrades.find(pg => pg.id === field.value)?.name
-                            : 'Select pay grade...'}
+                            : t('selectPayGrade', 'Select pay grade...')}
                           <ChevronDown className='opacity-50' />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className='p-0' align='start'>
                         <Command>
                           <CommandList>
-                            <CommandEmpty>No pay grade found.</CommandEmpty>
+                            <CommandEmpty>
+                              {t('noPayGradeFound', 'No pay grade found.')}
+                            </CommandEmpty>
                             <CommandGroup>
                               {payGrades?.map(pg => (
                                 <CommandItem
@@ -784,7 +821,7 @@ function TeamMemberSheet({
               />
               <Field className='col-span-1'>
                 <FieldLabel htmlFor='form-create-member-base-rate'>
-                  Base Rate
+                  {t('baseRate', 'Base Rate')}
                 </FieldLabel>
                 <Button
                   type='button'
@@ -811,7 +848,7 @@ function TeamMemberSheet({
                     className='col-span-1'
                   >
                     <FieldLabel htmlFor='form-create-member-rate-multiplier'>
-                      Multiplier
+                      {t('multiplier', 'Multiplier')}
                     </FieldLabel>
                     <Input
                       {...field}
@@ -820,7 +857,7 @@ function TeamMemberSheet({
                       step='0.01'
                       min='0'
                       aria-invalid={fieldState.invalid}
-                      placeholder='Rate Multiplier'
+                      placeholder={t('rateMultiplier', 'Rate Multiplier')}
                       autoComplete='off'
                       onChange={e =>
                         field.onChange(
@@ -844,7 +881,7 @@ function TeamMemberSheet({
                   onClick={deleteMember}
                 >
                   <Trash2 />
-                  Remove
+                  {t('remove', 'Remove')}
                 </Button>
               )}
               <Button
@@ -860,7 +897,7 @@ function TeamMemberSheet({
                   })
                 }}
               >
-                {editingIndex !== null ? 'Save' : 'Add'}
+                {editingIndex !== null ? 'Save' : t('add', 'Add')}
               </Button>
             </div>
           </form>
@@ -882,6 +919,7 @@ function PayGradesSheet({
     'fields' | 'append' | 'remove' | 'update'
   >
 }) {
+  const { t } = useTranslation()
   const { getValues, setValue, trigger, formState } =
     useFormContext<TeamCreateFormType>()
   const { fields, append, remove, update } = payGrades
@@ -919,9 +957,12 @@ function PayGradesSheet({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className='flex flex-col gap-6'>
         <SheetHeader>
-          <SheetTitle>Pay Grades</SheetTitle>
+          <SheetTitle>{t('payGrades', 'Pay Grades')}</SheetTitle>
           <SheetDescription>
-            Pay grades are shared across your team members.
+            {t(
+              'payGradesAreSharedAcrossYourTeamMembers',
+              'Pay grades are shared across your team members.',
+            )}
           </SheetDescription>
         </SheetHeader>
 
@@ -938,7 +979,7 @@ function PayGradesSheet({
           ))}
           <Button type='button' variant='outline' onClick={handleAdd}>
             <Plus />
-            Add pay grade
+            {t('addPayGrade', 'Add pay grade')}
           </Button>
         </ItemGroup>
       </SheetContent>
@@ -959,6 +1000,7 @@ function PayGradeItem({
   onDelete: () => void
   error?: { name?: { message?: string }; baseRate?: { message?: string } }
 }) {
+  const { t } = useTranslation()
   const [name, setName] = useState(field.name ?? '')
   const [baseRate, setBaseRate] = useState(field.baseRate ?? 0)
 
@@ -991,7 +1033,7 @@ function PayGradeItem({
       <ItemContent className='grid grid-cols-6 gap-4'>
         <Input
           value={name}
-          placeholder='Pay grade name'
+          placeholder={t('payGradeName2', 'Pay grade name')}
           className='col-span-4'
           aria-invalid={!!error?.name}
           onChange={e => {
@@ -1006,7 +1048,7 @@ function PayGradeItem({
         <Input
           type='number'
           value={baseRate}
-          placeholder='Base rate'
+          placeholder={t('baseRate2', 'Base rate')}
           className='col-span-2'
           aria-invalid={!!error?.baseRate}
           onChange={e => {
@@ -1027,6 +1069,7 @@ function PayGradeItem({
 }
 
 function AdditionalDetailsSection() {
+  const { t } = useTranslation()
   const [locationsOpen, setLocationsOpen] = useState(false)
   const [shiftTypesOpen, setShiftTypesOpen] = useState(false)
 
@@ -1089,7 +1132,10 @@ function AdditionalDetailsSection() {
 
       <FieldGroup>
         <FieldDescription>
-          Optional details to better organise your team.
+          {t(
+            'optionalDetailsToBetterOrganiseYourTeam',
+            'Optional details to better organise your team.',
+          )}
         </FieldDescription>
       </FieldGroup>
 
@@ -1098,14 +1144,14 @@ function AdditionalDetailsSection() {
           <ItemGroup className='*:first:pt-0 *:last:pb-0'>
             <Item>
               <ItemHeader>
-                <ItemTitle>Locations</ItemTitle>
+                <ItemTitle>{t('locations', 'Locations')}</ItemTitle>
                 <Button
                   type='button'
                   variant='secondary'
                   className='ml-auto'
                   onClick={() => setLocationsOpen(true)}
                 >
-                  Manage
+                  {t('manage', 'Manage')}
                 </Button>
               </ItemHeader>
               {locationFields.length ? (
@@ -1121,14 +1167,14 @@ function AdditionalDetailsSection() {
             <Separator />
             <Item className='items-start'>
               <ItemHeader>
-                <ItemTitle>Shift Types</ItemTitle>
+                <ItemTitle>{t('shiftTypes', 'Shift Types')}</ItemTitle>
                 <Button
                   type='button'
                   variant='secondary'
                   className='ml-auto'
                   onClick={() => setShiftTypesOpen(true)}
                 >
-                  Manage
+                  {t('manage', 'Manage')}
                 </Button>
               </ItemHeader>
               {shiftTypeFields.length ? (
@@ -1162,7 +1208,10 @@ function AdditionalDetailsSection() {
                           </div>
                         ) : (
                           <div className='text-xs text-muted-foreground'>
-                            No pay grades connected
+                            {t(
+                              'noPayGradesConnected',
+                              'No pay grades connected',
+                            )}
                           </div>
                         )}
                       </CardContent>
@@ -1190,6 +1239,7 @@ function LocationsSheet({
     'fields' | 'append' | 'remove' | 'update'
   >
 }) {
+  const { t } = useTranslation()
   const { trigger, formState } = useFormContext<TeamCreateFormType>()
   const { fields, append, remove, update } = locations
 
@@ -1205,9 +1255,12 @@ function LocationsSheet({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className='flex flex-col gap-6'>
         <SheetHeader>
-          <SheetTitle>Locations</SheetTitle>
+          <SheetTitle>{t('locations', 'Locations')}</SheetTitle>
           <SheetDescription>
-            Locations where your team operates.
+            {t(
+              'locationsWhereYourTeamOperates',
+              'Locations where your team operates.',
+            )}
           </SheetDescription>
         </SheetHeader>
 
@@ -1229,7 +1282,7 @@ function LocationsSheet({
             onClick={() => append({ id: crypto.randomUUID(), name: '' })}
           >
             <Plus />
-            Add location
+            {t('addLocation', 'Add location')}
           </Button>
         </ItemGroup>
       </SheetContent>
@@ -1250,6 +1303,7 @@ function LocationItem({
   onDelete: () => void
   error?: { name?: { message?: string } }
 }) {
+  const { t } = useTranslation()
   const [name, setName] = useState(field.name ?? '')
 
   const latestRef = useRef({
@@ -1275,7 +1329,7 @@ function LocationItem({
       <ItemContent>
         <Input
           value={name}
-          placeholder='Location name'
+          placeholder={t('locationName', 'Location name')}
           onChange={e => {
             setName(e.target.value)
             latestRef.current.name = e.target.value
@@ -1311,6 +1365,7 @@ function ShiftTypesSheet({
     'fields'
   > // for connecting pay grades to shift types
 }) {
+  const { t } = useTranslation()
   const { trigger, formState } = useFormContext<TeamCreateFormType>()
   const { fields, append, remove, update } = shiftTypes
 
@@ -1326,9 +1381,12 @@ function ShiftTypesSheet({
     <Sheet open={open} onOpenChange={handleOpenChange} modal={false}>
       <SheetContent className='flex flex-col gap-6'>
         <SheetHeader>
-          <SheetTitle>Shift Types</SheetTitle>
+          <SheetTitle>{t('shiftTypes', 'Shift Types')}</SheetTitle>
           <SheetDescription>
-            Different types of shifts your team members can have.
+            {t(
+              'differentTypesOfShiftsYourTeamMembersCanHave',
+              'Different types of shifts your team members can have.',
+            )}
           </SheetDescription>
         </SheetHeader>
 
@@ -1359,7 +1417,7 @@ function ShiftTypesSheet({
             }}
           >
             <Plus />
-            Add shift type
+            {t('addShiftType', 'Add shift type')}
           </Button>
         </ItemGroup>
       </SheetContent>
@@ -1389,6 +1447,7 @@ function ShiftTypeItem({
     'fields'
   >
 }) {
+  const { t } = useTranslation()
   const anchor = useComboboxAnchor()
 
   const [name, setName] = useState(field.name ?? '')
@@ -1505,7 +1564,9 @@ function ShiftTypeItem({
               </ComboboxValue>
             </ComboboxChips>
             <ComboboxContent anchor={anchor}>
-              <ComboboxEmpty>No pay grades found.</ComboboxEmpty>
+              <ComboboxEmpty>
+                {t('noPayGradesFound', 'No pay grades found.')}
+              </ComboboxEmpty>
               <ComboboxList>
                 {(
                   item: z.infer<
@@ -1531,7 +1592,7 @@ function ShiftTypeItem({
                     commit()
                   }}
                 >
-                  Select all
+                  {t('selectAll', 'Select all')}
                 </Button>
                 <Button
                   variant='link'
@@ -1543,7 +1604,7 @@ function ShiftTypeItem({
                     commit()
                   }}
                 >
-                  Clear all
+                  {t('clearAll', 'Clear all')}
                 </Button>
               </div>
             </ComboboxContent>
