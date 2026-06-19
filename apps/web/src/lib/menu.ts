@@ -1,6 +1,9 @@
+'use client'
+
 import { useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { UserTeam } from '@fuku/api/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   BadgeDollarSign,
   Calendar,
@@ -26,6 +29,7 @@ export type Menu = {
 }
 
 export const useSidebarMenu = (team: UserTeam | null): MenuGroup[] => {
+  const { t } = useTranslation()
   const params = useParams()
   const username = params.username as string
 
@@ -33,26 +37,26 @@ export const useSidebarMenu = (team: UserTeam | null): MenuGroup[] => {
     ? []
     : [
         {
-          label: 'Team',
+          label: t('team', 'Team'),
           menus: [
             {
               href: `/${username}/team/${team.slug}`,
-              label: 'Overview',
+              label: t('overview', 'Overview'),
               icon: Users2,
             },
             {
               href: `/${username}/team/${team.slug}/schedule`,
-              label: 'Schedule',
+              label: t('schedule', 'Schedule'),
               icon: Calendar,
             },
             {
               href: `/${username}/team/${team.slug}/members`,
-              label: 'Members',
+              label: t('members', 'Members'),
               icon: UserCircle2,
             },
             {
               href: `/${username}/team/${team.slug}/settings`,
-              label: 'Settings',
+              label: t('settings', 'Settings'),
               icon: Cog,
             },
           ],
@@ -64,54 +68,55 @@ export const useNavigationMenu = (
   username: string | null,
   team: UserTeam | null,
 ): Menu[] => {
+  const { t, i18n } = useTranslation()
   const menu = useMemo(() => {
     if (!username || !team) return []
 
     return [
       {
-        label: 'Team',
+        label: t('team', 'Team'),
         href: `/${username}/team`,
         icon: Users2,
         submenus: [
           {
-            label: 'Overview',
+            label: t('overview', 'Overview'),
             href: `/${username}/team/${team.slug}`,
             icon: Users2,
           },
           {
-            label: 'Members',
+            label: t('members', 'Members'),
             href: `/${username}/team/${team.slug}/members`,
             icon: UserCircle2,
           },
           {
-            label: 'Pay Grades',
+            label: t('payGrades', 'Pay Grades'),
             href: `/${username}/team/${team.slug}/pay-grades`,
             icon: BadgeDollarSign,
           },
           {
-            label: 'Shift Types',
+            label: t('shiftTypes', 'Shift Types'),
             href: `/${username}/team/${team.slug}/shift-types`,
             icon: Clock,
           },
           {
-            label: 'Locations',
+            label: t('locations', 'Locations'),
             href: `/${username}/team/${team.slug}/locations`,
             icon: MapPin,
           },
           {
-            label: 'Settings',
+            label: t('settings', 'Settings'),
             href: `/${username}/team/${team.slug}/settings`,
             icon: Cog,
           },
         ],
       },
       {
-        label: 'Schedule',
+        label: t('schedule', 'Schedule'),
         href: `/${username}/team/${team.slug}/schedule`,
         icon: Calendar,
       },
     ]
-  }, [username, team])
+  }, [username, team, i18n.resolvedLanguage])
 
   return menu
 }

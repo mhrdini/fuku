@@ -6,6 +6,7 @@ import {
   TeamMemberUpdateInput,
   TeamMemberUpdateInputSchema,
 } from '@fuku/api/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -47,6 +48,7 @@ import { useTRPC } from '~/trpc/client'
 import { DiscardChangesAlertDialogContent } from '../../discard-changes-alert-dialog'
 
 export const UpdateMemberFormDialog = () => {
+  const { t } = useTranslation()
   const { editingId: currentTeamMemberId, closeDialog } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
 
@@ -109,7 +111,10 @@ export const UpdateMemberFormDialog = () => {
     ...trpc.teamMember.update.mutationOptions(),
     onError: error => {
       toast.error('Error', {
-        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+        description: t('valMessage', '{{val}}: {{message}}', {
+          val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
+          message: error.message,
+        }),
       })
     },
     onSuccess: data => {
@@ -119,14 +124,20 @@ export const UpdateMemberFormDialog = () => {
       )
       closeDialog()
       toast.success('Team Member', {
-        description: `${data.givenNames} ${data.familyName} has been updated.`,
+        description: t(
+          'givennamesFamilynameHasBeenUpdated',
+          '{{givenNames}} {{familyName}} has been updated.',
+          { givenNames: data.givenNames, familyName: data.familyName },
+        ),
       })
     },
   })
 
   const onSubmit: SubmitHandler<TeamMemberUpdateInput> = async data => {
     if (!form.formState.isDirty) {
-      form.setError('root', { message: 'There are no changes to save.' })
+      form.setError('root', {
+        message: t('thereAreNoChangesToSave', 'There are no changes to save.'),
+      })
       return
     }
     try {
@@ -143,13 +154,13 @@ export const UpdateMemberFormDialog = () => {
 
   const cancelButton = (
     <Button variant='outline' className='ml-auto'>
-      Cancel
+      {t('cancel', 'Cancel')}
     </Button>
   )
 
   return (
     <>
-      <DialogTitle>Edit Team Member</DialogTitle>
+      <DialogTitle>{t('editTeamMember', 'Edit Team Member')}</DialogTitle>
       <form
         id='form-update-member'
         onSubmit={form.handleSubmit(onSubmit, onError)}
@@ -166,13 +177,13 @@ export const UpdateMemberFormDialog = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='form-update-member-given-names'>
-                    Given Name(s)
+                    {t('givenNames', 'Given Name(s)')}
                   </FieldLabel>
                   <Input
                     {...field}
                     id='form-update-member-given-names'
                     aria-invalid={fieldState.invalid}
-                    placeholder='Given Name(s)'
+                    placeholder={t('givenNames', 'Given Name(s)')}
                     autoComplete='off'
                   />
                   {fieldState.invalid && (
@@ -187,13 +198,13 @@ export const UpdateMemberFormDialog = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='form-update-member-family-name'>
-                    Last Name
+                    {t('lastName', 'Last Name')}
                   </FieldLabel>
                   <Input
                     {...field}
                     id='form-update-member-family-name'
                     aria-invalid={fieldState.invalid}
-                    placeholder='Last Name'
+                    placeholder={t('lastName', 'Last Name')}
                     autoComplete='off'
                   />
                   {fieldState.invalid && (
@@ -213,7 +224,7 @@ export const UpdateMemberFormDialog = () => {
                     className='col-span-2 sm:col-span-2'
                   >
                     <FieldLabel htmlFor='form-update-member-pay-grade-id'>
-                      Pay Grade
+                      {t('payGrade', 'Pay Grade')}
                     </FieldLabel>
                     <Popover open={payGradeOpen} onOpenChange={setPayGradeOpen}>
                       <PopoverTrigger asChild>
@@ -225,14 +236,16 @@ export const UpdateMemberFormDialog = () => {
                         >
                           {field.value && payGrades
                             ? payGrades.find(pg => pg.id === field.value)?.name
-                            : 'Select pay grade...'}
+                            : t('selectPayGrade', 'Select pay grade...')}
                           <ChevronDown className='opacity-50' />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className='p-0' align='start'>
                         <Command>
                           <CommandList>
-                            <CommandEmpty>No pay grade found.</CommandEmpty>
+                            <CommandEmpty>
+                              {t('noPayGradeFound', 'No pay grade found.')}
+                            </CommandEmpty>
                             <CommandGroup>
                               {payGrades?.map(pg => (
                                 <CommandItem
@@ -276,7 +289,7 @@ export const UpdateMemberFormDialog = () => {
               />
               <Field className='col-span-1'>
                 <FieldLabel htmlFor='form-update-member-base-rate'>
-                  Base Rate
+                  {t('baseRate', 'Base Rate')}
                 </FieldLabel>
                 <Button
                   id='form-update-member-base-rate'
@@ -301,7 +314,7 @@ export const UpdateMemberFormDialog = () => {
                     className='col-span-1'
                   >
                     <FieldLabel htmlFor='form-update-member-rate-multiplier'>
-                      Multiplier
+                      {t('multiplier', 'Multiplier')}
                     </FieldLabel>
                     <Input
                       {...field}
@@ -310,7 +323,7 @@ export const UpdateMemberFormDialog = () => {
                       step='0.01'
                       min='0'
                       aria-invalid={fieldState.invalid}
-                      placeholder='Rate Multiplier'
+                      placeholder={t('rateMultiplier', 'Rate Multiplier')}
                       autoComplete='off'
                       onChange={e =>
                         field.onChange(
@@ -332,16 +345,19 @@ export const UpdateMemberFormDialog = () => {
               render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor='form-update-member-username'>
-                    Linked Account
+                    {t('linkedAccount', 'Linked Account')}
                   </FieldLabel>
                   <Input
                     {...field}
                     id='form-update-member-username'
                     aria-invalid={fieldState.invalid}
-                    placeholder='Username (optional)'
+                    placeholder={t('usernameOptional', 'Username (optional)')}
                   />
                   <FieldDescription>
-                    Link this member to an existing user account.
+                    {t(
+                      'linkThisMemberToAnExistingUserAccount',
+                      'Link this member to an existing user account.',
+                    )}
                   </FieldDescription>
                 </Field>
               )}
@@ -365,7 +381,7 @@ export const UpdateMemberFormDialog = () => {
                 loading={isPending}
                 disabled={!teamMember || !payGrades}
               >
-                Save
+                {t('save', 'Save')}
               </LoadingButton>
             </Field>
           </FieldGroup>

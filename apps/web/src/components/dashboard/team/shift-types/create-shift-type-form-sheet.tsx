@@ -6,6 +6,7 @@ import {
   ShiftTypeCreateInput,
   ShiftTypeCreateInputSchema,
 } from '@fuku/api/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   Combobox,
@@ -45,7 +46,8 @@ const ShiftTypeCreateFormSchema = ShiftTypeCreateInputSchema
 type ShiftTypeCreateFormType = ShiftTypeCreateInput
 
 export const CreateShiftTypeFormSheet = () => {
-  const title = 'Create New Shift Type'
+  const { t } = useTranslation()
+  const title = t('createNewShiftType', 'Create New Shift Type')
   const { id, closeSheet } = useSheetStore()
   const anchor = useComboboxAnchor()
 
@@ -87,7 +89,10 @@ export const CreateShiftTypeFormSheet = () => {
     ...trpc.shiftType.create.mutationOptions(),
     onError: error => {
       toast.error('Error', {
-        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+        description: t('valMessage', '{{val}}: {{message}}', {
+          val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
+          message: error.message,
+        }),
       })
     },
     onSuccess: data => {
@@ -103,7 +108,9 @@ export const CreateShiftTypeFormSheet = () => {
         trpc.shiftType.list.queryOptions({ teamId: team?.id ?? '' }),
       )
       toast.success('Shift Type', {
-        description: `${data.name} has been created.`,
+        description: t('nameHasBeenCreated', '{{name}} has been created.', {
+          name: data.name,
+        }),
       })
     },
   })
@@ -139,7 +146,7 @@ export const CreateShiftTypeFormSheet = () => {
                     {...field}
                     id='form-create-shift-type-name'
                     aria-invalid={fieldState.invalid}
-                    placeholder='e.g. Morning Shift'
+                    placeholder={t('egMorningShift', 'e.g. Morning Shift')}
                     autoComplete='off'
                   />
                   {fieldState.invalid && (
@@ -154,7 +161,7 @@ export const CreateShiftTypeFormSheet = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='form-create-shift-type-start-time'>
-                    Start Time
+                    {t('startTime', 'Start Time')}
                   </FieldLabel>
                   <Input
                     {...field}
@@ -177,7 +184,7 @@ export const CreateShiftTypeFormSheet = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='form-create-shift-type-end-time'>
-                    End Time
+                    {t('endTime', 'End Time')}
                   </FieldLabel>
                   <Input
                     {...field}
@@ -200,7 +207,7 @@ export const CreateShiftTypeFormSheet = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='form-create-shift-type-connect-pay-grades'>
-                    Eligible Pay Grades
+                    {t('eligiblePayGrades', 'Eligible Pay Grades')}
                   </FieldLabel>
                   <Combobox
                     id='form-create-shift-type-connect-pay-grades'
@@ -228,7 +235,9 @@ export const CreateShiftTypeFormSheet = () => {
                       </ComboboxValue>
                     </ComboboxChips>
                     <ComboboxContent anchor={anchor}>
-                      <ComboboxEmpty>No pay grades found.</ComboboxEmpty>
+                      <ComboboxEmpty>
+                        {t('noPayGradesFound', 'No pay grades found.')}
+                      </ComboboxEmpty>
                       <ComboboxList>
                         {item => (
                           <ComboboxItem key={item.id} value={item.id}>
@@ -249,7 +258,7 @@ export const CreateShiftTypeFormSheet = () => {
                             )
                           }
                         >
-                          Select all
+                          {t('selectAll', 'Select all')}
                         </Button>
                         <Button
                           variant='link'
@@ -257,7 +266,7 @@ export const CreateShiftTypeFormSheet = () => {
                           type='button'
                           onClick={() => form.setValue('connectPayGrades', [])}
                         >
-                          Clear all
+                          {t('clearAll', 'Clear all')}
                         </Button>
                       </div>
                     </ComboboxContent>
@@ -269,11 +278,11 @@ export const CreateShiftTypeFormSheet = () => {
         </FieldSet>
         <SheetFooter>
           <LoadingButton form='form-create-shift-type' loading={isPending}>
-            Create shift type
+            {t('createShiftType', 'Create shift type')}
           </LoadingButton>
           <SheetClose asChild>
             <Button variant='outline' disabled={isPending}>
-              Close
+              {t('close', 'Close')}
             </Button>
           </SheetClose>
         </SheetFooter>

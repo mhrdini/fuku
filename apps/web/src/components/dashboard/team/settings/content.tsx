@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { TeamUpdateInputSchema } from '@fuku/api/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Field,
   FieldDescription,
@@ -41,6 +42,7 @@ const TeamSettingsFormSchema = TeamUpdateInputSchema.pick({
 type TeamSettingsFormType = z.infer<typeof TeamSettingsFormSchema>
 
 export const TeamSettingsContent = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const trpc = useTRPC()
   const params = useParams()
@@ -88,7 +90,7 @@ export const TeamSettingsContent = () => {
         trpc.team.bySlug.queryOptions({ slug: data!.slug }),
       )
       toast.success('Team', {
-        description: 'Changes saved!',
+        description: t('changesSaved', 'Changes saved!'),
       })
     },
   })
@@ -124,7 +126,9 @@ export const TeamSettingsContent = () => {
   const onSubmit: SubmitHandler<TeamSettingsFormType> = async values => {
     if (!team) return
     if (!isDirty) {
-      form.setError('root', { message: 'There are no changes to save.' })
+      form.setError('root', {
+        message: t('thereAreNoChangesToSave', 'There are no changes to save.'),
+      })
       return
     }
 
@@ -150,14 +154,14 @@ export const TeamSettingsContent = () => {
 
   return (
     <div className='flex flex-col gap-4 max-w-lg'>
-      <h2>Settings</h2>
+      <h2>{t('settings', 'Settings')}</h2>
       <form
         id='form-team-settings'
         onSubmit={form.handleSubmit(onSubmit, onError)}
       >
         <FieldGroup>
           <FieldSet>
-            <FieldLegend>General</FieldLegend>
+            <FieldLegend>{t('general', 'General')}</FieldLegend>
             <FieldSeparator />
             <FieldGroup className='*:not(:last-child):grid *:not(:last-child):gap-2'>
               <Controller
@@ -166,7 +170,7 @@ export const TeamSettingsContent = () => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor='form-team-settings-name'>
-                      Team Name
+                      {t('teamName', 'Team Name')}
                     </FieldLabel>
                     <Input
                       id='form-team-settings-name'
@@ -188,7 +192,7 @@ export const TeamSettingsContent = () => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor='form-team-settings-description'>
-                      Description
+                      {t('description', 'Description')}
                     </FieldLabel>
                     <Textarea
                       id='form-team-settings-description'
@@ -224,22 +228,25 @@ export const TeamSettingsContent = () => {
                   disabled={isPending || isSaving || isDeleting}
                   className='ml-auto'
                 >
-                  Save changes
+                  {t('saveChanges', 'Save changes')}
                 </LoadingButton>
               </Field>
             </FieldGroup>
           </FieldSet>
           <FieldSet>
-            <FieldLegend>Danger Zone</FieldLegend>
+            <FieldLegend>{t('dangerZone', 'Danger Zone')}</FieldLegend>
             <FieldSeparator />
             <FieldGroup className='p-4 rounded-md border border-destructive *:grid *:grid-cols-[2fr_1fr]'>
               <Field orientation='horizontal'>
                 <div>
                   <FieldLabel htmlFor='form-team-settings-delete'>
-                    Delete this team
+                    {t('deleteThisTeam', 'Delete this team')}
                   </FieldLabel>
                   <FieldDescription>
-                    Once you delete a team, there is no going back.
+                    {t(
+                      'onceYouDeleteATeamThereIsNoGoingBack',
+                      'Once you delete a team, there is no going back.',
+                    )}
                   </FieldDescription>
                 </div>
                 <LoadingButton
@@ -251,7 +258,7 @@ export const TeamSettingsContent = () => {
                   onClick={handleDelete}
                   className='ml-auto'
                 >
-                  Delete this team
+                  {t('deleteThisTeam', 'Delete this team')}
                 </LoadingButton>
               </Field>
             </FieldGroup>

@@ -6,6 +6,7 @@ import {
   LocationCreateInput,
   LocationCreateInputSchema,
 } from '@fuku/api/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   Field,
@@ -39,7 +40,8 @@ const LocationCreateFormSchema = LocationCreateInputSchema
 type LocationCreateFormType = LocationCreateInput
 
 export const CreateLocationFormSheet = () => {
-  const title = 'Create New Location'
+  const { t } = useTranslation()
+  const title = t('createNewLocation', 'Create New Location')
   const { id, closeSheet } = useSheetStore()
 
   const params = useParams()
@@ -76,7 +78,10 @@ export const CreateLocationFormSheet = () => {
     ...trpc.location.create.mutationOptions(),
     onError: error => {
       toast.error('Error', {
-        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+        description: t('valMessage', '{{val}}: {{message}}', {
+          val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
+          message: error.message,
+        }),
       })
     },
     onSuccess: data => {
@@ -96,7 +101,9 @@ export const CreateLocationFormSheet = () => {
         }),
       )
       toast.success('Location', {
-        description: `${data.name} has been created.`,
+        description: t('nameHasBeenCreated', '{{name}} has been created.', {
+          name: data.name,
+        }),
       })
     },
   })
@@ -137,7 +144,7 @@ export const CreateLocationFormSheet = () => {
                     {...field}
                     id='form-create-location-name'
                     aria-invalid={fieldState.invalid}
-                    placeholder='e.g. Main Office'
+                    placeholder={t('egMainOffice', 'e.g. Main Office')}
                     autoComplete='off'
                   />
                   {fieldState.invalid && (
@@ -152,13 +159,16 @@ export const CreateLocationFormSheet = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='form-create-location-address'>
-                    Address
+                    {t('address', 'Address')}
                   </FieldLabel>
                   <Input
                     {...field}
                     id='form-create-location-address'
                     aria-invalid={fieldState.invalid}
-                    placeholder='e.g. 123 Main St, City, Country'
+                    placeholder={t(
+                      'eg123MainStCityCountry',
+                      'e.g. 123 Main St, City, Country',
+                    )}
                     autoComplete='off'
                   />
                   {fieldState.invalid && (
@@ -171,11 +181,11 @@ export const CreateLocationFormSheet = () => {
         </FieldSet>
         <SheetFooter>
           <LoadingButton form='form-create-location' loading={isPending}>
-            Create location
+            {t('createLocation', 'Create location')}
           </LoadingButton>
           <SheetClose asChild>
             <Button type='button' variant='outline' disabled={isPending}>
-              Close
+              {t('close', 'Close')}
             </Button>
           </SheetClose>
         </SheetFooter>

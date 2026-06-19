@@ -2,6 +2,7 @@
 
 import { DragDropProvider } from '@dnd-kit/react'
 import { SchedulerAssignment } from '@fuku/domain/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import { Badge, Button, ScrollArea, ScrollBar } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { format } from 'date-fns'
@@ -29,6 +30,7 @@ export const ScheduleGrid = ({
   derivedData: { daysRowList, cellMap, shiftTypeMap, payGradeMap },
   className,
 }: ScheduleGridProps) => {
+  const { t } = useTranslation()
   const { dayMetricsMap } = useScheduleStore()
 
   const { moveAssignmentToCell } = useScheduleActions()
@@ -122,7 +124,7 @@ export const ScheduleGrid = ({
           {filteredTeamMembers.length === 0 ? (
             <>
               <div className='sticky left-0 z-20 p-4 flex items-start text-sm text-muted-foreground bg-background border-r border-input'>
-                No members found.
+                {t('noMembersFound', 'No members found.')}
               </div>
 
               {daysRowList.map(day => (
@@ -154,7 +156,7 @@ export const ScheduleGrid = ({
           {/* footer row */}
           <div className='sticky left-0 bottom-0 z-30 border-t border-r border-input text-center bg-background p-2'>
             <Button className='w-full' variant='secondary'>
-              <Plus /> Add member
+              <Plus /> {t('addMember', 'Add member')}
             </Button>
           </div>
           {daysRowList.map(day => (

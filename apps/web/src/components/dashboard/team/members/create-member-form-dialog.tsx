@@ -7,6 +7,7 @@ import {
   TeamMemberCreateInputSchema,
 } from '@fuku/api/schemas'
 import { TeamMemberRoleValues } from '@fuku/domain/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -54,6 +55,7 @@ const TeamMemberCreateFormSchema = TeamMemberCreateInputSchema
 type TeamMemberCreateFormType = TeamMemberCreateInput
 
 export const CreateMemberFormDialog = () => {
+  const { t } = useTranslation()
   const { id, closeDialog } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
 
@@ -102,7 +104,10 @@ export const CreateMemberFormDialog = () => {
     ...trpc.teamMember.create.mutationOptions(),
     onError: error => {
       toast.error('Error', {
-        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+        description: t('valMessage', '{{val}}: {{message}}', {
+          val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
+          message: error.message,
+        }),
       })
     },
     onSuccess: data => {
@@ -116,14 +121,20 @@ export const CreateMemberFormDialog = () => {
       )
 
       toast.success('Team Member', {
-        description: `${data.givenNames} ${data.familyName} has been added to the team.`,
+        description: t(
+          'givennamesFamilynameHasBeenAddedToTheTeam',
+          '{{givenNames}} {{familyName}} has been added to the team.',
+          { givenNames: data.givenNames, familyName: data.familyName },
+        ),
       })
     },
   })
 
   const onSubmit: SubmitHandler<TeamMemberCreateFormType> = async data => {
     if (!form.formState.isDirty) {
-      form.setError('root', { message: 'There are no changes to save.' })
+      form.setError('root', {
+        message: t('thereAreNoChangesToSave', 'There are no changes to save.'),
+      })
       return
     }
     try {
@@ -142,14 +153,16 @@ export const CreateMemberFormDialog = () => {
 
   const cancelButton = (
     <Button variant='outline' className='ml-auto'>
-      Cancel
+      {t('cancel', 'Cancel')}
     </Button>
   )
 
   return (
     <>
-      <DialogTitle>New Team Member</DialogTitle>
-      <FieldDescription>Create a new member to your team.</FieldDescription>
+      <DialogTitle>{t('newTeamMember2', 'New Team Member')}</DialogTitle>
+      <FieldDescription>
+        {t('createANewMemberToYourTeam', 'Create a new member to your team.')}
+      </FieldDescription>
       <form
         id='form-create-member'
         onSubmit={form.handleSubmit(onSubmit, onError)}
@@ -162,13 +175,13 @@ export const CreateMemberFormDialog = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='form-create-member-given-names'>
-                    Given Name(s)
+                    {t('givenNames', 'Given Name(s)')}
                   </FieldLabel>
                   <Input
                     {...field}
                     id='form-create-member-given-names'
                     aria-invalid={fieldState.invalid}
-                    placeholder='Given Name(s)'
+                    placeholder={t('givenNames', 'Given Name(s)')}
                     autoComplete='off'
                   />
                   {fieldState.invalid && (
@@ -183,13 +196,13 @@ export const CreateMemberFormDialog = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='form-create-member-family-name'>
-                    Last Name
+                    {t('lastName', 'Last Name')}
                   </FieldLabel>
                   <Input
                     {...field}
                     id='form-create-member-family-name'
                     aria-invalid={fieldState.invalid}
-                    placeholder='Last Name'
+                    placeholder={t('lastName', 'Last Name')}
                     autoComplete='off'
                   />
                   {fieldState.invalid && (
@@ -209,7 +222,7 @@ export const CreateMemberFormDialog = () => {
                     className='col-span-2 sm:col-span-2'
                   >
                     <FieldLabel htmlFor='form-create-member-pay-grade-id'>
-                      Pay Grade
+                      {t('payGrade', 'Pay Grade')}
                     </FieldLabel>
                     <Popover open={payGradeOpen} onOpenChange={setPayGradeOpen}>
                       <PopoverTrigger asChild>
@@ -221,14 +234,16 @@ export const CreateMemberFormDialog = () => {
                         >
                           {field.value && payGrades
                             ? payGrades.find(pg => pg.id === field.value)?.name
-                            : 'Select pay grade...'}
+                            : t('selectPayGrade', 'Select pay grade...')}
                           <ChevronDown className='opacity-50' />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className='p-0' align='start'>
                         <Command>
                           <CommandList>
-                            <CommandEmpty>No pay grade found.</CommandEmpty>
+                            <CommandEmpty>
+                              {t('noPayGradeFound', 'No pay grade found.')}
+                            </CommandEmpty>
                             <CommandGroup>
                               {payGrades?.map(pg => (
                                 <CommandItem
@@ -267,7 +282,7 @@ export const CreateMemberFormDialog = () => {
               />
               <Field className='col-span-1'>
                 <FieldLabel htmlFor='form-create-member-base-rate'>
-                  Base Rate
+                  {t('baseRate', 'Base Rate')}
                 </FieldLabel>
                 <Button
                   id='form-create-member-base-rate'
@@ -292,7 +307,7 @@ export const CreateMemberFormDialog = () => {
                     className='col-span-1'
                   >
                     <FieldLabel htmlFor='form-create-member-rate-multiplier'>
-                      Multiplier
+                      {t('multiplier', 'Multiplier')}
                     </FieldLabel>
                     <Input
                       {...field}
@@ -301,7 +316,7 @@ export const CreateMemberFormDialog = () => {
                       step='0.01'
                       min='0'
                       aria-invalid={fieldState.invalid}
-                      placeholder='Rate Multiplier'
+                      placeholder={t('rateMultiplier', 'Rate Multiplier')}
                       autoComplete='off'
                       onChange={e =>
                         field.onChange(
@@ -336,7 +351,7 @@ export const CreateMemberFormDialog = () => {
                     htmlFor='form-create-member-is-admin'
                     className='font-normal'
                   >
-                    Set as team admin
+                    {t('setAsTeamAdmin', 'Set as team admin')}
                   </FieldLabel>
                 </Field>
               )}
@@ -349,17 +364,20 @@ export const CreateMemberFormDialog = () => {
               render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor='form-create-member-username'>
-                    Linked Account
+                    {t('linkedAccount', 'Linked Account')}
                   </FieldLabel>
                   <Input
                     {...field}
                     value={field.value ?? ''}
                     id='form-create-member-username'
                     aria-invalid={fieldState.invalid}
-                    placeholder='Username (optional)'
+                    placeholder={t('usernameOptional', 'Username (optional)')}
                   />
                   <FieldDescription>
-                    Link this member to an existing user account.
+                    {t(
+                      'linkThisMemberToAnExistingUserAccount',
+                      'Link this member to an existing user account.',
+                    )}
                   </FieldDescription>
                 </Field>
               )}
@@ -376,7 +394,9 @@ export const CreateMemberFormDialog = () => {
               ) : (
                 <DialogClose asChild>{cancelButton}</DialogClose>
               )}
-              <LoadingButton loading={isPending}>Create</LoadingButton>
+              <LoadingButton loading={isPending}>
+                {t('create', 'Create')}
+              </LoadingButton>
             </Field>
           </FieldGroup>
         </FieldSet>
