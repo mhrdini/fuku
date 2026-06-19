@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback } from 'react'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   DropdownMenu,
@@ -14,6 +15,7 @@ import { Check, ChevronDown } from 'lucide-react'
 import { useScheduleStore } from '~/store/schedule.store'
 
 export const ScheduleFooter = () => {
+  const { t } = useTranslation()
   const { setSchedulerAssignments, setSchedulerUnavailabilities } =
     useScheduleStore()
 
@@ -35,25 +37,25 @@ export const ScheduleFooter = () => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant='outline'>
-            Clear
+            {t('clear', 'Clear')}
             <ChevronDown className='text-muted-foreground' />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
           <DropdownMenuItem onClick={handleClearShifts}>
-            Clear shifts
+            {t('clearShifts', 'Clear shifts')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleClearUnavailabilities}>
-            Clear unavailabilities
+            {t('clearUnavailabilities', 'Clear unavailabilities')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleClearAll} variant='destructive'>
-            Clear all
+            {t('clearAll', 'Clear all')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <Button disabled>
-        Save
+        {t('save', 'Save')}
         <Check />
       </Button>
     </div>

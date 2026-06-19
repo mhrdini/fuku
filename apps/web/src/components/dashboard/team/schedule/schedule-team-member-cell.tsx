@@ -1,3 +1,4 @@
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Badge,
   Collapsible,
@@ -17,6 +18,7 @@ export const ScheduleTeamMemberCell = ({
 }: {
   teamMember: TeamMemberData
 }) => {
+  const { t } = useTranslation()
   return (
     <Collapsible className='group/panel not-last:border-b border-input'>
       <CollapsibleTrigger className='w-full flex items-center min-h-16 px-2'>
@@ -32,7 +34,14 @@ export const ScheduleTeamMemberCell = ({
               </span>
             </ItemTitle>
             <ItemDescription className='group-data-[state=open]/panel:hidden'>
-              {teamMember.totalAssignedShifts} shifts, {teamMember.totalHours}{' '}
+              {t(
+                'totalassignedshiftsShiftsTotalhours',
+                '{{totalAssignedShifts}} shifts, {{totalHours}}',
+                {
+                  totalAssignedShifts: teamMember.totalAssignedShifts,
+                  totalHours: teamMember.totalHours,
+                },
+              )}{' '}
               hours
             </ItemDescription>
           </ItemContent>
@@ -40,11 +49,15 @@ export const ScheduleTeamMemberCell = ({
       </CollapsibleTrigger>
       <CollapsibleContent className='p-1.5 px-2'>
         <div className='*:text-sm grid grid-cols-[auto_1fr] gap-2 **:justify-self-start *:self-center *:odd:self-start'>
-          <Badge variant='outline'>Pay Grade</Badge>
+          <Badge variant='outline'>{t('payGrade', 'Pay Grade')}</Badge>
           <div>{teamMember.payGrade?.name}</div>
-          <Badge variant='outline'>Shift Hours</Badge>
+          <Badge variant='outline'>{t('shiftHours', 'Shift Hours')}</Badge>
           <div className='grid grid-flow-row'>
-            <div>{teamMember.totalHours} hours</div>
+            <div>
+              {t('totalhoursHours', '{{totalHours}} hours', {
+                totalHours: teamMember.totalHours,
+              })}
+            </div>
             <div>
               {teamMember.totalHours *
                 (teamMember.payGrade ? teamMember.payGrade.baseRate : 0)}

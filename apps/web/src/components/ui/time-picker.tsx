@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   Command,
@@ -23,6 +24,7 @@ interface TimePickerProps {
 }
 
 export function TimePicker({ id, value, onChange }: TimePickerProps) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [hours, minutes] = value.split(':')
 
@@ -52,7 +54,7 @@ export function TimePicker({ id, value, onChange }: TimePickerProps) {
           variant='outline'
           className='py-0 px-2 border-none shadow-none bg-transparent h-auto justify-between'
         >
-          {hours}:{minutes}
+          {t('hoursminutes', '{{hours}}:{{minutes}}', { hours, minutes })}
         </Button>
       </PopoverTrigger>
 

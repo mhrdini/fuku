@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { TeamOutput } from '@fuku/api/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   ButtonGroup,
@@ -70,6 +71,8 @@ export const ScheduleHeader = ({
   },
   derivedData: { computeSchedulerMetrics },
 }: ScheduleHeaderProps) => {
+  const { t } = useTranslation()
+
   const locale = enGB
 
   const {
@@ -98,7 +101,10 @@ export const ScheduleHeader = ({
 
     const startStr = DateTime.fromJSDate(start).toFormat('yyyy-MM-dd')
     const endStr = DateTime.fromJSDate(end).toFormat('yyyy-MM-dd')
-    const fileName = `${startStr}__${endStr}.csv`
+    const fileName = t('startstr__endstrcsv', '{{startStr}}__{{endStr}}.csv', {
+      startStr,
+      endStr,
+    })
 
     const blob = new Blob([csv], {
       type: 'text/csv;charset=utf-8;',
@@ -128,7 +134,10 @@ export const ScheduleHeader = ({
 
     const startStr = DateTime.fromJSDate(start).toFormat('yyyy-MM-dd')
     const endStr = DateTime.fromJSDate(end).toFormat('yyyy-MM-dd')
-    const fileName = `${startStr}__${endStr}.pdf`
+    const fileName = t('startstr__endstrpdf', '{{startStr}}__{{endStr}}.pdf', {
+      startStr,
+      endStr,
+    })
 
     pdf.save(fileName)
   }
@@ -178,7 +187,7 @@ export const ScheduleHeader = ({
       <Select value={view} onValueChange={handleViewChange}>
         <SelectTrigger variant='secondary'>
           <span className='flex gap-1'>
-            View by
+            {t('viewBy', 'View by')}
             <span className='capitalize'>
               <SelectValue />
             </span>
@@ -186,7 +195,7 @@ export const ScheduleHeader = ({
         </SelectTrigger>
         <SelectContent align='start' position='popper'>
           <SelectGroup>
-            <SelectLabel>View by</SelectLabel>
+            <SelectLabel>{t('viewBy', 'View by')}</SelectLabel>
             {ViewOptionValues.map(option => (
               <SelectItem
                 id={option}
@@ -207,7 +216,7 @@ export const ScheduleHeader = ({
       >
         {isGenerating ? <Spinner /> : <RefreshCcw />}
         <span className={cn('hidden md:flex', isGenerating && 'md:hidden')}>
-          Auto-Schedule
+          {t('autoschedule', 'Auto-Schedule')}
         </span>
         <span className={cn('hidden', isGenerating && 'md:flex')}>
           Generating...
@@ -225,13 +234,17 @@ export const ScheduleHeader = ({
             className='block whitespace-nowrap cursor-pointer'
             onClick={downloadCSV}
           >
-            Download as <span className='font-bold'>CSV</span>
+            <Trans i18nKey='downloadAsSpanClassnamefontboldcsvspan'>
+              Download as <span className='font-bold'>CSV</span>
+            </Trans>
           </DropdownMenuItem>
           <DropdownMenuItem
             className='block whitespace-nowrap cursor-pointer'
             onClick={downloadPDF}
           >
-            Download as <span className='font-bold'>PDF</span>
+            <Trans i18nKey='downloadAsSpanClassnamefontboldpdfspan'>
+              Download as <span className='font-bold'>PDF</span>
+            </Trans>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

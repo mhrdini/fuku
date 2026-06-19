@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Collapsible,
   CollapsibleContent,
@@ -43,6 +44,7 @@ import { useTeamStore } from '~/store/team.store'
 import { useTRPC } from '~/trpc/client'
 
 export const DashboardSidebar = ({ username }: { username: string }) => {
+  const { t } = useTranslation()
   const { openTeamSelect, setOpenTeamSelect, activeTeamId, setActiveTeamId } =
     useTeamStore()
 
@@ -110,7 +112,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
                 </div>
                 <div className='grid flex-1 text-left text-sm leading-tight'>
                   <span className='truncate font-medium'>
-                    Create your first team
+                    {t('createYourFirstTeam', 'Create your first team')}
                   </span>
                 </div>
               </>
@@ -157,7 +159,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
             {sidebarState.teams.length > 1 && <DropdownMenuSeparator />}
 
             <DropdownMenuItem onClick={onNewTeam}>
-              <Plus /> Create a new team
+              <Plus /> {t('createANewTeam', 'Create a new team')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         )}

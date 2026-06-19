@@ -10,6 +10,7 @@ import {
   ShiftTypeOutput,
   TeamMemberOutput,
 } from '@fuku/api/schemas'
+import i18next from '@fuku/i18n/client'
 
 import { MutationMode } from '~/lib/query'
 
@@ -55,7 +56,10 @@ export const useRuleEditor = ({
     () => ({
       TEAM_MEMBER: teamMembers.map(m => ({
         value: m.id,
-        label: `${m.givenNames}${m.familyName ? ` ${m.familyName}` : ''}`,
+        label: i18next.t('givennamesval', '{{givenNames}}{{val}}', {
+          givenNames: m.givenNames,
+          val: m.familyName ? ` ${m.familyName}` : '',
+        }),
       })),
 
       PAY_GRADE: payGrades.map(p => ({
@@ -140,6 +144,7 @@ export const useRuleEditor = ({
   const updateRuleCondition = async (
     condition: RuleConditionUpdateInput,
   ): Promise<RuleConditionOutput> => {
+    // TODO: Fix IS_HOLIDAY error: Types of property 'field' are incompatible.
     setRuleConditions(prev => ({
       ...prev,
       [condition.ruleId]: prev[condition.ruleId].map(c =>

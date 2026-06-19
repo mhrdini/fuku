@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   Dialog,
@@ -17,6 +18,7 @@ import { Users } from 'lucide-react'
 import { useTRPC } from '~/trpc/client'
 
 export default function TeamDashboard() {
+  const { t } = useTranslation()
   const trpc = useTRPC()
 
   const { data: teams } = useQuery(trpc.team.getUserTeams.queryOptions())
@@ -34,16 +36,18 @@ export default function TeamDashboard() {
         <EmptyMedia variant='icon'>
           <Users />
         </EmptyMedia>
-        <EmptyTitle>No Teams Yet</EmptyTitle>
+        <EmptyTitle>{t('noTeamsYet', 'No Teams Yet')}</EmptyTitle>
         <EmptyDescription>
-          You haven&apos;t created any teams yet. Get started by creating your
-          first team.
+          {t(
+            'youHavenapostCreatedAnyTeamsYetGetStartedByCreatingYourFirstTeam',
+            'You haven&apos;t created any teams yet. Get started by creating your\n          first team.',
+          )}
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <div className='flex gap-2'>
           <DialogTrigger asChild>
-            <Button>Create Team</Button>
+            <Button>{t('createTeam', 'Create Team')}</Button>
           </DialogTrigger>
         </div>
       </EmptyContent>

@@ -8,6 +8,8 @@ import {
   RegisterSchema,
   RegisterSchemaType,
 } from '@fuku/api/schemas'
+import i18next from '@fuku/i18n/client'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   Card,
@@ -35,7 +37,7 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
 type UserAuthSchemaType = LoginSchemaType | RegisterSchemaType
 
 const testUser = {
-  name: 'Test User',
+  name: i18next.t('testUser', 'Test User'),
   username: 'testuser',
   email: 'testuser@example.com',
   password: 'testuser',
@@ -46,6 +48,7 @@ export function UserAuthForm({
   register,
   ...props
 }: UserAuthFormProps) {
+  const { t } = useTranslation()
   const [isRegister] = useState<boolean>(register || false)
   const router = useRouter()
   const form = useForm<UserAuthSchemaType>({
@@ -93,7 +96,9 @@ export function UserAuthForm({
     <div className={className} {...props}>
       <Card className='border-none w-full sm:max-w-md'>
         <CardHeader>
-          <CardTitle>{isRegister ? 'Create Account' : 'Login'}</CardTitle>
+          <CardTitle>
+            {isRegister ? t('createAccount', 'Create Account') : 'Login'}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form id='form-user-auth' onSubmit={form.handleSubmit(onSubmit)}>
@@ -128,7 +133,7 @@ export function UserAuthForm({
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor='form-user-auth-username'>
-                        Username
+                        {t('username', 'Username')}
                       </FieldLabel>
                       <Input
                         {...field}
@@ -150,7 +155,7 @@ export function UserAuthForm({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor='form-user-auth-email'>
-                          Email
+                          {t('email', 'Email')}
                         </FieldLabel>
                         <Input
                           {...field}
@@ -173,7 +178,7 @@ export function UserAuthForm({
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor='form-user-auth-password'>
-                        Password
+                        {t('password', 'Password')}
                       </FieldLabel>
                       <Input
                         {...field}
@@ -202,7 +207,7 @@ export function UserAuthForm({
               disabled={form.formState.isSubmitting}
               loading={form.formState.isSubmitting}
             >
-              {isRegister ? 'Sign up' : 'Log in'}
+              {isRegister ? t('signUp', 'Sign up') : t('logIn', 'Log in')}
             </LoadingButton>
             {isRegister && (
               <Button
@@ -211,7 +216,7 @@ export function UserAuthForm({
                 variant='link'
                 className='underline'
               >
-                Already have an account?
+                {t('alreadyHaveAnAccount', 'Already have an account?')}
               </Button>
             )}
             {!isRegister && (
@@ -221,7 +226,7 @@ export function UserAuthForm({
                 variant='secondary'
                 className='underline'
               >
-                Create an account
+                {t('createAnAccount', 'Create an account')}
               </Button>
             )}
           </Field>

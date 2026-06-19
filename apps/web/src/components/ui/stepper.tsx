@@ -1,6 +1,7 @@
 'use client'
 
 import { Fragment, useCallback } from 'react'
+import { useTranslation } from '@fuku/i18n/react'
 import { Button, Label, Separator } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -22,6 +23,7 @@ export default function Stepper({
   currentIndex,
   setCurrentIndex,
 }: StepperProps) {
+  const { t } = useTranslation()
   const setStep = useCallback(
     (index: number) => {
       setCurrentIndex(index)
@@ -53,7 +55,8 @@ export default function Stepper({
                 )}
               >
                 <Label className='flex md:hidden'>
-                  Step {index + 1} of {steps.length}
+                  {t('step', 'Step')} {index + 1}
+                  {t('ofLength', 'of {{length}}', { length: steps.length })}
                 </Label>
                 <Button
                   size='icon-sm'

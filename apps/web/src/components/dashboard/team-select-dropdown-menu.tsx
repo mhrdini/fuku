@@ -1,4 +1,5 @@
 import { useParams, useRouter } from 'next/navigation'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   DropdownMenu,
@@ -15,6 +16,7 @@ import { useTeamStore } from '~/store/team.store'
 import { useTRPC } from '~/trpc/client'
 
 export const TeamSelectDropdownMenu = () => {
+  const { t } = useTranslation()
   const params = useParams()
   const username = params.username as string
 
@@ -68,7 +70,7 @@ export const TeamSelectDropdownMenu = () => {
               </div>
               <div className='grid flex-1 text-left text-sm leading-tight'>
                 <span className='truncate font-medium'>
-                  Create your first team
+                  {t('createYourFirstTeam', 'Create your first team')}
                 </span>
               </div>
             </>
@@ -86,8 +88,8 @@ export const TeamSelectDropdownMenu = () => {
                   {sidebarState?.activeTeam?.teamMembers.length}
                   {' ' +
                     (sidebarState?.activeTeam?.teamMembers.length === 1
-                      ? 'member'
-                      : 'members')}
+                      ? t('memberCount', 'member')
+                      : t('membersCount', 'members'))}
                 </span>
               </div>
               <ChevronsUpDown className='ml-auto' />
@@ -116,7 +118,7 @@ export const TeamSelectDropdownMenu = () => {
         )}
 
         <DropdownMenuItem onClick={onNewTeam}>
-          <Plus /> Create a new team
+          <Plus /> {t('createANewTeam', 'Create a new team')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
