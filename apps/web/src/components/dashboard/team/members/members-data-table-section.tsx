@@ -57,6 +57,7 @@ import { useTRPC } from '~/trpc/client'
 import './create-member-form-dialog'
 
 import { useParams } from 'next/navigation'
+import { useTranslation } from '@fuku/i18n/react'
 
 import { DialogId } from '~/lib/dialog'
 
@@ -77,6 +78,7 @@ export function MembersDataTableSection({
   columns,
   defaultHiddenColumns,
 }: MembersDataTableProps<TeamMemberUI, any>) {
+  const { t } = useTranslation()
   const { openDialog } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
   const onCreateMember = () => {
@@ -147,7 +149,7 @@ export function MembersDataTableSection({
             className='justify-between border-dashed py-0'
           >
             <PlusCircle />
-            Pay Grade
+            {t('payGrade', 'Pay Grade')}
             {(table.getColumn('payGradeName')?.getFilterValue() as string[])
               ?.length > 0 && (
               <>
@@ -165,9 +167,14 @@ export function MembersDataTableSection({
         </PopoverTrigger>
         <PopoverContent align='start' className='p-0'>
           <Command>
-            <CommandInput placeholder='Pay Grade' className='h-9' />
+            <CommandInput
+              placeholder={t('payGrade', 'Pay Grade')}
+              className='h-9'
+            />
             <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandEmpty>
+                {t('noResultsFound', 'No results found.')}
+              </CommandEmpty>
               <CommandGroup>
                 {payGrades?.map(pg => (
                   <CommandItem
@@ -204,7 +211,7 @@ export function MembersDataTableSection({
                     table.getColumn('payGradeName')?.setFilterValue(undefined)
                   }}
                 >
-                  Clear filters
+                  {t('clearFilters', 'Clear filters')}
                 </Button>
               </CommandGroup>
             </CommandList>
@@ -219,7 +226,7 @@ export function MembersDataTableSection({
         <DropdownMenuTrigger asChild>
           <Button variant='outline'>
             <Settings2 />
-            <span className='hidden md:inline-flex'>View</span>
+            <span className='hidden md:inline-flex'>{t('view', 'View')}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
@@ -292,7 +299,7 @@ export function MembersDataTableSection({
                   colSpan={columns.length}
                   className='h-24 text-center'
                 >
-                  No results.
+                  {t('noResults', 'No results.')}
                 </TableCell>
               </TableRow>
             )}
@@ -306,13 +313,15 @@ export function MembersDataTableSection({
           onClick={onCreateMember}
         >
           <Plus />
-          <span className='hidden sm:inline'>New team member</span>
+          <span className='hidden sm:inline'>
+            {t('newTeamMember', 'New team member')}
+          </span>
         </Button>
         <Button
           className='ml-auto'
           variant='outline'
           size='sm'
-          aria-description='Go to previous page'
+          aria-description={t('goToPreviousPage', 'Go to previous page')}
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
@@ -321,7 +330,7 @@ export function MembersDataTableSection({
         <Button
           variant='outline'
           size='sm'
-          aria-description='Go to next page'
+          aria-description={t('goToNextPage', 'Go to next page')}
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >

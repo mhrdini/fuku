@@ -1,6 +1,7 @@
 'use client'
 
 import { LogOutButton } from '~/components/auth/log-out-button'
+import { LanguageSelect } from '../language-select'
 import { ThemeToggle } from '../theme-toggle'
 import { Breadcrumbs } from './breadcrumbs'
 import { DashboardNavigationMenu } from './dashboard-navigation-menu'
@@ -18,6 +19,7 @@ export const DashboardHeader = () => {
         </div>
         <div className='gap-1.5'>
           <ThemeToggle />
+          <LanguageSelect />
           <LogOutButton />
         </div>
       </div>

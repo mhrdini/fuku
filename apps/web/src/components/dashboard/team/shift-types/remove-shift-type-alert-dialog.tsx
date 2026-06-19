@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -17,6 +18,7 @@ import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 
 export const RemoveShiftTypeAlertDialog = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const trpc = useTRPC()
   const params = useParams()
@@ -37,7 +39,11 @@ export const RemoveShiftTypeAlertDialog = () => {
     ...trpc.shiftType.delete.mutationOptions(),
     onError: error => {
       toast.error('Error', {
-        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+        // TODO: Internationalize server errors according to message type
+        description: t('valMessage', '{{val}}: {{message}}', {
+          val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
+          message: error.message,
+        }),
       })
     },
     onSuccess: data => {
@@ -51,9 +57,11 @@ export const RemoveShiftTypeAlertDialog = () => {
         trpc.shiftType.list.queryOptions({ teamId: team?.id ?? '' }),
       )
       const toastId = toast('Shift Type', {
-        description: `${data.name} has been removed.`,
+        description: t('nameHasBeenRemoved', '{{name}} has been removed.', {
+          name: data.name,
+        }),
         action: {
-          label: 'Undo',
+          label: t('undo', 'Undo'),
           onClick: async () => {
             await restoreShiftType({ id: data.id })
             toast.dismiss(toastId)
@@ -66,7 +74,9 @@ export const RemoveShiftTypeAlertDialog = () => {
   const { mutateAsync: restoreShiftType } = useMutation({
     ...trpc.shiftType.restore.mutationOptions(),
     onError: error => {
-      toast.error('Error', { description: `${error.message}` })
+      toast.error('Error', {
+        description: t('message', '{{message}}', { message: error.message }),
+      })
     },
     onSuccess: data => {
       queryClient.setQueryData(
@@ -77,7 +87,9 @@ export const RemoveShiftTypeAlertDialog = () => {
         trpc.shiftType.listIds.queryOptions({ teamId: team?.id ?? '' }),
       )
       toast.success('Shift Type', {
-        description: `${data.name} has been restored.`,
+        description: t('nameHasBeenRestored', '{{name}} has been restored.', {
+          name: data.name,
+        }),
       })
     },
   })
@@ -93,7 +105,9 @@ export const RemoveShiftTypeAlertDialog = () => {
 
   return (
     <>
-      <AlertDialogTitle>Remove Shift Type</AlertDialogTitle>
+      <AlertDialogTitle>
+        {t('removeShiftType', 'Remove Shift Type')}
+      </AlertDialogTitle>
       {isLoadingShiftType ? (
         <AlertDialogDescription asChild>
           <Skeleton className='inline-block h-4 w-10' />
@@ -101,15 +115,24 @@ export const RemoveShiftTypeAlertDialog = () => {
       ) : (
         <AlertDialogDescription asChild>
           <div>
-            <div>Are you sure you want to remove {shiftType?.name}?</div>
+            <div>
+              {t(
+                'areYouSureYouWantToRemove',
+                'Are you sure you want to remove',
+              )}{' '}
+              {shiftType?.name}?
+            </div>
             <div className='font-semibold'>
-              You can restore it after deletion.
+              {t(
+                'youCanRestoreItAfterDeletion',
+                'You can restore it after deletion.',
+              )}
             </div>
           </div>
         </AlertDialogDescription>
       )}
       <AlertDialogFooter>
-        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogCancel>{t('cancel', 'Cancel')}</AlertDialogCancel>
         <AlertDialogAction asChild>
           <LoadingButton
             variant='destructive'
@@ -118,7 +141,7 @@ export const RemoveShiftTypeAlertDialog = () => {
             disabled={isLoadingShiftType || isPending}
             className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
           >
-            Remove
+            {t('remove', 'Remove')}
           </LoadingButton>
         </AlertDialogAction>
       </AlertDialogFooter>

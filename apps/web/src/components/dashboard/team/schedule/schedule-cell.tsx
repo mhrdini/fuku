@@ -3,6 +3,7 @@ import { CollisionPriority } from '@dnd-kit/abstract'
 import { useDroppable } from '@dnd-kit/react'
 import { ShiftTypeOutput, UnavailabilityOutput } from '@fuku/api/schemas'
 import { SchedulerAssignment } from '@fuku/domain/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import { Button, buttonVariants, Toggle } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { Ban, Plus } from 'lucide-react'
@@ -31,6 +32,7 @@ export const ScheduleCell = ({
   data: { cellData, shiftTypeMap, previewAssignment },
   className,
 }: ScheduleCellProps) => {
+  const { t } = useTranslation()
   const { isDropTarget, ref } = useDroppable({
     id: cellKey,
     type: 'cell',
@@ -136,7 +138,7 @@ export const ScheduleCell = ({
             <div className='text-xs text-muted-foreground'>
               {previewAssignmentShiftType.startTime ?? ''}
               {previewAssignmentShiftType.endTime
-                ? ' - ' + previewAssignmentShiftType.endTime
+                ? t('key', ' - ') + previewAssignmentShiftType.endTime
                 : ''}
             </div>
           </div>

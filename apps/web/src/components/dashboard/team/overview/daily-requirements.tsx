@@ -6,6 +6,7 @@ import {
   StaffingRequirementsOutputSchema,
 } from '@fuku/api/schemas'
 import { WeekdayKey } from '@fuku/domain/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   Checkbox,
@@ -49,6 +50,7 @@ const DailyRequirementsFormSchema = z.object({
 type DailyRequirementsFormType = z.infer<typeof DailyRequirementsFormSchema>
 
 export function DailyRequirementsSection({ teamId }: { teamId: string }) {
+  const { t } = useTranslation()
   const trpc = useTRPC()
 
   const { data: operationalHours, isSuccess: hoursFetched } = useQuery({
@@ -61,7 +63,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
     onSuccess: () => {
       form.reset(form.getValues())
       toast.success('Operational Hours', {
-        description: 'Changes saved!',
+        description: t('changesSaved', 'Changes saved!'),
       })
     },
     onError: error => {
@@ -81,7 +83,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
     onSuccess: () => {
       form.reset(form.getValues())
       toast.success('Staffing Requirements', {
-        description: 'Changes saved!',
+        description: t('changesSaved', 'Changes saved!'),
       })
     },
     onError: error => {
@@ -264,7 +266,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
   return (
     <div className='flex flex-col gap-4 @[50rem]:w-fit'>
       <div className='container grid grid-cols-2 gap-3'>
-        <h2>Daily Requirements</h2>
+        <h2>{t('dailyRequirements', 'Daily Requirements')}</h2>
       </div>
       <form
         onSubmit={form.handleSubmit(onSubmit, onError)}
@@ -302,7 +304,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                           />
                           <FieldContent>
                             <FieldLabel htmlFor={`closed-${day}`}>
-                              Closed
+                              {t('closed', 'Closed')}
                             </FieldLabel>
                           </FieldContent>
                         </Field>
@@ -319,7 +321,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                           className='col-span-2 @[50rem]:col-start-2 @[50rem]:row-start-1 @[50rem]:col-span-1 @[50rem]:row-span-2 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'
                         >
                           <FieldLabel htmlFor={`start-time-${day}`}>
-                            Start Time
+                            {t('startTime', 'Start Time')}
                           </FieldLabel>
                           <Select
                             {...field}
@@ -357,7 +359,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                           className='col-span-2 @[50rem]:col-span-1 @[50rem]:col-start-3 @[50rem]:row-start-1 @[50rem]:row-span-2 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'
                         >
                           <FieldLabel htmlFor={`end-time-${day}`}>
-                            End Time
+                            {t('endTime', 'End Time')}
                           </FieldLabel>
                           <Select
                             {...field}
@@ -391,7 +393,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                       name={`staffingRequirements.${day}.minMembers`}
                       render={({ field }) => (
                         <Field className='col-span-2 @[50rem]:col-span-1 @[50rem]:col-start-2 @[50rem]:row-start-3@ @[50rem]:row-span-2 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'>
-                          <FieldLabel>Min Staff</FieldLabel>
+                          <FieldLabel>{t('minStaff', 'Min Staff')}</FieldLabel>
                           <NumberStepperInput
                             value={field.value ?? NON_NEGATIVE_MIN}
                             onValueChange={minValue => {
@@ -428,7 +430,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                       name={`staffingRequirements.${day}.maxMembers`}
                       render={({ field }) => (
                         <Field className='col-span-2 @[50rem]:col-span-1 @[50rem]:col-start-3 @[50rem]:row-start-3 @[50rem]:row-span-2 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'>
-                          <FieldLabel>Max Staff</FieldLabel>
+                          <FieldLabel>{t('maxStaff', 'Max Staff')}</FieldLabel>
                           <NumberStepperInput
                             value={
                               field.value ??
@@ -475,7 +477,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
         {/* Save/Cancel buttons  */}
         <Field orientation='horizontal' className='gap-4 last:mt-2 col-span-2'>
           <Button type='submit' disabled={!hoursFetched}>
-            Save Changes
+            {t('saveChanges2', 'Save Changes')}
           </Button>
 
           <Button
@@ -484,7 +486,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
             onClick={resetForm}
             variant='outline'
           >
-            Reset
+            {t('reset', 'Reset')}
           </Button>
 
           <FieldError>{form.formState.errors.root?.message}</FieldError>

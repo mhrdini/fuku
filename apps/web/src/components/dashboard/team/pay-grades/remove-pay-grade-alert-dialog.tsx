@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -17,6 +18,7 @@ import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 
 export const RemovePayGradeAlertDialog = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const trpc = useTRPC()
   const params = useParams()
@@ -37,7 +39,10 @@ export const RemovePayGradeAlertDialog = () => {
     ...trpc.payGrade.delete.mutationOptions(),
     onError: error => {
       toast.error('Error', {
-        description: `${error.data?.httpStatus && ` (${error.data.httpStatus})`}: ${error.message}`,
+        description: t('valMessage', '{{val}}: {{message}}', {
+          val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
+          message: error.message,
+        }),
       })
     },
     onSuccess: data => {
@@ -50,7 +55,11 @@ export const RemovePayGradeAlertDialog = () => {
       queryClient.invalidateQueries(
         trpc.payGrade.list.queryOptions({ teamId: team?.id ?? '' }),
       )
-      toast('Pay Grade', { description: `${data.name} has been removed.` })
+      toast('Pay Grade', {
+        description: t('nameHasBeenRemoved', '{{name}} has been removed.', {
+          name: data.name,
+        }),
+      })
     },
   })
 
@@ -65,7 +74,9 @@ export const RemovePayGradeAlertDialog = () => {
 
   return (
     <>
-      <AlertDialogTitle>Remove Pay Grade</AlertDialogTitle>
+      <AlertDialogTitle>
+        {t('removePayGrade', 'Remove Pay Grade')}
+      </AlertDialogTitle>
       {isLoadingPayGrade ? (
         <AlertDialogDescription asChild>
           <Skeleton className='inline-block h-4 w-10' />
@@ -73,13 +84,21 @@ export const RemovePayGradeAlertDialog = () => {
       ) : (
         <AlertDialogDescription asChild>
           <div>
-            <div>Are you sure you want to remove {payGrade?.name}?</div>
-            <div className='font-semibold'>This action cannot be undone.</div>
+            <div>
+              {t(
+                'areYouSureYouWantToRemove',
+                'Are you sure you want to remove',
+              )}{' '}
+              {payGrade?.name}?
+            </div>
+            <div className='font-semibold'>
+              {t('thisActionCannotBeUndone', 'This action cannot be undone.')}
+            </div>
           </div>
         </AlertDialogDescription>
       )}
       <AlertDialogFooter>
-        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogCancel>{t('cancel', 'Cancel')}</AlertDialogCancel>
         <AlertDialogAction asChild>
           <LoadingButton
             variant='destructive'
@@ -88,7 +107,7 @@ export const RemovePayGradeAlertDialog = () => {
             disabled={isLoadingPayGrade || isPending}
             className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
           >
-            Remove
+            {t('remove', 'Remove')}
           </LoadingButton>
         </AlertDialogAction>
       </AlertDialogFooter>

@@ -4,6 +4,7 @@ import {
   TimeZone,
   WeekdayKey,
 } from '@fuku/domain/schemas'
+import i18next from '@fuku/i18n/server'
 import { DateTime, WeekdayNumbers } from 'luxon'
 
 export const WEEKDAY_MAP: Record<WeekdayKey, string> = Array.from(
@@ -122,7 +123,7 @@ export function getGroupedTimeZones(): Record<string, TimeZoneOption[]> {
 
     const option: TimeZoneOption = {
       value: zone,
-      label: `${name} (${abbr})`,
+      label: i18next.t('nameAbbr', '{{name}} ({{abbr}})', { name, abbr }),
       offset,
       offsetMinutes,
       region,

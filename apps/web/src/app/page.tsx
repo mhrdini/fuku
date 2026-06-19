@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import i18next from '@fuku/i18n/server'
 
 import { getSession } from '~/auth/server'
 
@@ -11,7 +12,7 @@ const IndexPage = async () => {
 
   return (
     <div>
-      <h1>Hello World</h1>
+      <h1>{i18next.t('helloWorld', 'Hello World')}</h1>
     </div>
   )
 }

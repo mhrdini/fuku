@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Table,
   TableBody,
@@ -24,6 +25,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const { t } = useTranslation()
   const table = useReactTable({
     data,
     columns,
@@ -68,7 +70,7 @@ export function DataTable<TData, TValue>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className='h-24 text-center'>
-                No results.
+                {t('noResults', 'No results.')}
               </TableCell>
             </TableRow>
           )}

@@ -1,6 +1,7 @@
 'use client'
 
 import { JSX, memo, useState } from 'react'
+import { useTranslation } from '@fuku/i18n/react'
 import { Input } from '@fuku/ui/components'
 import { Getter } from '@tanstack/react-table'
 import { TRPCClientError } from '@trpc/client'
@@ -35,6 +36,7 @@ function EditableCellInner<
   onSave,
   children,
 }: EditableCellProps<DataType, ColumnKey, ReturnType>) {
+  const { t } = useTranslation()
   const [value, setValue] = useState<string>(
     row[columnName] == null ? '' : String(row[columnName]),
   )
@@ -62,11 +64,16 @@ function EditableCellInner<
         const zodError = error.data?.zodError
         const issue = zodError?.fieldErrors?.[columnName as string]?.[0]
         toast.error('Error', {
-          description: issue ?? 'Invalid value. Please try again.',
+          description:
+            issue ??
+            t('invalidValuePleaseTryAgain', 'Invalid value. Please try again.'),
         })
       } else {
         toast.error('Error', {
-          description: 'Something went wrong. Please try again.',
+          description: t(
+            'somethingWentWrongPleaseTryAgain',
+            'Something went wrong. Please try again.',
+          ),
         })
       }
     }

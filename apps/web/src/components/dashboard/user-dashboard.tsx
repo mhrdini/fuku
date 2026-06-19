@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslation } from '@fuku/i18n/react'
 import { Card, CardContent, CardHeader } from '@fuku/ui/components'
 
 interface UserDashboardProps {
@@ -18,10 +19,13 @@ interface UserDashboardProps {
 }
 
 export default function UserDashboard({ user }: UserDashboardProps) {
+  const { t } = useTranslation()
   return (
     <Card>
       <CardHeader>
-        <h2 className='text-lg font-medium'>Welcome back, {user.name}!</h2>
+        <h2 className='text-lg font-medium'>
+          {t('welcomeBackName', 'Welcome back, {{name}}!', { name: user.name })}
+        </h2>
       </CardHeader>
       <CardContent className='h-full'></CardContent>
     </Card>

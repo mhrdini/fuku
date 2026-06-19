@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Badge,
   Button,
@@ -38,12 +39,14 @@ function SummaryCard<T>({
   manageButtonText,
   onManage,
 }: SummaryCardProps<T>) {
+  const { t } = useTranslation()
   return (
     <Card className='min-w-[200px] pt-4 pb-0'>
       <CardHeader className='gap-0'>
         <CardTitle className='text-sm'>{title}</CardTitle>
         <CardDescription className='text-xs'>
-          {description ?? `${items?.length ?? 0} items`}
+          {description ??
+            t('valItems', '{{val}} items', { val: items?.length ?? 0 })}
         </CardDescription>
       </CardHeader>
       <Separator />
@@ -53,7 +56,7 @@ function SummaryCard<T>({
         ) : (
           <div
             className='text-sm text-muted-foreground'
-            aria-description='no items'
+            aria-description={t('noItems', 'no items')}
           >
             —
           </div>
@@ -74,6 +77,7 @@ function SummaryCard<T>({
 }
 
 export const SummarySection = () => {
+  const { t } = useTranslation()
   const session = useSession()
   const params = useParams()
   const slug = params.slug as string
@@ -178,7 +182,7 @@ export const SummarySection = () => {
 
   const teamMembersSummary = (
     <SummaryCard
-      title='Team Members'
+      title={t('teamMembers', 'Team Members')}
       items={members}
       renderItem={member => (
         <div key={member.id} className='flex items-center justify-between'>
@@ -207,7 +211,7 @@ export const SummarySection = () => {
 
   const locationSummary = (
     <SummaryCard
-      title='Active Locations'
+      title={t('activeLocations', 'Active Locations')}
       items={locations}
       renderItem={location => (
         <div key={location.id} className='flex items-center justify-between'>
@@ -227,7 +231,7 @@ export const SummarySection = () => {
 
   const shiftTypesSummary = (
     <SummaryCard
-      title='Shift Types'
+      title={t('shiftTypes', 'Shift Types')}
       items={shiftTypes}
       renderItem={st => (
         <div className='flex items-center justify-between' key={st.id}>
@@ -239,7 +243,10 @@ export const SummarySection = () => {
             <span>{st.name}</span>
           </Badge>
           <div className='text-sm text-muted-foreground'>
-            {st.startTime} - {st.endTime}
+            {t('starttimeEndtime', '{{startTime}} - {{endTime}}', {
+              startTime: st.startTime,
+              endTime: st.endTime,
+            })}
           </div>
         </div>
       )}
@@ -250,7 +257,7 @@ export const SummarySection = () => {
 
   const payGradeSummary = (
     <SummaryCard
-      title='Pay Grades'
+      title={t('payGrades', 'Pay Grades')}
       items={payGrades}
       renderItem={pg => (
         <div key={pg.id} className='flex items-center justify-between'>
@@ -268,10 +275,10 @@ export const SummarySection = () => {
   return (
     <div className='flex flex-col gap-4 w-full'>
       <div className='flex flex-row w-full'>
-        <h2>Summary</h2>
+        <h2>{t('summary', 'Summary')}</h2>
         <Button size='sm' className='ml-auto' onClick={handleGenerateSchedule}>
           <CalendarPlus />
-          Generate Schedule
+          {t('generateSchedule', 'Generate Schedule')}
         </Button>
       </div>
       <div className='grid grid-cols-1 @[24rem]/main:grid-cols-2 @[50rem]/main:grid-cols-4 gap-4'>
