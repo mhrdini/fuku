@@ -64,7 +64,7 @@ function SummaryCard<T>({
       </CardContent>
       <div className='p-0 mt-auto border-t'>
         <Button
-          className='w-full rounded-b-xl rounded-t-none'
+          className='w-full rounded-b-none rounded-t-none'
           onClick={onManage}
           variant='ghost'
         >
@@ -218,7 +218,7 @@ export const SummarySection = () => {
           <Badge variant='outline'>
             <span
               style={{ ['--bg-color' as any]: location.color }}
-              className='bg-[var(--bg-color)] rounded-full size-2'
+              className='bg-[var(--bg-color)] rounded-none size-2'
             />
             <span>{location.name}</span>
           </Badge>
@@ -238,7 +238,7 @@ export const SummarySection = () => {
           <Badge variant='outline'>
             <span
               style={{ ['--bg-color' as any]: st.color }}
-              className='bg-[var(--bg-color)] rounded-full size-2'
+              className='bg-[var(--bg-color)] rounded-none size-2'
             />
             <span>{st.name}</span>
           </Badge>

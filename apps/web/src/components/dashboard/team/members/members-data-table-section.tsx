@@ -183,9 +183,8 @@ export function MembersDataTableSection({
                     onSelect={value =>
                       toggleFilter(table.getColumn('payGradeName')!, value)
                     }
-                    asChild
                   >
-                    <div>
+                    <div className='flex gap-2 items-center justify-center'>
                       <Checkbox
                         id={pg.id}
                         value={pg.name}

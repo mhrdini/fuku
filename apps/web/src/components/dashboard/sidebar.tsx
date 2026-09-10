@@ -85,7 +85,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
   const teamsHeader =
     sidebarState === undefined ? (
       <>
-        <div className='flex aspect-square size-8 items-center justify-center rounded-lg bg-muted'>
+        <div className='flex aspect-square size-8 items-center justify-center rounded-none bg-muted'>
           <Skeleton className='size-4 rounded' />
         </div>
         <div className='grid flex-1 gap-1'>
@@ -107,7 +107,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
             {!sidebarState.activeTeam ? (
               // no sidebarState.teams
               <>
-                <div className='flex aspect-square size-8 items-center justify-center rounded-lg'>
+                <div className='flex aspect-square size-8 items-center justify-center rounded-none'>
                   <Plus className='size-4' />
                 </div>
                 <div className='grid flex-1 text-left text-sm leading-tight'>
@@ -119,7 +119,7 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
             ) : (
               // has sidebarState.teams
               <>
-                <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
+                <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-none'>
                   <Users2 className='size-4' />
                 </div>
                 <div className='grid flex-1 text-left text-sm leading-tight'>

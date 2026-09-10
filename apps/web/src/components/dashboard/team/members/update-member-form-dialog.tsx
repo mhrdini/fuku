@@ -295,7 +295,7 @@ export const UpdateMemberFormDialog = () => {
                   id='form-update-member-base-rate'
                   variant='outline'
                   disabled
-                  className='text-justify items-start justify-start disabled:opacity-100'
+                  className='items-center justify-start disabled:opacity-100'
                 >
                   {payGrades && form.getValues('payGradeId') ? (
                     payGrades.find(pg => pg.id === form.getValues('payGradeId'))

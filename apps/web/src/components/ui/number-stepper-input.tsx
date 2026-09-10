@@ -1,8 +1,4 @@
-import {
-  Button,
-  ButtonGroup,
-  Input,
-} from '@fuku/ui/components'
+import { Button, ButtonGroup, Input } from '@fuku/ui/components'
 import { Minus, Plus } from 'lucide-react'
 
 interface NumberStepperInputProps {
@@ -33,7 +29,7 @@ export function NumberStepperInput({
         max={max}
         disabled={disabled}
         onChange={e => onValueChange(Number(e.target.value))}
-        className='grow'
+        className='grow py-0'
       />
       {/* Decrement */}
       <Button

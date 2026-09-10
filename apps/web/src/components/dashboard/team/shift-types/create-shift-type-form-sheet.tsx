@@ -26,7 +26,6 @@ import {
   FieldSet,
   Input,
   LoadingButton,
-  SheetClose,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -132,7 +131,7 @@ export const CreateShiftTypeFormSheet = () => {
         className='flex flex-col gap-4 h-full'
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <FieldSet className='grid gap-4 flex-1 auto-rows-min px-4'>
+        <FieldSet className='grid gap-4 auto-rows-min px-4'>
           <FieldGroup>
             <Controller
               name='name'
@@ -276,15 +275,15 @@ export const CreateShiftTypeFormSheet = () => {
             />
           </FieldGroup>
         </FieldSet>
-        <SheetFooter>
+        <SheetFooter className='mt-0'>
           <LoadingButton form='form-create-shift-type' loading={isPending}>
             {t('createShiftType', 'Create shift type')}
           </LoadingButton>
-          <SheetClose asChild>
+          {/* <SheetClose asChild>
             <Button variant='outline' disabled={isPending}>
               {t('close', 'Close')}
             </Button>
-          </SheetClose>
+          </SheetClose> */}
         </SheetFooter>
       </form>
     </>

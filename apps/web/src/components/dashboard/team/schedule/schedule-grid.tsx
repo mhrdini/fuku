@@ -89,7 +89,7 @@ export const ScheduleGrid = ({
       }}
     >
       <ScrollArea
-        className={cn('h-[600px] border rounded-md border-input', className)}
+        className={cn('h-[600px] border rounded-none border-input', className)}
       >
         <div
           className='grid min-w-max h-[600px] isolate'
