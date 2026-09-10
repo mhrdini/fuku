@@ -53,6 +53,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  ScrollArea,
   Select,
   SelectContent,
   SelectItem,
@@ -61,6 +62,9 @@ import {
   Switch,
   ToggleGroup,
   ToggleGroupItem,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import {
@@ -243,24 +247,25 @@ export const RulePanelPopoverButton = ({
         className='min-w-fit min-h-0 flex flex-col max-h-[40rem] p-0 border border-border shadow-2xl '
       >
         <Command>
-          <div className='p-2 flex gap-2 w-full'>
+          <div className='p-2 w-full flex'>
             <CommandInput
               className='w-full'
               placeholder={t('searchRules', 'Search rules...')}
             />
           </div>
           <CommandSeparator />
-          <div className='group/rules flex flex-col min-w-fit overflow-y-auto'>
+          <ScrollArea className='group/rules flex flex-col min-w-fit overflow-y-auto overflow-x-clip'>
             {rules && Object.keys(rules).length ? (
-              Object.entries(rules).map(([ruleId, rule]) => (
+              Object.entries(rules).map(([ruleId, rule], idx) => (
                 <div key={ruleId}>
                   <CommandItem
+                    noHighlightOnSelected
                     value={getRuleSearchValue(
                       rule,
                       ruleConditions ? ruleConditions[rule.id] || [] : [],
                       targetOptions,
                     )}
-                    asChild
+                    className='pr-4'
                   >
                     <RulePanelItem
                       rule={rule}
@@ -289,11 +294,11 @@ export const RulePanelPopoverButton = ({
                 </div>
               ))
             ) : (
-              <div className='text-sm text-muted-foreground p-4'>
+              <div className='text-muted-foreground p-4'>
                 {t('noRulesFound', 'No rules found.')}
               </div>
             )}
-          </div>
+          </ScrollArea>
           <CommandSeparator />
           <div className='p-2 w-full flex'>
             <Button
@@ -527,13 +532,13 @@ const RulePanelItem = ({
   }
 
   return (
-    <Collapsible id={`rule-${rule.id}`} className='group p-4'>
-      <div className='flex flex-col gap-2 items-start *:flex *:flex-row *:gap-2 *:items-center *:justify-start *:w-full'>
+    <Collapsible id={`rule-${rule.id}`} className='group/rule w-full'>
+      <div className='flex flex-col gap-2  items-start *:flex *:flex-row *:gap-2 *:items-center *:justify-start *:w-full'>
         {/* first row */}
         <div>
           {/* target type*/}
           <Select value={rule.target} onValueChange={handleUpdateTargetType}>
-            <SelectTrigger size='chip' variant='secondary'>
+            <SelectTrigger size='sm' variant='secondary'>
               <SelectValue placeholder='Scope' />
             </SelectTrigger>
             <SelectContent>
@@ -564,7 +569,7 @@ const RulePanelItem = ({
             }
             onValueChange={handleUpdateTargetId}
           >
-            <SelectTrigger size='chip' variant='secondary'>
+            <SelectTrigger size='sm' variant='secondary'>
               <SelectValue placeholder='Target' />
             </SelectTrigger>
             <SelectContent>
@@ -606,7 +611,7 @@ const RulePanelItem = ({
         <div>
           {/* metric */}
           <Select value={rule.metric} onValueChange={handleUpdateRuleMetric}>
-            <SelectTrigger size='chip' variant='secondary'>
+            <SelectTrigger size='sm' variant='secondary'>
               <SelectValue placeholder={t('rulemetric', 'RuleMetric')} />
             </SelectTrigger>
             <SelectContent>
@@ -620,7 +625,7 @@ const RulePanelItem = ({
 
           {/* operator */}
           <Select value={rule.operator} onValueChange={handleUpdateOperator}>
-            <SelectTrigger size='chip' variant='secondary'>
+            <SelectTrigger size='sm' variant='secondary'>
               <SelectValue placeholder='Operator' />
             </SelectTrigger>
             <SelectContent>
@@ -636,7 +641,7 @@ const RulePanelItem = ({
             className='w-[8ch]'
             type='number'
             placeholder='Value'
-            size='chip'
+            variant='chip'
             value={thresholdInput}
             onChange={e => setThresholdInput(e.target.value)}
             onBlur={commitThreshold}
@@ -647,13 +652,13 @@ const RulePanelItem = ({
             }}
           />
           {/* per */}
-          <span className='text-sm'>/</span>
+          <span>/</span>
           {/* time window */}
           <Select
             value={rule.timeWindow}
             onValueChange={handleUpdateRuleTimeWindow}
           >
-            <SelectTrigger size='chip' variant='secondary'>
+            <SelectTrigger size='sm' variant='secondary'>
               <SelectValue placeholder={t('timeWindow', 'Time Window')} />
             </SelectTrigger>
             <SelectContent>
@@ -670,7 +675,7 @@ const RulePanelItem = ({
           {/* hard constraint y/n */}
           <ToggleGroup
             type='single'
-            size='chip'
+            size='sm'
             variant='outline'
             value={String(rule.hardConstraint)}
             onValueChange={handleToggleHardConstraint}
@@ -690,8 +695,9 @@ const RulePanelItem = ({
           </ToggleGroup>
           {/* penalty */}
           <Input
+            name='rule-panel-popover-hard-constraint'
             className='w-[8ch]'
-            size='chip'
+            variant='chip'
             placeholder='Penalty'
             value={penaltyInput}
             onChange={e => setPenaltyInput(e.target.value)}
@@ -705,17 +711,36 @@ const RulePanelItem = ({
             disabled={rule.hardConstraint}
           />
           {/* actions */}
-          <Button size='icon-xs' variant='ghost' className='ml-auto'>
-            <Copy />
-          </Button>
-          <Button size='icon-xs' variant='error-secondary'>
-            <Trash />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size='icon-sm'
+                variant='ghost'
+                className='ml-auto'
+                onClick={handleDuplicateRule}
+              >
+                <Copy />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t('duplicate', 'Duplicate')}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size='icon-sm'
+                variant='error-ghost'
+                onClick={handleDeleteRule}
+              >
+                <Trash />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t('delete', 'Delete')}</TooltipContent>
+          </Tooltip>
         </div>
         <div>
           <CollapsibleTrigger asChild>
-            <Button variant='link' size='chip'>
-              <ChevronRight className=' transition-transform duration-300 ease-in-out group-data-[state=open]:rotate-90' />
+            <Button variant='link'>
+              <ChevronRight className=' transition-transform duration-300 ease-in-out group-data-[state=open]/rule:rotate-90' />
               {t('lengthConditions', '{{length}} conditions', {
                 length: ruleConditions.length,
               })}
@@ -723,7 +748,7 @@ const RulePanelItem = ({
           </CollapsibleTrigger>
         </div>
       </div>
-      <CollapsibleContent className='p-0 pt-2 flex flex-col w-full min-w-0 rounded-b-lg gap-2 pl-6'>
+      <CollapsibleContent className='p-0 pt-2 flex flex-col w-full min-w-0 rounded-b-none gap-2'>
         {ruleConditions.map(rc => {
           return (
             <RuleConditionPanelItem
@@ -735,9 +760,9 @@ const RulePanelItem = ({
           )
         })}
         <Button
+          variant='secondary'
           size='sm'
-          variant='ghost'
-          className='justify-start'
+          // className='group-data-[selected=true]/command-item:border-input'
           onClick={handleCreateCondition}
         >
           <Plus />
@@ -873,14 +898,14 @@ const RuleConditionPanelItem = ({
   )
 
   return (
-    <div className='group/condition flex w-full min-w-0 items-center gap-2'>
+    <div className='group/condition flex w-full min-w-0 items-center gap-1'>
       {/* field */}
       <Select
         disabled={isWeekdayCondition}
         value={ruleCondition.field}
         onValueChange={handleUpdateField}
       >
-        <SelectTrigger size='sm'>
+        <SelectTrigger size='sm' className='grow'>
           <SelectValue placeholder='Field' />
         </SelectTrigger>
 
@@ -924,7 +949,7 @@ const RuleConditionPanelItem = ({
       >
         <ComboboxTrigger
           render={
-            <Button size='chip' variant='outline' className='min-w-fit'>
+            <Button size='sm' variant='outline' className='min-w-fit grow'>
               <ComboboxValue placeholder='-' />
               <ChevronDownIcon className='ml-auto size-4 opacity-50' />
             </Button>
@@ -947,7 +972,7 @@ const RuleConditionPanelItem = ({
       </Combobox>
       <Button
         variant='ghost'
-        size='icon-xs'
+        size='icon-sm'
         onClick={() => deleteRuleCondition(ruleCondition.id)}
         className={cn(
           'opacity-20 group-hover/condition:opacity-100 transition-opacity duration-75 ease-in-out',

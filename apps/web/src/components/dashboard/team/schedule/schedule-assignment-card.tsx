@@ -73,7 +73,7 @@ export const ScheduleAssignmentCard = ({
     <div
       ref={ref}
       className={cn(
-        'relative group/assignment rounded-md py-1 px-2 border border-input bg-muted flex flex-col',
+        'relative group/assignment rounded-none py-1 px-2 border border-input bg-muted flex flex-col',
         'transition-all opacity-100',
         className,
       )}
@@ -84,17 +84,17 @@ export const ScheduleAssignmentCard = ({
         {shiftType?.endTime ? t('key', ' - ') + shiftType?.endTime : ''}
       </div>
       <DropdownMenu>
-        <div className='absolute top-2 right-2 opacity-0 group-hover/assignment:opacity-100 transition-opacity'>
-          <DropdownMenuTrigger asChild>
-            <Button
-              size='icon-chip'
-              className='flex items-center bg-ring/50 text-secondary-foreground/80 hover:text-secondary-foreground active:text-secondary-foreground hover:bg-ring/80 p-1'
-            >
-              <ChevronDown className='size-3' />
-            </Button>
-          </DropdownMenuTrigger>
-        </div>
-        <DropdownMenuContent className='max-w-min' align='center' side='bottom'>
+        <DropdownMenuTrigger asChild>
+          <Button
+            size='icon-chip'
+            variant='secondary'
+            className='absolute top-1.5 right-2 opacity-0 group-hover/assignment:opacity-100 transition-opacity'
+            // className='flex items-center bg-ring/50 text-secondary-foreground/80 hover:text-secondary-foreground active:text-secondary-foreground hover:bg-ring/80 p-1'
+          >
+            <ChevronDown />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className='max-w-min' align='end' side='bottom'>
           <DropdownMenuRadioGroup
             value={assignment.shiftTypeId}
             onValueChange={handleUpdateShiftType}

@@ -106,11 +106,7 @@ export const ScheduleTeamMemberHeaderCell = ({
                             const pg = payGradeMap.get(id)
 
                             return pg ? (
-                              <Badge
-                                key={id}
-                                variant='outline'
-                                className='rounded-sm'
-                              >
+                              <Badge key={id} variant='outline'>
                                 {pg.name}
                                 <Button
                                   variant='ghost'

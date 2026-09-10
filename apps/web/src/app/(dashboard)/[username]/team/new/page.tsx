@@ -42,11 +42,13 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
   FieldSet,
+  FieldTitle,
   Input,
   Item,
   ItemActions,
@@ -646,12 +648,17 @@ function TeamMemberSheet({
 
   const [payGradeOpen, setPayGradeOpen] = useState(false)
 
+  // again, use temporary uuids for id and teamid for client-side, and when form is
+  // submitted, real uuids will be generated for the actual created member
+  // stored in the db
   const form = useForm<TeamMemberFormType>({
     defaultValues: {
+      id: crypto.randomUUID(),
       familyName: '',
       givenNames: '',
       teamMemberRole: 'STAFF',
       rateMultiplier: 1,
+      teamId: crypto.randomUUID(),
     },
     resolver: zodResolver(TeamMemberFormSchema),
   })
@@ -672,8 +679,6 @@ function TeamMemberSheet({
     } else {
       append({
         ...values,
-        id: crypto.randomUUID(),
-        teamId: crypto.randomUUID(), // just for schema validation
       })
     }
     onOpenChange(false)
@@ -828,7 +833,7 @@ function TeamMemberSheet({
                   id='form-create-member-base-rate'
                   variant='outline'
                   disabled
-                  className='text-justify items-start justify-start disabled:opacity-100'
+                  className='items-center justify-start disabled:opacity-100'
                 >
                   {payGrades && form.getValues('payGradeClientId') ? (
                     payGrades.find(
@@ -897,7 +902,7 @@ function TeamMemberSheet({
                   })
                 }}
               >
-                {editingIndex !== null ? 'Save' : t('add', 'Add')}
+                {editingIndex !== null ? t('save', 'Save') : t('add', 'Add')}
               </Button>
             </div>
           </form>
@@ -1141,84 +1146,107 @@ function AdditionalDetailsSection() {
 
       <FieldGroup>
         <Card>
-          <ItemGroup className='*:first:pt-0 *:last:pb-0'>
+          <ItemGroup className='[&_[data-slot=item]]:py-0 [&_[data-slot=item]]:px-(--card-spacing)'>
             <Item>
               <ItemHeader>
                 <ItemTitle>{t('locations', 'Locations')}</ItemTitle>
                 <Button
                   type='button'
                   variant='secondary'
-                  className='ml-auto'
                   onClick={() => setLocationsOpen(true)}
                 >
                   {t('manage', 'Manage')}
                 </Button>
               </ItemHeader>
-              {locationFields.length ? (
-                <ItemContent>
-                  {locationFields.map(l => (
-                    <Badge key={l.id} variant='secondary'>
-                      {l.name}
-                    </Badge>
-                  ))}
-                </ItemContent>
-              ) : null}
+              <ItemContent>
+                <ItemDescription>
+                  {locationFields.length ? (
+                    <>
+                      {locationFields.map(l => (
+                        <Badge key={l.id} variant='secondary'>
+                          {l.name}
+                        </Badge>
+                      ))}
+                    </>
+                  ) : (
+                    <span className='text-muted-foreground'>
+                      {t('noLocationsAdded', 'No locations yet')}
+                    </span>
+                  )}
+                </ItemDescription>
+              </ItemContent>
             </Item>
             <Separator />
-            <Item className='items-start'>
+            <Item>
               <ItemHeader>
                 <ItemTitle>{t('shiftTypes', 'Shift Types')}</ItemTitle>
                 <Button
                   type='button'
                   variant='secondary'
-                  className='ml-auto'
                   onClick={() => setShiftTypesOpen(true)}
                 >
                   {t('manage', 'Manage')}
                 </Button>
               </ItemHeader>
-              {shiftTypeFields.length ? (
-                <ItemContent>
-                  <Card className='divide-y gap-0 py-0'>
-                    {shiftTypeFields.map(st => (
-                      <CardContent key={st.id} className='p-4 space-y-2'>
-                        {/* Header Row */}
-                        <div className='flex items-center justify-between'>
-                          <CardTitle>{st.name}</CardTitle>
-                          <CardDescription className='flex items-center gap-1 '>
-                            {st.startTime}
-                            <ArrowRight size={16} />
-                            {st.endTime}
-                          </CardDescription>
-                        </div>
-
-                        {/* Pay Grades */}
-                        {st.connectPayGrades?.length ? (
-                          <div className='flex flex-wrap gap-2'>
-                            {st.connectPayGrades.map(pgId => {
-                              const pg = payGradeFields.find(p => p.id === pgId)
-                              if (!pg) return
-
-                              return (
-                                <Badge key={pgId} variant='secondary'>
-                                  {pg.name}
-                                </Badge>
-                              )
-                            })}
+              <ItemContent>
+                <ItemDescription>
+                  {shiftTypeFields.length ? (
+                    <Card className='divide-y gap-0 py-0'>
+                      {shiftTypeFields.map(st => (
+                        <CardContent
+                          key={st.id}
+                          className='space-y-1 py-1.5 px-0'
+                        >
+                          {/* Header Row */}
+                          <div className='flex items-center justify-between'>
+                            <CardTitle>{st.name}</CardTitle>
+                            <CardDescription className='flex items-center gap-1 '>
+                              {st.startTime}
+                              <ArrowRight size={16} />
+                              {st.endTime}
+                            </CardDescription>
                           </div>
-                        ) : (
-                          <div className='text-xs text-muted-foreground'>
-                            {t(
-                              'noPayGradesConnected',
-                              'No pay grades connected',
-                            )}
-                          </div>
-                        )}
-                      </CardContent>
-                    ))}
-                  </Card>
-                </ItemContent>
-              ) : null}
+
+                          {/* Pay Grades */}
+                          {st.connectPayGrades?.length ? (
+                            <div className='flex flex-wrap gap-2'>
+                              <span className='text-muted-foreground'>
+                                {t(
+                                  'assignedToPayGrades',
+                                  'Assigned to pay grades:',
+                                )}
+                              </span>
+                              {st.connectPayGrades.map(pgId => {
+                                const pg = payGradeFields.find(
+                                  p => p.id === pgId,
+                                )
+                                if (!pg) return
+
+                                return (
+                                  <Badge key={pgId} variant='secondary'>
+                                    {pg.name}
+                                  </Badge>
+                                )
+                              })}
+                            </div>
+                          ) : (
+                            <div className='text-xs text-muted-foreground'>
+                              {t(
+                                'noPayGradesAssigned',
+                                'No pay grades assigned',
+                              )}
+                            </div>
+                          )}
+                        </CardContent>
+                      ))}
+                    </Card>
+                  ) : (
+                    <span className='text-muted-foreground'>
+                      {t('noShiftTypesAdded', 'No shift added')}
+                    </span>
+                  )}
+                </ItemDescription>
+              </ItemContent>
             </Item>
           </ItemGroup>
         </Card>
@@ -1453,7 +1481,7 @@ function ShiftTypeItem({
   const [name, setName] = useState(field.name ?? '')
   const [startTime, setStartTime] = useState(field.startTime)
   const [endTime, setEndTime] = useState(field.endTime)
-  const [connectedPayGradeIds, setConnectedPayGradeIds] = useState(
+  const [assignedPayGradeIds, setAssignedPayGradeIds] = useState(
     field.connectPayGrades ?? [],
   )
 
@@ -1480,7 +1508,7 @@ function ShiftTypeItem({
   }, [field.endTime])
 
   useEffect(() => {
-    setConnectedPayGradeIds(field.connectPayGrades ?? [])
+    setAssignedPayGradeIds(field.connectPayGrades ?? [])
     latestRef.current.connectPayGrades = field.connectPayGrades
   }, [field.connectPayGrades])
 
@@ -1536,80 +1564,85 @@ function ShiftTypeItem({
           onBlur={flush}
           aria-invalid={!!error?.endTime}
         />
-        <div className='col-span-6 flex items-center gap-2'>
-          <CornerDownRight size={16} className='text-muted-foreground ml-2' />
-          <Combobox
-            multiple
-            items={payGrades.fields}
-            value={connectedPayGradeIds}
-            onValueChange={(ids: string[]) => {
-              setConnectedPayGradeIds(ids)
-              latestRef.current.connectPayGrades = ids
-              commit()
-            }}
-          >
-            <ComboboxChips ref={anchor} className='w-full'>
-              <ComboboxValue>
-                {(ids: string[]) => (
-                  <>
-                    {ids.map(id => {
-                      const pg = payGrades.fields.find(p => p.id === id)
-                      if (!pg) return null
+        <Field className='col-span-6 flex items-center gap-2'>
+          <FieldTitle className='text-muted-foreground'>
+            <CornerDownRight size={14} className='mb-1' />
+            <span>{t('assignedToPayGrades', 'Assigned to pay grades:')}</span>
+          </FieldTitle>
+          <FieldContent className='pl-[22px]'>
+            <Combobox
+              multiple
+              items={payGrades.fields}
+              value={assignedPayGradeIds}
+              onValueChange={(ids: string[]) => {
+                setAssignedPayGradeIds(ids)
+                latestRef.current.connectPayGrades = ids
+                commit()
+              }}
+            >
+              <ComboboxChips ref={anchor} className='w-full'>
+                <ComboboxValue>
+                  {(ids: string[]) => (
+                    <>
+                      {ids.map(id => {
+                        const pg = payGrades.fields.find(p => p.id === id)
+                        if (!pg) return null
 
-                      return <ComboboxChip key={id}>{pg.name}</ComboboxChip>
-                    })}
-                    <ComboboxChipsInput />
-                  </>
-                )}
-              </ComboboxValue>
-            </ComboboxChips>
-            <ComboboxContent anchor={anchor}>
-              <ComboboxEmpty>
-                {t('noPayGradesFound', 'No pay grades found.')}
-              </ComboboxEmpty>
-              <ComboboxList>
-                {(
-                  item: z.infer<
-                    typeof TeamCreateFormSchema.shape.payGrades.element
-                  >,
-                ) => (
-                  <ComboboxItem key={item.id} value={item.id}>
-                    {item.name}
-                  </ComboboxItem>
-                )}
-              </ComboboxList>
-              <ComboboxSeparator className='m-0' />
-              <div className='flex flex-row w-full justify-between'>
-                <Button
-                  variant='link'
-                  className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
-                  type='button'
-                  onClick={() => {
-                    setConnectedPayGradeIds(payGrades.fields.map(pg => pg.id))
-                    latestRef.current.connectPayGrades = payGrades.fields.map(
-                      pg => pg.id,
-                    )
-                    commit()
-                  }}
-                >
-                  {t('selectAll', 'Select all')}
-                </Button>
-                <Button
-                  variant='link'
-                  className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
-                  type='button'
-                  onClick={() => {
-                    setConnectedPayGradeIds([])
-                    latestRef.current.connectPayGrades = []
-                    commit()
-                  }}
-                >
-                  {t('clearAll', 'Clear all')}
-                </Button>
-              </div>
-            </ComboboxContent>
-          </Combobox>
-        </div>
+                        return <ComboboxChip key={id}>{pg.name}</ComboboxChip>
+                      })}
+                      <ComboboxChipsInput />
+                    </>
+                  )}
+                </ComboboxValue>
+              </ComboboxChips>
+              <ComboboxContent anchor={anchor}>
+                <ComboboxEmpty>
+                  {t('noPayGradesFound', 'No pay grades found.')}
+                </ComboboxEmpty>
+                <ComboboxList>
+                  {(
+                    item: z.infer<
+                      typeof TeamCreateFormSchema.shape.payGrades.element
+                    >,
+                  ) => (
+                    <ComboboxItem key={item.id} value={item.id}>
+                      {item.name}
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+                <ComboboxSeparator className='m-0' />
+                <div className='flex flex-row w-full justify-between'>
+                  <Button
+                    variant='link'
+                    className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                    type='button'
+                    onClick={() => {
+                      setAssignedPayGradeIds(payGrades.fields.map(pg => pg.id))
+                      latestRef.current.connectPayGrades = payGrades.fields.map(
+                        pg => pg.id,
+                      )
+                      commit()
+                    }}
+                  >
+                    {t('selectAll', 'Select all')}
+                  </Button>
+                  <Button
+                    variant='link'
+                    className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                    type='button'
+                    onClick={() => {
+                      setAssignedPayGradeIds([])
+                      latestRef.current.connectPayGrades = []
+                      commit()
+                    }}
+                  >
+                    {t('clearAll', 'Clear all')}
+                  </Button>
+                </div>
+              </ComboboxContent>
+            </Combobox>
+          </FieldContent>
+        </Field>
       </ItemContent>
       <ItemActions className='items-start h-full'>
         <Button type='button' variant='ghost' size='icon' onClick={onDelete}>

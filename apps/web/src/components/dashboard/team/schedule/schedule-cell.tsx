@@ -128,7 +128,7 @@ export const ScheduleCell = ({
           <div
             className={cn(
               'absolute left-1 right-1',
-              'group/assignment rounded-md py-1 px-2 border border-input bg-muted flex flex-col',
+              'group/assignment rounded-none py-1 px-2 border border-input bg-muted flex flex-col',
               'border-2 border-dashed border-info-foreground',
             )}
           >
@@ -186,7 +186,7 @@ export const ScheduleCell = ({
           <Button
             variant='error-secondary'
             size='icon-chip'
-            className='rounded-r-none data-[state=on]:rounded-md'
+            className='rounded-r-none data-[state=on]:rounded-none'
           >
             <Ban />
           </Button>

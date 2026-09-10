@@ -21,8 +21,8 @@ export const ScheduleTeamMemberCell = ({
   const { t } = useTranslation()
   return (
     <Collapsible className='group/panel not-last:border-b border-input'>
-      <CollapsibleTrigger className='w-full flex items-center min-h-16 px-2'>
-        <Item className='size-full py-0 px-2'>
+      <CollapsibleTrigger className='w-full flex items-center min-h-16'>
+        <Item className='size-full'>
           <ItemContent className='items-start'>
             <ItemTitle>
               <span>{teamMember.givenNames}</span>
@@ -33,37 +33,40 @@ export const ScheduleTeamMemberCell = ({
                 {teamMember.familyName}
               </span>
             </ItemTitle>
-            <ItemDescription className='group-data-[state=open]/panel:hidden'>
+            <ItemDescription
+            // className='group-data-[state=open]/panel:hidden'
+            >
               {t(
-                'totalassignedshiftsShiftsTotalhours',
-                '{{totalAssignedShifts}} shifts, {{totalHours}}',
+                'totalAssignedShiftsHours',
+                '{{totalAssignedShifts}} shifts, {{totalHours}} hours',
                 {
                   totalAssignedShifts: teamMember.totalAssignedShifts,
                   totalHours: teamMember.totalHours,
                 },
-              )}{' '}
-              hours
+              )}
             </ItemDescription>
           </ItemContent>
         </Item>
       </CollapsibleTrigger>
-      <CollapsibleContent className='p-1.5 px-2'>
-        <div className='*:text-sm grid grid-cols-[auto_1fr] gap-2 **:justify-self-start *:self-center *:odd:self-start'>
+      <CollapsibleContent>
+        <Item className='*:text-xs pt-0 grid grid-cols-[auto_1fr] gap-2 **:justify-self-start *:self-center *:odd:self-start'>
           <Badge variant='outline'>{t('payGrade', 'Pay Grade')}</Badge>
           <div>{teamMember.payGrade?.name}</div>
           <Badge variant='outline'>{t('shiftHours', 'Shift Hours')}</Badge>
-          <div className='grid grid-flow-row'>
+          <div className='grid gap-1 grid-flow-col'>
             <div>
-              {t('totalhoursHours', '{{totalHours}} hours', {
+              {t('totalHours', '{{totalHours}} hours', {
                 totalHours: teamMember.totalHours,
               })}
             </div>
             <div>
+              (
               {teamMember.totalHours *
                 (teamMember.payGrade ? teamMember.payGrade.baseRate : 0)}
+              )
             </div>
           </div>
-        </div>
+        </Item>
       </CollapsibleContent>
     </Collapsible>
   )

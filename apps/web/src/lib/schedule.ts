@@ -1,6 +1,5 @@
 import { TeamMemberOutput, UnavailabilityOutput } from '@fuku/api/schemas'
 import { SchedulerAssignment } from '@fuku/domain/schemas'
-import i18next from '@fuku/i18n/server'
 import { DateTime } from 'luxon'
 
 export const ViewOptionValues = ['day', 'week', 'month'] as const
@@ -97,11 +96,10 @@ export const getDayId = (date: Date | string) => {
   return DateTime.fromJSDate(d).toFormat('yyyy-MM-dd')
 }
 
-export const getCellKey = (teamMemberId: string, date: Date | string) =>
-  i18next.t('teammemberid_val', '{{teamMemberId}}_{{val}}', {
-    teamMemberId,
-    val: getDayId(date),
-  })
+export const getCellKey = (teamMemberId: string, date: Date | string) => {
+  const dayId = getDayId(date)
+  return `${teamMemberId}_${dayId}`
+}
 
 export const splitCellKey = (cellKey: string) => {
   const [teamMemberId, date] = cellKey.split('_')

@@ -8,6 +8,8 @@ const IndexPage = async () => {
 
   if (session) {
     redirect(`/${session.user.username}`)
+  } else {
+    redirect('/login')
   }
 
   return (
