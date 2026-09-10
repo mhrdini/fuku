@@ -2,7 +2,7 @@
 
 import i18n from '@fuku/i18n/client'
 import { I18nextProvider } from '@fuku/i18n/react'
-import { Toaster } from '@fuku/ui/components'
+import { Toaster, TooltipProvider } from '@fuku/ui/components'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ThemeProvider } from 'next-themes'
 
@@ -13,7 +13,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
       <I18nextProvider i18n={i18n}>
         <TRPCReactProvider>
-          {children}
+          <TooltipProvider>{children}</TooltipProvider>
           <ReactQueryDevtools initialIsOpen={false} />
           <Toaster />
         </TRPCReactProvider>

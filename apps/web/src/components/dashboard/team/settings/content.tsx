@@ -162,7 +162,6 @@ export const TeamSettingsContent = () => {
         <FieldGroup>
           <FieldSet>
             <FieldLegend>{t('general', 'General')}</FieldLegend>
-            <FieldSeparator />
             <FieldGroup className='*:not(:last-child):grid *:not(:last-child):gap-2'>
               <Controller
                 name='name'
@@ -236,7 +235,7 @@ export const TeamSettingsContent = () => {
           <FieldSet>
             <FieldLegend>{t('dangerZone', 'Danger Zone')}</FieldLegend>
             <FieldSeparator />
-            <FieldGroup className='p-4 rounded-md border border-destructive *:grid *:grid-cols-[2fr_1fr]'>
+            <FieldGroup className='p-4 rounded-none border border-destructive *:grid *:grid-cols-[2fr_1fr]'>
               <Field orientation='horizontal'>
                 <div>
                   <FieldLabel htmlFor='form-team-settings-delete'>

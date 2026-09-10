@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { TeamOutput } from '@fuku/api/schemas'
-import { useTranslation } from '@fuku/i18n/react'
+import { Trans, useTranslation } from '@fuku/i18n/react'
 import {
   Button,
   ButtonGroup,
@@ -234,7 +234,7 @@ export const ScheduleHeader = ({
             className='block whitespace-nowrap cursor-pointer'
             onClick={downloadCSV}
           >
-            <Trans i18nKey='downloadAsSpanClassnamefontboldcsvspan'>
+            <Trans i18nKey='downloadAsCSV'>
               Download as <span className='font-bold'>CSV</span>
             </Trans>
           </DropdownMenuItem>
@@ -242,7 +242,7 @@ export const ScheduleHeader = ({
             className='block whitespace-nowrap cursor-pointer'
             onClick={downloadPDF}
           >
-            <Trans i18nKey='downloadAsSpanClassnamefontboldpdfspan'>
+            <Trans i18nKey='downloadAsPDF'>
               Download as <span className='font-bold'>PDF</span>
             </Trans>
           </DropdownMenuItem>
