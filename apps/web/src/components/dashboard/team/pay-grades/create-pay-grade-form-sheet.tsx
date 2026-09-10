@@ -26,7 +26,6 @@ import {
   FieldSet,
   Input,
   LoadingButton,
-  SheetClose,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -257,15 +256,15 @@ export const CreatePayGradeFormSheet = () => {
             />
           </FieldGroup>
         </FieldSet>
-        <SheetFooter>
+        <SheetFooter className='mt-0'>
           <LoadingButton form='form-create-pay-grade' loading={isPending}>
             {t('create', 'Create')}
           </LoadingButton>
-          <SheetClose asChild>
+          {/* <SheetClose asChild>
             <Button variant='outline' disabled={isPending}>
               {t('close', 'Close')}
             </Button>
-          </SheetClose>
+          </SheetClose> */}
         </SheetFooter>
       </form>
     </>

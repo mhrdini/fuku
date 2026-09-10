@@ -53,6 +53,7 @@ export function TimeInput({
         'appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none',
         'w-full h-full min-w-0 text-sm p-0 m-0 border-none rounded-none focus-visible:ring-0 shadow-none',
         'text-center tabular-nums',
+        '!bg-transparent dark:!bg-transparent',
       )}
       onChange={e => {
         setDraft(e.target.value)

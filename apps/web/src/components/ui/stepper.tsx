@@ -62,7 +62,7 @@ export default function Stepper({
                   size='icon-sm'
                   role='tab'
                   variant={index === currentIndex ? 'default' : 'secondary'}
-                  className='hidden md:flex rounded-full'
+                  className='hidden md:flex rounded-none' // TODO: or rounded-full?
                   onClick={() => setStep(index)}
                   aria-current={currentIndex === index ? 'step' : undefined}
                   aria-posinset={index + 1}

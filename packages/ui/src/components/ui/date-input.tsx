@@ -218,7 +218,7 @@ const DateInput: React.FC<DateInputProps> = ({ value, onChange }) => {
     }
 
   return (
-    <div className='flex border rounded-lg items-center text-sm px-1'>
+    <div className='flex border rounded-none items-center text-xs px-1'>
       <input
         type='text'
         ref={dayRef}

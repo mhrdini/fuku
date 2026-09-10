@@ -51,7 +51,7 @@
   }
 
   .table-container {
-    @apply overflow-hidden rounded-md border;
+    @apply overflow-hidden rounded-none border;
   }
 
   table[data-slot='table'] {

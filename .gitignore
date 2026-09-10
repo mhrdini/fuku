@@ -53,3 +53,4 @@ packages/solver/src/**/*.json
 
 *.generated.ts
 project.inlang/
+packages/ui/src/components/ui-old

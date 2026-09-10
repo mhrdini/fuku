@@ -8,7 +8,6 @@ import {
 } from '@fuku/api/schemas'
 import { useTranslation } from '@fuku/i18n/react'
 import {
-  Button,
   Field,
   FieldError,
   FieldGroup,
@@ -16,7 +15,6 @@ import {
   FieldSet,
   Input,
   LoadingButton,
-  SheetClose,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -179,15 +177,15 @@ export const CreateLocationFormSheet = () => {
             />
           </FieldGroup>
         </FieldSet>
-        <SheetFooter>
+        <SheetFooter className='mt-auto'>
           <LoadingButton form='form-create-location' loading={isPending}>
             {t('createLocation', 'Create location')}
           </LoadingButton>
-          <SheetClose asChild>
+          {/* <SheetClose asChild>
             <Button type='button' variant='outline' disabled={isPending}>
               {t('close', 'Close')}
             </Button>
-          </SheetClose>
+          </SheetClose> */}
         </SheetFooter>
       </form>
     </>
