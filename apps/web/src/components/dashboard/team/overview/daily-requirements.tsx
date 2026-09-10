@@ -272,12 +272,12 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
         onSubmit={form.handleSubmit(onSubmit, onError)}
         className='flex flex-col gap-4'
       >
-        <FieldSet className='flex flex-col gap-4 *:data-'>
+        <FieldSet className='flex flex-col'>
           {(Object.keys(WEEKDAY_MAP) as WeekdayKey[]).map(day => {
             const weekday = WEEKDAY_MAP[day]
             return (
-              <Item size='xs' key={day} className='flex gap-4 '>
-                <ItemContent className='gap-3 @[50rem]:grid @[50rem]:grid-cols-3 @[50rem]:grid-rows-4 @[50rem]:items-start'>
+              <Item size='xs' key={day} className='flex'>
+                <ItemContent className='flex gap-2 @[50rem]:grid @[50rem]:grid-cols-3 @[50rem]:grid-rows-4 @[50rem]:items-start'>
                   <ItemTitle className='@[50rem]:col-span-1'>
                     {weekday}
                   </ItemTitle>
@@ -387,7 +387,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                       )}
                     />
 
-                    {/* MIN MEMBERS */}
+                    {/* MIN STAFF / MIN MEMBERS */}
                     <Controller
                       control={form.control}
                       name={`staffingRequirements.${day}.minMembers`}
@@ -424,7 +424,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                       )}
                     />
 
-                    {/* MAX MEMBERS */}
+                    {/* MAX STAFF / MAX MEMBERS */}
                     <Controller
                       control={form.control}
                       name={`staffingRequirements.${day}.maxMembers`}

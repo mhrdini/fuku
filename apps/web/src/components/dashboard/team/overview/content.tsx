@@ -42,8 +42,8 @@ export default function TeamOverviewContent() {
         <EmptyTitle>{t('noTeamsYet', 'No Teams Yet')}</EmptyTitle>
         <EmptyDescription>
           {t(
-            'youHavenapostCreatedAnyTeamsYetGetStartedByCreatingYourFirstTeam',
-            'You haven&apos;t created any teams yet. Get started by creating your\n          first team.',
+            'youHaventCreatedAnyTeamsYetGetStartedByCreatingYourFirstTeam',
+            "You haven't created any teams yet. Get started by creating your first team.",
           )}
         </EmptyDescription>
       </EmptyHeader>
