@@ -42,7 +42,7 @@ import { getByIdMap } from '~/lib/db'
 import { convertToPDF } from '~/lib/pdf'
 import { ViewOptionValues } from '~/lib/schedule'
 import { useScheduleStore } from '~/store/schedule.store'
-import { RulePanelPopoverButton } from './rule-panel-popover-button'
+import RulePanelPopoverButton from './rule-panel/rule-panel-popover-button'
 
 type ScheduleHeaderProps = {
   viewState: ScheduleViewState
