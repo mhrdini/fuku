@@ -19,7 +19,8 @@ import {
   SelectValue,
 } from '@fuku/ui/components'
 
-import { useCommittedNumberField } from './use-committed-number-field'
+import { useCommittedNumberField } from '~/hooks/rule-panel/use-committed-number-field'
+import { RULE_METRIC_LABELS } from '~/lib/rule-panel/rule.constants'
 
 const RuleMetricEditor = ({
   rule,
@@ -68,7 +69,7 @@ const RuleMetricEditor = ({
         <SelectContent>
           {Object.values(RuleMetricValues).map(value => (
             <SelectItem key={value} value={value}>
-              {t(value)}
+              {t(value, RULE_METRIC_LABELS[value])}
             </SelectItem>
           ))}
         </SelectContent>

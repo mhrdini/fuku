@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { TeamCreateInput, TeamCreateInputSchema } from '@fuku/api/schemas'
+import i18next from '@fuku/i18n/client'
 import { useTranslation } from '@fuku/i18n/react'
-import i18next from '@fuku/i18n/server'
 import {
   Badge,
   Button,
@@ -102,8 +102,8 @@ import { CountryController } from '~/components/country-controller'
 import { useSession } from '~/components/providers/session-provider'
 import { TimeZoneController } from '~/components/timezone-controller'
 import { Step } from '~/components/ui/stepper'
-import { useDebouncedCommit } from '~/hooks/useDebouncedCommit'
-import { useStepper } from '~/hooks/useStepper'
+import { useDebouncedCommit } from '~/hooks/use-debounced-commit'
+import { useStepper } from '~/hooks/use-stepper'
 import { useTeamStore } from '~/store/team.store'
 import { useTRPC } from '~/trpc/client'
 

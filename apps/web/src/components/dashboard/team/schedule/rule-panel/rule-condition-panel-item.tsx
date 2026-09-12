@@ -37,8 +37,8 @@ import {
   RULE_CONDITION_FIELD_LABELS,
   RULE_CONDITION_OPERATOR_LABELS,
   RULE_CONDITION_VALUE_OPTIONS_BY_FIELD,
-} from './rule.constants'
-import { isSyntheticCondition } from './rule.helpers'
+} from '~/lib/rule-panel/rule.constants'
+import { isSyntheticCondition } from '~/lib/rule-panel/rule.helpers'
 
 const RuleConditionPanelItem = ({
   ruleCondition,

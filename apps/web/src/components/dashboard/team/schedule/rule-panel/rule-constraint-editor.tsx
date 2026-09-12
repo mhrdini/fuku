@@ -4,7 +4,7 @@ import { RuleOutput, RuleUpdateInput } from '@fuku/api/schemas'
 import { useTranslation } from '@fuku/i18n/react'
 import { Input, ToggleGroup, ToggleGroupItem } from '@fuku/ui/components'
 
-import { useCommittedNumberField } from './use-committed-number-field'
+import { useCommittedNumberField } from '~/hooks/rule-panel/use-committed-number-field'
 
 const RuleConstraintEditor = ({
   rule,
