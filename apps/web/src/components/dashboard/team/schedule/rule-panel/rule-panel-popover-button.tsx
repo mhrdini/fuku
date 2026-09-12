@@ -19,6 +19,7 @@ import {
   RuleTargetValues,
   RuleTimeWindowValues,
 } from '@fuku/domain/schemas'
+import i18next from '@fuku/i18n/client'
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
@@ -41,24 +42,27 @@ import {
   ScrollArea,
 } from '@fuku/ui/components'
 import {
-  BadgeDollarSignIcon,
   ChevronDown,
   CircleDashedIcon,
   CircleIcon,
-  ClockIcon,
   GaugeIcon,
-  GlobeIcon,
   ListFilter,
   LoaderIcon,
   Plus,
-  UserCircle2Icon,
   UserRoundCheckIcon,
 } from 'lucide-react'
 
-import { useRuleEditor } from '~/hooks/useRuleEditor'
+import { useRuleEditor } from '~/hooks/rule-panel/use-rule-editor'
+import { useRuleFilters } from '~/hooks/rule-panel/use-rule-filters'
+import { useRuleSort } from '~/hooks/rule-panel/use-rule-sort'
 import { MutationMode } from '~/lib/query'
+import {
+  RULE_METRIC_LABELS,
+  RULE_TARGET_ICONS,
+  RULE_TARGET_LABELS,
+  WEEKDAY_CONDITION_ID_PREFIX,
+} from '~/lib/rule-panel/rule.constants'
 import RulePanelItem from './rule-panel-item'
-import { WEEKDAY_CONDITION_ID_PREFIX } from './rule.constants'
 
 function getRuleSearchValue(
   rule: RuleOutput,
@@ -75,12 +79,12 @@ function getRuleSearchValue(
         )?.label ?? '')
 
   return [
-    rule.metric,
-    rule.timeWindow,
-    rule.operator,
-    rule.target,
+    i18next.t(rule.metric),
+    i18next.t(rule.timeWindow),
+    i18next.t(rule.operator),
+    i18next.t(rule.target),
     targetLabel,
-    rule.hardConstraint ? 'hard required' : 'soft preferred',
+    rule.hardConstraint ? i18next.t('required') : i18next.t('preferred'),
   ]
     .join(' ')
     .toLowerCase()
@@ -150,6 +154,19 @@ export const RulePanelPopoverButton = ({
     mutateRule,
     mutateRuleCondition,
   })
+
+  const allRules = useMemo(() => Object.values(rules), [rules])
+  const {
+    filteredRules,
+    filters,
+    toggleActive,
+    toggleTarget,
+    toggleMetric,
+    hasActiveFilters,
+    clearFilters,
+  } = useRuleFilters(allRules)
+  const { sortedRules, sortKey, setSortKey, direction, toggleDirection } =
+    useRuleSort(filteredRules)
 
   const weekdayConditionsMap = useMemo(() => {
     const map = new Map<string, RuleConditionOutput>()
@@ -221,11 +238,17 @@ export const RulePanelPopoverButton = ({
                     {t('status', 'Status')}
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
-                    <DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={filters.activeList?.includes(true) ?? false}
+                      onCheckedChange={() => toggleActive(true)}
+                    >
                       <CircleIcon />
                       {t('isActive', 'Active')}
                     </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={filters.activeList?.includes(false) ?? false}
+                      onCheckedChange={() => toggleActive(false)}
+                    >
                       <CircleDashedIcon />
                       {t('isInactive', 'Inactive')}
                     </DropdownMenuCheckboxItem>
@@ -238,22 +261,21 @@ export const RulePanelPopoverButton = ({
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
                     <DropdownMenuGroup>
-                      <DropdownMenuCheckboxItem>
-                        <BadgeDollarSignIcon />
-                        {t(RuleTargetValues.PAY_GRADE, 'Pay Grade')}
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem>
-                        <ClockIcon />
-                        {t(RuleTargetValues.SHIFT_TYPE, 'Shift Type')}
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem>
-                        <UserCircle2Icon />
-                        {t(RuleTargetValues.TEAM_MEMBER, 'Team Member')}
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem>
-                        <GlobeIcon />
-                        {t(RuleTargetValues.GLOBAL, 'Global')}
-                      </DropdownMenuCheckboxItem>
+                      {Object.values(RuleTargetValues).map(value => {
+                        const Icon = RULE_TARGET_ICONS[value]
+                        return (
+                          <DropdownMenuCheckboxItem
+                            key={value}
+                            checked={
+                              filters.targetList?.includes(value) ?? false
+                            }
+                            onCheckedChange={() => toggleTarget(value)}
+                          >
+                            <Icon />
+                            {t(value, RULE_TARGET_LABELS[value])}
+                          </DropdownMenuCheckboxItem>
+                        )
+                      })}
                     </DropdownMenuGroup>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
@@ -264,27 +286,19 @@ export const RulePanelPopoverButton = ({
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
                     <DropdownMenuGroup>
-                      <DropdownMenuCheckboxItem>
-                        {t(RuleMetricValues.DAYS_WORKED, 'Days worked')}
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem>
-                        {t(RuleMetricValues.HOURS_WORKED, 'Hours worked')}
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem>
-                        {t(RuleMetricValues.DAYS_OFF, 'Days off')}
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem>
-                        {t(
-                          RuleMetricValues.CONSECUTIVE_DAYS_WORKED,
-                          'Consecutive days worked',
-                        )}
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem>
-                        {t(
-                          RuleMetricValues.UNIQUE_MEMBERS_ASSIGNED,
-                          'Unique members assigned',
-                        )}
-                      </DropdownMenuCheckboxItem>
+                      {Object.values(RuleMetricValues).map(value => {
+                        return (
+                          <DropdownMenuCheckboxItem
+                            key={value}
+                            checked={
+                              filters.metricList?.includes(value) ?? false
+                            }
+                            onCheckedChange={() => toggleMetric(value)}
+                          >
+                            {t(value, RULE_METRIC_LABELS[value])}
+                          </DropdownMenuCheckboxItem>
+                        )
+                      })}
                     </DropdownMenuGroup>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
@@ -293,8 +307,8 @@ export const RulePanelPopoverButton = ({
           </div>
           <CommandSeparator />
           <ScrollArea className='group/rules flex flex-col min-w-fit overflow-y-auto overflow-x-clip'>
-            {rules && Object.keys(rules).length ? (
-              Object.entries(rules).map(([ruleId, rule]) => (
+            {sortedRules && Object.keys(sortedRules).length ? (
+              Object.entries(sortedRules).map(([ruleId, rule]) => (
                 <div key={ruleId}>
                   <CommandItem
                     noHighlightOnSelected

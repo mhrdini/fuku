@@ -12,7 +12,11 @@ import {
   Switch,
 } from '@fuku/ui/components'
 
-import { buildTargetIdUpdate, buildTargetTypeUpdate } from './rule.helpers'
+import { RULE_TARGET_LABELS } from '~/lib/rule-panel/rule.constants'
+import {
+  buildTargetIdUpdate,
+  buildTargetTypeUpdate,
+} from '~/lib/rule-panel/rule.helpers'
 
 const RuleScopeSelect = ({
   rule,
@@ -58,7 +62,7 @@ const RuleScopeSelect = ({
             )
             .map(value => (
               <SelectItem key={value} value={value}>
-                {t(value)}
+                {t(value, RULE_TARGET_LABELS[value])}
               </SelectItem>
             ))}
         </SelectContent>

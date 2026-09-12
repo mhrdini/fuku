@@ -4,7 +4,12 @@ import {
   RuleUpdateInput,
   ShiftTypeOutput,
 } from '@fuku/api/schemas'
-import { RuleTargetSchema, RuleTargetValues } from '@fuku/domain/schemas'
+import {
+  RuleMetric,
+  RuleTarget,
+  RuleTargetSchema,
+  RuleTargetValues,
+} from '@fuku/domain/schemas'
 
 import { WEEKDAY_CONDITION_ID_PREFIX } from './rule.constants'
 
@@ -86,7 +91,7 @@ export function buildTargetTypeUpdate(
   return updatedFields
 }
 
-/** what changes on the rule when the target id (which member/grade/type) changes */
+// what changes on the rule when the target id (which member/grade/type) changes
 export function buildTargetIdUpdate(
   rule: RuleOutput,
   id: string,
@@ -101,4 +106,74 @@ export function buildTargetIdUpdate(
     default:
       return null
   }
+}
+
+// filtering
+export type RuleFilters = {
+  targetList?: RuleTarget[]
+  activeList?: boolean[]
+  metricList?: RuleMetric[]
+  hardConstraintList?: boolean[]
+}
+
+export function matchesRuleFilters(
+  rule: RuleOutput,
+  filters?: RuleFilters,
+): boolean {
+  if (!filters) return true
+
+  if (
+    filters.targetList &&
+    filters.targetList.length &&
+    !filters.targetList.includes(rule.target)
+  )
+    return false
+  if (
+    filters.activeList &&
+    filters.activeList.length &&
+    !filters.activeList.includes(rule.active)
+  )
+    return false
+  if (
+    filters.metricList &&
+    filters.metricList.length &&
+    !filters.metricList.includes(rule.metric)
+  )
+    return false
+  if (
+    filters.hardConstraintList &&
+    filters.hardConstraintList.length &&
+    !filters.hardConstraintList.includes(rule.hardConstraint)
+  )
+    return false
+  return true
+}
+
+export function toggleListValue<T>(list: T[] | undefined, value: T): T[] {
+  const current = list ?? []
+  return current.includes(value)
+    ? current.filter(v => v !== value)
+    : [...current, value]
+}
+
+// --- sorting
+export type RuleSortKey = 'threshold' | 'metric' | 'target' | 'active'
+
+export const RULE_SORT_COMPARATORS: Record<
+  RuleSortKey,
+  (a: RuleOutput, b: RuleOutput) => number
+> = {
+  threshold: (a, b) => a.threshold - b.threshold,
+  metric: (a, b) => a.metric.localeCompare(b.metric),
+  target: (a, b) => a.target.localeCompare(b.target),
+  active: (a, b) => Number(b.active) - Number(a.active),
+}
+
+export function sortRules(
+  rules: RuleOutput[],
+  sortBy: RuleSortKey,
+  direction: 'asc' | 'desc' = 'asc',
+): RuleOutput[] {
+  const sorted = [...rules].sort(RULE_SORT_COMPARATORS[sortBy])
+  return direction === 'asc' ? sorted : sorted.reverse()
 }
