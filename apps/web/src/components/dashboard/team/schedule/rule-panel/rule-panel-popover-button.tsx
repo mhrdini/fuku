@@ -26,12 +26,34 @@ import {
   CommandInput,
   CommandItem,
   CommandSeparator,
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
   Popover,
   PopoverContent,
   PopoverTrigger,
   ScrollArea,
 } from '@fuku/ui/components'
-import { ChevronDown, ListFilter, Plus } from 'lucide-react'
+import {
+  BadgeDollarSignIcon,
+  ChevronDown,
+  CircleDashedIcon,
+  CircleIcon,
+  ClockIcon,
+  GaugeIcon,
+  GlobeIcon,
+  ListFilter,
+  LoaderIcon,
+  Plus,
+  UserCircle2Icon,
+  UserRoundCheckIcon,
+} from 'lucide-react'
 
 import { useRuleEditor } from '~/hooks/useRuleEditor'
 import { MutationMode } from '~/lib/query'
@@ -165,7 +187,11 @@ export const RulePanelPopoverButton = ({
       <PopoverTrigger asChild>
         <Button variant='secondary'>
           <ListFilter />
-          {rules ? Object.values(rules).filter(r => r.active).length : 0} rules
+          {t('lengthRules', '{{length}} rules', {
+            length: rules
+              ? Object.values(rules).filter(r => r.active).length
+              : 0,
+          })}
           <ChevronDown />
         </Button>
       </PopoverTrigger>
@@ -174,11 +200,96 @@ export const RulePanelPopoverButton = ({
         className='min-w-fit min-h-0 flex flex-col max-h-[40rem] p-0 border border-border shadow-2xl '
       >
         <Command>
-          <div className='p-2 w-full flex'>
+          <div className='p-2 w-full flex gap-1'>
             <CommandInput
               className='w-full'
               placeholder={t('searchRules', 'Search rules...')}
             />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='secondary' size='icon-lg'>
+                  <ListFilter />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>
+                  {(t('filterBy'), 'Filter by')}
+                </DropdownMenuLabel>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <LoaderIcon />
+                    {t('status', 'Status')}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuCheckboxItem>
+                      <CircleIcon />
+                      {t('isActive', 'Active')}
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem>
+                      <CircleDashedIcon />
+                      {t('isInactive', 'Inactive')}
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <UserRoundCheckIcon />
+                    {t('scope', 'Scope')}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuGroup>
+                      <DropdownMenuCheckboxItem>
+                        <BadgeDollarSignIcon />
+                        {t(RuleTargetValues.PAY_GRADE, 'Pay Grade')}
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem>
+                        <ClockIcon />
+                        {t(RuleTargetValues.SHIFT_TYPE, 'Shift Type')}
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem>
+                        <UserCircle2Icon />
+                        {t(RuleTargetValues.TEAM_MEMBER, 'Team Member')}
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem>
+                        <GlobeIcon />
+                        {t(RuleTargetValues.GLOBAL, 'Global')}
+                      </DropdownMenuCheckboxItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <GaugeIcon />
+                    {t('metric', 'Metric')}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuGroup>
+                      <DropdownMenuCheckboxItem>
+                        {t(RuleMetricValues.DAYS_WORKED, 'Days worked')}
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem>
+                        {t(RuleMetricValues.HOURS_WORKED, 'Hours worked')}
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem>
+                        {t(RuleMetricValues.DAYS_OFF, 'Days off')}
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem>
+                        {t(
+                          RuleMetricValues.CONSECUTIVE_DAYS_WORKED,
+                          'Consecutive days worked',
+                        )}
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem>
+                        {t(
+                          RuleMetricValues.UNIQUE_MEMBERS_ASSIGNED,
+                          'Unique members assigned',
+                        )}
+                      </DropdownMenuCheckboxItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <CommandSeparator />
           <ScrollArea className='group/rules flex flex-col min-w-fit overflow-y-auto overflow-x-clip'>
