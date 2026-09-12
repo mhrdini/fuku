@@ -2,6 +2,7 @@
 
 import { RuleOutput, RuleUpdateInput } from '@fuku/api/schemas'
 import { RuleTargetValues } from '@fuku/domain/schemas'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Select,
   SelectContent,
@@ -22,6 +23,8 @@ const RuleScopeSelect = ({
   targetOptions: Record<string, { value: string; label: string }[]>
   updateRule: (rule: RuleUpdateInput) => Promise<RuleOutput>
 }) => {
+  const { t } = useTranslation()
+
   const handleUpdateActive = (active: boolean) => {
     updateRule({ ...rule, active })
   }
@@ -55,7 +58,7 @@ const RuleScopeSelect = ({
             )
             .map(value => (
               <SelectItem key={value} value={value}>
-                {value}
+                {t(value)}
               </SelectItem>
             ))}
         </SelectContent>

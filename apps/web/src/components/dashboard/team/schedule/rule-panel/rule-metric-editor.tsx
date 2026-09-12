@@ -63,12 +63,12 @@ const RuleMetricEditor = ({
       {/* metric */}
       <Select value={rule.metric} onValueChange={handleUpdateRuleMetric}>
         <SelectTrigger size='sm' variant='secondary'>
-          <SelectValue placeholder={t('rulemetric', 'RuleMetric')} />
+          <SelectValue placeholder={t('metric', 'Metric')} />
         </SelectTrigger>
         <SelectContent>
           {Object.values(RuleMetricValues).map(value => (
             <SelectItem key={value} value={value}>
-              {value}
+              {t(value)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -77,12 +77,12 @@ const RuleMetricEditor = ({
       {/* operator */}
       <Select value={rule.operator} onValueChange={handleUpdateOperator}>
         <SelectTrigger size='sm' variant='secondary'>
-          <SelectValue placeholder='Operator' />
+          <SelectValue placeholder={t('operator', 'Operator')} />
         </SelectTrigger>
         <SelectContent>
           {Object.values(RuleOperatorValues).map(value => (
             <SelectItem key={value} value={value}>
-              {value}
+              {t(value)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -92,7 +92,7 @@ const RuleMetricEditor = ({
       <Input
         className='w-[8ch]'
         type='number'
-        placeholder='Value'
+        placeholder={t('value', 'Value')}
         variant='chip'
         value={threshold.input}
         onChange={e => threshold.setInput(e.target.value)}
@@ -101,8 +101,6 @@ const RuleMetricEditor = ({
           if (e.key === 'Enter' || e.key === 'Escape') threshold.commit()
         }}
       />
-      {/* per */}
-      <span>/</span>
       {/* time window */}
       <Select
         value={rule.timeWindow}
@@ -114,7 +112,7 @@ const RuleMetricEditor = ({
         <SelectContent>
           {Object.values(RuleTimeWindowValues).map(value => (
             <SelectItem key={value} value={value}>
-              {value}
+              {t(value)}
             </SelectItem>
           ))}
         </SelectContent>
