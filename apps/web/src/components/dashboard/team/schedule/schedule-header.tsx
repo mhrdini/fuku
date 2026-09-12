@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { TeamOutput } from '@fuku/api/schemas'
+import i18next from '@fuku/i18n/client'
 import { Trans, useTranslation } from '@fuku/i18n/react'
 import {
   Button,
@@ -22,7 +23,7 @@ import {
   Spinner,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
-import { enGB } from 'date-fns/locale'
+import { enGB, ja } from 'date-fns/locale'
 import {
   ChevronDown,
   ChevronLeft,
@@ -73,7 +74,10 @@ export const ScheduleHeader = ({
 }: ScheduleHeaderProps) => {
   const { t } = useTranslation()
 
-  const locale = enGB
+  const locale = useMemo(
+    () => (i18next.language === 'en' ? enGB : ja),
+    [i18next.language],
+  )
 
   const {
     schedulerAssignments,
