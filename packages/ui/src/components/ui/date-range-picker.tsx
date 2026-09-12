@@ -6,7 +6,7 @@ import { useDebouncedCommit } from '@fuku/ui/hooks/use-debounced-commit'
 import { cn } from '@fuku/ui/lib/utils'
 import { format, Locale } from 'date-fns'
 import * as locales from 'date-fns/locale'
-import { CheckIcon } from 'lucide-react'
+import { CheckIcon, Minus } from 'lucide-react'
 
 import { Button, buttonVariants } from './button'
 import { Calendar } from './calendar'
@@ -555,7 +555,9 @@ export function DateRangePicker({
                         }))
                       }}
                     />
-                    <div className='py-1'>-</div>
+                    <div className='py-1'>
+                      <Minus className='size-4' />
+                    </div>
                     <DateInput
                       value={range.to}
                       onChange={date => {
