@@ -25,6 +25,18 @@ export const ScheduleRow = ({
   days: daysRowList,
   data: { shiftTypeMap, cellMap },
 }: ScheduleRowProps) => {
+  const eligibleShifts = useMemo(() => {
+    if (!tm.payGradeId) return new Map<string, ShiftTypeOutput>()
+
+    const entries = Array.from(shiftTypeMap.values())
+      .filter(st =>
+        st.eligiblePayGrades.some(pgst => pgst.payGradeId === tm.payGradeId),
+      )
+      .map(st => [st.id, st] as const)
+
+    return new Map(entries)
+  }, [tm.payGradeId, shiftTypeMap])
+  // dnd
   const { source, target } = useDragOperation()
 
   const sourceCellKey = useMemo(
@@ -49,6 +61,7 @@ export const ScheduleRow = ({
       <div
         className={cn(
           'sticky left-0 z-20 w-[250px] bg-background border-r border-input',
+          // 'flex flex-col h-full',
           !isLastRow && 'border-b',
         )}
       >
@@ -75,6 +88,7 @@ export const ScheduleRow = ({
             isLastCol={isLastCol}
             isLastRow={isLastRow}
             data={{
+              eligibleShifts,
               cellData,
               shiftTypeMap,
               previewAssignment,
