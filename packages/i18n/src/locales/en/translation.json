@@ -97,6 +97,7 @@
   "lastName": "Last Name",
   "lengthConditions": "{{length}} conditions",
   "lengthRules": "{{length}} rules",
+  "lengthMembersAssigned": "{{length}} assigned",
   "linkedAccount": "Linked Account",
   "linkThisMemberToAnExistingUserAccount": "Link this member to an existing user account.",
   "locationName": "Location name",

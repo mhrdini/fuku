@@ -1,12 +1,14 @@
 'use client'
 
+import { useMemo } from 'react'
 import { DragDropProvider } from '@dnd-kit/react'
 import { SchedulerAssignment } from '@fuku/domain/schemas'
+import i18next from '@fuku/i18n/client'
 import { useTranslation } from '@fuku/i18n/react'
 import { Badge, Button, ScrollArea, ScrollBar } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { format } from 'date-fns'
-import { enGB } from 'date-fns/locale'
+import { enGB, ja } from 'date-fns/locale'
 import { Plus } from 'lucide-react'
 
 import { useScheduleActions } from '~/hooks/schedule/useScheduleActions'
@@ -31,11 +33,15 @@ export const ScheduleGrid = ({
   className,
 }: ScheduleGridProps) => {
   const { t } = useTranslation()
+
+  const locale = useMemo(
+    () => (i18next.language === 'en' ? enGB : ja),
+    [i18next.language],
+  )
+
   const { dayMetricsMap } = useScheduleStore()
 
   const { moveAssignmentToCell } = useScheduleActions()
-
-  const locale = enGB
 
   return (
     <DragDropProvider
@@ -166,8 +172,10 @@ export const ScheduleGrid = ({
               className='sticky bottom-0 z-10 border-t border-input flex items-center bg-background'
             >
               <Badge variant='outline' className='mx-auto'>
-                {dayMetricsMap.get(day.id)?.totalScheduledTeamMembers ?? 0}{' '}
-                assigned
+                {t('lengthMembersAssigned', '{{length}} assigned', {
+                  length:
+                    dayMetricsMap.get(day.id)?.totalScheduledTeamMembers ?? 0,
+                })}
               </Badge>
             </div>
           ))}

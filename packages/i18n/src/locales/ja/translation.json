@@ -97,6 +97,7 @@
   "lastName": "姓",
   "lengthConditions": "{{length}}の条件",
   "lengthRules": "{{length}}のルール",
+  "lengthMembersAssigned": "{{length}}割り当て済み",
   "linkedAccount": "リンク済みアカウント",
   "linkThisMemberToAnExistingUserAccount": "このメンバーを既存のユーザーアカウントにリンクします。",
   "locationName": "ロケーション名",
