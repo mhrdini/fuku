@@ -27,6 +27,12 @@ export function useRuleGroupBySort(
   const toggleDirection = () =>
     setDirection(d => (d === 'asc' ? 'desc' : 'asc'))
 
+  const reset = () => {
+    setDirection('asc')
+    setGroupByKey(undefined)
+    setSortKey(undefined)
+  }
+
   const sortedRules = useMemo(() => {
     return groupRules(rules, groupByKey).flatMap(rules =>
       sortRules(rules, sortKey, direction),
@@ -42,5 +48,6 @@ export function useRuleGroupBySort(
     direction,
     setDirection,
     toggleDirection,
+    reset,
   }
 }
