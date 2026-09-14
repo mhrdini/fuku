@@ -186,6 +186,7 @@
   "shiftTypes": "Shift Types",
   "signUp": "Sign up",
   "somethingWentWrongPleaseTryAgain": "Something went wrong. Please try again.",
+  "sortBy": "Sort by",
   "startstr__endstrcsv": "{{startStr}}__{{endStr}}.csv",
   "startstr__endstrpdf": "{{startStr}}__{{endStr}}.pdf",
   "startTime": "Start Time",
@@ -241,5 +242,9 @@
   "WEEK": "per week",
   "MONTH": "per month",
   "ROLLING_WEEK": "every 7 days",
-  "ROLLING_MONTH": "every rolling month"
+  "ROLLING_MONTH": "every rolling month",
+
+  "noGrouping": "No grouping",
+  "created": "Created",
+  "threshold": "Threshold"
 }
