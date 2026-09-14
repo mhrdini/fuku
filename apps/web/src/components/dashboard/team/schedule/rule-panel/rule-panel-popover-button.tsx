@@ -32,6 +32,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -47,7 +48,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@fuku/ui/components'
+import { cn } from '@fuku/ui/lib/utils'
 import {
+  ArrowDownNarrowWideIcon,
+  ArrowUpWideNarrowIcon,
   ChevronDown,
   CircleDashedIcon,
   CircleIcon,
@@ -71,10 +75,7 @@ import {
   RULE_TARGET_LABELS,
   WEEKDAY_CONDITION_ID_PREFIX,
 } from '~/lib/rule-panel/rule.constants'
-import {
-  RuleGroupByKey,
-  RuleSortKey,
-} from '~/lib/rule-panel/rule.helpers'
+import { RuleGroupByKey, RuleSortKey } from '~/lib/rule-panel/rule.helpers'
 import RulePanelItem from './rule-panel-item'
 
 function getRuleSearchValue(
@@ -186,6 +187,7 @@ export const RulePanelPopoverButton = ({
     setSortKey,
     direction,
     toggleDirection,
+    reset,
   } = useRuleGroupBySort(filteredRules)
 
   const weekdayConditionsMap = useMemo(() => {
@@ -254,7 +256,7 @@ export const RulePanelPopoverButton = ({
               </DropdownMenuTrigger>
               <DropdownMenuContent align='end'>
                 <DropdownMenuLabel>
-                  {(t('filterBy'), 'Filter by')}
+                  {t('filterBy', 'Filter by')}
                 </DropdownMenuLabel>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
@@ -330,6 +332,13 @@ export const RulePanelPopoverButton = ({
                     </DropdownMenuGroup>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
+                <DropdownMenuSeparator />
+                <Button
+                  className='w-full text-muted-foreground'
+                  variant='ghost'
+                >
+                  {t('clearFilters', 'Clear filters')}
+                </Button>
               </DropdownMenuContent>
             </DropdownMenu>
             {/* rule sort */}
@@ -367,7 +376,29 @@ export const RulePanelPopoverButton = ({
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-                    <div>Sorting</div>
+                    <div className='flex gap-2 justify-between'>
+                      <div>Sorting</div>
+                      <Button
+                        hidden={sortKey === undefined}
+                        variant='ghost'
+                        size='icon-sm'
+                        onClick={toggleDirection}
+                      >
+                        <ArrowDownNarrowWideIcon
+                          className={cn(
+                            'hidden',
+                            sortKey && direction === 'asc' && 'flex',
+                          )}
+                        />
+                        <ArrowUpWideNarrowIcon
+                          className={cn(
+                            'hidden',
+                            sortKey && direction === 'desc' && 'flex',
+                          )}
+                        />
+                      </Button>
+                    </div>
+
                     <Select
                       value={sortKey ?? 'undefined'}
                       onValueChange={value =>
@@ -394,7 +425,9 @@ export const RulePanelPopoverButton = ({
                     </Select>
                   </div>
                   <CommandSeparator />
-                  <Button variant='ghost'>{t('reset', 'Reset')}</Button>
+                  <Button onClick={reset} variant='ghost'>
+                    {t('reset', 'Reset')}
+                  </Button>
                 </Command>
               </PopoverContent>
             </Popover>
