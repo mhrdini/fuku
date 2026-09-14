@@ -201,13 +201,8 @@ export const ScheduleHeader = ({
           <SelectGroup>
             <SelectLabel>{t('viewBy', 'View by')}</SelectLabel>
             {ViewOptionValues.map(option => (
-              <SelectItem
-                id={option}
-                key={option}
-                value={option}
-                className='capitalize'
-              >
-                {option}
+              <SelectItem id={option} key={option} value={option}>
+                {t(option, option)}
               </SelectItem>
             ))}
           </SelectGroup>
