@@ -56,11 +56,12 @@ import {
   CircleDashedIcon,
   CircleIcon,
   GaugeIcon,
-  ListFilter,
+  ListFilterIcon,
   LoaderIcon,
   Plus,
   Settings2Icon,
   UserRoundCheckIcon,
+  WorkflowIcon,
 } from 'lucide-react'
 
 import { useRuleEditor } from '~/hooks/rule-panel/use-rule-editor'
@@ -227,7 +228,7 @@ export const RulePanelPopoverButton = ({
     <Popover>
       <PopoverTrigger asChild>
         <Button variant='secondary'>
-          <ListFilter />
+          <WorkflowIcon />
           {t('lengthRules', '{{length}} rules', {
             length: rules
               ? Object.values(rules).filter(r => r.active).length
@@ -251,7 +252,7 @@ export const RulePanelPopoverButton = ({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant='secondary' size='icon-lg'>
-                  <ListFilter />
+                  <ListFilterIcon />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align='end'>

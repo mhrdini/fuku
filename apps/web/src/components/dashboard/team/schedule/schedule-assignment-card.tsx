@@ -73,6 +73,7 @@ export const ScheduleAssignmentCard = ({
     <div
       ref={ref}
       className={cn(
+        'min-h-12',
         'relative group/assignment rounded-none py-1 px-2 border border-input bg-muted flex flex-col',
         'transition-all opacity-100',
         className,

@@ -9,7 +9,6 @@ import {
   ItemDescription,
   ItemTitle,
 } from '@fuku/ui/components'
-import { cn } from '@fuku/ui/lib/utils'
 
 import { TeamMemberData } from '~/lib/schedule'
 
@@ -20,17 +19,16 @@ export const ScheduleTeamMemberCell = ({
 }) => {
   const { t } = useTranslation()
   return (
-    <Collapsible className='group/panel not-last:border-b border-input'>
-      <CollapsibleTrigger className='w-full flex items-center min-h-16'>
+    <Collapsible className='group/panel flex flex-col size-full not-last:border-b border-input'>
+      <CollapsibleTrigger className='flex min-h-0 min-w-0 items-center h-full'>
         <Item className='size-full'>
           <ItemContent className='items-start'>
             <ItemTitle>
-              <span>{teamMember.givenNames}</span>
-              <span
-                className={cn(teamMember.familyName ? 'inline-flex' : 'hidden')}
-              >
-                {' '}
-                {teamMember.familyName}
+              <span>
+                {t('givennamesFamilyname', {
+                  givenNames: teamMember.givenNames,
+                  familyName: teamMember.familyName,
+                })}
               </span>
             </ItemTitle>
             <ItemDescription
