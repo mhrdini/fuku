@@ -25,6 +25,7 @@ interface ScheduleAssignmentCardProps {
   cellKey: string
   assignment: SchedulerAssignment
   data: {
+    eligibleShifts: Map<string, ShiftTypeOutput>
     shiftTypeMap: Map<string, ShiftTypeOutput>
   }
   className?: string
@@ -33,7 +34,7 @@ interface ScheduleAssignmentCardProps {
 export const ScheduleAssignmentCard = ({
   cellKey,
   assignment,
-  data: { shiftTypeMap },
+  data: { eligibleShifts, shiftTypeMap },
   className,
 }: ScheduleAssignmentCardProps) => {
   const { t } = useTranslation()
@@ -60,14 +61,14 @@ export const ScheduleAssignmentCard = ({
     deleteAssignmentById(assignment.id)
   }, [assignment.id, deleteAssignmentById])
 
-  const shiftTypes = useMemo(
-    () => Array.from(shiftTypeMap.entries()),
-    [shiftTypeMap],
+  const eligibleShiftTypes = useMemo(
+    () => Array.from(eligibleShifts.entries()),
+    [eligibleShifts],
   )
 
   const shiftType = useMemo(() => {
     return shiftTypeMap.get(assignment.shiftTypeId)
-  }, [shiftTypes, assignment.shiftTypeId])
+  }, [assignment.shiftTypeId])
 
   return (
     <div
@@ -100,7 +101,7 @@ export const ScheduleAssignmentCard = ({
             value={assignment.shiftTypeId}
             onValueChange={handleUpdateShiftType}
           >
-            {shiftTypes.map(([id, st]) => (
+            {eligibleShiftTypes.map(([id, st]) => (
               <DropdownMenuRadioItem key={id} value={st.id}>
                 {st.name}
               </DropdownMenuRadioItem>
