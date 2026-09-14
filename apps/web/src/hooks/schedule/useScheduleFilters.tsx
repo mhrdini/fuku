@@ -13,6 +13,11 @@ export const useScheduleFilters = ({ teamMembers }: ScheduleFiltersProps) => {
 
   const payGradeFilterId = useId()
   const [filteredPayGrades, setFilteredPayGrades] = useState<string[]>([])
+
+  const resetFilteredPayGrades = () => {
+    setFilteredPayGrades([])
+  }
+
   const togglePayGrade = (value: string) => {
     setFilteredPayGrades(prev =>
       prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value],
@@ -55,6 +60,7 @@ export const useScheduleFilters = ({ teamMembers }: ScheduleFiltersProps) => {
     togglePayGrade,
     removePayGrade,
     filteredTeamMembers,
+    resetFilteredPayGrades,
   }
 }
 

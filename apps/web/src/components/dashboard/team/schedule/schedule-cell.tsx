@@ -18,6 +18,7 @@ interface ScheduleCellProps {
   isLastRow: boolean
   isLastCol: boolean
   data: {
+    eligibleShifts: Map<string, ShiftTypeOutput>
     cellData: CellData | undefined
     shiftTypeMap: Map<string, ShiftTypeOutput>
     previewAssignment: SchedulerAssignment | null
@@ -29,7 +30,7 @@ export const ScheduleCell = ({
   cellKey,
   isLastRow,
   isLastCol,
-  data: { cellData, shiftTypeMap, previewAssignment },
+  data: { eligibleShifts, cellData, shiftTypeMap, previewAssignment },
   className,
 }: ScheduleCellProps) => {
   const { t } = useTranslation()
@@ -65,7 +66,7 @@ export const ScheduleCell = ({
   }, [cellData?.schedulerUnavailabilities])
 
   const handleCreateAssignment = () => {
-    const getDefaultShiftTypeId = shiftTypeMap.keys().next().value!
+    const getDefaultShiftTypeId = eligibleShifts.keys().next().value!
     createAssignmentInCell({ cellKey, shiftTypeId: getDefaultShiftTypeId })
   }
 
@@ -92,9 +93,9 @@ export const ScheduleCell = ({
   const previewAssignmentShiftType = useMemo(
     () =>
       previewAssignment
-        ? (shiftTypeMap.get(previewAssignment.shiftTypeId) ?? null)
+        ? (eligibleShifts.get(previewAssignment.shiftTypeId) ?? null)
         : null,
-    [previewAssignment, shiftTypeMap],
+    [previewAssignment, eligibleShifts],
   )
 
   return (
@@ -153,6 +154,7 @@ export const ScheduleCell = ({
               cellKey={cellKey}
               assignment={a}
               data={{
+                eligibleShifts,
                 shiftTypeMap,
               }}
             />
@@ -173,7 +175,7 @@ export const ScheduleCell = ({
           disabled={
             !!unavailability ||
             !cellKey ||
-            shiftTypeMap.size === 0 ||
+            eligibleShifts.size === 0 ||
             cellData?.schedulerAssignments.length === 1
           }
           variant='success-secondary'

@@ -9,25 +9,26 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSet,
+  CommandSeparator,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+  ScrollArea,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import {
+  BadgeDollarSignIcon,
   Check,
-  ChevronsUpDown,
   Search,
-  SlidersHorizontal,
+  Settings2Icon,
   X,
 } from 'lucide-react'
 
@@ -50,6 +51,7 @@ export const ScheduleTeamMemberHeaderCell = ({
     setSearch,
     payGradeFilterId,
     filteredPayGrades,
+    resetFilteredPayGrades,
     togglePayGrade,
     removePayGrade,
   },
@@ -79,96 +81,58 @@ export const ScheduleTeamMemberHeaderCell = ({
         </InputGroupAddon>
       </InputGroup>
 
-      {/* filter/sort panel popover */}
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant='secondary' size='icon'>
-            <SlidersHorizontal />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant='secondary' size='icon-lg'>
+            <Settings2Icon />
           </Button>
-        </PopoverTrigger>
-        <PopoverContent side='right' align='start'>
-          <FieldGroup>
-            <FieldSet className='gap-3'>
-              <FieldLegend>{t('filter', 'Filter')}</FieldLegend>
-              <Field>
-                <FieldLabel>{t('byPayGrade', 'By Pay Grade')}</FieldLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      id={payGradeFilterId}
-                      variant='outline'
-                      role='combobox'
-                      className='h-auto min-h-8 w-full justify-between hover:bg-transparent'
-                    >
-                      <div className='flex flex-wrap items-center gap-1 pr-2.5'>
-                        {filteredPayGrades.length > 0 ? (
-                          filteredPayGrades.map(id => {
-                            const pg = payGradeMap.get(id)
-
-                            return pg ? (
-                              <Badge key={id} variant='outline'>
-                                {pg.name}
-                                <Button
-                                  variant='ghost'
-                                  size='icon'
-                                  className='size-4'
-                                  onClick={e => {
-                                    e.stopPropagation()
-                                    removePayGrade(id)
-                                  }}
-                                  asChild
-                                >
-                                  <span>
-                                    <X className='size-3' />
-                                  </span>
-                                </Button>
-                              </Badge>
-                            ) : null
-                          })
-                        ) : (
-                          <span className='text-muted-foreground'>
-                            {t('selectPayGrades', 'Select pay grades')}
-                          </span>
-                        )}
-                      </div>
-                      <ChevronsUpDown
-                        className='text-muted-foreground/80 shrink-0'
-                        aria-hidden='true'
-                      />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className='w-(--radix-popper-anchor-width) p-0'>
-                    <Command>
-                      <CommandInput
-                        placeholder={t('searchPayGrade', 'Search pay grade...')}
-                      />
-                      <CommandList>
-                        <CommandEmpty>
-                          {t('noPayGradeFound', 'No pay grade found.')}
-                        </CommandEmpty>
-                        <CommandGroup>
-                          {payGrades?.map(pg => (
-                            <CommandItem
-                              key={pg.id}
-                              value={pg.id}
-                              onSelect={() => togglePayGrade(pg.id)}
-                            >
-                              <span className='truncate'>{pg.name}</span>
-                              {filteredPayGrades.includes(pg.id) && (
-                                <Check size={16} className='ml-auto' />
-                              )}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </Field>
-            </FieldSet>
-          </FieldGroup>
-        </PopoverContent>
-      </Popover>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>{t('filterBy', 'Filter by')}</DropdownMenuLabel>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <BadgeDollarSignIcon />
+              {t('payGrade', 'Pay Grade')}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <Command>
+                <CommandInput placeholder={t('searchPayGrade')} />
+                <CommandList>
+                  <ScrollArea
+                  // className='max-h-48'
+                  >
+                    <CommandEmpty className='text-xs text-muted-foreground p-4'>
+                      {t('noPayGradesFound')}
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {payGrades?.map(pg => (
+                        <CommandItem
+                          key={pg.id}
+                          value={pg.id}
+                          onSelect={() => togglePayGrade(pg.id)}
+                        >
+                          <Badge variant='outline'>{pg.name}</Badge>
+                          {filteredPayGrades.includes(pg.id) && (
+                            <Check size={16} className='ml-auto' />
+                          )}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </ScrollArea>
+                </CommandList>
+                <CommandSeparator />
+                <Button
+                  onClick={resetFilteredPayGrades}
+                  variant='ghost'
+                  className='text-muted-foreground'
+                >
+                  {t('clearAll')}
+                </Button>
+              </Command>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }
