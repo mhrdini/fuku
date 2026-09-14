@@ -11,7 +11,11 @@ import {
   RuleTargetValues,
 } from '@fuku/domain/schemas'
 
-import { WEEKDAY_CONDITION_ID_PREFIX } from './rule.constants'
+import {
+  RULE_GROUP_BY_KEYS,
+  RULE_SORT_KEYS,
+  WEEKDAY_CONDITION_ID_PREFIX,
+} from './rule.constants'
 
 type TargetOptions = Record<string, { value: string; label: string }[]>
 
@@ -157,7 +161,7 @@ export function toggleListValue<T>(list: T[] | undefined, value: T): T[] {
 }
 
 // --- sorting
-export type RuleSortKey = 'threshold' | 'metric' | 'target' | 'active'
+export type RuleSortKey = (typeof RULE_SORT_KEYS)[number]
 
 export const RULE_SORT_COMPARATORS: Record<
   RuleSortKey,
@@ -165,15 +169,39 @@ export const RULE_SORT_COMPARATORS: Record<
 > = {
   threshold: (a, b) => a.threshold - b.threshold,
   metric: (a, b) => a.metric.localeCompare(b.metric),
-  target: (a, b) => a.target.localeCompare(b.target),
-  active: (a, b) => Number(b.active) - Number(a.active),
+  scope: (a, b) => a.target.localeCompare(b.target),
+  status: (a, b) => Number(b.active) - Number(a.active),
 }
 
 export function sortRules(
   rules: RuleOutput[],
-  sortBy: RuleSortKey,
+  sortBy: RuleSortKey | undefined,
   direction: 'asc' | 'desc' = 'asc',
 ): RuleOutput[] {
+  if (!sortBy) return rules
   const sorted = [...rules].sort(RULE_SORT_COMPARATORS[sortBy])
   return direction === 'asc' ? sorted : sorted.reverse()
+}
+
+// -- grouping
+export type RuleGroupByKey = (typeof RULE_GROUP_BY_KEYS)[number]
+
+export function groupRules(
+  rules: RuleOutput[],
+  groupBy: RuleGroupByKey | undefined,
+): RuleOutput[][] {
+  if (!groupBy) return [rules]
+  const groupKey = groupBy === 'scope' ? 'target' : 'metric'
+
+  const groups = new Map<string, RuleOutput[]>()
+
+  rules.forEach(rule => {
+    const key = String(rule[groupKey])
+    if (!groups.has(key)) {
+      groups.set(key, [])
+    }
+    groups.get(key)!.push(rule)
+  })
+
+  return Array.from(groups.values())
 }

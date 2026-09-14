@@ -40,6 +40,12 @@ import {
   PopoverContent,
   PopoverTrigger,
   ScrollArea,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@fuku/ui/components'
 import {
   ChevronDown,
@@ -49,19 +55,26 @@ import {
   ListFilter,
   LoaderIcon,
   Plus,
+  Settings2Icon,
   UserRoundCheckIcon,
 } from 'lucide-react'
 
 import { useRuleEditor } from '~/hooks/rule-panel/use-rule-editor'
 import { useRuleFilters } from '~/hooks/rule-panel/use-rule-filters'
-import { useRuleSort } from '~/hooks/rule-panel/use-rule-sort'
+import { useRuleGroupBySort } from '~/hooks/rule-panel/use-rule-group-by-sort'
 import { MutationMode } from '~/lib/query'
 import {
+  RULE_GROUP_BY_KEYS,
   RULE_METRIC_LABELS,
+  RULE_SORT_KEYS,
   RULE_TARGET_ICONS,
   RULE_TARGET_LABELS,
   WEEKDAY_CONDITION_ID_PREFIX,
 } from '~/lib/rule-panel/rule.constants'
+import {
+  RuleGroupByKey,
+  RuleSortKey,
+} from '~/lib/rule-panel/rule.helpers'
 import RulePanelItem from './rule-panel-item'
 
 function getRuleSearchValue(
@@ -165,8 +178,15 @@ export const RulePanelPopoverButton = ({
     hasActiveFilters,
     clearFilters,
   } = useRuleFilters(allRules)
-  const { sortedRules, sortKey, setSortKey, direction, toggleDirection } =
-    useRuleSort(filteredRules)
+  const {
+    sortedRules,
+    groupByKey,
+    setGroupByKey,
+    sortKey,
+    setSortKey,
+    direction,
+    toggleDirection,
+  } = useRuleGroupBySort(filteredRules)
 
   const weekdayConditionsMap = useMemo(() => {
     const map = new Map<string, RuleConditionOutput>()
@@ -199,6 +219,8 @@ export const RulePanelPopoverButton = ({
     })
   }
 
+  const preventCloseOnSelect = (e: Event) => e.preventDefault()
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -218,17 +240,19 @@ export const RulePanelPopoverButton = ({
       >
         <Command>
           <div className='p-2 w-full flex gap-1'>
+            {/* rule search bar */}
             <CommandInput
               className='w-full'
               placeholder={t('searchRules', 'Search rules...')}
             />
+            {/* rule filter dropdown menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant='secondary' size='icon-lg'>
                   <ListFilter />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent align='end'>
                 <DropdownMenuLabel>
                   {(t('filterBy'), 'Filter by')}
                 </DropdownMenuLabel>
@@ -241,6 +265,7 @@ export const RulePanelPopoverButton = ({
                     <DropdownMenuCheckboxItem
                       checked={filters.activeList?.includes(true) ?? false}
                       onCheckedChange={() => toggleActive(true)}
+                      onSelect={preventCloseOnSelect}
                     >
                       <CircleIcon />
                       {t('isActive', 'Active')}
@@ -248,6 +273,7 @@ export const RulePanelPopoverButton = ({
                     <DropdownMenuCheckboxItem
                       checked={filters.activeList?.includes(false) ?? false}
                       onCheckedChange={() => toggleActive(false)}
+                      onSelect={preventCloseOnSelect}
                     >
                       <CircleDashedIcon />
                       {t('isInactive', 'Inactive')}
@@ -270,6 +296,7 @@ export const RulePanelPopoverButton = ({
                               filters.targetList?.includes(value) ?? false
                             }
                             onCheckedChange={() => toggleTarget(value)}
+                            onSelect={preventCloseOnSelect}
                           >
                             <Icon />
                             {t(value, RULE_TARGET_LABELS[value])}
@@ -294,6 +321,7 @@ export const RulePanelPopoverButton = ({
                               filters.metricList?.includes(value) ?? false
                             }
                             onCheckedChange={() => toggleMetric(value)}
+                            onSelect={preventCloseOnSelect}
                           >
                             {t(value, RULE_METRIC_LABELS[value])}
                           </DropdownMenuCheckboxItem>
@@ -304,6 +332,72 @@ export const RulePanelPopoverButton = ({
                 </DropdownMenuSub>
               </DropdownMenuContent>
             </DropdownMenu>
+            {/* rule sort */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant='secondary' size='icon-lg'>
+                  <Settings2Icon />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align='end' className='max-w-max p-0'>
+                <Command>
+                  <div className='p-2 grid gap-2 grid-cols-2 *:flex *:items-center *:min-w-0 *:flex-1 *:w-full *:odd:text-muted-foreground'>
+                    <div>Grouping</div>
+                    <Select
+                      value={groupByKey ?? 'undefined'}
+                      onValueChange={value =>
+                        value === 'undefined'
+                          ? setGroupByKey(undefined)
+                          : setGroupByKey(value as RuleGroupByKey)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value='undefined'>
+                            {t('noGrouping', 'No grouping')}
+                          </SelectItem>
+                          {RULE_GROUP_BY_KEYS.map(groupByKey => (
+                            <SelectItem key={groupByKey} value={groupByKey}>
+                              {t(groupByKey)}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <div>Sorting</div>
+                    <Select
+                      value={sortKey ?? 'undefined'}
+                      onValueChange={value =>
+                        value === 'undefined'
+                          ? setSortKey(undefined)
+                          : setSortKey(value as RuleSortKey)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value='undefined'>
+                            {t('created', 'Created')}
+                          </SelectItem>
+                          {RULE_SORT_KEYS.map(sortKey => (
+                            <SelectItem key={sortKey} value={sortKey}>
+                              {t(sortKey)}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <CommandSeparator />
+                  <Button variant='ghost'>{t('reset', 'Reset')}</Button>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
           <CommandSeparator />
           <ScrollArea className='group/rules flex flex-col min-w-fit overflow-y-auto overflow-x-clip'>

@@ -67,3 +67,14 @@ export const RULE_METRIC_LABELS: Record<RuleMetric, string> = {
   [RuleMetricValues.CONSECUTIVE_DAYS_WORKED]: 'Consecutive days worked',
   [RuleMetricValues.UNIQUE_MEMBERS_ASSIGNED]: 'Unique members assigned',
 }
+
+// rule sorting
+export const RULE_SORT_KEYS = [
+  'threshold',
+  'metric',
+  'scope',
+  'status',
+] as const
+
+// rule grouping
+export const RULE_GROUP_BY_KEYS = ['scope', 'metric'] as const
