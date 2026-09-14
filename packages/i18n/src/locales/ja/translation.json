@@ -251,5 +251,17 @@
 
   "noGrouping": "グループ化なし",
   "created": "作成済み",
-  "threshold": "しきい値"
+  "threshold": "しきい値",
+
+  "today": "今日",
+  "yesterday": "昨日",
+  "last7": "過去7日間",
+  "last14": "過去14日間",
+  "last30": "過去30日間",
+  "lastWeek": "先週",
+  "thisWeek": "今週",
+  "nextWeek": "来週",
+  "lastMonth": "先月",
+  "thisMonth": "今月",
+  "nextMonth": "来月"
 }
