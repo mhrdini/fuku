@@ -2,6 +2,7 @@
 
 import type { VariantProps } from 'class-variance-authority'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from '@fuku/i18n/react'
 import { useDebouncedCommit } from '@fuku/ui/hooks/use-debounced-commit'
 import { cn } from '@fuku/ui/lib/utils'
 import { format, Locale } from 'date-fns'
@@ -419,22 +420,25 @@ export function DateRangePicker({
     preset: string
     label: string
     isSelected: boolean
-  }) => (
-    <Button
-      className={cn(isSelected && 'pointer-events-none')}
-      variant='ghost'
-      onClick={() => {
-        setPreset(preset)
-      }}
-    >
-      <>
-        <span className={cn('pr-2 opacity-0', isSelected && 'opacity-70')}>
-          <CheckIcon width={18} height={18} />
-        </span>
-        {label}
-      </>
-    </Button>
-  )
+  }) => {
+    const { t } = useTranslation()
+    return (
+      <Button
+        className={cn(isSelected && 'pointer-events-none')}
+        variant='ghost'
+        onClick={() => {
+          setPreset(preset)
+        }}
+      >
+        <>
+          <span className={cn('pr-2 opacity-0', isSelected && 'opacity-70')}>
+            <CheckIcon width={18} height={18} />
+          </span>
+          {t(label, label)}
+        </>
+      </Button>
+    )
+  }
 
   // Helper function to check if two date ranges are equal
   const areRangesEqual = (a?: DateRange, b?: DateRange): boolean => {
@@ -736,7 +740,7 @@ export function DateRangePicker({
                   <PresetButton
                     key={preset.name}
                     preset={preset.name}
-                    label={preset.label}
+                    label={preset.name} // lowercase for i18n
                     isSelected={selectedPreset === preset.name}
                   />
                 ))}

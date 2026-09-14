@@ -251,5 +251,17 @@
 
   "noGrouping": "No grouping",
   "created": "Created",
-  "threshold": "Threshold"
+  "threshold": "Threshold",
+
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "last7": "Last 7 days",
+  "last14": "Last 14 days",
+  "last30": "Last 30 days",
+  "lastWeek": "Last Week",
+  "thisWeek": "This Week",
+  "nextWeek": "Next Week",
+  "lastMonth": "Last Month",
+  "thisMonth": "This Month",
+  "nextMonth": "Next Month"
 }
