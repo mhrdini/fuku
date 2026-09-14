@@ -106,7 +106,7 @@ export const ScheduleCell = ({
         'border-input p-1',
         !isLastRow && 'border-b',
         !isLastCol && 'border-r',
-        'flex flex-col gap-1.5',
+        'flex flex-col gap-1',
         // 'transition-all',
         'hover:bg-muted/50', // desktop hover
         'focus-visible:bg-muted/50', // keyboard focus
@@ -160,7 +160,7 @@ export const ScheduleCell = ({
         })}
       <div
         className={cn(
-          'pointer-events-none opacity-0 md:pointer-events-auto md:flex size-full items-end *:flex-1 *:h-6 transition-opacity text-xs text-muted-foreground group-hover:opacity-100 group-focus-visible:opacity-100',
+          'pointer-events-none opacity-0 md:pointer-events-auto  md:flex md:gap-1 md:flex-col size-full items-center justify-end *:w-full transition-opacity text-xs text-muted-foreground group-hover:opacity-100 group-focus-visible:opacity-100',
           'has-[*[data-state=on]]:opacity-100',
           'has-[*[data-state=on]]:[&>*]:hidden',
           'has-[*[data-state=on]]:[&>*[data-state=on]]:flex',
@@ -168,6 +168,24 @@ export const ScheduleCell = ({
         )}
       >
         {/* Add assignments, unavailabilities, per cell etc here */}
+        <Button
+          hidden={assignments && assignments.length > 0}
+          disabled={
+            !!unavailability ||
+            !cellKey ||
+            shiftTypeMap.size === 0 ||
+            cellData?.schedulerAssignments.length === 1
+          }
+          variant='success-secondary'
+          size='icon-chip'
+          className={cn(
+            'flex-1 rounded-b-none',
+            'min-h-[46px]', // TODO: still reliant on height of schedule assignment card
+          )}
+          onClick={handleCreateAssignment}
+        >
+          <Plus />
+        </Button>
         <Toggle
           asChild
           className={cn(
@@ -186,25 +204,14 @@ export const ScheduleCell = ({
           <Button
             variant='error-secondary'
             size='icon-chip'
-            className='rounded-r-none data-[state=on]:rounded-none'
+            className={cn(
+              'h-9 rounded-t-none data-[state=on]:rounded-none',
+              assignments && assignments.length > 0 && 'flex-1',
+            )}
           >
             <Ban />
           </Button>
         </Toggle>
-        <Button
-          disabled={
-            !!unavailability ||
-            !cellKey ||
-            shiftTypeMap.size === 0 ||
-            cellData?.schedulerAssignments.length === 1
-          }
-          variant='success-secondary'
-          size='icon-chip'
-          className='rounded-l-none'
-          onClick={handleCreateAssignment}
-        >
-          <Plus />
-        </Button>
       </div>
     </div>
   )
