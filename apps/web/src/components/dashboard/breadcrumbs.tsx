@@ -3,6 +3,7 @@
 import { Fragment, useMemo } from 'react'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,6 +23,8 @@ const MAX_VISIBLE = 3
 const MAX_TRAILING = 1
 
 export function Breadcrumbs() {
+  const { t } = useTranslation()
+
   const session = useSession()
   const pathname = usePathname()
   const segments = pathname.split('/').filter(Boolean)
@@ -57,19 +60,29 @@ export function Breadcrumbs() {
             .filter(s => s !== '…')
             .join('/')
 
-        let label = decodeURIComponent(segment)
-          .replace(/-/g, ' ')
-          .replace(/\b\w/g, c => c.toUpperCase())
+        // kebab case to capitalised with spaces
+        // let label: string = decodeURIComponent(segment)
+        //   .replace(/-/g, ' ')
+        //   .replace(/\b\w/g, c => c.toUpperCase())
 
-        if (segment === session?.user.username) label = 'Home'
-        if (segment === team?.slug) label = team ? 'Overview' : ''
+        // kebab case to camel case
+        let label: string = decodeURIComponent(segment)
+          .split('-')
+          .map((word, index) =>
+            index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1),
+          )
+          .join('')
+
+        if (segment === session?.user.username) label = t('home', 'Home')
+        if (segment === team?.slug)
+          label = team ? t('overview', 'Overview') : ''
         if (segment === 'team') {
           if (!team) return null
           label = team.name
           href = ''
         }
 
-        return { href, label }
+        return { href, label: t(label, label) }
       })
       .filter(Boolean) as { href: string; label: string }[]
   }, [segments, team, session?.user.username])
