@@ -33,6 +33,7 @@ export const TeamScheduleContent = () => {
       <ScheduleHeader
         viewState={viewState}
         data={data}
+        filters={filters}
         mutations={mutations}
         derivedData={derivedData}
       />

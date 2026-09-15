@@ -5,14 +5,27 @@ import { TeamOutput } from '@fuku/api/schemas'
 import i18next from '@fuku/i18n/client'
 import { Trans, useTranslation } from '@fuku/i18n/react'
 import {
+  Badge,
   Button,
   ButtonGroup,
   ButtonGroupSeparator,
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
   DateRangePicker,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
+  ScrollArea,
   Select,
   SelectContent,
   SelectGroup,
@@ -25,16 +38,20 @@ import {
 import { cn } from '@fuku/ui/lib/utils'
 import { enGB, ja } from 'date-fns/locale'
 import {
+  CheckIcon,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ClockIcon,
   Download,
+  EyeIcon,
   RefreshCcw,
 } from 'lucide-react'
 import { DateTime } from 'luxon'
 
 import { ScheduleData } from '~/hooks/schedule/useScheduleData'
 import { ScheduleDerivedData } from '~/hooks/schedule/useScheduleDerivedData'
+import { ScheduleFilters } from '~/hooks/schedule/useScheduleFilters'
 import { ScheduleMutations } from '~/hooks/schedule/useScheduleMutations'
 import { ScheduleViewState } from '~/hooks/schedule/useScheduleView'
 import { convertToCSV } from '~/lib/csv'
@@ -47,6 +64,7 @@ import RulePanelPopoverButton from './rule-panel/rule-panel-popover-button'
 type ScheduleHeaderProps = {
   viewState: ScheduleViewState
   data: ScheduleData
+  filters: ScheduleFilters
   mutations: ScheduleMutations
   derivedData: ScheduleDerivedData
 }
@@ -64,6 +82,7 @@ export const ScheduleHeader = ({
     handleViewChange,
   },
   data: { team, rules, ruleConditions, teamMembers, shiftTypes, payGrades },
+  filters: { toggleShiftType, filteredShiftTypes, resetFilteredShiftTypes },
   mutations: {
     handleMutateRule,
     handleMutateRuleCondition,
@@ -208,6 +227,58 @@ export const ScheduleHeader = ({
           </SelectGroup>
         </SelectContent>
       </Select>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant='secondary' size='icon'>
+            <EyeIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>{t('showFilters')}</DropdownMenuLabel>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <ClockIcon />
+              {t('shiftType', 'Shift Type')}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <Command>
+                <CommandInput placeholder={t('searchPayGrade')} />
+                <CommandList>
+                  <ScrollArea
+                  // className='max-h-48'
+                  >
+                    <CommandEmpty className='text-xs text-muted-foreground p-4'>
+                      {t('noShiftTypesFound')}
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {shiftTypes?.map(st => (
+                        <CommandItem
+                          key={st.id}
+                          value={st.id}
+                          onSelect={() => toggleShiftType(st.id)}
+                        >
+                          <Badge variant='outline'>{st.name}</Badge>
+                          {filteredShiftTypes.has(st.id) && (
+                            <CheckIcon size={16} className='ml-auto' />
+                          )}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </ScrollArea>
+                </CommandList>
+                <CommandSeparator />
+                <Button
+                  onClick={resetFilteredShiftTypes}
+                  variant='ghost'
+                  className='text-muted-foreground'
+                >
+                  {t('clearAll')}
+                </Button>
+              </Command>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <Button
         className='ml-auto'
         onClick={handleGenerateSchedule}
