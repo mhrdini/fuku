@@ -113,7 +113,7 @@ export const ScheduleAssignmentCard = ({
             variant='destructive'
           >
             <Trash />
-            {t('delete', 'Delete')}
+            <div className='whitespace-nowrap'>{t('delete', 'Delete')}</div>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
