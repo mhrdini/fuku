@@ -234,7 +234,7 @@ export const ScheduleHeader = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuLabel>{t('showFilters')}</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('showOnly')}</DropdownMenuLabel>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <ClockIcon />
