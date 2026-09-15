@@ -10,6 +10,7 @@ import { Ban, Plus } from 'lucide-react'
 import { DateTime } from 'luxon'
 
 import { useScheduleActions } from '~/hooks/schedule/useScheduleActions'
+import { ScheduleFilters } from '~/hooks/schedule/useScheduleFilters'
 import { CellData, getCellKey, parseCellKey } from '~/lib/schedule'
 import { ScheduleAssignmentCard } from './schedule-assignment-card'
 
@@ -23,6 +24,7 @@ interface ScheduleCellProps {
     shiftTypeMap: Map<string, ShiftTypeOutput>
     previewAssignment: SchedulerAssignment | null
   }
+  filters: { filteredShiftTypes: ScheduleFilters['filteredShiftTypes'] }
   className?: string
 }
 
@@ -31,6 +33,7 @@ export const ScheduleCell = ({
   isLastRow,
   isLastCol,
   data: { eligibleShifts, cellData, shiftTypeMap, previewAssignment },
+  filters: { filteredShiftTypes },
   className,
 }: ScheduleCellProps) => {
   const { t } = useTranslation()
@@ -148,7 +151,9 @@ export const ScheduleCell = ({
       {assignments &&
         assignments.length > 0 &&
         assignments.map(a => {
-          return (
+          return filteredShiftTypes.size == 0 ||
+            (filteredShiftTypes.size > 0 &&
+              filteredShiftTypes.has(a.shiftTypeId)) ? (
             <ScheduleAssignmentCard
               key={a.id}
               cellKey={cellKey}
@@ -158,7 +163,7 @@ export const ScheduleCell = ({
                 shiftTypeMap,
               }}
             />
-          )
+          ) : null
         })}
       <div
         className={cn(

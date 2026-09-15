@@ -69,11 +69,9 @@ export const ScheduleTeamMemberHeaderCell = ({
   filters: {
     search,
     setSearch,
-    payGradeFilterId,
     filteredPayGrades,
     resetFilteredPayGrades,
     togglePayGrade,
-    removePayGrade,
   },
   derivedData: { payGradeMap },
   teamMemberGroupBySort: {
@@ -141,7 +139,7 @@ export const ScheduleTeamMemberHeaderCell = ({
                           onSelect={() => togglePayGrade(pg.id)}
                         >
                           <Badge variant='outline'>{pg.name}</Badge>
-                          {filteredPayGrades.includes(pg.id) && (
+                          {filteredPayGrades.has(pg.id) && (
                             <Check size={16} className='ml-auto' />
                           )}
                         </CommandItem>

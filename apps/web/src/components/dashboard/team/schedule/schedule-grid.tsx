@@ -151,8 +151,8 @@ export const ScheduleGrid = ({
           {/* member rows */}
           {sortedTeamMembers.length === 0 ? (
             <>
-              <div className='sticky left-0 z-20 p-4 flex items-start text-sm text-muted-foreground bg-background border-r border-input'>
-                {t('noMembersFound', 'No members found.')}
+              <div className='sticky left-0 z-20 p-4 flex items-start text-xs text-muted-foreground bg-background border-r border-input'>
+                {t('noMembersFound', 'No members .')}
               </div>
 
               {daysRowList.map(day => (
@@ -176,6 +176,7 @@ export const ScheduleGrid = ({
                     shiftTypeMap,
                     cellMap,
                   }}
+                  filters={{ filteredTeamMembers, ...filters }}
                 />
               )
             })
