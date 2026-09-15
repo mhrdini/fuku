@@ -12,21 +12,66 @@ export const useScheduleFilters = ({ teamMembers }: ScheduleFiltersProps) => {
   const { teamMemberMetricsMap } = useScheduleStore()
 
   const payGradeFilterId = useId()
-  const [filteredPayGrades, setFilteredPayGrades] = useState<string[]>([])
+  const [filteredPayGrades, setFilteredPayGrades] = useState<Set<string>>(
+    new Set(),
+  )
 
+  const shiftTypeFilterId = useId()
+  const [filteredShiftTypes, setFilteredShiftTypes] = useState<Set<string>>(
+    new Set(),
+  )
+
+  // pay grades methods
   const resetFilteredPayGrades = () => {
-    setFilteredPayGrades([])
+    setFilteredPayGrades(new Set())
   }
 
   const togglePayGrade = (value: string) => {
-    setFilteredPayGrades(prev =>
-      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value],
-    )
-  }
-  const removePayGrade = (value: string) => {
-    setFilteredPayGrades(prev => prev.filter(v => v !== value))
+    setFilteredPayGrades(prev => {
+      const next = new Set(prev)
+      if (next.has(value)) {
+        next.delete(value)
+      } else {
+        next.add(value)
+      }
+      return next
+    })
   }
 
+  const removePayGrade = (value: string) => {
+    setFilteredPayGrades(prev => {
+      const next = new Set(prev)
+      next.delete(value)
+      return next
+    })
+  }
+
+  // shift types methods
+  // shift types methods
+  const resetFilteredShiftTypes = () => {
+    setFilteredShiftTypes(new Set())
+  }
+
+  const toggleShiftType = (id: string) => {
+    setFilteredShiftTypes(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
+  const removeShiftType = (id: string) => {
+    setFilteredShiftTypes(prev => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
+  }
+  // search
   const [search, setSearch] = useState('')
 
   const filteredTeamMembers: TeamMemberData[] = useMemo(() => {
@@ -41,11 +86,10 @@ export const useScheduleFilters = ({ teamMembers }: ScheduleFiltersProps) => {
       }))
       .filter(tm => tm.givenNames.toLowerCase().includes(search.toLowerCase()))
 
-    if (filteredPayGrades.length > 0) {
-      const filteredPayGradeIds = new Set(filteredPayGrades)
+    if (filteredPayGrades.size > 0) {
       filtered = filtered.filter(
         (tm: TeamMemberOutput) =>
-          tm.payGradeId && filteredPayGradeIds.has(tm.payGradeId),
+          tm.payGradeId && filteredPayGrades.has(tm.payGradeId),
       )
     }
 
@@ -53,14 +97,19 @@ export const useScheduleFilters = ({ teamMembers }: ScheduleFiltersProps) => {
   }, [teamMembers, search, teamMemberMetricsMap, filteredPayGrades])
 
   return {
-    search,
-    setSearch,
     payGradeFilterId,
     filteredPayGrades,
     togglePayGrade,
     removePayGrade,
-    filteredTeamMembers,
     resetFilteredPayGrades,
+    shiftTypeFilterId,
+    filteredShiftTypes,
+    toggleShiftType,
+    removeShiftType,
+    resetFilteredShiftTypes,
+    search,
+    setSearch,
+    filteredTeamMembers,
   }
 }
 

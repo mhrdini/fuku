@@ -54,7 +54,8 @@ export const ScheduleAssignmentCard = ({
     useScheduleActions()
 
   const handleUpdateShiftType = (shiftTypeId: string) => {
-    updateAssignmentShiftType({ assignmentId: assignment.id, shiftTypeId })
+    if (shiftTypeId !== assignment.shiftTypeId)
+      updateAssignmentShiftType({ assignmentId: assignment.id, shiftTypeId })
   }
 
   const handleDeleteAssignment = useCallback(() => {
