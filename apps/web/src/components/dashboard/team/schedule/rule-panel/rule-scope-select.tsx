@@ -51,7 +51,7 @@ const RuleScopeSelect = ({
       {/* target type*/}
       <Select value={rule.target} onValueChange={handleUpdateTargetType}>
         <SelectTrigger size='sm' variant='secondary'>
-          <SelectValue placeholder='Scope' />
+          <SelectValue placeholder={t('scope')} />
         </SelectTrigger>
         <SelectContent>
           {Object.values(RuleTargetValues)
@@ -82,7 +82,7 @@ const RuleScopeSelect = ({
         onValueChange={handleUpdateTargetId}
       >
         <SelectTrigger size='sm' variant='secondary'>
-          <SelectValue placeholder='Target' />
+          <SelectValue placeholder={t('target')} />
         </SelectTrigger>
         <SelectContent>
           {targetOptions[rule.target].map(({ value, label }) => (

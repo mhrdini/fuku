@@ -87,17 +87,17 @@ interface Preset {
 
 // Define presets
 const PRESETS: Preset[] = [
-  { name: 'today', label: 'Today' },
-  { name: 'yesterday', label: 'Yesterday' },
-  // { name: 'last7', label: 'Last 7 days' },
-  // { name: 'last14', label: 'Last 14 days' },
-  // { name: 'last30', label: 'Last 30 days' },
-  { name: 'lastWeek', label: 'Last Week' },
-  { name: 'thisWeek', label: 'This Week' },
-  { name: 'nextWeek', label: 'Next Week' },
-  { name: 'lastMonth', label: 'Last Month' },
-  { name: 'thisMonth', label: 'This Month' },
-  { name: 'nextMonth', label: 'Next Month' },
+  { name: 'today', label: 'today' },
+  { name: 'yesterday', label: 'yesterday' },
+  // { name: 'last7', label: 'last7' },
+  // { name: 'last14', label: 'last14' },
+  // { name: 'last30', label: 'last30' },
+  { name: 'lastWeek', label: 'lastWeek' },
+  { name: 'thisWeek', label: 'thisWeek' },
+  { name: 'nextWeek', label: 'nextWeek' },
+  { name: 'lastMonth', label: 'lastMonth' },
+  { name: 'thisMonth', label: 'thisMonth' },
+  { name: 'nextMonth', label: 'nextMonth' },
 ]
 
 /** The DateRangePicker component allows a user to select a range of dates */
@@ -117,6 +117,8 @@ export function DateRangePicker({
   view = 'day',
   weekStartsOn = 'monday',
 }: DateRangePickerProps & VariantProps<typeof buttonVariants>) {
+  const { t } = useTranslation()
+
   const [isOpen, setIsOpen] = useState(false)
 
   // Compute a dynamic range based on the view
@@ -633,12 +635,12 @@ export function DateRangePicker({
                   }}
                 >
                   <SelectTrigger className='w-[180px] mx-auto mb-2'>
-                    <SelectValue placeholder='Select...' />
+                    <SelectValue placeholder={t('presets')} />
                   </SelectTrigger>
                   <SelectContent>
                     {PRESETS.map(preset => (
                       <SelectItem key={preset.name} value={preset.name}>
-                        {preset.label}
+                        {preset.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -735,12 +737,13 @@ export function DateRangePicker({
           </div>
           {!isSmallScreen && (
             <div className='flex flex-col items-end gap-1 pr-2 pl-6 pb-6'>
+              <div>{t('presets')}</div>
               <div className='flex w-full flex-col items-end gap-1 pr-2 pl-6 pb-6'>
                 {PRESETS.map(preset => (
                   <PresetButton
                     key={preset.name}
                     preset={preset.name}
-                    label={preset.name} // lowercase for i18n
+                    label={preset.label}
                     isSelected={selectedPreset === preset.name}
                   />
                 ))}

@@ -117,7 +117,7 @@ export function UserAuthForm({
                           {...field}
                           id='form-user-auth-name'
                           aria-invalid={fieldState.invalid}
-                          placeholder='Name'
+                          placeholder={t('name')}
                           autoComplete='off'
                         />
                         {fieldState.invalid && (
@@ -139,7 +139,7 @@ export function UserAuthForm({
                         {...field}
                         id='form-user-auth-username'
                         aria-invalid={fieldState.invalid}
-                        placeholder='Username'
+                        placeholder={t('username')}
                         autoComplete='off'
                       />
                       {fieldState.invalid && (
@@ -162,7 +162,7 @@ export function UserAuthForm({
                           id='form-user-auth-email'
                           type='email'
                           aria-invalid={fieldState.invalid}
-                          placeholder='Email'
+                          placeholder={t('email')}
                           autoComplete='off'
                         />
                         {fieldState.invalid && (
@@ -185,7 +185,7 @@ export function UserAuthForm({
                         id='form-user-auth-password'
                         type='password'
                         aria-invalid={fieldState.invalid}
-                        placeholder='Password'
+                        placeholder={t('password')}
                         autoComplete='off'
                       />
                       {fieldState.invalid && (

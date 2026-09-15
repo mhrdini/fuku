@@ -173,7 +173,7 @@ const RuleConditionPanelItem = ({
         onValueChange={handleUpdateField}
       >
         <SelectTrigger size='sm' className='grow'>
-          <SelectValue placeholder='Field' />
+          <SelectValue placeholder={t('field')} />
         </SelectTrigger>
 
         <SelectContent>
@@ -191,7 +191,7 @@ const RuleConditionPanelItem = ({
         onValueChange={handleUpdateOperator}
       >
         <SelectTrigger size='sm'>
-          <SelectValue placeholder='Operator' />
+          <SelectValue placeholder={t('operator')} />
         </SelectTrigger>
 
         <SelectContent>
