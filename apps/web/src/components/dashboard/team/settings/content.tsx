@@ -175,7 +175,7 @@ export const TeamSettingsContent = () => {
                       id='form-team-settings-name'
                       {...field}
                       aria-invalid={fieldState.invalid}
-                      placeholder='Name'
+                      placeholder={t('name')}
                       autoComplete='off'
                       disabled={isPending}
                     />
@@ -198,7 +198,7 @@ export const TeamSettingsContent = () => {
                       {...field}
                       value={field.value || ''}
                       aria-invalid={fieldState.invalid}
-                      placeholder='Description'
+                      placeholder={t('description')}
                       autoComplete='off'
                       className='resize-none h-14 overflow-y-auto'
                       disabled={isPending}

@@ -1526,7 +1526,7 @@ function ShiftTypeItem({
       <ItemContent className='grid grid-cols-6 gap-2'>
         <Input
           value={name}
-          placeholder='Name'
+          placeholder={t('name')}
           className='col-span-2'
           onChange={e => {
             setName(e.target.value)
