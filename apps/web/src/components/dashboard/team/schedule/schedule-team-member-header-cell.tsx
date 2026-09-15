@@ -12,6 +12,8 @@ import {
   CommandSeparator,
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSub,
   DropdownMenuSubContent,
@@ -22,9 +24,18 @@ import {
   InputGroupButton,
   InputGroupInput,
   ScrollArea,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Separator,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import {
+  ArrowDownNarrowWideIcon,
+  ArrowUpWideNarrowIcon,
   BadgeDollarSignIcon,
   Check,
   Search,
@@ -32,7 +43,15 @@ import {
   X,
 } from 'lucide-react'
 
+import { TeamMemberGroupBySort } from '~/hooks/schedule/use-team-member-group-by-sort'
 import { ScheduleFilters } from '~/hooks/schedule/useScheduleFilters'
+import { preventCloseOnSelect } from '~/lib/event'
+import {
+  TEAM_MEMBER_GROUP_BY_KEYS,
+  TEAM_MEMBER_SORT_KEYS,
+  TeamMemberGroupByKey,
+  TeamMemberSortKey,
+} from '~/lib/team-member'
 
 interface ScheduleTeamMemberHeaderCellProps {
   data: {
@@ -42,6 +61,7 @@ interface ScheduleTeamMemberHeaderCellProps {
   derivedData: {
     payGradeMap: Map<string, PayGradeOutput>
   }
+  teamMemberGroupBySort: TeamMemberGroupBySort
 }
 
 export const ScheduleTeamMemberHeaderCell = ({
@@ -56,6 +76,15 @@ export const ScheduleTeamMemberHeaderCell = ({
     removePayGrade,
   },
   derivedData: { payGradeMap },
+  teamMemberGroupBySort: {
+    groupByKey,
+    setGroupByKey,
+    sortKey,
+    setSortKey,
+    direction,
+    toggleDirection,
+    reset,
+  },
 }: ScheduleTeamMemberHeaderCellProps) => {
   const { t } = useTranslation()
   return (
@@ -131,6 +160,84 @@ export const ScheduleTeamMemberHeaderCell = ({
               </Command>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
+          <Separator />
+          <DropdownMenuGroup className='*:p-0 p-2 grid grid-cols-2 gap-2 *:grid *:grid-cols-subgrid *:col-span-2 *:items-center *:*:odd:text-muted-foreground *:*:even:min-w-0 *:*:even:flex-1 *:*:even:w-full'>
+            <DropdownMenuItem noHighlight onSelect={preventCloseOnSelect}>
+              <div>{t('grouping')}</div>
+              <Select
+                value={groupByKey ?? 'undefined'}
+                onValueChange={value =>
+                  value === 'undefined'
+                    ? setGroupByKey(undefined)
+                    : setGroupByKey(value as TeamMemberGroupByKey)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value='undefined'>
+                      {t('noGrouping', 'No grouping')}
+                    </SelectItem>
+                    {TEAM_MEMBER_GROUP_BY_KEYS.map(groupByKey => (
+                      <SelectItem key={groupByKey} value={groupByKey}>
+                        {t(groupByKey)}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </DropdownMenuItem>
+            <DropdownMenuItem noHighlight onSelect={preventCloseOnSelect}>
+              <div className='flex gap-2 items-center justify-between'>
+                <div>{t('sorting')}</div>
+                <Button
+                  hidden={sortKey === undefined}
+                  variant='ghost'
+                  size='icon-sm'
+                  onClick={toggleDirection}
+                >
+                  <ArrowDownNarrowWideIcon
+                    className={cn(
+                      'hidden',
+                      sortKey && direction === 'asc' && 'flex',
+                    )}
+                  />
+                  <ArrowUpWideNarrowIcon
+                    className={cn(
+                      'hidden',
+                      sortKey && direction === 'desc' && 'flex',
+                    )}
+                  />
+                </Button>
+              </div>
+              <Select
+                value={sortKey ?? 'undefined'}
+                onValueChange={value =>
+                  value === 'undefined'
+                    ? setSortKey(undefined)
+                    : setSortKey(value as TeamMemberSortKey)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value='undefined'>
+                      {t('created', 'Created')}
+                    </SelectItem>
+                    {TEAM_MEMBER_SORT_KEYS.map(sortKey => (
+                      <SelectItem key={sortKey} value={sortKey}>
+                        {t(sortKey)}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

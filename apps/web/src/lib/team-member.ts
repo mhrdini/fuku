@@ -1,9 +1,8 @@
-// --- For data table rows ---
-// Extend the schema with included relations
-
 import { TeamMemberOutput, TeamMemberOutputSchema } from '@fuku/api/schemas'
 import i18next from '@fuku/i18n/server'
 import * as z from 'zod/v4'
+
+import { TeamMemberData } from './schedule'
 
 // from the procedure and also with UI-specific fields
 export const TeamMemberUISchema = TeamMemberOutputSchema.extend({
@@ -33,6 +32,75 @@ export const toTeamMemberUI = (
 
 export const getTeamMemberName = (
   tm: TeamMemberOutput | TeamMemberUI,
-): string => {
-  return tm.givenNames + (tm.familyName ?? '')
+): string =>
+  i18next.t('givennamesFamilyname', '{{givenNames}} {{familyName}}', {
+    givenNames: tm.givenNames,
+    familyName: tm.familyName,
+  })
+
+export const getTeamMemberTotalEarnings = (tm: TeamMemberData): number =>
+  tm.totalHours * (tm.payGrade ? tm.payGrade.baseRate : 0)
+
+// team member sorting
+export const TEAM_MEMBER_SORT_KEYS = [
+  'name',
+  'totalShifts',
+  'totalHours',
+  'totalEarnings',
+  'payGrade',
+] as const
+
+export type TeamMemberSortKey = (typeof TEAM_MEMBER_SORT_KEYS)[number]
+
+export const TEAM_MEMBER_SORT_COMPARATORS: Record<
+  TeamMemberSortKey,
+  (a: TeamMemberData, b: TeamMemberData) => number
+> = {
+  name: (a, b) => getTeamMemberName(a).localeCompare(getTeamMemberName(b)),
+  totalShifts: (a, b) => a.totalAssignedShifts - b.totalAssignedShifts,
+  totalHours: (a, b) => a.totalHours - b.totalHours,
+  totalEarnings: (a, b) =>
+    getTeamMemberTotalEarnings(a) - getTeamMemberTotalEarnings(b),
+  payGrade: (a, b) =>
+    (a.payGrade ? a.payGrade.name : '').localeCompare(b.payGrade?.name ?? ''),
+}
+
+export function sortTeamMembers(
+  tms: TeamMemberData[],
+  sortBy: TeamMemberSortKey | undefined,
+  direction: 'asc' | 'desc' = 'asc',
+): TeamMemberData[] {
+  if (!sortBy) return tms
+  const sorted = [...tms].sort(TEAM_MEMBER_SORT_COMPARATORS[sortBy])
+  return direction === 'asc' ? sorted : sorted.reverse()
+}
+
+// team member grouping
+export const TEAM_MEMBER_GROUP_BY_KEYS = ['payGrade'] as const
+
+export type TeamMemberGroupByKey = (typeof TEAM_MEMBER_GROUP_BY_KEYS)[number]
+
+export const TEAM_MEMBER_GROUP_BY_GETTERS: Record<
+  TeamMemberGroupByKey,
+  (tm: TeamMemberData) => string
+> = {
+  payGrade: tm => tm.payGrade?.name ?? '',
+}
+
+export function groupTeamMembers(
+  tms: TeamMemberData[],
+  groupBy: TeamMemberGroupByKey | undefined,
+): TeamMemberData[][] {
+  if (!groupBy) return [tms]
+  const groups = new Map<string, TeamMemberData[]>()
+
+  tms.forEach(tm => {
+    const key = TEAM_MEMBER_GROUP_BY_GETTERS[groupBy](tm)
+    if (!groups.has(key)) {
+      groups.set(key, [])
+    }
+    groups.get(key)!.push(tm)
+  })
+
+  return Array.from(groups.values())
 }

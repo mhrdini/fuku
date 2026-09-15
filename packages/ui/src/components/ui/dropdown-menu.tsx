@@ -65,10 +65,12 @@ function DropdownMenuItem({
   className,
   inset,
   variant = 'default',
+  noHighlight = false,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
   inset?: boolean
   variant?: 'default' | 'destructive'
+  noHighlight?: boolean
 }) {
   return (
     <DropdownMenuPrimitive.Item
@@ -77,6 +79,8 @@ function DropdownMenuItem({
       data-variant={variant}
       className={cn(
         "group/dropdown-menu-item relative flex cursor-default items-center gap-2 rounded-none px-2 py-2 text-xs outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-inset:pl-7 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-[variant=destructive]:*:[svg]:text-destructive",
+        noHighlight &&
+          'data-highlighted:bg-inherit data-highlighted:text-inherit [&[data-highlighted]>*]:bg-inherit [&[data-highlighted]>*]:text-inherit',
         className,
       )}
       {...props}

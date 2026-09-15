@@ -11,6 +11,7 @@ import { format } from 'date-fns'
 import { enGB, ja } from 'date-fns/locale'
 import { Plus } from 'lucide-react'
 
+import { useTeamMemberGroupBySort } from '~/hooks/schedule/use-team-member-group-by-sort'
 import { useScheduleActions } from '~/hooks/schedule/useScheduleActions'
 import { ScheduleData } from '~/hooks/schedule/useScheduleData'
 import { ScheduleDerivedData } from '~/hooks/schedule/useScheduleDerivedData'
@@ -42,6 +43,17 @@ export const ScheduleGrid = ({
   const { dayMetricsMap } = useScheduleStore()
 
   const { moveAssignmentToCell } = useScheduleActions()
+
+  const {
+    sortedTeamMembers,
+    groupByKey,
+    setGroupByKey,
+    sortKey,
+    setSortKey,
+    direction,
+    toggleDirection,
+    reset,
+  } = useTeamMemberGroupBySort(filteredTeamMembers)
 
   return (
     <DragDropProvider
@@ -102,8 +114,8 @@ export const ScheduleGrid = ({
           style={{
             gridTemplateColumns: `250px repeat(${daysRowList.length}, minmax(120px, 1fr))`,
             gridTemplateRows:
-              filteredTeamMembers.length > 1
-                ? `min-content repeat(${filteredTeamMembers.length - 1}, min-content) 1fr min-content`
+              sortedTeamMembers.length > 1
+                ? `min-content repeat(${sortedTeamMembers.length - 1}, min-content) 1fr min-content`
                 : 'min-content 1fr min-content',
           }}
         >
@@ -112,6 +124,16 @@ export const ScheduleGrid = ({
             data={{ payGrades }}
             filters={{ filteredTeamMembers, ...filters }}
             derivedData={{ payGradeMap }}
+            teamMemberGroupBySort={{
+              sortedTeamMembers,
+              groupByKey,
+              setGroupByKey,
+              sortKey,
+              setSortKey,
+              direction,
+              toggleDirection,
+              reset,
+            }}
           />
           {daysRowList.map(day => (
             <div
@@ -127,7 +149,7 @@ export const ScheduleGrid = ({
           ))}
 
           {/* member rows */}
-          {filteredTeamMembers.length === 0 ? (
+          {sortedTeamMembers.length === 0 ? (
             <>
               <div className='sticky left-0 z-20 p-4 flex items-start text-sm text-muted-foreground bg-background border-r border-input'>
                 {t('noMembersFound', 'No members found.')}
@@ -142,8 +164,8 @@ export const ScheduleGrid = ({
               ))}
             </>
           ) : (
-            filteredTeamMembers.map((tm, idx) => {
-              const isLastRow = idx === filteredTeamMembers.length - 1
+            sortedTeamMembers.map((tm, idx) => {
+              const isLastRow = idx === sortedTeamMembers.length - 1
               return (
                 <ScheduleRow
                   key={tm.id}
