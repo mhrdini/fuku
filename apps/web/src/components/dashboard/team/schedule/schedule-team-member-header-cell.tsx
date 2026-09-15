@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { PayGradeOutput } from '@fuku/api/schemas'
 import { useTranslation } from '@fuku/i18n/react'
 import {
@@ -15,6 +16,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -81,10 +83,16 @@ export const ScheduleTeamMemberHeaderCell = ({
     setSortKey,
     direction,
     toggleDirection,
-    reset,
+    reset: resetGroupBySort,
   },
 }: ScheduleTeamMemberHeaderCellProps) => {
   const { t } = useTranslation()
+
+  const resetAll = useCallback(() => {
+    resetFilteredPayGrades()
+    resetGroupBySort()
+  }, [])
+
   return (
     <div className='sticky left-0 top-0 z-40 p-2 border-b border-r border-input bg-background flex items-center gap-2'>
       <InputGroup className='flex-1 bg-input/30'>
@@ -236,6 +244,27 @@ export const ScheduleTeamMemberHeaderCell = ({
               </Select>
             </DropdownMenuItem>
           </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <div onSelect={preventCloseOnSelect}>
+            <div className='text-xs p-2 w-full flex items-center justify-between gap-2 *:text-muted-foreground'>
+              <div>{t('reset')}</div>
+              <div className='flex items-center gap-1'>
+                <Button
+                  variant='link'
+                  size='xs'
+                  onClick={resetFilteredPayGrades}
+                >
+                  {t('filters')}
+                </Button>
+                <Button variant='link' size='xs' onClick={resetGroupBySort}>
+                  {t('groupSort')}
+                </Button>
+                <Button variant='link' size='xs' onClick={resetAll}>
+                  {t('all')}
+                </Button>
+              </div>
+            </div>
+          </div>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
