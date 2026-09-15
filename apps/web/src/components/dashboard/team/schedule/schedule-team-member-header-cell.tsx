@@ -245,24 +245,18 @@ export const ScheduleTeamMemberHeaderCell = ({
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <div onSelect={preventCloseOnSelect}>
-            <div className='text-xs p-2 w-full flex items-center justify-between gap-2 *:text-muted-foreground'>
-              <div>{t('reset')}</div>
-              <div className='flex items-center gap-1'>
-                <Button
-                  variant='link'
-                  size='xs'
-                  onClick={resetFilteredPayGrades}
-                >
-                  {t('filters')}
-                </Button>
-                <Button variant='link' size='xs' onClick={resetGroupBySort}>
-                  {t('groupSort')}
-                </Button>
-                <Button variant='link' size='xs' onClick={resetAll}>
-                  {t('all')}
-                </Button>
-              </div>
+          <div className='text-xs p-2 w-full flex items-center justify-between gap-2 *:text-muted-foreground'>
+            <div>{t('reset')}</div>
+            <div className='flex items-center gap-1'>
+              <Button variant='link' size='xs' onClick={resetFilteredPayGrades}>
+                {t('filters')}
+              </Button>
+              <Button variant='link' size='xs' onClick={resetGroupBySort}>
+                {t('groupSort')}
+              </Button>
+              <Button variant='link' size='xs' onClick={resetAll}>
+                {t('all')}
+              </Button>
             </div>
           </div>
         </DropdownMenuContent>
