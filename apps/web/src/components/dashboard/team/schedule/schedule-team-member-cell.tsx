@@ -5,6 +5,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
   Item,
+  ItemActions,
   ItemContent,
   ItemDescription,
   ItemTitle,
@@ -12,6 +13,7 @@ import {
 import { cn } from '@fuku/ui/lib/utils'
 
 import { TeamMemberData } from '~/lib/schedule'
+import { getTeamMemberTotalEarnings } from '~/lib/team-member'
 
 export const ScheduleTeamMemberCell = ({
   teamMember,
@@ -24,7 +26,8 @@ export const ScheduleTeamMemberCell = ({
       <CollapsibleTrigger
         className={cn(
           'flex min-h-0 min-w-0 items-center h-[94px]',
-          // 'data-[state=closed]:h-full data-[state=open]:h-fit data-[state=open]:flex-shrink-0',
+          // 'data-[state=closed]:h-full data-[state=open]:h-fit
+          // data-[state=open]:flex-shrink-0',
         )}
       >
         <Item className='size-full'>
@@ -42,33 +45,47 @@ export const ScheduleTeamMemberCell = ({
             >
               {t(
                 'totalAssignedShiftsHours',
-                '{{totalAssignedShifts}} shifts, {{totalHours}} hours',
+                '{{totalAssignedShifts}} shifts, {{totalAssignedHours}} hours',
                 {
                   totalAssignedShifts: teamMember.totalAssignedShifts,
-                  totalHours: teamMember.totalHours,
+                  totalAssignedHours: teamMember.totalHours,
                 },
               )}
             </ItemDescription>
           </ItemContent>
+          {teamMember.payGrade && (
+            <ItemActions className='group-data-[state=open]/panel:hidden'>
+              <Badge variant='secondary'>{teamMember.payGrade.name}</Badge>
+            </ItemActions>
+          )}
         </Item>
       </CollapsibleTrigger>
       <CollapsibleContent>
         <Item className='*:text-xs pt-0 grid grid-cols-[auto_1fr] gap-2 **:justify-self-start *:self-center *:odd:self-start'>
           <Badge variant='outline'>{t('payGrade', 'Pay Grade')}</Badge>
-          <div>{teamMember.payGrade?.name}</div>
-          <Badge variant='outline'>{t('shiftHours', 'Shift Hours')}</Badge>
-          <div className='grid gap-1 grid-flow-col'>
-            <div>
-              {t('totalHours', '{{totalHours}} hours', {
-                totalHours: teamMember.totalHours,
-              })}
-            </div>
-            <div>
-              (
-              {teamMember.totalHours *
-                (teamMember.payGrade ? teamMember.payGrade.baseRate : 0)}
-              )
-            </div>
+          <div className='flex items-center gap-2'>
+            {teamMember.payGrade ? (
+              <>
+                <Badge variant='secondary'>{teamMember.payGrade.name}</Badge>
+                <Badge variant='outline'>{teamMember.payGrade.baseRate}</Badge>
+              </>
+            ) : (
+              '-'
+            )}
+          </div>
+          <Badge variant='outline'>{t('totalEarnings')}</Badge>
+          <div className='grid gap-1 grid-cols-1 *:py-0.5'>
+            <>{getTeamMemberTotalEarnings(teamMember)}</>
+            {/* <div>
+              {t(
+                'totalAssignedShiftsHours',
+                '{{totalAssignedShifts}} shifts, {{totalAssignedHours}} hours',
+                {
+                  totalAssignedShifts: teamMember.totalAssignedShifts,
+                  totalAssignedHours: teamMember.totalHours,
+                },
+              )}
+            </div> */}
           </div>
         </Item>
       </CollapsibleContent>

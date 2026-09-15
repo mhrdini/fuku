@@ -67,6 +67,7 @@ import {
 import { useRuleEditor } from '~/hooks/rule-panel/use-rule-editor'
 import { useRuleFilters } from '~/hooks/rule-panel/use-rule-filters'
 import { useRuleGroupBySort } from '~/hooks/rule-panel/use-rule-group-by-sort'
+import { preventCloseOnSelect } from '~/lib/event'
 import { MutationMode } from '~/lib/query'
 import {
   RULE_GROUP_BY_KEYS,
@@ -222,8 +223,6 @@ export const RulePanelPopoverButton = ({
     })
   }
 
-  const preventCloseOnSelect = (e: Event) => e.preventDefault()
-
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -352,7 +351,7 @@ export const RulePanelPopoverButton = ({
               <PopoverContent align='end' className='max-w-max p-0'>
                 <Command>
                   <div className='p-2 grid gap-2 grid-cols-2 *:flex *:items-center *:min-w-0 *:flex-1 *:w-full *:odd:text-muted-foreground'>
-                    <div>Grouping</div>
+                    <div>{t('grouping')}</div>
                     <Select
                       value={groupByKey ?? 'undefined'}
                       onValueChange={value =>
@@ -378,7 +377,7 @@ export const RulePanelPopoverButton = ({
                       </SelectContent>
                     </Select>
                     <div className='flex gap-2 justify-between'>
-                      <div>Sorting</div>
+                      <div>{t('sorting')}</div>
                       <Button
                         hidden={sortKey === undefined}
                         variant='ghost'
@@ -439,7 +438,7 @@ export const RulePanelPopoverButton = ({
               Object.entries(sortedRules).map(([ruleId, rule]) => (
                 <div key={ruleId}>
                   <CommandItem
-                    noHighlightOnSelected
+                    noHighlight
                     value={getRuleSearchValue(
                       rule,
                       ruleConditions ? ruleConditions[rule.id] || [] : [],

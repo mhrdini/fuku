@@ -144,18 +144,18 @@ function CommandSeparator({
 
 function CommandItem({
   className,
-  noHighlightOnSelected = false,
+  noHighlight = false,
   children,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Item> & {
-  noHighlightOnSelected?: boolean
+  noHighlight?: boolean
 }) {
   return (
     <CommandPrimitive.Item
       data-slot='command-item'
       className={cn(
         "group/command-item relative flex cursor-default items-center gap-2 rounded-none px-2 py-2 text-xs outline-hidden select-none in-data-[slot=dialog-content]:rounded-none! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        !noHighlightOnSelected &&
+        !noHighlight &&
           'data-selected:bg-muted data-selected:text-foreground data-selected:*:[svg]:text-foreground',
         className,
       )}
