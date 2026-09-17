@@ -3,7 +3,7 @@ import {
   RuleMetricValues,
   RuleOperator,
   RuleOperatorValues,
-  RuleTargetValues,
+  RuleScopeValues,
   RuleTimeWindow,
   RuleTimeWindowValues,
 } from '@fuku/domain/schemas'
@@ -293,7 +293,7 @@ export class ConstraintModelBuilder {
         const windowLength = rule.threshold + 1
 
         for (const tm of this.ctx.teamMembers) {
-          if (!this.isRuleTargetMember(rule, tm)) continue
+          if (!this.isRuleScopeMember(rule, tm)) continue
 
           const shiftTypes = this.getRelevantShiftTypes(rule)
 
@@ -353,7 +353,7 @@ export class ConstraintModelBuilder {
           const auxVariables: string[] = []
 
           for (const tm of this.ctx.teamMembers) {
-            if (!this.isRuleTargetMember(rule, tm)) continue
+            if (!this.isRuleScopeMember(rule, tm)) continue
 
             const auxVarName = `uniqueMember__${rule.id}__${tm.id}__${windowIndex}`
             auxVariables.push(auxVarName)
@@ -431,7 +431,7 @@ export class ConstraintModelBuilder {
         if (validDays.length === 0) continue
 
         for (const tm of this.ctx.teamMembers) {
-          if (!this.isRuleTargetMember(rule, tm)) continue
+          if (!this.isRuleScopeMember(rule, tm)) continue
 
           const { coefficients, adjustRhs, flipOperator } =
             this.computeMetricExpression(rule, tm.id, validDays)
@@ -885,18 +885,17 @@ export class ConstraintModelBuilder {
     }
   }
 
-  private isRuleTargetMember(rule: Rule, teamMember: TeamMember) {
-    if (rule.target === 'GLOBAL') return true
-    if (rule.target === 'PAY_GRADE')
+  private isRuleScopeMember(rule: Rule, teamMember: TeamMember) {
+    if (rule.scope === 'GLOBAL') return true
+    if (rule.scope === 'PAY_GRADE')
       return teamMember.payGradeId === rule.payGradeId
-    if (rule.target === 'SHIFT_TYPE') {
+    if (rule.scope === 'SHIFT_TYPE') {
       const eligibleShiftTypes = this.payGradeToShiftTypesMap.get(
         teamMember.payGradeId!,
       )
       return eligibleShiftTypes?.has(rule.shiftTypeId!) ?? false
     }
-    if (rule.target === 'TEAM_MEMBER')
-      return teamMember.id === rule.teamMemberId
+    if (rule.scope === 'TEAM_MEMBER') return teamMember.id === rule.teamMemberId
     return false
   }
 
@@ -914,7 +913,7 @@ export class ConstraintModelBuilder {
   }
 
   private getRelevantShiftTypes(rule: Rule): ShiftType[] {
-    if (rule.target === RuleTargetValues.SHIFT_TYPE && rule.shiftTypeId) {
+    if (rule.scope === RuleScopeValues.SHIFT_TYPE && rule.shiftTypeId) {
       return this.ctx.shiftTypes.filter(st => st.id === rule.shiftTypeId)
     }
     return this.ctx.shiftTypes

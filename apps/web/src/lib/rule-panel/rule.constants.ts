@@ -5,8 +5,8 @@ import {
   RuleConditionOperatorValues,
   RuleMetric,
   RuleMetricValues,
-  RuleTarget,
-  RuleTargetValues,
+  RuleScope,
+  RuleScopeValues,
 } from '@fuku/domain/schemas'
 import {
   BadgeDollarSignIcon,
@@ -44,19 +44,19 @@ export const RULE_CONDITION_VALUE_OPTIONS_BY_FIELD = {
 
 export const WEEKDAY_CONDITION_ID_PREFIX = 'weekday_condition_'
 
-// rule scopes/targets
-export const RULE_TARGET_LABELS: Record<RuleTarget, string> = {
-  [RuleTargetValues.PAY_GRADE]: 'Pay Grade',
-  [RuleTargetValues.SHIFT_TYPE]: 'Shift Type',
-  [RuleTargetValues.TEAM_MEMBER]: 'Team Member',
-  [RuleTargetValues.GLOBAL]: 'Global',
+// rule scopes/scopes
+export const RULE_SCOPE_LABELS: Record<RuleScope, string> = {
+  [RuleScopeValues.PAY_GRADE]: 'Pay Grade',
+  [RuleScopeValues.SHIFT_TYPE]: 'Shift Type',
+  [RuleScopeValues.TEAM_MEMBER]: 'Team Member',
+  [RuleScopeValues.GLOBAL]: 'Global',
 }
 
-export const RULE_TARGET_ICONS: Record<RuleTarget, LucideIcon> = {
-  [RuleTargetValues.PAY_GRADE]: BadgeDollarSignIcon,
-  [RuleTargetValues.SHIFT_TYPE]: ClockIcon,
-  [RuleTargetValues.TEAM_MEMBER]: UserCircle2Icon,
-  [RuleTargetValues.GLOBAL]: GlobeIcon,
+export const RULE_SCOPE_ICONS: Record<RuleScope, LucideIcon> = {
+  [RuleScopeValues.PAY_GRADE]: BadgeDollarSignIcon,
+  [RuleScopeValues.SHIFT_TYPE]: ClockIcon,
+  [RuleScopeValues.TEAM_MEMBER]: UserCircle2Icon,
+  [RuleScopeValues.GLOBAL]: GlobeIcon,
 }
 
 // rule metrics

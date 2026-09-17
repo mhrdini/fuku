@@ -6,9 +6,9 @@ import {
 } from '@fuku/api/schemas'
 import {
   RuleMetric,
-  RuleTarget,
-  RuleTargetSchema,
-  RuleTargetValues,
+  RuleScope,
+  RuleScopeSchema,
+  RuleScopeValues,
 } from '@fuku/domain/schemas'
 
 import {
@@ -17,17 +17,17 @@ import {
   WEEKDAY_CONDITION_ID_PREFIX,
 } from './rule.constants'
 
-type TargetOptions = Record<string, { value: string; label: string }[]>
+type ScopeOptions = Record<string, { value: string; label: string }[]>
 
 export function getRuleSearchValue(
   rule: RuleOutput,
   conditions: RuleConditionOutput[],
-  targetOptions: TargetOptions,
+  scopeOptions: ScopeOptions,
 ) {
-  const targetLabel =
-    rule.target === 'GLOBAL'
+  const scopeLabel =
+    rule.scope === 'GLOBAL'
       ? 'global'
-      : (targetOptions[rule.target].find(
+      : (scopeOptions[rule.scope].find(
           opt =>
             opt.value ===
             (rule.teamMemberId ?? rule.payGradeId ?? rule.shiftTypeId),
@@ -37,8 +37,8 @@ export function getRuleSearchValue(
     rule.metric,
     rule.timeWindow,
     rule.operator,
-    rule.target,
-    targetLabel,
+    rule.scope,
+    scopeLabel,
     rule.hardConstraint ? 'hard required' : 'soft preferred',
   ]
     .join(' ')
@@ -64,48 +64,48 @@ export function isSyntheticCondition(conditionId: string) {
   return conditionId.startsWith(WEEKDAY_CONDITION_ID_PREFIX)
 }
 
-// what changes on the rule when the target type (scope) changes
-export function buildTargetTypeUpdate(
+// what changes on the rule when the scope type (scope) changes
+export function buildScopeTypeUpdate(
   rule: RuleOutput,
-  target: string,
-  targetOptions: TargetOptions,
+  scope: string,
+  scopeOptions: ScopeOptions,
 ): Partial<RuleUpdateInput> {
   const updatedFields: Partial<RuleUpdateInput> = {
     ...(rule.penalty ? { penalty: rule.penalty } : {}),
-    target: RuleTargetSchema.parse(target),
+    scope: RuleScopeSchema.parse(scope),
     teamMemberId: null,
     payGradeId: null,
     shiftTypeId: null,
   }
 
-  switch (target) {
-    case RuleTargetValues.TEAM_MEMBER:
+  switch (scope) {
+    case RuleScopeValues.TEAM_MEMBER:
       updatedFields.teamMemberId =
-        targetOptions[RuleTargetValues.TEAM_MEMBER][0]?.value ?? null
+        scopeOptions[RuleScopeValues.TEAM_MEMBER][0]?.value ?? null
       break
-    case RuleTargetValues.PAY_GRADE:
+    case RuleScopeValues.PAY_GRADE:
       updatedFields.payGradeId =
-        targetOptions[RuleTargetValues.PAY_GRADE][0]?.value ?? null
+        scopeOptions[RuleScopeValues.PAY_GRADE][0]?.value ?? null
       break
-    case RuleTargetValues.SHIFT_TYPE:
+    case RuleScopeValues.SHIFT_TYPE:
       updatedFields.shiftTypeId =
-        targetOptions[RuleTargetValues.SHIFT_TYPE][0]?.value ?? null
+        scopeOptions[RuleScopeValues.SHIFT_TYPE][0]?.value ?? null
       break
   }
   return updatedFields
 }
 
-// what changes on the rule when the target id (which member/grade/type) changes
-export function buildTargetIdUpdate(
+// what changes on the rule when the scope id (which member/grade/type) changes
+export function buildScopeIdUpdate(
   rule: RuleOutput,
   id: string,
 ): Partial<RuleUpdateInput> | null {
-  switch (rule.target) {
-    case RuleTargetValues.TEAM_MEMBER:
+  switch (rule.scope) {
+    case RuleScopeValues.TEAM_MEMBER:
       return id === rule.teamMemberId ? null : { teamMemberId: id }
-    case RuleTargetValues.PAY_GRADE:
+    case RuleScopeValues.PAY_GRADE:
       return id === rule.payGradeId ? null : { payGradeId: id }
-    case RuleTargetValues.SHIFT_TYPE:
+    case RuleScopeValues.SHIFT_TYPE:
       return id === rule.shiftTypeId ? null : { shiftTypeId: id }
     default:
       return null
@@ -114,7 +114,7 @@ export function buildTargetIdUpdate(
 
 // filtering
 export type RuleFilters = {
-  targetList?: RuleTarget[]
+  scopeList?: RuleScope[]
   activeList?: boolean[]
   metricList?: RuleMetric[]
   hardConstraintList?: boolean[]
@@ -127,9 +127,9 @@ export function matchesRuleFilters(
   if (!filters) return true
 
   if (
-    filters.targetList &&
-    filters.targetList.length &&
-    !filters.targetList.includes(rule.target)
+    filters.scopeList &&
+    filters.scopeList.length &&
+    !filters.scopeList.includes(rule.scope)
   )
     return false
   if (
@@ -169,7 +169,7 @@ export const RULE_SORT_COMPARATORS: Record<
 > = {
   threshold: (a, b) => a.threshold - b.threshold,
   metric: (a, b) => a.metric.localeCompare(b.metric),
-  scope: (a, b) => a.target.localeCompare(b.target),
+  scope: (a, b) => a.scope.localeCompare(b.scope),
   status: (a, b) => Number(b.active) - Number(a.active),
 }
 
@@ -191,7 +191,7 @@ export function groupRules(
   groupBy: RuleGroupByKey | undefined,
 ): RuleOutput[][] {
   if (!groupBy) return [rules]
-  const groupKey = groupBy === 'scope' ? 'target' : 'metric'
+  const groupKey = groupBy === 'scope' ? 'scope' : 'metric'
 
   const groups = new Map<string, RuleOutput[]>()
 

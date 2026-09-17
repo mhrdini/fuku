@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { RuleOutput } from '@fuku/api/schemas'
-import { RuleMetric, RuleTarget } from '@fuku/domain/schemas'
+import { RuleMetric, RuleScope } from '@fuku/domain/schemas'
 
 import {
   matchesRuleFilters,
@@ -13,10 +13,10 @@ import {
 export function useRuleFilters(rules: RuleOutput[]) {
   const [filters, setFilters] = useState<RuleFilters>({})
 
-  const toggleTarget = (target: RuleTarget) =>
+  const toggleScope = (scope: RuleScope) =>
     setFilters(prev => ({
       ...prev,
-      targetList: toggleListValue(prev.targetList, target),
+      scopeList: toggleListValue(prev.scopeList, scope),
     }))
 
   const toggleMetric = (metric: RuleMetric) =>
@@ -55,7 +55,7 @@ export function useRuleFilters(rules: RuleOutput[]) {
   return {
     filteredRules,
     filters,
-    toggleTarget,
+    toggleScope,
     toggleMetric,
     toggleActive,
     toggleHardConstraint,

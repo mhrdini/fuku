@@ -34,7 +34,7 @@ import RuleScopeSelect from './rule-scope-select'
 const RulePanelItem = ({
   rule,
   ruleConditions,
-  targetOptions,
+  scopeOptions,
   createRule,
   updateRule,
   deleteRule,
@@ -44,7 +44,7 @@ const RulePanelItem = ({
 }: {
   rule: RuleOutput
   ruleConditions: RuleConditionOutput[]
-  targetOptions: Record<string, { value: string; label: string }[]>
+  scopeOptions: Record<string, { value: string; label: string }[]>
   createRule: (rule: RuleCreateInput) => Promise<RuleOutput>
   updateRule: (rule: RuleUpdateInput) => Promise<RuleOutput>
   deleteRule: (ruleId: string) => Promise<RuleOutput>
@@ -91,7 +91,7 @@ const RulePanelItem = ({
         <div>
           <RuleScopeSelect
             rule={rule}
-            targetOptions={targetOptions}
+            scopeOptions={scopeOptions}
             updateRule={updateRule}
           />
         </div>

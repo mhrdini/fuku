@@ -16,7 +16,7 @@ import {
 import {
   RuleMetricValues,
   RuleOperatorValues,
-  RuleTargetValues,
+  RuleScopeValues,
   RuleTimeWindowValues,
 } from '@fuku/domain/schemas'
 import i18next from '@fuku/i18n/client'
@@ -72,9 +72,9 @@ import { MutationMode } from '~/lib/query'
 import {
   RULE_GROUP_BY_KEYS,
   RULE_METRIC_LABELS,
+  RULE_SCOPE_ICONS,
+  RULE_SCOPE_LABELS,
   RULE_SORT_KEYS,
-  RULE_TARGET_ICONS,
-  RULE_TARGET_LABELS,
   WEEKDAY_CONDITION_ID_PREFIX,
 } from '~/lib/rule-panel/rule.constants'
 import { RuleGroupByKey, RuleSortKey } from '~/lib/rule-panel/rule.helpers'
@@ -83,12 +83,12 @@ import RulePanelItem from './rule-panel-item'
 function getRuleSearchValue(
   rule: RuleOutput,
   conditions: RuleConditionOutput[],
-  targetOptions: Record<string, { value: string; label: string }[]>,
+  scopeOptions: Record<string, { value: string; label: string }[]>,
 ) {
-  const targetLabel =
-    rule.target === 'GLOBAL'
+  const scopeLabel =
+    rule.scope === 'GLOBAL'
       ? 'global'
-      : (targetOptions[rule.target].find(
+      : (scopeOptions[rule.scope].find(
           opt =>
             opt.value ===
             (rule.teamMemberId ?? rule.payGradeId ?? rule.shiftTypeId),
@@ -98,8 +98,8 @@ function getRuleSearchValue(
     i18next.t(rule.metric),
     i18next.t(rule.timeWindow),
     i18next.t(rule.operator),
-    i18next.t(rule.target),
-    targetLabel,
+    i18next.t(rule.scope),
+    scopeLabel,
     rule.hardConstraint ? i18next.t('required') : i18next.t('preferred'),
   ]
     .join(' ')
@@ -160,7 +160,7 @@ export const RulePanelPopoverButton = ({
     createRuleCondition,
     updateRuleCondition,
     deleteRuleCondition,
-    targetOptions,
+    scopeOptions,
   } = useRuleEditor({
     initialRules,
     initialRuleConditions,
@@ -176,7 +176,7 @@ export const RulePanelPopoverButton = ({
     filteredRules,
     filters,
     toggleActive,
-    toggleTarget,
+    toggleScope,
     toggleMetric,
     hasActiveFilters,
     clearFilters,
@@ -210,7 +210,7 @@ export const RulePanelPopoverButton = ({
     if (team.id === undefined) return
     createRule({
       teamId: team.id,
-      target: RuleTargetValues.GLOBAL,
+      scope: RuleScopeValues.GLOBAL,
       payGradeId: null,
       shiftTypeId: null,
       teamMemberId: null,
@@ -289,19 +289,19 @@ export const RulePanelPopoverButton = ({
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
                     <DropdownMenuGroup>
-                      {Object.values(RuleTargetValues).map(value => {
-                        const Icon = RULE_TARGET_ICONS[value]
+                      {Object.values(RuleScopeValues).map(value => {
+                        const Icon = RULE_SCOPE_ICONS[value]
                         return (
                           <DropdownMenuCheckboxItem
                             key={value}
                             checked={
-                              filters.targetList?.includes(value) ?? false
+                              filters.scopeList?.includes(value) ?? false
                             }
-                            onCheckedChange={() => toggleTarget(value)}
+                            onCheckedChange={() => toggleScope(value)}
                             onSelect={preventCloseOnSelect}
                           >
                             <Icon />
-                            {t(value, RULE_TARGET_LABELS[value])}
+                            {t(value, RULE_SCOPE_LABELS[value])}
                           </DropdownMenuCheckboxItem>
                         )
                       })}
@@ -442,7 +442,7 @@ export const RulePanelPopoverButton = ({
                     value={getRuleSearchValue(
                       rule,
                       ruleConditions ? ruleConditions[rule.id] || [] : [],
-                      targetOptions,
+                      scopeOptions,
                     )}
                     className='pr-4'
                   >
@@ -460,7 +460,7 @@ export const RulePanelPopoverButton = ({
                             : ruleConditions[rule.id] || []
                           : []
                       }
-                      targetOptions={targetOptions}
+                      scopeOptions={scopeOptions}
                       createRule={createRule}
                       updateRule={updateRule}
                       deleteRule={deleteRule}
