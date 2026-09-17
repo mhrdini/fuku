@@ -209,7 +209,7 @@
   "status": "ステータス",
   "step": "ステップ",
   "summary": "サマリー",
-  "target": "対象",
+  "scope": "対象",
   "team": "チーム",
   "teammemberid_val": "{{teamMemberId}}_{{val}}",
   "teamMember": "チームメンバー",

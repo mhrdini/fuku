@@ -1,8 +1,5 @@
 import * as z from 'zod/v4'
 
-
-
-
 export function enumToSelfMap<T extends z.ZodEnum<any>>(
   schema: T,
 ): { [K in z.output<T>]: K } {
@@ -47,11 +44,11 @@ export const RuleOperatorSchema = z.enum(['MIN', 'MAX'])
 export const RuleOperatorValues = enumToSelfMap(RuleOperatorSchema)
 export type RuleOperator = z.infer<typeof RuleOperatorSchema>
 
-export const RuleTargetSchema = z.enum([
+export const RuleScopeSchema = z.enum([
   'PAY_GRADE',
   'SHIFT_TYPE',
   'TEAM_MEMBER',
   'GLOBAL',
 ])
-export const RuleTargetValues = enumToSelfMap(RuleTargetSchema)
-export type RuleTarget = z.infer<typeof RuleTargetSchema>
+export const RuleScopeValues = enumToSelfMap(RuleScopeSchema)
+export type RuleScope = z.infer<typeof RuleScopeSchema>
