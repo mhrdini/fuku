@@ -3,14 +3,14 @@ import * as z from 'zod/v4'
 import {
   RuleMetricSchema,
   RuleOperatorSchema,
-  RuleTargetSchema,
+  RuleScopeSchema,
   RuleTimeWindowSchema,
 } from './enums'
 
 export const RuleSchema = z.object({
   id: z.string(),
   teamId: z.string(),
-  target: RuleTargetSchema,
+  scope: RuleScopeSchema,
   payGradeId: z.string().nullable(),
   shiftTypeId: z.string().nullable(),
   teamMemberId: z.string().nullable(),

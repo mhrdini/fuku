@@ -52,7 +52,7 @@ export const useRuleEditor = ({
     setRuleConditions(initialRuleConditions)
   }, [initialRuleConditions])
 
-  const targetOptions = useMemo(
+  const scopeOptions = useMemo(
     () => ({
       TEAM_MEMBER: teamMembers.map(m => ({
         value: m.id,
@@ -177,6 +177,6 @@ export const useRuleEditor = ({
     updateRuleCondition,
     deleteRuleCondition,
 
-    targetOptions,
+    scopeOptions,
   }
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { RuleOutput, RuleUpdateInput } from '@fuku/api/schemas'
-import { RuleTargetValues } from '@fuku/domain/schemas'
+import { RuleScopeValues } from '@fuku/domain/schemas'
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Select,
@@ -12,19 +12,19 @@ import {
   Switch,
 } from '@fuku/ui/components'
 
-import { RULE_TARGET_LABELS } from '~/lib/rule-panel/rule.constants'
+import { RULE_SCOPE_LABELS } from '~/lib/rule-panel/rule.constants'
 import {
-  buildTargetIdUpdate,
-  buildTargetTypeUpdate,
+  buildScopeIdUpdate,
+  buildScopeTypeUpdate,
 } from '~/lib/rule-panel/rule.helpers'
 
 const RuleScopeSelect = ({
   rule,
-  targetOptions,
+  scopeOptions,
   updateRule,
 }: {
   rule: RuleOutput
-  targetOptions: Record<string, { value: string; label: string }[]>
+  scopeOptions: Record<string, { value: string; label: string }[]>
   updateRule: (rule: RuleUpdateInput) => Promise<RuleOutput>
 }) => {
   const { t } = useTranslation()
@@ -33,59 +33,59 @@ const RuleScopeSelect = ({
     updateRule({ ...rule, active })
   }
 
-  const handleUpdateTargetType = (target: string) => {
-    if (target === rule.target) return
+  const handleUpdateScopeType = (scope: string) => {
+    if (scope === rule.scope) return
     updateRule({
       ...rule,
-      ...buildTargetTypeUpdate(rule, target, targetOptions),
+      ...buildScopeTypeUpdate(rule, scope, scopeOptions),
     })
   }
 
-  const handleUpdateTargetId = (id: string) => {
-    const update = buildTargetIdUpdate(rule, id)
+  const handleUpdateScopeId = (id: string) => {
+    const update = buildScopeIdUpdate(rule, id)
     if (update) updateRule({ ...rule, ...update })
   }
 
   return (
     <>
-      {/* target type*/}
-      <Select value={rule.target} onValueChange={handleUpdateTargetType}>
+      {/* scope type*/}
+      <Select value={rule.scope} onValueChange={handleUpdateScopeType}>
         <SelectTrigger size='sm' variant='secondary'>
           <SelectValue placeholder={t('scope')} />
         </SelectTrigger>
         <SelectContent>
-          {Object.values(RuleTargetValues)
+          {Object.values(RuleScopeValues)
             .filter(
               value =>
-                targetOptions[value].length > 0 ||
-                value === RuleTargetValues.GLOBAL,
+                scopeOptions[value].length > 0 ||
+                value === RuleScopeValues.GLOBAL,
             )
             .map(value => (
               <SelectItem key={value} value={value}>
-                {t(value, RULE_TARGET_LABELS[value])}
+                {t(value, RULE_SCOPE_LABELS[value])}
               </SelectItem>
             ))}
         </SelectContent>
       </Select>
-      {/* target selection, dependent on target */}
+      {/* scope selection, dependent on scope */}
       <Select
-        disabled={rule.target === RuleTargetValues.GLOBAL}
+        disabled={rule.scope === RuleScopeValues.GLOBAL}
         value={
-          rule.target === RuleTargetValues.GLOBAL
+          rule.scope === RuleScopeValues.GLOBAL
             ? undefined
-            : rule.target === RuleTargetValues.TEAM_MEMBER
+            : rule.scope === RuleScopeValues.TEAM_MEMBER
               ? (rule.teamMemberId ?? undefined)
-              : rule.target === RuleTargetValues.PAY_GRADE
+              : rule.scope === RuleScopeValues.PAY_GRADE
                 ? (rule.payGradeId ?? undefined)
                 : (rule.shiftTypeId ?? undefined)
         }
-        onValueChange={handleUpdateTargetId}
+        onValueChange={handleUpdateScopeId}
       >
         <SelectTrigger size='sm' variant='secondary'>
-          <SelectValue placeholder={t('target')} />
+          <SelectValue placeholder={t('scope')} />
         </SelectTrigger>
         <SelectContent>
-          {targetOptions[rule.target].map(({ value, label }) => (
+          {scopeOptions[rule.scope].map(({ value, label }) => (
             <SelectItem key={value} value={value}>
               {label}
             </SelectItem>

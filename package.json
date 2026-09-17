@@ -10,7 +10,7 @@
     "build": "dotenv -e .env.${NODE_ENV:-production} -- turbo run build",
     "db:migrate:deploy": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:deploy",
     "db:migrate:dev": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:dev",
-    "db:migrate:dev:auto": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:dev:auto",
+    "db:migrate:dev:auto": "dotenv -e i.env.${NODE_ENV:-development} -- turbo run db:migrate:dev:auto",
     "db:push": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:push",
     "db:seed": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:seed",
     "db:seed:dev": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:seed:dev",

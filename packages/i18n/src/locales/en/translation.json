@@ -209,7 +209,7 @@
   "status": "Status",
   "step": "Step",
   "summary": "Summary",
-  "target": "Target",
+  "scope": "Scope",
   "team": "Team",
   "teammemberid_val": "{{teamMemberId}}_{{val}}",
   "teamMember": "Team Member",

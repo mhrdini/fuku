@@ -171,7 +171,7 @@ enum RuleOperator {
   MAX // value <= threshold
 }
 
-enum RuleTarget {
+enum RuleScope {
   PAY_GRADE
   SHIFT_TYPE
   TEAM_MEMBER
@@ -182,7 +182,7 @@ model Rule {
   id           String      @id @default(uuid())
   teamId       String      @map("team_id")
   team         Team        @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  target       RuleTarget  @default(GLOBAL)
+  scope       RuleScope  @default(GLOBAL)
   payGradeId   String?     @map("pay_grade_id")
   payGrade     PayGrade?   @relation(fields: [payGradeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   shiftTypeId  String?     @map("shift_type_id")

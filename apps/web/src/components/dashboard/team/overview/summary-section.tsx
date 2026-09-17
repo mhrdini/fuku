@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import i18next from '@fuku/i18n/client'
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Badge,
@@ -27,7 +28,7 @@ interface SummaryCardProps<T> {
   items: T[] | undefined
   renderItem: (item: T) => React.ReactNode
   description?: string
-  manageButtonText: string
+  buttonText?: string
   onManage?: () => void
 }
 
@@ -36,7 +37,7 @@ function SummaryCard<T>({
   items,
   renderItem,
   description,
-  manageButtonText,
+  buttonText = i18next.t('manage', 'Manage'),
   onManage,
 }: SummaryCardProps<T>) {
   const { t } = useTranslation()
@@ -68,7 +69,7 @@ function SummaryCard<T>({
           onClick={onManage}
           variant='ghost'
         >
-          {manageButtonText}
+          {buttonText}
           <ArrowRight />
         </Button>
       </div>
@@ -204,7 +205,6 @@ export const SummarySection = () => {
           )}
         </div>
       )}
-      manageButtonText='Manage'
       onManage={onManageMembers}
     />
   )
@@ -224,7 +224,6 @@ export const SummarySection = () => {
           </Badge>
         </div>
       )}
-      manageButtonText='Manage'
       onManage={onManageLocations}
     />
   )
@@ -250,7 +249,6 @@ export const SummarySection = () => {
           </div>
         </div>
       )}
-      manageButtonText='Manage'
       onManage={onManageShiftTypes}
     />
   )
@@ -267,7 +265,6 @@ export const SummarySection = () => {
           <Badge variant='secondary'>{pg.baseRate.toFixed(2)}</Badge>
         </div>
       )}
-      manageButtonText='Manage'
       onManage={onManagePayGrades}
     />
   )
