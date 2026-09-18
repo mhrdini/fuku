@@ -217,7 +217,7 @@ export const RulePanelPopoverButton = ({
       metric: RuleMetricValues.DAYS_WORKED,
       operator: RuleOperatorValues.MIN,
       threshold: 1,
-      timeWindow: RuleTimeWindowValues.WEEK,
+      timeWindow: RuleTimeWindowValues.PER_WEEK,
       hardConstraint: true,
       active: false,
     })
