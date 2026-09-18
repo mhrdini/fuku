@@ -1,12 +1,17 @@
-import i18next from '@fuku/i18n/client'
 import { useTranslation } from '@fuku/i18n/react'
 import { Button } from '@fuku/ui/components'
 import { GlobeIcon } from 'lucide-react'
 
+import type { Language } from '@fuku/i18n'
+
 export function LanguageSelect() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+
   const toggleLanguage = async () => {
-    await i18next.changeLanguage(i18next.language === 'en' ? 'ja' : 'en')
+    const nextLanguage: Language
+      = i18n.language === 'en' ? 'ja' : 'en'
+    await i18n.changeLanguage(nextLanguage)
+    // await i18next.changeLanguage(nextLanguage)
   }
   return (
     <Button
