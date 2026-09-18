@@ -159,11 +159,11 @@ enum Metric {
 }
 
 enum TimeWindow {
-  DAY
-  WEEK
-  MONTH
-  ROLLING_WEEK
-  ROLLING_MONTH
+  PER_DAY
+  PER_WEEK
+  PER_MONTH
+  PER_ROLLING_WEEK
+  PER_ROLLING_MONTH
 }
 
 enum RuleOperator {
@@ -182,7 +182,7 @@ model Rule {
   id           String      @id @default(uuid())
   teamId       String      @map("team_id")
   team         Team        @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  scope       RuleScope  @default(GLOBAL)
+  scope        RuleScope   @default(GLOBAL)
   payGradeId   String?     @map("pay_grade_id")
   payGrade     PayGrade?   @relation(fields: [payGradeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   shiftTypeId  String?     @map("shift_type_id")

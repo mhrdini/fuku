@@ -1,39 +1,5 @@
-import {
-  MonthKey,
-  SUPPORTED_TIME_ZONES,
-  TimeZone,
-  WeekdayKey,
-} from '@fuku/domain/schemas'
+import { SUPPORTED_TIME_ZONES, TimeZone } from '@fuku/domain/schemas'
 import i18next from '@fuku/i18n/server'
-import { DateTime, WeekdayNumbers } from 'luxon'
-
-export const WEEKDAY_MAP: Record<WeekdayKey, string> = Array.from(
-  { length: 7 },
-  (_, i) => i + 1,
-).reduce(
-  (acc, day) => {
-    const key = String(day) as WeekdayKey
-    acc[key] = DateTime.fromObject({
-      weekday: day as WeekdayNumbers,
-    }).weekdayLong!
-    return acc
-  },
-  {} as Record<WeekdayKey, string>,
-)
-
-export const MONTH_MAP: Record<MonthKey, string> = Array.from(
-  { length: 12 },
-  (_, i) => i + 1,
-).reduce(
-  (acc, month) => {
-    const key = String(month) as MonthKey
-    acc[key] = DateTime.fromObject({
-      month,
-    }).monthLong!
-    return acc
-  },
-  {} as Record<MonthKey, string>,
-)
 
 function generateTimeOptions(minuteInterval: number = 30): string[] {
   const options = []
@@ -63,7 +29,6 @@ export type TimeZoneOption = {
 function getOffsetInfo(timeZone: TimeZone) {
   const date = new Date()
 
-  // Get long offset like "GMT+09:00"
   const longFormatter = new Intl.DateTimeFormat('en-US', {
     timeZone,
     timeZoneName: 'longOffset',
@@ -78,7 +43,6 @@ function getOffsetInfo(timeZone: TimeZone) {
     offset = 'UTC+00:00'
   }
 
-  // Convert offset to minutes for proper numeric sorting
   const match = offset.match(/UTC([+-]\d{2}):(\d{2})/)
   let offsetMinutes = 0
 
@@ -88,7 +52,6 @@ function getOffsetInfo(timeZone: TimeZone) {
     offsetMinutes = hours * 60 + Math.sign(hours) * minutes
   }
 
-  // Get abbreviation like "JST", "AEDT", "EST"
   const shortFormatter = new Intl.DateTimeFormat('en-US', {
     timeZone,
     timeZoneName: 'short',
@@ -101,8 +64,6 @@ function getOffsetInfo(timeZone: TimeZone) {
 }
 
 export function getGroupedTimeZones(): Record<string, TimeZoneOption[]> {
-  // timezones = region -> cities[]
-
   const zones = SUPPORTED_TIME_ZONES
   const result: Record<string, TimeZoneOption[]> = {}
 
@@ -111,13 +72,10 @@ export function getGroupedTimeZones(): Record<string, TimeZoneOption[]> {
     if (!city) continue
 
     const { offset, offsetMinutes, abbr } = getOffsetInfo(zone)
-    // Replace underscores
     let name = city.replaceAll('_', ' ')
 
-    // Split camel case
     name = name.replace(/([a-z])([A-Z])/g, '$1 $2')
 
-    // Fix common French particles
     name = name.replace(/DU/g, "d'U")
     name = name.replace(/DA/g, "d'A")
 
@@ -133,7 +91,6 @@ export function getGroupedTimeZones(): Record<string, TimeZoneOption[]> {
     result[region].push(option)
   }
 
-  // sort by offset, then city name
   for (const region in result) {
     result[region].sort((a, b) => {
       if (a.offsetMinutes === b.offsetMinutes) {

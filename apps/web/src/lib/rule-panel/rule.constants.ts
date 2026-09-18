@@ -16,8 +16,6 @@ import {
   UserCircle2Icon,
 } from 'lucide-react'
 
-import { MONTH_MAP, WEEKDAY_MAP } from '~/lib/date'
-
 export const RULE_CONDITION_FIELD_LABELS: Record<RuleConditionField, string> = {
   [RuleConditionFieldValues.MONTH]: 'Month',
   [RuleConditionFieldValues.WEEKDAY]: 'Weekday',
@@ -37,14 +35,25 @@ export const RULE_CONDITION_OPERATOR_LABELS: Record<
 }
 
 export const RULE_CONDITION_VALUE_OPTIONS_BY_FIELD = {
-  [RuleConditionFieldValues.MONTH]: MONTH_MAP,
-  [RuleConditionFieldValues.WEEKDAY]: WEEKDAY_MAP,
-  [RuleConditionFieldValues.IS_HOLIDAY]: { true: 'true', false: 'false' },
+  [RuleConditionFieldValues.MONTH]: new Map<string, string>(
+    Array.from({ length: 12 }, (_, i) => i + 1)
+      .map(String)
+      .map(v => [v, 'MONTH_' + v]),
+  ),
+  [RuleConditionFieldValues.WEEKDAY]: new Map<string, string>(
+    Array.from({ length: 7 }, (_, i) => i + 1)
+      .map(String)
+      .map(v => [v, 'WEEKDAY_' + v]),
+  ),
+  [RuleConditionFieldValues.IS_HOLIDAY]: new Map<string, string>([
+    ['true', 'true'],
+    ['false', 'false'],
+  ]),
 }
 
 export const WEEKDAY_CONDITION_ID_PREFIX = 'weekday_condition_'
 
-// rule scopes/scopes
+// rule scopes/targets
 export const RULE_SCOPE_LABELS: Record<RuleScope, string> = {
   [RuleScopeValues.PAY_GRADE]: 'Pay Grade',
   [RuleScopeValues.SHIFT_TYPE]: 'Shift Type',

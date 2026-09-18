@@ -31,11 +31,11 @@ export const RuleMetricValues = enumToSelfMap(RuleMetricSchema)
 export type RuleMetric = z.infer<typeof RuleMetricSchema>
 
 export const RuleTimeWindowSchema = z.enum([
-  'DAY',
-  'WEEK',
-  'MONTH',
-  'ROLLING_WEEK',
-  'ROLLING_MONTH',
+  'PER_DAY',
+  'PER_WEEK',
+  'PER_MONTH',
+  'PER_ROLLING_WEEK',
+  'PER_ROLLING_MONTH',
 ])
 export const RuleTimeWindowValues = enumToSelfMap(RuleTimeWindowSchema)
 export type RuleTimeWindow = z.infer<typeof RuleTimeWindowSchema>

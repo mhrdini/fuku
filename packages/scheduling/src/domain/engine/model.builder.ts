@@ -339,7 +339,7 @@ export class ConstraintModelBuilder {
       // =========================================================
       if (rule.metric === RuleMetricValues.UNIQUE_MEMBERS_ASSIGNED) {
         const windows =
-          rule.timeWindow === RuleTimeWindowValues.MONTH
+          rule.timeWindow === RuleTimeWindowValues.PER_MONTH
             ? [this.getDaysForRuleTimeWindow(rule.timeWindow, 0)]
             : Array.from({ length: this.numDays }, (_, i) =>
                 this.getDaysForRuleTimeWindow(rule.timeWindow, i),
@@ -418,7 +418,7 @@ export class ConstraintModelBuilder {
       // 3. GENERIC METRICS (DAYS_WORKED, HOURS_WORKED, DAYS_OFF)
       // =========================================================
       const windows =
-        rule.timeWindow === RuleTimeWindowValues.MONTH
+        rule.timeWindow === RuleTimeWindowValues.PER_MONTH
           ? [this.getDaysForRuleTimeWindow(rule.timeWindow, 0)]
           : Array.from({ length: this.numDays }, (_, i) =>
               this.getDaysForRuleTimeWindow(rule.timeWindow, i),
@@ -845,26 +845,30 @@ export class ConstraintModelBuilder {
 
     const forwardEndIndex =
       startDayIndex +
-      (timeWindow === RuleTimeWindowValues.MONTH ? daysInMonth : daysInWeek) -
+      (timeWindow === RuleTimeWindowValues.PER_MONTH
+        ? daysInMonth
+        : daysInWeek) -
       1
     const backwardStartIndex =
       startDayIndex -
-      (timeWindow === RuleTimeWindowValues.MONTH ? daysInMonth : daysInWeek) +
+      (timeWindow === RuleTimeWindowValues.PER_MONTH
+        ? daysInMonth
+        : daysInWeek) +
       1
 
     switch (timeWindow) {
-      case RuleTimeWindowValues.DAY: {
+      case RuleTimeWindowValues.PER_DAY: {
         days.push(startDayIndex)
         break
       }
-      case RuleTimeWindowValues.WEEK:
-      case RuleTimeWindowValues.MONTH: {
+      case RuleTimeWindowValues.PER_WEEK:
+      case RuleTimeWindowValues.PER_MONTH: {
         const end = Math.min(forwardEndIndex, maxDayIndex)
         for (let d = startDayIndex; d <= end; d++) days.push(d)
         break
       }
-      case RuleTimeWindowValues.ROLLING_WEEK:
-      case RuleTimeWindowValues.ROLLING_MONTH: {
+      case RuleTimeWindowValues.PER_ROLLING_WEEK:
+      case RuleTimeWindowValues.PER_ROLLING_MONTH: {
         const start = Math.max(backwardStartIndex, minDayIndex)
         for (let d = start; d <= startDayIndex; d++) days.push(d)
         break

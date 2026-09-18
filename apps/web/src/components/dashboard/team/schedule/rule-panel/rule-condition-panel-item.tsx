@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import {
   RuleConditionOutput,
   RuleConditionUpdateInput,
@@ -23,7 +23,6 @@ import {
   ComboboxItem,
   ComboboxList,
   ComboboxTrigger,
-  ComboboxValue,
   Select,
   SelectContent,
   SelectItem,
@@ -59,11 +58,11 @@ const RuleConditionPanelItem = ({
     ruleCondition.operator === RuleConditionOperatorValues.NOT_IN
 
   const items = useMemo(() => {
-    const source: Record<string, string> | undefined =
+    const source: Map<string, string> | undefined =
       RULE_CONDITION_VALUE_OPTIONS_BY_FIELD[ruleCondition.field]
     if (!source) return []
 
-    return Object.entries(source).map(([value, label]) => ({
+    return Array.from(source).map(([value, label]) => ({
       value: String(value),
       label: String(label),
     }))
@@ -73,18 +72,28 @@ const RuleConditionPanelItem = ({
    * Convert stored value → UI value
    * Combobox always receives strings
    */
+  const getLocalisedValue = useCallback((uiValue: string) => {
+    return t(
+      RULE_CONDITION_VALUE_OPTIONS_BY_FIELD[ruleCondition.field].get(uiValue)!,
+    )
+  }, [])
+
   const uiValue = useMemo(() => {
     const v = ruleCondition.value
 
     if (isMulti) {
       const arr = Array.isArray(v) ? v : v !== null ? [v] : []
-      return arr.map(x => String(x))
+      return arr.map(x => getLocalisedValue(String(x)))
     }
 
     const single = Array.isArray(v) ? v[0] : v
     return single !== undefined && single !== null
-      ? String(single)
-      : String(RULE_CONDITION_OPTIONS_CONFIG[ruleCondition.field].defaultValue)
+      ? getLocalisedValue(String(single))
+      : getLocalisedValue(
+          String(
+            RULE_CONDITION_OPTIONS_CONFIG[ruleCondition.field].defaultValue,
+          ),
+        )
   }, [ruleCondition.value, ruleCondition.field, isMulti])
 
   const handleUpdateField = (field: string) => {
@@ -179,7 +188,7 @@ const RuleConditionPanelItem = ({
         <SelectContent>
           {Object.values(RuleConditionFieldValues).map(value => (
             <SelectItem key={value} value={value}>
-              {RULE_CONDITION_FIELD_LABELS[value]}
+              {t(value, RULE_CONDITION_FIELD_LABELS)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -217,7 +226,9 @@ const RuleConditionPanelItem = ({
         <ComboboxTrigger
           render={
             <Button size='sm' variant='outline' className='min-w-fit grow'>
-              <ComboboxValue placeholder='-' />
+              <span>
+                {Array.isArray(uiValue) ? uiValue.join(', ') : uiValue || '-'}
+              </span>
               <ChevronDownIcon className='ml-auto size-4 opacity-50' />
             </Button>
           }
@@ -231,7 +242,7 @@ const RuleConditionPanelItem = ({
           <ComboboxList>
             {(item: { value: string; label: string }) => (
               <ComboboxItem key={item.value} value={item.value}>
-                {item.label}
+                {t(item.label)}
               </ComboboxItem>
             )}
           </ComboboxList>
