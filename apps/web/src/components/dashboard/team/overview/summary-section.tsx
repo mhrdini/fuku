@@ -19,7 +19,7 @@ import {
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { ArrowRight, CalendarPlus } from 'lucide-react'
 
-import { useSession } from '~/components/providers/session-provider'
+import { useSession } from '~/components/providers/session-context'
 import { isEntity } from '~/lib/db'
 import { useTRPC } from '~/trpc/client'
 
