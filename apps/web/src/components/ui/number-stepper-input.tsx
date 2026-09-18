@@ -1,5 +1,5 @@
 import { Button, ButtonGroup, Input } from '@fuku/ui/components'
-import { Minus, Plus } from 'lucide-react'
+import { MinusIcon, PlusIcon } from 'lucide-react'
 
 type NumberStepperInputProps = {
   value: number
@@ -40,7 +40,7 @@ export function NumberStepperInput({
         disabled={disabled || value <= min}
         aria-label='Decrement'
       >
-        <Minus />
+        <MinusIcon />
       </Button>
 
       {/* Increment */}
@@ -52,7 +52,7 @@ export function NumberStepperInput({
         disabled={disabled || value >= max}
         aria-label='Increment'
       >
-        <Plus />
+        <PlusIcon />
       </Button>
     </ButtonGroup>
   )

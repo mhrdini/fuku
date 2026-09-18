@@ -39,10 +39,10 @@ import {
   ArrowDownNarrowWideIcon,
   ArrowUpWideNarrowIcon,
   BadgeDollarSignIcon,
-  Check,
-  Search,
+  CheckIcon,
+  SearchIcon,
   Settings2Icon,
-  X,
+  XIcon,
 } from 'lucide-react'
 
 import type { PayGradeOutput } from '@fuku/api/schemas'
@@ -101,7 +101,7 @@ export function ScheduleTeamMemberHeaderCell({
     <div className='border-input bg-background sticky top-0 left-0 z-40 flex items-center gap-2 border-r border-b p-2'>
       <InputGroup className='bg-input/30 flex-1'>
         <InputGroupAddon>
-          <Search className='size-4 shrink-0 opacity-50' />
+          <SearchIcon className='size-4 shrink-0 opacity-50' />
         </InputGroupAddon>
 
         <InputGroupInput
@@ -115,7 +115,7 @@ export function ScheduleTeamMemberHeaderCell({
             variant='ghost'
             onClick={() => setSearch('')}
           >
-            <X />
+            <XIcon />
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>
@@ -152,7 +152,7 @@ export function ScheduleTeamMemberHeaderCell({
                         >
                           <Badge variant='outline'>{pg.name}</Badge>
                           {filteredPayGrades.has(pg.id) && (
-                            <Check size={16} className='ml-auto' />
+                            <CheckIcon size={16} className='ml-auto' />
                           )}
                         </CommandItem>
                       ))}

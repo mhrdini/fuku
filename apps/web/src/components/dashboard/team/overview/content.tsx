@@ -13,7 +13,7 @@ import {
   EmptyTitle,
 } from '@fuku/ui/components'
 import { useQuery } from '@tanstack/react-query'
-import { Users } from 'lucide-react'
+import { UsersIcon } from 'lucide-react'
 
 import { useTRPC } from '~/trpc/client'
 
@@ -41,7 +41,7 @@ export default function TeamOverviewContent() {
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant='icon'>
-              <Users />
+              <UsersIcon />
             </EmptyMedia>
             <EmptyTitle>{t('noTeamsYet', 'No Teams Yet')}</EmptyTitle>
             <EmptyDescription>

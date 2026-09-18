@@ -33,12 +33,12 @@ import {
 import { cn } from '@fuku/ui/lib/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  Check,
-  ChevronRight,
-  ChevronsUpDown,
-  Dot,
-  Plus,
-  Users2,
+  CheckIcon,
+  ChevronRightIcon,
+  ChevronsUpDownIcon,
+  DotIcon,
+  PlusIcon,
+  Users2Icon,
 } from 'lucide-react'
 
 import { useSidebarMenu } from '~/lib/menu'
@@ -111,7 +111,7 @@ export function DashboardSidebar({ username }: { username: string }) {
               // no sidebarState.teams
               <>
                 <div className='flex aspect-square size-8 items-center justify-center rounded-none'>
-                  <Plus className='size-4' />
+                  <PlusIcon className='size-4' />
                 </div>
                 <div className='grid flex-1 text-left text-sm leading-tight'>
                   <span className='truncate font-medium'>
@@ -123,7 +123,7 @@ export function DashboardSidebar({ username }: { username: string }) {
               // has sidebarState.teams
               <>
                 <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-none'>
-                  <Users2 className='size-4' />
+                  <Users2Icon className='size-4' />
                 </div>
                 <div className='grid flex-1 text-left text-sm leading-tight'>
                   <span className='truncate font-medium'>
@@ -137,7 +137,7 @@ export function DashboardSidebar({ username }: { username: string }) {
                         : 'members'}`}
                   </span>
                 </div>
-                <ChevronsUpDown className='ml-auto' />
+                <ChevronsUpDownIcon className='ml-auto' />
               </>
             )}
           </SidebarMenuButton>
@@ -154,7 +154,7 @@ export function DashboardSidebar({ username }: { username: string }) {
               >
                 {team.name}
                 {sidebarState.activeTeam?.id === team.id && (
-                  <Check className='ml-auto' />
+                  <CheckIcon className='ml-auto' />
                 )}
               </DropdownMenuItem>
             ))}
@@ -162,7 +162,7 @@ export function DashboardSidebar({ username }: { username: string }) {
             {sidebarState.teams.length > 1 && <DropdownMenuSeparator />}
 
             <DropdownMenuItem onClick={onNewTeam}>
-              <Plus />
+              <PlusIcon />
               {' '}
               {t('createANewTeam', 'Create a new team')}
             </DropdownMenuItem>
@@ -201,7 +201,7 @@ export function DashboardSidebar({ username }: { username: string }) {
                               <SidebarMenuButton>
                                 <menu.icon />
                                 <span>{menu.label}</span>
-                                <ChevronRight className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
+                                <ChevronRightIcon className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
                               </SidebarMenuButton>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
@@ -218,7 +218,7 @@ export function DashboardSidebar({ username }: { username: string }) {
                                             <submenu.icon />
                                           )
                                         : (
-                                            <Dot />
+                                            <DotIcon />
                                           )}
                                       {submenu.label}
                                     </SidebarMenuSubButton>
@@ -244,7 +244,7 @@ export function DashboardSidebar({ username }: { username: string }) {
                               className='transition-transform group-data-[state=open]/collapsible:rotate-90'
                             >
                               <SidebarMenuAction>
-                                <ChevronRight className='' />
+                                <ChevronRightIcon className='' />
                               </SidebarMenuAction>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
@@ -261,7 +261,7 @@ export function DashboardSidebar({ username }: { username: string }) {
                                             <submenu.icon />
                                           )
                                         : (
-                                            <Dot />
+                                            <DotIcon />
                                           )}
                                       {submenu.label}
                                     </SidebarMenuSubButton>

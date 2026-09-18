@@ -9,7 +9,7 @@ import { Badge, Button, ScrollArea, ScrollBar } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { format } from 'date-fns'
 import { enGB, ja } from 'date-fns/locale'
-import { Plus } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 
 import type { SchedulerAssignment } from '@fuku/domain/schemas'
 
@@ -192,7 +192,7 @@ export function ScheduleGrid({
           {/* footer row */}
           <div className='border-input bg-background sticky bottom-0 left-0 z-30 border-t border-r p-2 text-center'>
             <Button className='w-full' variant='secondary'>
-              <Plus />
+              <PlusIcon />
               {' '}
               {t('addMember', 'Add member')}
             </Button>

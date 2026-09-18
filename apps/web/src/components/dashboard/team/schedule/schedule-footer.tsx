@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@fuku/ui/components'
-import { Check, ChevronDown } from 'lucide-react'
+import { CheckIcon, ChevronDownIcon } from 'lucide-react'
 
 import { useScheduleStore } from '~/store/schedule.store'
 
@@ -39,7 +39,7 @@ export function ScheduleFooter() {
         <DropdownMenuTrigger asChild>
           <Button variant='outline'>
             {t('clear', 'Clear')}
-            <ChevronDown className='text-muted-foreground' />
+            <ChevronDownIcon className='text-muted-foreground' />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
@@ -57,7 +57,7 @@ export function ScheduleFooter() {
       </DropdownMenu>
       <Button disabled>
         {t('save', 'Save')}
-        <Check />
+        <CheckIcon />
       </Button>
     </div>
   )

@@ -5,7 +5,7 @@ import { useDroppable } from '@dnd-kit/react'
 import { useTranslation } from '@fuku/i18n/react'
 import { Button, buttonVariants, Toggle } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
-import { Ban, Plus } from 'lucide-react'
+import { BanIcon, PlusIcon } from 'lucide-react'
 import { DateTime } from 'luxon'
 
 import type { ShiftTypeOutput, UnavailabilityOutput } from '@fuku/api/schemas'
@@ -197,7 +197,7 @@ export function ScheduleCell({
           )}
           onClick={handleCreateAssignment}
         >
-          <Plus />
+          <PlusIcon />
         </Button>
         <Toggle
           asChild
@@ -222,7 +222,7 @@ export function ScheduleCell({
               assignments && assignments.length > 0 && 'flex-1',
             )}
           >
-            <Ban />
+            <BanIcon />
           </Button>
         </Toggle>
       </div>

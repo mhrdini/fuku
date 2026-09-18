@@ -16,7 +16,7 @@ import {
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { useQuery } from '@tanstack/react-query'
-import { Home } from 'lucide-react'
+import { HomeIcon } from 'lucide-react'
 
 import { useTRPC } from '~/trpc/client'
 
@@ -106,7 +106,7 @@ export function Breadcrumbs() {
                         <>
                           <BreadcrumbLink asChild>
                             <Link href={crumb.href}>
-                              <Home className='size-4.5' />
+                              <HomeIcon className='size-4.5' />
                             </Link>
                           </BreadcrumbLink>
                           <BreadcrumbSeparator />
@@ -132,7 +132,7 @@ export function Breadcrumbs() {
                 : (
                     <BreadcrumbLink asChild>
                       <Link href={crumb.href}>
-                        {idx === 0 ? <Home className='size-4.5' /> : crumb.label}
+                        {idx === 0 ? <HomeIcon className='size-4.5' /> : crumb.label}
                       </Link>
                     </BreadcrumbLink>
                   )}

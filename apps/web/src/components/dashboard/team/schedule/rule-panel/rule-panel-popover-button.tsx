@@ -41,13 +41,13 @@ import { cn } from '@fuku/ui/lib/utils'
 import {
   ArrowDownNarrowWideIcon,
   ArrowUpWideNarrowIcon,
-  ChevronDown,
+  ChevronDownIcon,
   CircleDashedIcon,
   CircleIcon,
   GaugeIcon,
   ListFilterIcon,
   LoaderIcon,
-  Plus,
+  PlusIcon,
   Settings2Icon,
   UserRoundCheckIcon,
   WorkflowIcon,
@@ -241,7 +241,7 @@ export function RulePanelPopoverButton({
               ? Object.values(rules).filter(r => r.active).length
               : 0,
           })}
-          <ChevronDown />
+          <ChevronDownIcon />
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -493,7 +493,7 @@ export function RulePanelPopoverButton({
               variant='secondary'
               onClick={handleCreateRule}
             >
-              <Plus />
+              <PlusIcon />
               {t('addRule', 'Add rule')}
             </Button>
           </div>

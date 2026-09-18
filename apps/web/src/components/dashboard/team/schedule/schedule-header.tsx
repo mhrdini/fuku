@@ -39,13 +39,13 @@ import { cn } from '@fuku/ui/lib/utils'
 import { enGB, ja } from 'date-fns/locale'
 import {
   CheckIcon,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   ClockIcon,
-  Download,
+  DownloadIcon,
   EyeIcon,
-  RefreshCcw,
+  RefreshCcwIcon,
 } from 'lucide-react'
 import { DateTime } from 'luxon'
 
@@ -172,7 +172,7 @@ export function ScheduleHeader({
     <div className='flex gap-2'>
       <ButtonGroup>
         <Button variant='secondary' size='icon' onClick={handlePrevRange}>
-          <ChevronLeft />
+          <ChevronLeftIcon />
         </Button>
         <ButtonGroupSeparator />
         <DateRangePicker
@@ -198,7 +198,7 @@ export function ScheduleHeader({
         />
         <ButtonGroupSeparator />
         <Button variant='secondary' size='icon' onClick={handleNextRange}>
-          <ChevronRight />
+          <ChevronRightIcon />
         </Button>
       </ButtonGroup>
       <RulePanelPopoverButton
@@ -288,7 +288,7 @@ export function ScheduleHeader({
         onClick={handleGenerateSchedule}
         disabled={isGenerating}
       >
-        {isGenerating ? <Spinner /> : <RefreshCcw />}
+        {isGenerating ? <Spinner /> : <RefreshCcwIcon />}
         <span className={cn('hidden md:flex', isGenerating && 'md:hidden')}>
           {t('autoschedule', 'Auto-Schedule')}
         </span>
@@ -299,8 +299,8 @@ export function ScheduleHeader({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant='secondary'>
-            <Download />
-            <ChevronDown className='text-muted-foreground' />
+            <DownloadIcon />
+            <ChevronDownIcon className='text-muted-foreground' />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>

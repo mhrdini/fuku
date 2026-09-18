@@ -74,18 +74,18 @@ import { cn } from '@fuku/ui/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  ArrowRight,
-  Check,
-  ChevronDown,
-  CornerDownRight,
-  Ellipsis,
-  Layers,
-  Pencil,
-  Plus,
-  Shield,
-  SlidersHorizontal,
-  Trash2,
-  UserRoundPlus,
+  ArrowRightIcon,
+  CheckIcon,
+  ChevronDownIcon,
+  CornerDownRightIcon,
+  EllipsisIcon,
+  LayersIcon,
+  PencilIcon,
+  PlusIcon,
+  ShieldIcon,
+  SlidersHorizontalIcon,
+  Trash2Icon,
+  UserRoundPlusIcon,
 } from 'lucide-react'
 import {
   Controller,
@@ -447,7 +447,7 @@ function TeamMembersSection() {
       </FieldGroup>
       <Field orientation='horizontal'>
         <Button type='button' variant='outline' onClick={openPayGradeSheet}>
-          <Layers />
+          <LayersIcon />
           {t('payGrades', 'Pay Grades')}
         </Button>
         <Button
@@ -456,7 +456,7 @@ function TeamMembersSection() {
           className='ml-auto'
           onClick={openAddMember}
         >
-          <UserRoundPlus />
+          <UserRoundPlusIcon />
           {t('addMember', 'Add member')}
         </Button>
       </Field>
@@ -493,7 +493,7 @@ function TeamMembersSection() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button type='button' variant='ghost' size='icon'>
-                        <Ellipsis />
+                        <EllipsisIcon />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end'>
@@ -506,7 +506,7 @@ function TeamMembersSection() {
                               ),
                             )}
                         >
-                          <Pencil />
+                          <PencilIcon />
                           {t('edit', 'Edit')}
                         </DropdownMenuItem>
                         <DropdownMenuCheckboxItem
@@ -523,7 +523,7 @@ function TeamMembersSection() {
                               },
                             )}
                         >
-                          <Shield />
+                          <ShieldIcon />
                           {t('makeAdmin', 'Make admin')}
                         </DropdownMenuCheckboxItem>
                       </DropdownMenuGroup>
@@ -531,7 +531,7 @@ function TeamMembersSection() {
                       <DropdownMenuGroup>
                         <DropdownMenuSub>
                           <DropdownMenuSubTrigger>
-                            <Layers />
+                            <LayersIcon />
                             {t('assignPayGrade', 'Assign pay grade')}
                           </DropdownMenuSubTrigger>
                           <DropdownMenuPortal>
@@ -586,7 +586,7 @@ function TeamMembersSection() {
                                 </DropdownMenuRadioGroup>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem onSelect={openPayGradeSheet}>
-                                  <SlidersHorizontal />
+                                  <SlidersHorizontalIcon />
                                   {t('manage', 'Manage')}
                                 </DropdownMenuItem>
                               </DropdownMenuGroup>
@@ -607,7 +607,7 @@ function TeamMembersSection() {
                                   ),
                                 )}
                             >
-                              <Trash2 />
+                              <Trash2Icon />
                               {t('remove', 'Remove')}
                             </DropdownMenuItem>
                           </DropdownMenuGroup>
@@ -773,7 +773,7 @@ function TeamMemberSheet({
                           {field.value && payGrades
                             ? payGrades.find(pg => pg.id === field.value)?.name
                             : t('selectPayGrade', 'Select pay grade...')}
-                          <ChevronDown className='opacity-50' />
+                          <ChevronDownIcon className='opacity-50' />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className='p-0' align='start'>
@@ -801,7 +801,7 @@ function TeamMemberSheet({
                                   }}
                                 >
                                   {pg.name}
-                                  <Check
+                                  <CheckIcon
                                     className={cn(
                                       'ml-auto',
                                       pg.id === field.value
@@ -884,7 +884,7 @@ function TeamMemberSheet({
                   variant='destructive'
                   onClick={deleteMember}
                 >
-                  <Trash2 />
+                  <Trash2Icon />
                   {t('remove', 'Remove')}
                 </Button>
               )}
@@ -983,7 +983,7 @@ function PayGradesSheet({
             />
           ))}
           <Button type='button' variant='outline' onClick={handleAdd}>
-            <Plus />
+            <PlusIcon />
             {t('addPayGrade', 'Add pay grade')}
           </Button>
         </ItemGroup>
@@ -1067,7 +1067,7 @@ function PayGradeItem({
       </ItemContent>
 
       <Button type='button' variant='ghost' size='icon' onClick={onDelete}>
-        <Trash2 />
+        <Trash2Icon />
       </Button>
     </Item>
   )
@@ -1204,7 +1204,7 @@ function AdditionalDetailsSection() {
                             <CardTitle>{st.name}</CardTitle>
                             <CardDescription className='flex items-center gap-1 '>
                               {st.startTime}
-                              <ArrowRight size={16} />
+                              <ArrowRightIcon size={16} />
                               {st.endTime}
                             </CardDescription>
                           </div>
@@ -1315,7 +1315,7 @@ function LocationsSheet({
             variant='outline'
             onClick={() => append({ id: crypto.randomUUID(), name: '' })}
           >
-            <Plus />
+            <PlusIcon />
             {t('addLocation', 'Add location')}
           </Button>
         </ItemGroup>
@@ -1375,7 +1375,7 @@ function LocationItem({
       </ItemContent>
       <ItemActions>
         <Button type='button' variant='ghost' size='icon' onClick={onDelete}>
-          <Trash2 />
+          <Trash2Icon />
         </Button>
       </ItemActions>
     </Item>
@@ -1451,7 +1451,7 @@ function ShiftTypesSheet({
               })
             }}
           >
-            <Plus />
+            <PlusIcon />
             {t('addShiftType', 'Add shift type')}
           </Button>
         </ItemGroup>
@@ -1573,7 +1573,7 @@ function ShiftTypeItem({
         />
         <Field className='col-span-6 flex items-center gap-2'>
           <FieldTitle className='text-muted-foreground'>
-            <CornerDownRight size={14} className='mb-1' />
+            <CornerDownRightIcon size={14} className='mb-1' />
             <span>{t('assignedToPayGrades', 'Assigned to pay grades:')}</span>
           </FieldTitle>
           <FieldContent className='pl-[22px]'>
@@ -1654,7 +1654,7 @@ function ShiftTypeItem({
       </ItemContent>
       <ItemActions className='h-full items-start'>
         <Button type='button' variant='ghost' size='icon' onClick={onDelete}>
-          <Trash2 />
+          <Trash2Icon />
         </Button>
       </ItemActions>
     </Item>

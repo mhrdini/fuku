@@ -17,7 +17,7 @@ import {
   Separator,
 } from '@fuku/ui/components'
 import { useQueries, useQuery } from '@tanstack/react-query'
-import { ArrowRight, CalendarPlus } from 'lucide-react'
+import { ArrowRightIcon, CalendarPlusIcon } from 'lucide-react'
 
 import { useSession } from '~/components/providers/session-context'
 import { isEntity } from '~/lib/db'
@@ -74,7 +74,7 @@ function SummaryCard<T>({
           variant='ghost'
         >
           {buttonText}
-          <ArrowRight />
+          <ArrowRightIcon />
         </Button>
       </div>
     </Card>
@@ -280,7 +280,7 @@ export function SummarySection() {
       <div className='flex w-full flex-row'>
         <h2>{t('summary', 'Summary')}</h2>
         <Button size='sm' className='ml-auto' onClick={handleGenerateSchedule}>
-          <CalendarPlus />
+          <CalendarPlusIcon />
           {t('generateSchedule', 'Generate Schedule')}
         </Button>
       </div>
