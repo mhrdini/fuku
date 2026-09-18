@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -10,10 +11,11 @@ import {
 } from '@fuku/ui/components'
 import { useQuery } from '@tanstack/react-query'
 
-import { Menu, useNavigationMenu } from '~/lib/menu'
+import type { Menu } from '~/lib/menu'
+import { useNavigationMenu } from '~/lib/menu'
 import { useTRPC } from '~/trpc/client'
 
-export const DashboardNavigationMenu = () => {
+export function DashboardNavigationMenu() {
   const params = useParams()
   const username = params.username as string
   const trpc = useTRPC()
@@ -24,7 +26,7 @@ export const DashboardNavigationMenu = () => {
   })
 
   const menu = useNavigationMenu(
-    username ? username : null,
+    username || null,
     sidebarState ? sidebarState.activeTeam : null,
   )
 
@@ -33,13 +35,15 @@ export const DashboardNavigationMenu = () => {
       <NavigationMenuList>
         {menu.map((m: Menu) => (
           <NavigationMenuItem key={m.href}>
-            {m.submenus?.length ? (
-              <NavigationMenuTrigger>{m.label}</NavigationMenuTrigger>
-            ) : (
-              <NavigationMenuLink asChild>
-                <Link href={m.href}>{m.label}</Link>
-              </NavigationMenuLink>
-            )}
+            {m.submenus?.length
+              ? (
+                  <NavigationMenuTrigger>{m.label}</NavigationMenuTrigger>
+                )
+              : (
+                  <NavigationMenuLink asChild>
+                    <Link href={m.href}>{m.label}</Link>
+                  </NavigationMenuLink>
+                )}
             {m.submenus?.length && (
               <NavigationMenuContent className='w-max'>
                 {m.submenus.map(sm => (

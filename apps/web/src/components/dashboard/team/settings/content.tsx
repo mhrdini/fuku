@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import { useParams, useRouter } from 'next/navigation'
+
 import { TeamUpdateInputSchema } from '@fuku/api/schemas'
 import { useTranslation } from '@fuku/i18n/react'
 import {
@@ -21,12 +23,15 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Controller,
-  SubmitErrorHandler,
-  SubmitHandler,
   useForm,
 } from 'react-hook-form'
 import { toast } from 'sonner'
-import * as z from 'zod/v4'
+
+import type {
+  SubmitErrorHandler,
+  SubmitHandler,
+} from 'react-hook-form'
+import type * as z from 'zod/v4'
 
 import { CountryController } from '~/components/country-controller'
 import { TimeZoneController } from '~/components/timezone-controller'
@@ -41,7 +46,7 @@ const TeamSettingsFormSchema = TeamUpdateInputSchema.pick({
 })
 type TeamSettingsFormType = z.infer<typeof TeamSettingsFormSchema>
 
-export const TeamSettingsContent = () => {
+export function TeamSettingsContent() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const trpc = useTRPC()
@@ -83,7 +88,7 @@ export const TeamSettingsContent = () => {
 
   const { mutateAsync: updateTeam, isPending: isSaving } = useMutation({
     ...trpc.team.update.mutationOptions(),
-    onSuccess: async data => {
+    onSuccess: async (data) => {
       form.reset(form.getValues())
       queryClient.invalidateQueries(trpc.user.getSidebarState.queryOptions())
       queryClient.invalidateQueries(
@@ -97,23 +102,23 @@ export const TeamSettingsContent = () => {
 
   const { mutateAsync: deleteTeam, isPending: isDeleting } = useMutation({
     ...trpc.team.delete.mutationOptions(),
-    onSuccess: async data => {
-      data.team.teamMembers.forEach(member => {
+    onSuccess: async (data) => {
+      data.team.teamMembers.forEach((member) => {
         queryClient.removeQueries(
           trpc.teamMember.byId.queryOptions({ id: member.id }),
         )
       })
-      data.team.locations.forEach(location => {
+      data.team.locations.forEach((location) => {
         queryClient.removeQueries(
           trpc.location.byId.queryOptions({ id: location.id }),
         )
       })
-      data.team.payGrades.forEach(payGrade => {
+      data.team.payGrades.forEach((payGrade) => {
         queryClient.removeQueries(
           trpc.payGrade.byId.queryOptions({ id: payGrade.id }),
         )
       })
-      data.team.shiftTypes.forEach(shiftType => {
+      data.team.shiftTypes.forEach((shiftType) => {
         queryClient.removeQueries(
           trpc.shiftType.byId.queryOptions({ id: shiftType.id }),
         )
@@ -123,8 +128,9 @@ export const TeamSettingsContent = () => {
     },
   })
 
-  const onSubmit: SubmitHandler<TeamSettingsFormType> = async values => {
-    if (!team) return
+  const onSubmit: SubmitHandler<TeamSettingsFormType> = async (values) => {
+    if (!team)
+      return
     if (!isDirty) {
       form.setError('root', {
         message: t('thereAreNoChangesToSave', 'There are no changes to save.'),
@@ -139,12 +145,13 @@ export const TeamSettingsContent = () => {
     }
   }
 
-  const onError: SubmitErrorHandler<TeamSettingsFormType> = errors => {
-    console.log('team settings save errors:', errors)
+  const onError: SubmitErrorHandler<TeamSettingsFormType> = (errors) => {
+    console.error('team settings save errors:', errors)
   }
 
   const handleDelete = async () => {
-    if (!team) return
+    if (!team)
+      return
     try {
       await deleteTeam({ id: team.id })
     } catch {
@@ -153,7 +160,7 @@ export const TeamSettingsContent = () => {
   }
 
   return (
-    <div className='flex flex-col gap-4 max-w-lg'>
+    <div className='flex max-w-lg flex-col gap-4'>
       <h2>{t('settings', 'Settings')}</h2>
       <form
         id='form-team-settings'
@@ -200,7 +207,7 @@ export const TeamSettingsContent = () => {
                       aria-invalid={fieldState.invalid}
                       placeholder={t('description')}
                       autoComplete='off'
-                      className='resize-none h-14 overflow-y-auto'
+                      className='h-14 resize-none overflow-y-auto'
                       disabled={isPending}
                     />
                     {fieldState.invalid && (
@@ -235,7 +242,7 @@ export const TeamSettingsContent = () => {
           <FieldSet>
             <FieldLegend>{t('dangerZone', 'Danger Zone')}</FieldLegend>
             <FieldSeparator />
-            <FieldGroup className='p-4 rounded-none border border-destructive *:grid *:grid-cols-[2fr_1fr]'>
+            <FieldGroup className='border-destructive rounded-none border p-4 *:grid *:grid-cols-[2fr_1fr]'>
               <Field orientation='horizontal'>
                 <div>
                   <FieldLabel htmlFor='form-team-settings-delete'>

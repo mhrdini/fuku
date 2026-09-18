@@ -1,7 +1,9 @@
 'use client'
 
 import { useCallback } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Collapsible,
@@ -43,10 +45,10 @@ import { useSidebarMenu } from '~/lib/menu'
 import { useTeamStore } from '~/store/team.store'
 import { useTRPC } from '~/trpc/client'
 
-export const DashboardSidebar = ({ username }: { username: string }) => {
+export function DashboardSidebar({ username }: { username: string }) {
   const { t } = useTranslation()
-  const { openTeamSelect, setOpenTeamSelect, activeTeamId, setActiveTeamId } =
-    useTeamStore()
+  const { openTeamSelect, setOpenTeamSelect, activeTeamId, setActiveTeamId }
+    = useTeamStore()
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
@@ -76,16 +78,17 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
   }
 
   const onSelectTeam = async (id: string, slug: string) => {
-    if (id === activeTeamId) return
+    if (id === activeTeamId)
+      return
     setActiveTeamId(id)
     await setLastActiveTeam({ teamId: id })
     router.push(`/${username}/team/${slug}`)
   }
 
-  const teamsHeader =
-    sidebarState === undefined ? (
+  const teamsHeader
+    = sidebarState === undefined ? (
       <>
-        <div className='flex aspect-square size-8 items-center justify-center rounded-none bg-muted'>
+        <div className='bg-muted flex aspect-square size-8 items-center justify-center rounded-none'>
           <Skeleton className='size-4 rounded' />
         </div>
         <div className='grid flex-1 gap-1'>
@@ -99,8 +102,8 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
           <SidebarMenuButton
             size='lg'
             className={cn(
-              !sidebarState.teams?.length &&
-                'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
+              !sidebarState.teams?.length
+              && 'bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border shadow-xs',
             )}
             onClick={!sidebarState.teams?.length ? onNewTeam : undefined}
           >
@@ -128,10 +131,10 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
                   </span>
                   <span className='truncate text-xs'>
                     {sidebarState.activeTeam.teamMembers.length}
-                    {' ' +
-                      (sidebarState.activeTeam.teamMembers.length === 1
+                    {` ${
+                      sidebarState.activeTeam.teamMembers.length === 1
                         ? 'member'
-                        : 'members')}
+                        : 'members'}`}
                   </span>
                 </div>
                 <ChevronsUpDown className='ml-auto' />
@@ -159,7 +162,9 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
             {sidebarState.teams.length > 1 && <DropdownMenuSeparator />}
 
             <DropdownMenuItem onClick={onNewTeam}>
-              <Plus /> {t('createANewTeam', 'Create a new team')}
+              <Plus />
+              {' '}
+              {t('createANewTeam', 'Create a new team')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         )}
@@ -174,18 +179,18 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {sidebarState &&
-          sidebarState.teams &&
-          sidebarState.teams.length > 0 &&
-          sidebarState.activeTeam &&
-          menuGroups.map(group => (
+        {sidebarState
+          && sidebarState.teams
+          && sidebarState.teams.length > 0
+          && sidebarState.activeTeam
+          && menuGroups.map(group => (
             <SidebarGroup key={group.label}>
               {group.label && (
                 <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
               )}
               {group.menus && (
                 <SidebarGroupContent>
-                  {group.menus.map(menu => {
+                  {group.menus.map((menu) => {
                     let sidebarMenuContent = null
 
                     if (!menu.href && menu.submenus) {
@@ -205,15 +210,16 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
                                   <SidebarMenuSubItem key={submenu.href}>
                                     <SidebarMenuSubButton
                                       onClick={() =>
-                                        onMenuButtonClick(submenu.href)
-                                      }
+                                        onMenuButtonClick(submenu.href)}
                                       className='cursor-pointer'
                                     >
-                                      {submenu.icon ? (
-                                        <submenu.icon />
-                                      ) : (
-                                        <Dot />
-                                      )}
+                                      {submenu.icon
+                                        ? (
+                                            <submenu.icon />
+                                          )
+                                        : (
+                                            <Dot />
+                                          )}
                                       {submenu.label}
                                     </SidebarMenuSubButton>
                                   </SidebarMenuSubItem>
@@ -247,15 +253,16 @@ export const DashboardSidebar = ({ username }: { username: string }) => {
                                   <SidebarMenuSubItem key={submenu.href}>
                                     <SidebarMenuSubButton
                                       onClick={() =>
-                                        onMenuButtonClick(submenu.href)
-                                      }
+                                        onMenuButtonClick(submenu.href)}
                                       className='cursor-pointer'
                                     >
-                                      {submenu.icon ? (
-                                        <submenu.icon />
-                                      ) : (
-                                        <Dot />
-                                      )}
+                                      {submenu.icon
+                                        ? (
+                                            <submenu.icon />
+                                          )
+                                        : (
+                                            <Dot />
+                                          )}
                                       {submenu.label}
                                     </SidebarMenuSubButton>
                                   </SidebarMenuSubItem>

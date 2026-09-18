@@ -1,8 +1,8 @@
 {
-  "private": true,
   "name": "@fuku/infrastructure",
-  "version": "1.0.0",
   "type": "module",
+  "version": "1.0.0",
+  "private": true,
   "exports": {
     "./holiday": "./src/holiday/index.ts"
   }

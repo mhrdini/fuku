@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { PayGradeOutput } from '@fuku/api/schemas'
+
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Badge,
@@ -45,17 +45,21 @@ import {
   X,
 } from 'lucide-react'
 
-import { TeamMemberGroupBySort } from '~/hooks/schedule/use-team-member-group-by-sort'
-import { ScheduleFilters } from '~/hooks/schedule/useScheduleFilters'
+import type { PayGradeOutput } from '@fuku/api/schemas'
+
+import type { ScheduleFilters } from '~/hooks/schedule/use-schedule-filters'
+import type { TeamMemberGroupBySort } from '~/hooks/schedule/use-team-member-group-by-sort'
 import { preventCloseOnSelect } from '~/lib/event'
-import {
-  TEAM_MEMBER_GROUP_BY_KEYS,
-  TEAM_MEMBER_SORT_KEYS,
+import type {
   TeamMemberGroupByKey,
   TeamMemberSortKey,
 } from '~/lib/team-member'
+import {
+  TEAM_MEMBER_GROUP_BY_KEYS,
+  TEAM_MEMBER_SORT_KEYS,
+} from '~/lib/team-member'
 
-interface ScheduleTeamMemberHeaderCellProps {
+type ScheduleTeamMemberHeaderCellProps = {
   data: {
     payGrades: PayGradeOutput[] | undefined
   }
@@ -66,7 +70,7 @@ interface ScheduleTeamMemberHeaderCellProps {
   teamMemberGroupBySort: TeamMemberGroupBySort
 }
 
-export const ScheduleTeamMemberHeaderCell = ({
+export function ScheduleTeamMemberHeaderCell({
   data: { payGrades },
   filters: {
     search,
@@ -85,7 +89,7 @@ export const ScheduleTeamMemberHeaderCell = ({
     toggleDirection,
     reset: resetGroupBySort,
   },
-}: ScheduleTeamMemberHeaderCellProps) => {
+}: ScheduleTeamMemberHeaderCellProps) {
   const { t } = useTranslation()
 
   const resetAll = useCallback(() => {
@@ -94,8 +98,8 @@ export const ScheduleTeamMemberHeaderCell = ({
   }, [])
 
   return (
-    <div className='sticky left-0 top-0 z-40 p-2 border-b border-r border-input bg-background flex items-center gap-2'>
-      <InputGroup className='flex-1 bg-input/30'>
+    <div className='border-input bg-background sticky top-0 left-0 z-40 flex items-center gap-2 border-r border-b p-2'>
+      <InputGroup className='bg-input/30 flex-1'>
         <InputGroupAddon>
           <Search className='size-4 shrink-0 opacity-50' />
         </InputGroupAddon>
@@ -136,7 +140,7 @@ export const ScheduleTeamMemberHeaderCell = ({
                   <ScrollArea
                   // className='max-h-48'
                   >
-                    <CommandEmpty className='text-xs text-muted-foreground p-4'>
+                    <CommandEmpty className='text-muted-foreground p-4 text-xs'>
                       {t('noPayGradesFound')}
                     </CommandEmpty>
                     <CommandGroup>
@@ -167,7 +171,7 @@ export const ScheduleTeamMemberHeaderCell = ({
             </DropdownMenuSubContent>
           </DropdownMenuSub>
           <Separator />
-          <DropdownMenuGroup className='*:p-0 p-2 grid grid-cols-2 gap-2 *:grid *:grid-cols-subgrid *:col-span-2 *:items-center *:*:odd:text-muted-foreground *:*:even:min-w-0 *:*:even:flex-1 *:*:even:w-full'>
+          <DropdownMenuGroup className='*:*:odd:text-muted-foreground grid grid-cols-2 gap-2 p-2 *:col-span-2 *:grid *:grid-cols-subgrid *:items-center *:p-0 *:*:even:w-full *:*:even:min-w-0 *:*:even:flex-1'>
             <DropdownMenuItem noHighlight onSelect={preventCloseOnSelect}>
               <div>{t('grouping')}</div>
               <Select
@@ -175,8 +179,7 @@ export const ScheduleTeamMemberHeaderCell = ({
                 onValueChange={value =>
                   value === 'undefined'
                     ? setGroupByKey(undefined)
-                    : setGroupByKey(value as TeamMemberGroupByKey)
-                }
+                    : setGroupByKey(value as TeamMemberGroupByKey)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -196,7 +199,7 @@ export const ScheduleTeamMemberHeaderCell = ({
               </Select>
             </DropdownMenuItem>
             <DropdownMenuItem noHighlight onSelect={preventCloseOnSelect}>
-              <div className='flex gap-2 items-center justify-between'>
+              <div className='flex items-center justify-between gap-2'>
                 <div>{t('sorting')}</div>
                 <Button
                   hidden={sortKey === undefined}
@@ -223,8 +226,7 @@ export const ScheduleTeamMemberHeaderCell = ({
                 onValueChange={value =>
                   value === 'undefined'
                     ? setSortKey(undefined)
-                    : setSortKey(value as TeamMemberSortKey)
-                }
+                    : setSortKey(value as TeamMemberSortKey)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -245,7 +247,7 @@ export const ScheduleTeamMemberHeaderCell = ({
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <div className='text-xs p-2 w-full flex items-center justify-between gap-2 *:text-muted-foreground'>
+          <div className='*:text-muted-foreground flex w-full items-center justify-between gap-2 p-2 text-xs'>
             <div>{t('reset')}</div>
             <div className='flex items-center gap-1'>
               <Button variant='link' size='xs' onClick={resetFilteredPayGrades}>

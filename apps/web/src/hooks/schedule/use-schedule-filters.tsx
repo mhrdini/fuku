@@ -1,23 +1,24 @@
 import { useId, useMemo, useState } from 'react'
-import { TeamMemberOutput } from '@fuku/api/schemas'
 
-import { TeamMemberData } from '~/lib/schedule'
+import type { TeamMemberOutput } from '@fuku/api/schemas'
+
+import type { TeamMemberData } from '~/lib/schedule'
 import { useScheduleStore } from '~/store/schedule.store'
 
-interface ScheduleFiltersProps {
+type ScheduleFiltersProps = {
   teamMembers: TeamMemberOutput[]
 }
 
-export const useScheduleFilters = ({ teamMembers }: ScheduleFiltersProps) => {
+export function useScheduleFilters({ teamMembers }: ScheduleFiltersProps) {
   const { teamMemberMetricsMap } = useScheduleStore()
 
   const payGradeFilterId = useId()
-  const [filteredPayGrades, setFilteredPayGrades] = useState<Set<string>>(
+  const [filteredPayGrades, setFilteredPayGrades] = useState<Set<string>>(() =>
     new Set(),
   )
 
   const shiftTypeFilterId = useId()
-  const [filteredShiftTypes, setFilteredShiftTypes] = useState<Set<string>>(
+  const [filteredShiftTypes, setFilteredShiftTypes] = useState<Set<string>>(() =>
     new Set(),
   )
 
@@ -27,7 +28,7 @@ export const useScheduleFilters = ({ teamMembers }: ScheduleFiltersProps) => {
   }
 
   const togglePayGrade = (value: string) => {
-    setFilteredPayGrades(prev => {
+    setFilteredPayGrades((prev) => {
       const next = new Set(prev)
       if (next.has(value)) {
         next.delete(value)
@@ -39,7 +40,7 @@ export const useScheduleFilters = ({ teamMembers }: ScheduleFiltersProps) => {
   }
 
   const removePayGrade = (value: string) => {
-    setFilteredPayGrades(prev => {
+    setFilteredPayGrades((prev) => {
       const next = new Set(prev)
       next.delete(value)
       return next
@@ -53,7 +54,7 @@ export const useScheduleFilters = ({ teamMembers }: ScheduleFiltersProps) => {
   }
 
   const toggleShiftType = (id: string) => {
-    setFilteredShiftTypes(prev => {
+    setFilteredShiftTypes((prev) => {
       const next = new Set(prev)
       if (next.has(id)) {
         next.delete(id)
@@ -65,7 +66,7 @@ export const useScheduleFilters = ({ teamMembers }: ScheduleFiltersProps) => {
   }
 
   const removeShiftType = (id: string) => {
-    setFilteredShiftTypes(prev => {
+    setFilteredShiftTypes((prev) => {
       const next = new Set(prev)
       next.delete(id)
       return next
@@ -75,7 +76,8 @@ export const useScheduleFilters = ({ teamMembers }: ScheduleFiltersProps) => {
   const [search, setSearch] = useState('')
 
   const filteredTeamMembers: TeamMemberData[] = useMemo(() => {
-    if (!teamMembers) return []
+    if (!teamMembers)
+      return []
     let filtered = teamMembers
       .map(tm => ({
         ...tm,

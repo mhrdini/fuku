@@ -1,10 +1,11 @@
-import { UnavailabilityOutput } from '@fuku/api/schemas'
-import { SchedulerAssignment } from '@fuku/domain/schemas'
-import { DateRange } from '@fuku/ui/components'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import { DayMetrics, SchedulerMetrics, TeamMemberMetrics } from '~/lib/schedule'
+import type { UnavailabilityOutput } from '@fuku/api/schemas'
+import type { SchedulerAssignment } from '@fuku/domain/schemas'
+import type { DateRange } from '@fuku/ui/components'
+
+import type { DayMetrics, SchedulerMetrics, TeamMemberMetrics } from '~/lib/schedule'
 import { mapStorage } from '~/lib/store'
 
 // import { mapStorage } from '~/lib/store'
@@ -41,7 +42,7 @@ type UnavailabilitySlice = {
   setSchedulerUnavailabilities: (
     schedulerUnavailabilities: UnavailabilityOutput[],
   ) => void
-  createUnavailability: (input: { teamMemberId: string; date: Date }) => void
+  createUnavailability: (input: { teamMemberId: string, date: Date }) => void
   deleteUnavailability: (unavailabilityId: string) => void
 }
 
@@ -51,10 +52,10 @@ type MetricsSlice = {
   setSchedulerMetrics: (metrics: Partial<SchedulerMetrics>) => void
 }
 
-type ScheduleStore = DateRangeSlice &
-  AssignmentSlice &
-  UnavailabilitySlice &
-  MetricsSlice
+type ScheduleStore = DateRangeSlice
+  & AssignmentSlice
+  & UnavailabilitySlice
+  & MetricsSlice
 
 type PersistedScheduleStore = Pick<
   ScheduleStore,
@@ -74,14 +75,14 @@ export const useScheduleStore = create<
       setSchedulerAssignments: (schedulerAssignments: SchedulerAssignment[]) =>
         set({ schedulerAssignments }),
       updateAssignment: ({ assignmentId, updatedFields }) =>
-        set(state => {
+        set((state) => {
           const schedulerAssignments = state.schedulerAssignments.map(a =>
             a.id === assignmentId ? { ...a, ...updatedFields } : a,
           )
           return { ...state, schedulerAssignments }
         }),
       moveAssignment: ({ assignmentId, toTeamMemberId, toDate }) =>
-        set(state => {
+        set((state) => {
           const schedulerAssignments = state.schedulerAssignments.map(a =>
             a.id === assignmentId
               ? { ...a, teamMemberId: toTeamMemberId, date: toDate }
@@ -133,7 +134,7 @@ export const useScheduleStore = create<
       teamMemberMetricsMap: new Map(),
       dayMetricsMap: new Map(),
       setSchedulerMetrics: (metrics: Partial<SchedulerMetrics>) =>
-        set(state => {
+        set((state) => {
           return {
             ...state,
             teamMemberMetricsMap: metrics.teamMemberMetricsMap

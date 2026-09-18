@@ -1,11 +1,9 @@
-import { defineConfig, env } from 'prisma/config'
-
+import dotenv from 'dotenv'
 import 'dotenv/config'
-
+import dotenvExpand from 'dotenv-expand'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import dotenv from 'dotenv'
-import dotenvExpand from 'dotenv-expand'
+import { defineConfig, env } from 'prisma/config'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

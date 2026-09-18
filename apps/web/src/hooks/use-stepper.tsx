@@ -1,8 +1,9 @@
 import { useState } from 'react'
 
-import Stepper, { Step } from '~/components/ui/stepper'
+import type { Step } from '~/components/ui/stepper'
+import Stepper from '~/components/ui/stepper'
 
-export const useStepper = (steps: Step[]) => {
+export function useStepper(steps: Step[]) {
   const [index, setIndex] = useState(0)
 
   const currentStep = () => {

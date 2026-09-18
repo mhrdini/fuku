@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+
 import { useRouter } from 'next/navigation'
-import { TeamCreateInput, TeamCreateInputSchema } from '@fuku/api/schemas'
+
+import { TeamCreateInputSchema } from '@fuku/api/schemas'
 import i18next from '@fuku/i18n/client'
 import { useTranslation } from '@fuku/i18n/react'
 import {
@@ -88,20 +90,24 @@ import {
 import {
   Controller,
   FormProvider,
-  SubmitErrorHandler,
-  SubmitHandler,
   useFieldArray,
-  UseFieldArrayReturn,
   useForm,
   useFormContext,
 } from 'react-hook-form'
 import { toast } from 'sonner'
-import * as z from 'zod/v4'
+
+import type { TeamCreateInput } from '@fuku/api/schemas'
+import type {
+  SubmitErrorHandler,
+  SubmitHandler,
+  UseFieldArrayReturn,
+} from 'react-hook-form'
+import type * as z from 'zod/v4'
 
 import { CountryController } from '~/components/country-controller'
 import { useSession } from '~/components/providers/session-provider'
 import { TimeZoneController } from '~/components/timezone-controller'
-import { Step } from '~/components/ui/stepper'
+import type { Step } from '~/components/ui/stepper'
 import { useDebouncedCommit } from '~/hooks/use-debounced-commit'
 import { useStepper } from '~/hooks/use-stepper'
 import { useTeamStore } from '~/store/team.store'
@@ -125,8 +131,6 @@ const TeamMembersSectionSchema = TeamCreateFormSchema.pick({
   teamMembers: true,
 })
 
-type TeamMembersSectionType = z.infer<typeof TeamMembersSectionSchema>
-
 const TeamMemberFormSchema = TeamMembersSectionSchema.shape.teamMembers.element
 
 type TeamMemberFormType = z.infer<typeof TeamMemberFormSchema>
@@ -135,10 +139,6 @@ const AdditionalDetailsSectionSchema = TeamCreateFormSchema.pick({
   locations: true,
   shiftTypes: true,
 })
-
-type AdditionalDetailsSectionType = z.infer<
-  typeof AdditionalDetailsSectionSchema
->
 
 const steps: Step[] = [
   {
@@ -234,14 +234,15 @@ export default function NewTeamPage() {
 
     const valid = await form.trigger(fieldNames)
 
-    if (!valid) return
+    if (!valid)
+      return
 
     nextStep()
   }
 
   const { mutateAsync: createTeam } = useMutation({
     ...trpc.team.create.mutationOptions(),
-    onSuccess: data => {
+    onSuccess: (data) => {
       setOpenTeamSelect(false)
       queryClient.invalidateQueries(trpc.user.getSidebarState.queryOptions())
       router.push(`/${session?.user.username}/team/${data.slug}`)
@@ -253,15 +254,13 @@ export default function NewTeamPage() {
     },
   })
 
-  const onSubmit: SubmitHandler<TeamCreateFormType> = values => {
+  const onSubmit: SubmitHandler<TeamCreateFormType> = (values) => {
     try {
       createTeam(values)
     } catch {}
   }
 
-  const onError: SubmitErrorHandler<TeamCreateFormType> = errors => {
-    console.log('new team submit errors:', errors)
-    console.log('new team submit values:', form.getValues())
+  const onError: SubmitErrorHandler<TeamCreateFormType> = (errors) => {
   }
 
   const sections = [
@@ -271,7 +270,7 @@ export default function NewTeamPage() {
   ] as const
 
   return (
-    <div className='flex flex-col gap-6 max-w-lg mx-auto'>
+    <div className='mx-auto flex max-w-lg flex-col gap-6'>
       <h2>{t('createANewTeam', 'Create a new team')}</h2>
       {stepper}
       <FormProvider {...form}>
@@ -468,7 +467,9 @@ function TeamMembersSection() {
               <Item key={field.rhfId} className='py-0'>
                 <ItemContent>
                   <ItemTitle>
-                    {field.givenNames} {field.familyName}
+                    {field.givenNames}
+                    {' '}
+                    {field.familyName}
                   </ItemTitle>
                   <ItemDescription>
                     {t('payGrade2', 'Pay Grade: ')}
@@ -503,8 +504,7 @@ function TeamMembersSection() {
                               teamMemberFields.findIndex(
                                 tm => tm.id === field.id,
                               ),
-                            )
-                          }
+                            )}
                         >
                           <Pencil />
                           {t('edit', 'Edit')}
@@ -521,8 +521,7 @@ function TeamMembersSection() {
                                 ...field,
                                 teamMemberRole: checked ? 'ADMIN' : 'STAFF',
                               },
-                            )
-                          }
+                            )}
                         >
                           <Shield />
                           {t('makeAdmin', 'Make admin')}
@@ -557,8 +556,8 @@ function TeamMembersSection() {
                                       key={pg.id}
                                       value={pg.id}
                                       onSelect={() => {
-                                        const index =
-                                          teamMemberFields.findIndex(
+                                        const index
+                                          = teamMemberFields.findIndex(
                                             tm => tm.id === field.id,
                                           )
                                         if (field.payGradeClientId === pg.id) {
@@ -606,8 +605,7 @@ function TeamMembersSection() {
                                   teamMemberFields.findIndex(
                                     tm => tm.id === field.id,
                                   ),
-                                )
-                              }
+                                )}
                             >
                               <Trash2 />
                               {t('remove', 'Remove')}
@@ -640,7 +638,7 @@ function TeamMemberSheet({
     UseFieldArrayReturn<TeamCreateFormType, 'teamMembers'>,
     'fields' | 'append' | 'update' | 'remove'
   >
-  payGrades: { id: string; name?: string; baseRate?: number }[]
+  payGrades: { id: string, name?: string, baseRate?: number }[]
   editingIndex: number | null
 }) {
   const { t } = useTranslation()
@@ -789,7 +787,7 @@ function TeamMemberSheet({
                                 <CommandItem
                                   key={pg.id}
                                   value={pg.id}
-                                  onSelect={currentValue => {
+                                  onSelect={(currentValue) => {
                                     form.setValue(
                                       'payGradeClientId',
                                       currentValue,
@@ -835,13 +833,15 @@ function TeamMemberSheet({
                   disabled
                   className='items-center justify-start disabled:opacity-100'
                 >
-                  {payGrades && form.getValues('payGradeClientId') ? (
-                    payGrades.find(
-                      pg => pg.id === form.getValues('payGradeClientId'),
-                    )?.baseRate
-                  ) : (
-                    <span className='text-muted-foreground'>N/A</span>
-                  )}
+                  {payGrades && form.getValues('payGradeClientId')
+                    ? (
+                        payGrades.find(
+                          pg => pg.id === form.getValues('payGradeClientId'),
+                        )?.baseRate
+                      )
+                    : (
+                        <span className='text-muted-foreground'>N/A</span>
+                      )}
                 </Button>
               </Field>
               <Controller
@@ -867,8 +867,7 @@ function TeamMemberSheet({
                       onChange={e =>
                         field.onChange(
                           e.target.value === '' ? 0 : Number(e.target.value),
-                        )
-                      }
+                        )}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -893,11 +892,11 @@ function TeamMemberSheet({
                 type='button'
                 className='ml-auto'
                 onClick={async () => {
-                  form.trigger().then(isValid => {
+                  form.trigger().then((isValid) => {
                     if (isValid) {
                       form.handleSubmit(submitTeamMember)()
                     } else {
-                      console.log('form invalid', form.formState.errors)
+                      console.error('form invalid', form.formState.errors)
                     }
                   })
                 }}
@@ -925,8 +924,8 @@ function PayGradesSheet({
   >
 }) {
   const { t } = useTranslation()
-  const { getValues, setValue, trigger, formState } =
-    useFormContext<TeamCreateFormType>()
+  const { getValues, setValue, trigger, formState }
+    = useFormContext<TeamCreateFormType>()
   const { fields, append, remove, update } = payGrades
 
   const handleAdd = () => {
@@ -953,7 +952,8 @@ function PayGradesSheet({
   const handleOpenChange = async () => {
     if (open) {
       const isValid = await trigger('payGrades')
-      if (!isValid) return
+      if (!isValid)
+        return
     }
     onOpenChange(!open)
   }
@@ -1003,7 +1003,7 @@ function PayGradeItem({
   index: number
   update: (index: number, value: any) => void
   onDelete: () => void
-  error?: { name?: { message?: string }; baseRate?: { message?: string } }
+  error?: { name?: { message?: string }, baseRate?: { message?: string } }
 }) {
   const { t } = useTranslation()
   const [name, setName] = useState(field.name ?? '')
@@ -1041,7 +1041,7 @@ function PayGradeItem({
           placeholder={t('payGradeName2', 'Pay grade name')}
           className='col-span-4'
           aria-invalid={!!error?.name}
-          onChange={e => {
+          onChange={(e) => {
             const value = e.target.value
             setName(value)
             latestRef.current.name = value
@@ -1056,7 +1056,7 @@ function PayGradeItem({
           placeholder={t('baseRate2', 'Base rate')}
           className='col-span-2'
           aria-invalid={!!error?.baseRate}
-          onChange={e => {
+          onChange={(e) => {
             const value = Number(e.target.value)
             setBaseRate(value)
             latestRef.current.baseRate = value
@@ -1146,7 +1146,7 @@ function AdditionalDetailsSection() {
 
       <FieldGroup>
         <Card>
-          <ItemGroup className='[&_[data-slot=item]]:py-0 [&_[data-slot=item]]:px-(--card-spacing)'>
+          <ItemGroup className='[&_[data-slot=item]]:px-(--card-spacing) [&_[data-slot=item]]:py-0'>
             <Item>
               <ItemHeader>
                 <ItemTitle>{t('locations', 'Locations')}</ItemTitle>
@@ -1160,19 +1160,21 @@ function AdditionalDetailsSection() {
               </ItemHeader>
               <ItemContent>
                 <ItemDescription>
-                  {locationFields.length ? (
-                    <>
-                      {locationFields.map(l => (
-                        <Badge key={l.id} variant='secondary'>
-                          {l.name}
-                        </Badge>
-                      ))}
-                    </>
-                  ) : (
-                    <span className='text-muted-foreground'>
-                      {t('noLocationsAdded', 'No locations yet')}
-                    </span>
-                  )}
+                  {locationFields.length
+                    ? (
+                        <>
+                          {locationFields.map(l => (
+                            <Badge key={l.id} variant='secondary'>
+                              {l.name}
+                            </Badge>
+                          ))}
+                        </>
+                      )
+                    : (
+                        <span className='text-muted-foreground'>
+                          {t('noLocationsAdded', 'No locations yet')}
+                        </span>
+                      )}
                 </ItemDescription>
               </ItemContent>
             </Item>
@@ -1191,11 +1193,11 @@ function AdditionalDetailsSection() {
               <ItemContent>
                 <ItemDescription>
                   {shiftTypeFields.length ? (
-                    <Card className='divide-y gap-0 py-0'>
+                    <Card className='gap-0 divide-y py-0'>
                       {shiftTypeFields.map(st => (
                         <CardContent
                           key={st.id}
-                          className='space-y-1 py-1.5 px-0'
+                          className='space-y-1 px-0 py-1.5'
                         >
                           {/* Header Row */}
                           <div className='flex items-center justify-between'>
@@ -1208,35 +1210,38 @@ function AdditionalDetailsSection() {
                           </div>
 
                           {/* Pay Grades */}
-                          {st.connectPayGrades?.length ? (
-                            <div className='flex flex-wrap gap-2'>
-                              <span className='text-muted-foreground'>
-                                {t(
-                                  'assignedToPayGrades',
-                                  'Assigned to pay grades:',
-                                )}
-                              </span>
-                              {st.connectPayGrades.map(pgId => {
-                                const pg = payGradeFields.find(
-                                  p => p.id === pgId,
-                                )
-                                if (!pg) return
+                          {st.connectPayGrades?.length
+                            ? (
+                                <div className='flex flex-wrap gap-2'>
+                                  <span className='text-muted-foreground'>
+                                    {t(
+                                      'assignedToPayGrades',
+                                      'Assigned to pay grades:',
+                                    )}
+                                  </span>
+                                  {st.connectPayGrades.map((pgId) => {
+                                    const pg = payGradeFields.find(
+                                      p => p.id === pgId,
+                                    )
+                                    if (!pg)
+                                      return null
 
-                                return (
-                                  <Badge key={pgId} variant='secondary'>
-                                    {pg.name}
-                                  </Badge>
-                                )
-                              })}
-                            </div>
-                          ) : (
-                            <div className='text-xs text-muted-foreground'>
-                              {t(
-                                'noPayGradesAssigned',
-                                'No pay grades assigned',
+                                    return (
+                                      <Badge key={pgId} variant='secondary'>
+                                        {pg.name}
+                                      </Badge>
+                                    )
+                                  })}
+                                </div>
+                              )
+                            : (
+                                <div className='text-muted-foreground text-xs'>
+                                  {t(
+                                    'noPayGradesAssigned',
+                                    'No pay grades assigned',
+                                  )}
+                                </div>
                               )}
-                            </div>
-                          )}
                         </CardContent>
                       ))}
                     </Card>
@@ -1274,7 +1279,8 @@ function LocationsSheet({
   const handleOpenChange = async () => {
     if (open) {
       const isValid = await trigger('locations')
-      if (!isValid) return
+      if (!isValid)
+        return
     }
     onOpenChange(!open)
   }
@@ -1358,7 +1364,7 @@ function LocationItem({
         <Input
           value={name}
           placeholder={t('locationName', 'Location name')}
-          onChange={e => {
+          onChange={(e) => {
             setName(e.target.value)
             latestRef.current.name = e.target.value
             schedule()
@@ -1400,7 +1406,8 @@ function ShiftTypesSheet({
   const handleOpenChange = async () => {
     if (open) {
       const isValid = await trigger('shiftTypes')
-      if (!isValid) return
+      if (!isValid)
+        return
     }
     onOpenChange(!open)
   }
@@ -1522,13 +1529,13 @@ function ShiftTypeItem({
   const { schedule, flush } = useDebouncedCommit(commit)
 
   return (
-    <Item className='p-0 gap-2'>
+    <Item className='gap-2 p-0'>
       <ItemContent className='grid grid-cols-6 gap-2'>
         <Input
           value={name}
           placeholder={t('name')}
           className='col-span-2'
-          onChange={e => {
+          onChange={(e) => {
             setName(e.target.value)
             latestRef.current.name = e.target.value
             schedule()
@@ -1542,7 +1549,7 @@ function ShiftTypeItem({
           placeholder='09:00'
           autoComplete='off'
           className='col-span-2 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
-          onChange={e => {
+          onChange={(e) => {
             setStartTime(e.target.value)
             latestRef.current.startTime = e.target.value
             schedule()
@@ -1556,7 +1563,7 @@ function ShiftTypeItem({
           placeholder='17:00'
           autoComplete='off'
           className='col-span-2 appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
-          onChange={e => {
+          onChange={(e) => {
             setEndTime(e.target.value)
             latestRef.current.endTime = e.target.value
             schedule()
@@ -1584,9 +1591,10 @@ function ShiftTypeItem({
                 <ComboboxValue>
                   {(ids: string[]) => (
                     <>
-                      {ids.map(id => {
+                      {ids.map((id) => {
                         const pg = payGrades.fields.find(p => p.id === id)
-                        if (!pg) return null
+                        if (!pg)
+                          return null
 
                         return <ComboboxChip key={id}>{pg.name}</ComboboxChip>
                       })}
@@ -1611,10 +1619,10 @@ function ShiftTypeItem({
                   )}
                 </ComboboxList>
                 <ComboboxSeparator className='m-0' />
-                <div className='flex flex-row w-full justify-between'>
+                <div className='flex w-full flex-row justify-between'>
                   <Button
                     variant='link'
-                    className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                    className='text-muted-foreground hover:text-foreground px-3 text-center hover:no-underline'
                     type='button'
                     onClick={() => {
                       setAssignedPayGradeIds(payGrades.fields.map(pg => pg.id))
@@ -1628,7 +1636,7 @@ function ShiftTypeItem({
                   </Button>
                   <Button
                     variant='link'
-                    className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                    className='text-muted-foreground hover:text-foreground px-3 text-center hover:no-underline'
                     type='button'
                     onClick={() => {
                       setAssignedPayGradeIds([])
@@ -1644,7 +1652,7 @@ function ShiftTypeItem({
           </FieldContent>
         </Field>
       </ItemContent>
-      <ItemActions className='items-start h-full'>
+      <ItemActions className='h-full items-start'>
         <Button type='button' variant='ghost' size='icon' onClick={onDelete}>
           <Trash2 />
         </Button>

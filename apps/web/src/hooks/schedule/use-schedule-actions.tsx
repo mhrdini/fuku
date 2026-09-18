@@ -1,7 +1,7 @@
 import { parseCellKey } from '~/lib/schedule'
 import { useScheduleStore } from '~/store/schedule.store'
 
-export const useScheduleActions = () => {
+export function useScheduleActions() {
   const {
     updateAssignment,
     moveAssignment,
@@ -47,7 +47,7 @@ export const useScheduleActions = () => {
   }) => {
     const { teamMemberId, date } = parseCellKey(cellKey)
 
-    console.log('Creating assignment for', { teamMemberId, date, shiftTypeId })
+    // console.log('Creating assignment for', { teamMemberId, date, shiftTypeId })
 
     createAssignment({
       teamMemberId,
@@ -64,7 +64,7 @@ export const useScheduleActions = () => {
   const addUnavailabilityToCell = (cellKey: string) => {
     const { teamMemberId, date } = parseCellKey(cellKey)
 
-    console.log('Adding unavailability for', { teamMemberId, date })
+    // console.log('Adding unavailability for', { teamMemberId, date })
 
     createUnavailability({
       teamMemberId,

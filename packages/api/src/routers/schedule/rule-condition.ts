@@ -1,14 +1,15 @@
 import { Prisma } from '@fuku/db'
-import { TRPCRouterRecord } from '@trpc/server'
 import * as z from 'zod/v4'
+
+import type { TRPCRouterRecord } from '@trpc/server'
 
 import {
   RuleConditionCreateInputSchema,
   RuleConditionOutputSchema,
   RuleConditionUpdateInputSchema,
-} from '../../schemas/ruleCondition'
+} from '../../schemas/rule-condition'
 import { protectedProcedure } from '../../trpc'
-import { groupBy } from '../../utils/groupBy'
+import { groupBy } from '../../utils/group-by'
 
 export const ruleConditionRouter = {
   groupByRules: protectedProcedure

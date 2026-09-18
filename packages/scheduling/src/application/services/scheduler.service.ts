@@ -1,40 +1,42 @@
-import {
+import type {
+  SchedulerEngine,
+} from '../../domain/engine/scheduler.engine'
+import type {
+  ProposedAssignment,
+  SchedulerContext,
+  TeamSnapshot,
+} from '../../domain/types/engine'
+import type {
+  OperationalHours,
+  StaffingRequirements,
+} from '../../domain/types/schedule'
+import type { HolidayService } from '../ports/holiday.service'
+import type { TeamRepository } from '../ports/team.repository'
+import type {
   GenerateScheduleInput,
   GenerateScheduleOutput,
   SchedulerAssignment,
   TimeZone,
 } from '@fuku/domain/schemas'
-import { WeekdayNumbers } from 'luxon'
+import type { WeekdayNumbers } from 'luxon'
 
 import {
   DefaultSchedulerEngine,
-  SchedulerEngine,
 } from '../../domain/engine/scheduler.engine'
-import {
-  ProposedAssignment,
-  SchedulerContext,
-  TeamSnapshot,
-} from '../../domain/types/engine'
-import {
-  OperationalHours,
-  StaffingRequirements,
-} from '../../domain/types/schedule'
 import { toISODateFromJS, toJSDateFromISO } from '../../shared/utils/date'
-import { HolidayService } from '../ports/holiday.service'
-import { TeamRepository } from '../ports/team.repository'
 
-export type SchedulerMode =
-  | 'dry-run' // without persisting to db
-  | 'replace' // persist to db, replacing existing assignments for the period
-export interface SchedulerService {
+export type SchedulerMode
+  = | 'dry-run' // without persisting to db
+    | 'replace' // persist to db, replacing existing assignments for the period
+export type SchedulerService = {
   mode: SchedulerMode
-  generate(
+  generate: (
     input: GenerateScheduleInput,
     options?: GenerateScheduleOptions,
-  ): Promise<GenerateScheduleOutput>
+  ) => Promise<GenerateScheduleOutput>
 }
 
-export interface GenerateScheduleOptions {
+export type GenerateScheduleOptions = {
   mode?: SchedulerMode
 }
 export class DefaultSchedulerService implements SchedulerService {
@@ -50,6 +52,7 @@ export class DefaultSchedulerService implements SchedulerService {
       this.mode = mode
     }
   }
+
   async generate(
     input: GenerateScheduleInput,
     options?: GenerateScheduleOptions,
@@ -60,7 +63,8 @@ export class DefaultSchedulerService implements SchedulerService {
     // 4. If mode is 'commit', persist the proposed assignments to the database
     // 5. Return the generated schedule
 
-    if (options) this.setOptions(options)
+    if (options)
+      this.setOptions(options)
 
     const context = await this.buildContext(input)
 
@@ -112,7 +116,7 @@ export class DefaultSchedulerService implements SchedulerService {
         startDate: input.start,
         endDate: input.end,
       })
-      console.log('\nHOLIDAYS:\n', holidays, '\n')
+      // console.log('\nHOLIDAYS:\n', holidays, '\n')
     }
 
     const snapshot = await this.teamRepository.getTeamSnapshot(
@@ -155,10 +159,12 @@ export class DefaultSchedulerService implements SchedulerService {
     }))
 
     for (const rule of snapshot.rules) {
-      if (!rule.shiftTypeId) continue
+      if (!rule.shiftTypeId)
+        continue
 
       const shiftType = shiftTypes.find(st => st.id === rule.shiftTypeId)
-      if (!shiftType || !shiftType.allowedWeekdays?.length) continue
+      if (!shiftType || !shiftType.allowedWeekdays?.length)
+        continue
 
       const allowed = new Set<number>(shiftType.allowedWeekdays as number[])
 
@@ -191,11 +197,12 @@ export class DefaultSchedulerService implements SchedulerService {
       const existingSet = new Set<number>(existing.value as number[])
 
       // check if sets are equal
-      const isSame =
-        existingSet.size === allowed.size &&
-        [...allowed].every(v => existingSet.has(v))
+      const isSame
+        = existingSet.size === allowed.size
+          && [...allowed].every(v => existingSet.has(v))
 
-      if (isSame) continue
+      if (isSame)
+        continue
 
       // if not, only get the allowed weekdays as the condition value
       const intersection = [...existingSet].filter(v => allowed.has(v))
@@ -248,9 +255,9 @@ export class DefaultSchedulerService implements SchedulerService {
       })),
     }
 
-    console.log('\n[PERIOD]')
-    console.log('start:', context.period.start)
-    console.log('end  :', context.period.end)
+    // console.log('\n[PERIOD]')
+    // console.log('start:', context.period.start)
+    // console.log('end  :', context.period.end)
 
     return context
   }

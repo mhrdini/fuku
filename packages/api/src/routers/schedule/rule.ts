@@ -1,9 +1,12 @@
-import { TRPCRouterRecord } from '@trpc/server'
 import * as z from 'zod/v4'
+
+import type {
+  RuleOutput,
+} from '../../schemas'
+import type { TRPCRouterRecord } from '@trpc/server'
 
 import {
   RuleCreateInputSchema,
-  RuleOutput,
   RuleUpdateInputSchema,
 } from '../../schemas'
 import { protectedProcedure } from '../../trpc'

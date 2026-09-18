@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { DialogId } from '~/lib/dialog'
+import type { DialogId } from '~/lib/dialog'
 
 type DialogOptions = {
   id: DialogId | null

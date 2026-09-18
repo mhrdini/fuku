@@ -2,11 +2,11 @@
 
 import { useSortable } from '@dnd-kit/react/sortable'
 
-interface EmptySortableSlotProps {
+type EmptySortableSlotProps = {
   cellKey: string
 }
 
-export const EmptySortableSlot = ({ cellKey }: EmptySortableSlotProps) => {
+export function EmptySortableSlot({ cellKey }: EmptySortableSlotProps) {
   const { ref } = useSortable({
     id: `empty-${cellKey}`,
     index: 0,

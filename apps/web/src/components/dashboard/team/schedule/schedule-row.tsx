@@ -1,16 +1,20 @@
 import { useMemo } from 'react'
 import { Fragment } from 'react/jsx-runtime'
+
 import { useDragOperation } from '@dnd-kit/react'
-import { ShiftTypeOutput } from '@fuku/api/schemas'
-import { SchedulerAssignment } from '@fuku/domain/schemas'
 import { cn } from '@fuku/ui/lib/utils'
 
-import { ScheduleFilters } from '~/hooks/schedule/useScheduleFilters'
-import { CellData, Day, getCellKey, TeamMemberData } from '~/lib/schedule'
+import type { ShiftTypeOutput } from '@fuku/api/schemas'
+import type { SchedulerAssignment } from '@fuku/domain/schemas'
+
+import type { ScheduleFilters } from '~/hooks/schedule/use-schedule-filters'
+import type { CellData, Day, TeamMemberData } from '~/lib/schedule'
+import { getCellKey } from '~/lib/schedule'
+
 import { ScheduleCell } from './schedule-cell'
 import { ScheduleTeamMemberCell } from './schedule-team-member-cell'
 
-interface ScheduleRowProps {
+type ScheduleRowProps = {
   teamMember: TeamMemberData
   isLastRow: boolean
   days: Day[]
@@ -21,15 +25,16 @@ interface ScheduleRowProps {
   filters: ScheduleFilters
 }
 
-export const ScheduleRow = ({
+export function ScheduleRow({
   teamMember: tm,
   isLastRow,
   days: daysRowList,
   data: { shiftTypeMap, cellMap },
   filters: { filteredShiftTypes },
-}: ScheduleRowProps) => {
+}: ScheduleRowProps) {
   const eligibleShifts = useMemo(() => {
-    if (!tm.payGradeId) return new Map<string, ShiftTypeOutput>()
+    if (!tm.payGradeId)
+      return new Map<string, ShiftTypeOutput>()
 
     const entries = Array.from(shiftTypeMap.values())
       .filter(st =>
@@ -63,7 +68,7 @@ export const ScheduleRow = ({
       {/* member cell */}
       <div
         className={cn(
-          'sticky left-0 z-20 w-[250px] bg-background border-r border-input',
+          'bg-background border-input sticky left-0 z-20 w-[250px] border-r',
           // 'flex flex-col h-full',
           !isLastRow && 'border-b',
         )}

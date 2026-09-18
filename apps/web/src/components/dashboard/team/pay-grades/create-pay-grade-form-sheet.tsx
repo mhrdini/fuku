@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import { useParams } from 'next/navigation'
+
 import {
-  PayGradeCreateInput,
   PayGradeCreateInputSchema,
 } from '@fuku/api/schemas'
 import { useTranslation } from '@fuku/i18n/react'
@@ -36,6 +37,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
+import type {
+  PayGradeCreateInput,
+} from '@fuku/api/schemas'
+
 import { SheetId } from '~/lib/sheet'
 import { useSheetStore } from '~/store/sheet.store'
 import { useTRPC } from '~/trpc/client'
@@ -43,7 +48,7 @@ import { useTRPC } from '~/trpc/client'
 const PayGradeCreateFormSchema = PayGradeCreateInputSchema
 type PayGradeCreateFormGrade = PayGradeCreateInput
 
-export const CreatePayGradeFormSheet = () => {
+export function CreatePayGradeFormSheet() {
   const { t } = useTranslation()
   const title = t('createNewPayGrade', 'Create New Pay Grade')
   const { id, closeSheet } = useSheetStore()
@@ -84,7 +89,7 @@ export const CreatePayGradeFormSheet = () => {
 
   const { mutateAsync: createPayGrade, isPending } = useMutation({
     ...trpc.payGrade.create.mutationOptions(),
-    onError: error => {
+    onError: (error) => {
       toast.error('Error', {
         description: t('valMessage', '{{val}}: {{message}}', {
           val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
@@ -92,7 +97,7 @@ export const CreatePayGradeFormSheet = () => {
         }),
       })
     },
-    onSuccess: data => {
+    onSuccess: (data) => {
       closeSheet()
       queryClient.setQueryData(
         trpc.payGrade.byId.queryKey({ id: data.id }),
@@ -126,10 +131,10 @@ export const CreatePayGradeFormSheet = () => {
       </SheetHeader>
       <form
         id='form-create-pay-grade'
-        className='flex flex-col gap-4 h-full'
+        className='flex h-full flex-col gap-4'
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <FieldSet className='grid gap-4 flex-1 auto-rows-min px-4'>
+        <FieldSet className='grid flex-1 auto-rows-min gap-4 px-4'>
           <FieldGroup>
             <Controller
               name='name'
@@ -172,8 +177,7 @@ export const CreatePayGradeFormSheet = () => {
                     onChange={e =>
                       field.onChange(
                         e.target.value === '' ? 0 : Number(e.target.value),
-                      )
-                    }
+                      )}
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -201,9 +205,10 @@ export const CreatePayGradeFormSheet = () => {
                       <ComboboxValue>
                         {(ids: string[]) => (
                           <>
-                            {ids.map(id => {
+                            {ids.map((id) => {
                               const st = shiftTypes?.find(st => st.id === id)
-                              if (!st) return null
+                              if (!st)
+                                return null
 
                               return (
                                 <ComboboxChip key={id}>{st.name}</ComboboxChip>
@@ -226,23 +231,22 @@ export const CreatePayGradeFormSheet = () => {
                         )}
                       </ComboboxList>
                       <ComboboxSeparator className='m-0' />
-                      <div className='flex flex-row w-full justify-between'>
+                      <div className='flex w-full flex-row justify-between'>
                         <Button
                           variant='link'
-                          className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                          className='text-muted-foreground hover:text-foreground px-3 text-center hover:no-underline'
                           type='button'
                           onClick={() =>
                             form.setValue(
                               'connectShiftTypes',
                               shiftTypes?.map(st => st.id),
-                            )
-                          }
+                            )}
                         >
                           {t('selectAll', 'Select all')}
                         </Button>
                         <Button
                           variant='link'
-                          className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                          className='text-muted-foreground hover:text-foreground px-3 text-center hover:no-underline'
                           type='button'
                           onClick={() => form.setValue('connectShiftTypes', [])}
                         >

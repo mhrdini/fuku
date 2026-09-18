@@ -1,10 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
-import {
-  RuleConditionOutput,
-  RuleConditionUpdateInput,
-} from '@fuku/api/schemas'
+
 import {
   getRuleConditionDefaultValueByField,
   normalizeConditionValue,
@@ -32,6 +29,11 @@ import {
 import { cn } from '@fuku/ui/lib/utils'
 import { ChevronDownIcon, X } from 'lucide-react'
 
+import type {
+  RuleConditionOutput,
+  RuleConditionUpdateInput,
+} from '@fuku/api/schemas'
+
 import {
   RULE_CONDITION_FIELD_LABELS,
   RULE_CONDITION_OPERATOR_LABELS,
@@ -39,7 +41,7 @@ import {
 } from '~/lib/rule-panel/rule.constants'
 import { isSyntheticCondition } from '~/lib/rule-panel/rule.helpers'
 
-const RuleConditionPanelItem = ({
+function RuleConditionPanelItem({
   ruleCondition,
   updateRuleCondition,
   deleteRuleCondition,
@@ -49,18 +51,19 @@ const RuleConditionPanelItem = ({
     condition: RuleConditionUpdateInput,
   ) => Promise<RuleConditionOutput>
   deleteRuleCondition: (conditionId: string) => Promise<RuleConditionOutput>
-}) => {
+}) {
   const { t } = useTranslation()
   const [inputValue, setInputValue] = useState('')
 
-  const isMulti =
-    ruleCondition.operator === RuleConditionOperatorValues.IN ||
-    ruleCondition.operator === RuleConditionOperatorValues.NOT_IN
+  const isMulti
+    = ruleCondition.operator === RuleConditionOperatorValues.IN
+      || ruleCondition.operator === RuleConditionOperatorValues.NOT_IN
 
   const items = useMemo(() => {
-    const source: Map<string, string> | undefined =
-      RULE_CONDITION_VALUE_OPTIONS_BY_FIELD[ruleCondition.field]
-    if (!source) return []
+    const source: Map<string, string> | undefined
+      = RULE_CONDITION_VALUE_OPTIONS_BY_FIELD[ruleCondition.field]
+    if (!source)
+      return []
 
     return Array.from(source).map(([value, label]) => ({
       value: String(value),
@@ -97,7 +100,8 @@ const RuleConditionPanelItem = ({
   }, [ruleCondition.value, ruleCondition.field, isMulti])
 
   const handleUpdateField = (field: string) => {
-    if (field === ruleCondition.field) return
+    if (field === ruleCondition.field)
+      return
 
     const nextField = RuleConditionFieldSchema.parse(field)
     const config = RULE_CONDITION_OPTIONS_CONFIG[nextField]
@@ -123,13 +127,14 @@ const RuleConditionPanelItem = ({
   }
 
   const handleUpdateOperator = (operator: string) => {
-    if (operator === ruleCondition.operator) return
+    if (operator === ruleCondition.operator)
+      return
 
     const parsedOperator = RuleConditionOperatorSchema.parse(operator)
 
-    const nextIsMulti =
-      parsedOperator === RuleConditionOperatorValues.IN ||
-      parsedOperator === RuleConditionOperatorValues.NOT_IN
+    const nextIsMulti
+      = parsedOperator === RuleConditionOperatorValues.IN
+        || parsedOperator === RuleConditionOperatorValues.NOT_IN
 
     let value = ruleCondition.value
 
@@ -143,8 +148,8 @@ const RuleConditionPanelItem = ({
     }
 
     if (!nextIsMulti && Array.isArray(value)) {
-      value =
-        value[0] ?? getRuleConditionDefaultValueByField(ruleCondition.field)
+      value
+        = value[0] ?? getRuleConditionDefaultValueByField(ruleCondition.field)
     }
 
     updateRuleCondition({
@@ -216,7 +221,7 @@ const RuleConditionPanelItem = ({
       {/* value */}
       <Combobox
         disabled={isWeekdayCondition}
-        items={items as { value: string; label: string }[]}
+        items={items as { value: string, label: string }[]}
         multiple={isMulti}
         value={uiValue}
         inputValue={inputValue}
@@ -224,14 +229,14 @@ const RuleConditionPanelItem = ({
         onValueChange={handleUpdateValue}
       >
         <ComboboxTrigger
-          render={
+          render={(
             <Button size='sm' variant='outline' className='min-w-fit grow'>
               <span>
                 {Array.isArray(uiValue) ? uiValue.join(', ') : uiValue || '-'}
               </span>
               <ChevronDownIcon className='ml-auto size-4 opacity-50' />
             </Button>
-          }
+          )}
         />
 
         <ComboboxContent className='min-w-fit'>
@@ -240,7 +245,7 @@ const RuleConditionPanelItem = ({
           </ComboboxEmpty>
 
           <ComboboxList>
-            {(item: { value: string; label: string }) => (
+            {(item: { value: string, label: string }) => (
               <ComboboxItem key={item.value} value={item.value}>
                 {t(item.label)}
               </ComboboxItem>
@@ -253,7 +258,7 @@ const RuleConditionPanelItem = ({
         size='icon-sm'
         onClick={() => deleteRuleCondition(ruleCondition.id)}
         className={cn(
-          'opacity-20 group-hover/condition:opacity-100 transition-opacity duration-75 ease-in-out',
+          'opacity-20 transition-opacity duration-75 ease-in-out group-hover/condition:opacity-100',
           isWeekdayCondition && 'hidden',
         )}
       >

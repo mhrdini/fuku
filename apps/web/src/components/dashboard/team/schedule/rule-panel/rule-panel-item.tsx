@@ -1,16 +1,7 @@
 'use client'
 
 import {
-  RuleConditionCreateInput,
-  RuleConditionOutput,
-  RuleConditionUpdateInput,
-  RuleCreateInput,
-  RuleOutput,
-  RuleUpdateInput,
-} from '@fuku/api/schemas'
-import {
   getRuleConditionDefaultValueByField,
-  RULE_CONDITION_OPTIONS_CONFIG,
   RuleConditionFieldValues,
   RuleConditionOperatorValues,
 } from '@fuku/domain/schemas'
@@ -26,12 +17,24 @@ import {
 } from '@fuku/ui/components'
 import { ChevronRight, Copy, Plus, Trash } from 'lucide-react'
 
+import type {
+  RuleConditionCreateInput,
+  RuleConditionOutput,
+  RuleConditionUpdateInput,
+  RuleCreateInput,
+  RuleOutput,
+  RuleUpdateInput,
+} from '@fuku/api/schemas'
+import type {
+  RULE_CONDITION_OPTIONS_CONFIG,
+} from '@fuku/domain/schemas'
+
 import RuleConditionPanelItem from './rule-condition-panel-item'
 import RuleConstraintEditor from './rule-constraint-editor'
 import RuleMetricEditor from './rule-metric-editor'
 import RuleScopeSelect from './rule-scope-select'
 
-const RulePanelItem = ({
+function RulePanelItem({
   rule,
   ruleConditions,
   scopeOptions,
@@ -44,7 +47,7 @@ const RulePanelItem = ({
 }: {
   rule: RuleOutput
   ruleConditions: RuleConditionOutput[]
-  scopeOptions: Record<string, { value: string; label: string }[]>
+  scopeOptions: Record<string, { value: string, label: string }[]>
   createRule: (rule: RuleCreateInput) => Promise<RuleOutput>
   updateRule: (rule: RuleUpdateInput) => Promise<RuleOutput>
   deleteRule: (ruleId: string) => Promise<RuleOutput>
@@ -55,7 +58,7 @@ const RulePanelItem = ({
     condition: RuleConditionUpdateInput,
   ) => Promise<RuleConditionOutput>
   deleteRuleCondition: (conditionId: string) => Promise<RuleConditionOutput>
-}) => {
+}) {
   const { t } = useTranslation()
 
   const handleDeleteRule = () => {
@@ -86,7 +89,7 @@ const RulePanelItem = ({
 
   return (
     <Collapsible id={`rule-${rule.id}`} className='group/rule w-full'>
-      <div className='flex flex-col gap-2  items-start *:flex *:flex-row *:gap-2 *:items-center *:justify-start *:w-full'>
+      <div className='flex flex-col items-start  gap-2 *:flex *:w-full *:flex-row *:items-center *:justify-start *:gap-2'>
         {/* first row */}
         <div>
           <RuleScopeSelect
@@ -139,7 +142,7 @@ const RulePanelItem = ({
           </CollapsibleTrigger>
         </div>
       </div>
-      <CollapsibleContent className='p-0 pt-2 flex flex-col w-full min-w-0 rounded-b-none gap-2'>
+      <CollapsibleContent className='flex w-full min-w-0 flex-col gap-2 rounded-b-none p-0 pt-2'>
         {ruleConditions.map(rc => (
           <RuleConditionPanelItem
             key={rc.id}

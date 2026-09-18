@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback } from 'react'
+
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
@@ -14,10 +15,10 @@ import { Check, ChevronDown } from 'lucide-react'
 
 import { useScheduleStore } from '~/store/schedule.store'
 
-export const ScheduleFooter = () => {
+export function ScheduleFooter() {
   const { t } = useTranslation()
-  const { setSchedulerAssignments, setSchedulerUnavailabilities } =
-    useScheduleStore()
+  const { setSchedulerAssignments, setSchedulerUnavailabilities }
+    = useScheduleStore()
 
   const handleClearShifts = useCallback(() => {
     setSchedulerAssignments([])
@@ -33,7 +34,7 @@ export const ScheduleFooter = () => {
   }, [])
 
   return (
-    <div className='flex gap-2 justify-end items-center'>
+    <div className='flex items-center justify-end gap-2'>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant='outline'>

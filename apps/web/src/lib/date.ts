@@ -1,5 +1,23 @@
-import { SUPPORTED_TIME_ZONES, TimeZone } from '@fuku/domain/schemas'
+import { SUPPORTED_TIME_ZONES } from '@fuku/domain/schemas'
 import i18next from '@fuku/i18n/server'
+
+import type { TimeZone } from '@fuku/domain/schemas'
+
+export function getMonthMap() {
+  return new Map<string, string>(
+    Array.from({ length: 12 }, (_, i) => i + 1)
+      .map(String)
+      .map(v => [v, `MONTH_${v}`]),
+  )
+}
+
+export function getWeekdayMap() {
+  return new Map<string, string>(
+    Array.from({ length: 7 }, (_, i) => i + 1)
+      .map(String)
+      .map(v => [v, `WEEKDAY_${v}`]),
+  )
+}
 
 function generateTimeOptions(minuteInterval: number = 30): string[] {
   const options = []
@@ -35,8 +53,8 @@ function getOffsetInfo(timeZone: TimeZone) {
   })
 
   const longParts = longFormatter.formatToParts(date)
-  const longOffset =
-    longParts.find(p => p.type === 'timeZoneName')?.value ?? 'GMT+00:00'
+  const longOffset
+    = longParts.find(p => p.type === 'timeZoneName')?.value ?? 'GMT+00:00'
 
   let offset = longOffset.replace('GMT', 'UTC')
   if (offset === 'UTC') {
@@ -69,15 +87,16 @@ export function getGroupedTimeZones(): Record<string, TimeZoneOption[]> {
 
   for (const zone of zones) {
     const [region, city] = zone.split('/')
-    if (!city) continue
+    if (!city)
+      continue
 
     const { offset, offsetMinutes, abbr } = getOffsetInfo(zone)
     let name = city.replaceAll('_', ' ')
 
     name = name.replace(/([a-z])([A-Z])/g, '$1 $2')
 
-    name = name.replace(/DU/g, "d'U")
-    name = name.replace(/DA/g, "d'A")
+    name = name.replace(/DU/g, 'd\'U')
+    name = name.replace(/DA/g, 'd\'A')
 
     const option: TimeZoneOption = {
       value: zone,
@@ -87,7 +106,8 @@ export function getGroupedTimeZones(): Record<string, TimeZoneOption[]> {
       region,
     }
 
-    if (!result[region]) result[region] = []
+    if (!result[region])
+      result[region] = []
     result[region].push(option)
   }
 

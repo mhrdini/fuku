@@ -1,6 +1,6 @@
 import { Skeleton } from '@fuku/ui/components'
 
-export const ContentSkeleton = () => {
+export function ContentSkeleton() {
   return (
     <>
       <Skeleton className='h-4 w-1/3 rounded-none' />

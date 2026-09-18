@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
+
 import { useTranslation } from '@fuku/i18n/react'
 import {
   AlertDialogAction,
@@ -17,7 +18,7 @@ import { toast } from 'sonner'
 import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 
-export const RemoveShiftTypeAlertDialog = () => {
+export function RemoveShiftTypeAlertDialog() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const trpc = useTRPC()
@@ -35,9 +36,32 @@ export const RemoveShiftTypeAlertDialog = () => {
     enabled: !!currentShiftTypeId,
   })
 
+  const { mutateAsync: restoreShiftType } = useMutation({
+    ...trpc.shiftType.restore.mutationOptions(),
+    onError: (error) => {
+      toast.error('Error', {
+        description: t('message', '{{message}}', { message: error.message }),
+      })
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        trpc.shiftType.byId.queryKey({ id: data.id }),
+        data,
+      )
+      queryClient.invalidateQueries(
+        trpc.shiftType.listIds.queryOptions({ teamId: team?.id ?? '' }),
+      )
+      toast.success('Shift Type', {
+        description: t('nameHasBeenRestored', '{{name}} has been restored.', {
+          name: data.name,
+        }),
+      })
+    },
+  })
+
   const { mutateAsync: removeShiftType, isPending } = useMutation({
     ...trpc.shiftType.delete.mutationOptions(),
-    onError: error => {
+    onError: (error) => {
       toast.error('Error', {
         // TODO: Internationalize server errors according to message type
         description: t('valMessage', '{{val}}: {{message}}', {
@@ -46,7 +70,7 @@ export const RemoveShiftTypeAlertDialog = () => {
         }),
       })
     },
-    onSuccess: data => {
+    onSuccess: (data) => {
       queryClient.removeQueries({
         queryKey: trpc.shiftType.byId.queryKey({ id: data.id }),
       })
@@ -71,31 +95,9 @@ export const RemoveShiftTypeAlertDialog = () => {
     },
   })
 
-  const { mutateAsync: restoreShiftType } = useMutation({
-    ...trpc.shiftType.restore.mutationOptions(),
-    onError: error => {
-      toast.error('Error', {
-        description: t('message', '{{message}}', { message: error.message }),
-      })
-    },
-    onSuccess: data => {
-      queryClient.setQueryData(
-        trpc.shiftType.byId.queryKey({ id: data.id }),
-        data,
-      )
-      queryClient.invalidateQueries(
-        trpc.shiftType.listIds.queryOptions({ teamId: team?.id ?? '' }),
-      )
-      toast.success('Shift Type', {
-        description: t('nameHasBeenRestored', '{{name}} has been restored.', {
-          name: data.name,
-        }),
-      })
-    },
-  })
-
   const onRemove = async () => {
-    if (!currentShiftTypeId) return
+    if (!currentShiftTypeId)
+      return
     try {
       await removeShiftType({ id: currentShiftTypeId })
     } catch {
@@ -108,29 +110,33 @@ export const RemoveShiftTypeAlertDialog = () => {
       <AlertDialogTitle>
         {t('removeShiftType', 'Remove Shift Type')}
       </AlertDialogTitle>
-      {isLoadingShiftType ? (
-        <AlertDialogDescription asChild>
-          <Skeleton className='inline-block h-4 w-10' />
-        </AlertDialogDescription>
-      ) : (
-        <AlertDialogDescription asChild>
-          <div>
-            <div>
-              {t(
-                'areYouSureYouWantToRemove',
-                'Are you sure you want to remove',
-              )}{' '}
-              {shiftType?.name}?
-            </div>
-            <div className='font-semibold'>
-              {t(
-                'youCanRestoreItAfterDeletion',
-                'You can restore it after deletion.',
-              )}
-            </div>
-          </div>
-        </AlertDialogDescription>
-      )}
+      {isLoadingShiftType
+        ? (
+            <AlertDialogDescription asChild>
+              <Skeleton className='inline-block h-4 w-10' />
+            </AlertDialogDescription>
+          )
+        : (
+            <AlertDialogDescription asChild>
+              <div>
+                <div>
+                  {t(
+                    'areYouSureYouWantToRemove',
+                    'Are you sure you want to remove',
+                  )}
+                  {' '}
+                  {shiftType?.name}
+                  ?
+                </div>
+                <div className='font-semibold'>
+                  {t(
+                    'youCanRestoreItAfterDeletion',
+                    'You can restore it after deletion.',
+                  )}
+                </div>
+              </div>
+            </AlertDialogDescription>
+          )}
       <AlertDialogFooter>
         <AlertDialogCancel>{t('cancel', 'Cancel')}</AlertDialogCancel>
         <AlertDialogAction asChild>
@@ -139,7 +145,7 @@ export const RemoveShiftTypeAlertDialog = () => {
             onClick={onRemove}
             loading={isPending}
             disabled={isLoadingShiftType || isPending}
-            className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
+            className='bg-destructive hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-white'
           >
             {t('remove', 'Remove')}
           </LoadingButton>

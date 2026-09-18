@@ -1,11 +1,9 @@
 import { useEffect } from 'react'
+
 import {
-  OperationalHoursOutput,
   OperationalHoursOutputSchema,
-  StaffingRequirementsOutput,
   StaffingRequirementsOutputSchema,
 } from '@fuku/api/schemas'
-import { WeekdayKey } from '@fuku/domain/schemas'
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
@@ -29,15 +27,23 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import {
   Controller,
-  SubmitErrorHandler,
-  SubmitHandler,
   useForm,
 } from 'react-hook-form'
 import { toast } from 'sonner'
 import * as z from 'zod/v4'
 
+import type {
+  OperationalHoursOutput,
+  StaffingRequirementsOutput,
+} from '@fuku/api/schemas'
+import type { WeekdayKey } from '@fuku/domain/schemas'
+import type {
+  SubmitErrorHandler,
+  SubmitHandler,
+} from 'react-hook-form'
+
 import { NumberStepperInput } from '~/components/ui/number-stepper-input'
-import { TIME_OPTIONS, WEEKDAY_MAP } from '~/lib/date'
+import { getWeekdayMap, TIME_OPTIONS } from '~/lib/date'
 import { useTRPC } from '~/trpc/client'
 
 const NON_NEGATIVE_MIN = 1
@@ -58,39 +64,9 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
     enabled: !!teamId,
   })
 
-  const { mutateAsync: setHours } = useMutation({
-    ...trpc.operationalHour.setHours.mutationOptions(),
-    onSuccess: () => {
-      form.reset(form.getValues())
-      toast.success('Operational Hours', {
-        description: t('changesSaved', 'Changes saved!'),
-      })
-    },
-    onError: error => {
-      toast.error('Operational Hours', {
-        description: error.message,
-      })
-    },
-  })
-
   const { data: staffingRequirements } = useQuery({
     ...trpc.staffingRequirement.list.queryOptions({ teamId }),
     enabled: !!teamId,
-  })
-
-  const { mutateAsync: setStaffing } = useMutation({
-    ...trpc.staffingRequirement.setStaffing.mutationOptions(),
-    onSuccess: () => {
-      form.reset(form.getValues())
-      toast.success('Staffing Requirements', {
-        description: t('changesSaved', 'Changes saved!'),
-      })
-    },
-    onError: error => {
-      toast.error('Staffing Requirements', {
-        description: error.message,
-      })
-    },
   })
 
   const createDefaultDay = () => ({
@@ -130,6 +106,36 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
       },
     },
     resolver: zodResolver(DailyRequirementsFormSchema),
+  })
+
+  const { mutateAsync: setHours } = useMutation({
+    ...trpc.operationalHour.setHours.mutationOptions(),
+    onSuccess: () => {
+      form.reset(form.getValues())
+      toast.success('Operational Hours', {
+        description: t('changesSaved', 'Changes saved!'),
+      })
+    },
+    onError: (error) => {
+      toast.error('Operational Hours', {
+        description: error.message,
+      })
+    },
+  })
+
+  const { mutateAsync: setStaffing } = useMutation({
+    ...trpc.staffingRequirement.setStaffing.mutationOptions(),
+    onSuccess: () => {
+      form.reset(form.getValues())
+      toast.success('Staffing Requirements', {
+        description: t('changesSaved', 'Changes saved!'),
+      })
+    },
+    onError: (error) => {
+      toast.error('Staffing Requirements', {
+        description: error.message,
+      })
+    },
   })
 
   const resetForm = () => {
@@ -192,13 +198,13 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
       operationalHours: updatedOpHours,
       staffingRequirements: updatedStaffingReqs,
     }))
-  }, [operationalHours, staffingRequirements])
+  }, [])
 
-  const onSubmit: SubmitHandler<DailyRequirementsFormType> = async values => {
+  const onSubmit: SubmitHandler<DailyRequirementsFormType> = async (values) => {
     try {
       const dirtyOperationalHours = form.formState.dirtyFields.operationalHours
-      const dirtyStaffingRequirements =
-        form.formState.dirtyFields.staffingRequirements
+      const dirtyStaffingRequirements
+        = form.formState.dirtyFields.staffingRequirements
 
       let hoursUpdated = true
       let staffingUpdated = true
@@ -207,9 +213,9 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
       if (!dirtyOperationalHours) {
         hoursUpdated = false
       } else {
-        const dirtyDays = Object.keys(dirtyOperationalHours).filter(day => {
-          const value =
-            dirtyOperationalHours[day as keyof typeof dirtyOperationalHours]
+        const dirtyDays = Object.keys(dirtyOperationalHours).filter((day) => {
+          const value
+            = dirtyOperationalHours[day as keyof typeof dirtyOperationalHours]
           return value && Object.keys(value as object).length > 0
         })
 
@@ -217,8 +223,8 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
           hoursUpdated = false
         } else {
           const operationalHours = dirtyDays.reduce((acc, day) => {
-            acc[day as WeekdayKey] =
-              values.operationalHours[
+            acc[day as WeekdayKey]
+              = values.operationalHours[
                 day as keyof typeof values.operationalHours
               ]
             return acc
@@ -231,9 +237,9 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
       if (!dirtyStaffingRequirements) {
         staffingUpdated = false
       } else {
-        const dirtyDays = Object.keys(dirtyStaffingRequirements).filter(day => {
-          const value =
-            dirtyStaffingRequirements[
+        const dirtyDays = Object.keys(dirtyStaffingRequirements).filter((day) => {
+          const value
+            = dirtyStaffingRequirements[
               day as keyof typeof dirtyStaffingRequirements
             ]
           return value && Object.keys(value as object).length > 0
@@ -243,8 +249,8 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
           staffingUpdated = false
         } else {
           const staffingRequirements = dirtyDays.reduce((acc, day) => {
-            acc[day as WeekdayKey] =
-              values.staffingRequirements[
+            acc[day as WeekdayKey]
+              = values.staffingRequirements[
                 day as keyof typeof values.staffingRequirements
               ]
             return acc
@@ -258,9 +264,9 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
     }
   }
 
-  const onError: SubmitErrorHandler<OperationalHoursOutput> = errors => {
-    console.log('operational hour form errors:', errors)
-    console.log('operational hour form values on error:', form.getValues())
+  const onError: SubmitErrorHandler<OperationalHoursOutput> = (errors) => {
+    console.error('operational hour form errors:', errors)
+    console.error('operational hour form values on error:', form.getValues())
   }
 
   return (
@@ -273,15 +279,16 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
         className='flex flex-col gap-4'
       >
         <FieldSet className='flex flex-col'>
-          {(Object.keys(WEEKDAY_MAP) as WeekdayKey[]).map(day => {
-            const weekday = WEEKDAY_MAP[day]
+          {Array.from(getWeekdayMap()).map(([day_number, day_locale]) => {
+            const day = day_number as WeekdayKey
+            const weekday = t(day_locale)
             return (
               <Item size='xs' key={day} className='flex'>
                 <ItemContent className='flex gap-2 @[50rem]:grid @[50rem]:grid-cols-3 @[50rem]:grid-rows-4 @[50rem]:items-start'>
                   <ItemTitle className='@[50rem]:col-span-1'>
                     {weekday}
                   </ItemTitle>
-                  <ItemActions className='gap-3 grid grid-cols-4 @[50rem]:col-span-3 @[50rem]:contents items-start'>
+                  <ItemActions className='grid grid-cols-4 items-start gap-3 @[50rem]:col-span-3 @[50rem]:contents'>
                     {/* CLOSED CHECKBOX */}
                     <Controller
                       control={form.control}
@@ -299,8 +306,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                             disabled={!hoursFetched}
                             checked={!!field.value}
                             onCheckedChange={checked =>
-                              field.onChange(checked ? new Date() : null)
-                            }
+                              field.onChange(checked ? new Date() : null)}
                           />
                           <FieldContent>
                             <FieldLabel htmlFor={`closed-${day}`}>
@@ -318,7 +324,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                       render={({ field }) => (
                         <Field
                           id={`start-time-${day}`}
-                          className='col-span-2 @[50rem]:col-start-2 @[50rem]:row-start-1 @[50rem]:col-span-1 @[50rem]:row-span-2 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'
+                          className='col-span-2 @[50rem]:col-span-1 @[50rem]:col-start-2 @[50rem]:row-span-2 @[50rem]:row-start-1 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'
                         >
                           <FieldLabel htmlFor={`start-time-${day}`}>
                             {t('startTime', 'Start Time')}
@@ -328,8 +334,8 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                             value={field.value ?? ''}
                             onValueChange={field.onChange}
                             disabled={
-                              !hoursFetched ||
-                              form.watch(
+                              !hoursFetched
+                              || form.watch(
                                 `operationalHours.${day}.deletedAt`,
                               ) !== null
                             }
@@ -356,7 +362,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                       render={({ field }) => (
                         <Field
                           id={`end-time-${day}`}
-                          className='col-span-2 @[50rem]:col-span-1 @[50rem]:col-start-3 @[50rem]:row-start-1 @[50rem]:row-span-2 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'
+                          className='col-span-2 @[50rem]:col-span-1 @[50rem]:col-start-3 @[50rem]:row-span-2 @[50rem]:row-start-1 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'
                         >
                           <FieldLabel htmlFor={`end-time-${day}`}>
                             {t('endTime', 'End Time')}
@@ -366,8 +372,8 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                             value={field.value ?? ''}
                             onValueChange={field.onChange}
                             disabled={
-                              !hoursFetched ||
-                              form.watch(
+                              !hoursFetched
+                              || form.watch(
                                 `operationalHours.${day}.deletedAt`,
                               ) !== null
                             }
@@ -392,17 +398,17 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                       control={form.control}
                       name={`staffingRequirements.${day}.minMembers`}
                       render={({ field }) => (
-                        <Field className='col-span-2 @[50rem]:col-span-1 @[50rem]:col-start-2 @[50rem]:row-start-3@ @[50rem]:row-span-2 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'>
+                        <Field className='@[50rem]:row-start-3@ col-span-2 @[50rem]:col-span-1 @[50rem]:col-start-2 @[50rem]:row-span-2 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'>
                           <FieldLabel>{t('minStaff', 'Min Staff')}</FieldLabel>
                           <NumberStepperInput
                             value={field.value ?? NON_NEGATIVE_MIN}
-                            onValueChange={minValue => {
+                            onValueChange={(minValue) => {
                               const maxValue = form.watch(
                                 `staffingRequirements.${day}.maxMembers`,
                               )
                               if (
-                                maxValue !== undefined &&
-                                minValue > maxValue
+                                maxValue !== undefined
+                                && minValue > maxValue
                               ) {
                                 form.setValue(
                                   `staffingRequirements.${day}.maxMembers`,
@@ -413,8 +419,8 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                               return field.onChange(minValue)
                             }}
                             disabled={
-                              !staffingRequirements ||
-                              form.watch(
+                              !staffingRequirements
+                              || form.watch(
                                 `operationalHours.${day}.deletedAt`,
                               ) !== null
                             }
@@ -429,24 +435,24 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                       control={form.control}
                       name={`staffingRequirements.${day}.maxMembers`}
                       render={({ field }) => (
-                        <Field className='col-span-2 @[50rem]:col-span-1 @[50rem]:col-start-3 @[50rem]:row-start-3 @[50rem]:row-span-2 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'>
+                        <Field className='col-span-2 @[50rem]:col-span-1 @[50rem]:col-start-3 @[50rem]:row-span-2 @[50rem]:row-start-3 @[50rem]:grid-rows-subgrid *:@[50rem]:row-span-1'>
                           <FieldLabel>{t('maxStaff', 'Max Staff')}</FieldLabel>
                           <NumberStepperInput
                             value={
-                              field.value ??
-                              form.watch(
+                              field.value
+                              ?? form.watch(
                                 `staffingRequirements.${day}.maxMembers`,
-                              ) ??
-                              NON_NEGATIVE_MIN
+                              )
+                              ?? NON_NEGATIVE_MIN
                             }
-                            onValueChange={maxValue => {
+                            onValueChange={(maxValue) => {
                               const minValue = form.watch(
                                 `staffingRequirements.${day}.minMembers`,
                               )
 
                               if (
-                                minValue !== undefined &&
-                                maxValue < minValue
+                                minValue !== undefined
+                                && maxValue < minValue
                               ) {
                                 form.setValue(
                                   `staffingRequirements.${day}.minMembers`,
@@ -457,8 +463,8 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
                               return field.onChange(maxValue)
                             }}
                             disabled={
-                              !staffingRequirements ||
-                              form.watch(
+                              !staffingRequirements
+                              || form.watch(
                                 `operationalHours.${day}.deletedAt`,
                               ) !== null
                             }
@@ -475,7 +481,7 @@ export function DailyRequirementsSection({ teamId }: { teamId: string }) {
         </FieldSet>
 
         {/* Save/Cancel buttons  */}
-        <Field orientation='horizontal' className='gap-4 last:mt-2 col-span-2'>
+        <Field orientation='horizontal' className='col-span-2 gap-4 last:mt-2'>
           <Button type='submit' disabled={!hoursFetched}>
             {t('saveChanges2', 'Save Changes')}
           </Button>

@@ -20,7 +20,7 @@ export const metadata = {
   title: 'fuku',
 }
 
-const RootLayout = ({ children }: { children: React.ReactNode }) => {
+function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       suppressHydrationWarning

@@ -1,7 +1,7 @@
 import { ShiftAssignmentSchema } from '@fuku/domain/schemas'
 import * as z from 'zod/v4'
 
-import { WorkHourOutputSchema } from './workHour'
+import { WorkHourOutputSchema } from './work-hour'
 
 export const ShiftAssignmentOutputSchema = ShiftAssignmentSchema.extend({
   locationId: z.string().nullable(),

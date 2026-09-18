@@ -1,15 +1,16 @@
-import {
-  addDays,
-  getDaysBetweenInclusive,
-  getDaysDifference,
-} from '../../shared/utils/date'
-import {
+import type {
   ProposedAssignment,
   SchedulerContext,
   SchedulerMetrics,
   SchedulerResult,
 } from '../types'
-import { SolverResult } from './solver.adapter'
+import type { SolverResult } from './solver.adapter'
+
+import {
+  addDays,
+  getDaysBetweenInclusive,
+  getDaysDifference,
+} from '../../shared/utils/date'
 
 export class SolutionMapper {
   private totalDays: number
@@ -33,8 +34,10 @@ export class SolutionMapper {
     const proposedAssignments: ProposedAssignment[] = []
 
     for (const [varName, value] of Object.entries(this.solverResult.values)) {
-      if (!varName.startsWith('assign__')) continue
-      if (value !== 1) continue
+      if (!varName.startsWith('assign__'))
+        continue
+      if (value !== 1)
+        continue
 
       const [, teamMemberId, dayIndexStr, shiftTypeId] = varName.split('__')
 
@@ -62,7 +65,7 @@ export class SolutionMapper {
     const totalSlotsFilled = assignments.length
 
     // coverage
-    const coveragePerDay: number[] = Array(this.totalDays).fill(0)
+    const coveragePerDay: number[] = Array.from({ length: this.totalDays }).fill(0)
 
     for (const assignment of assignments) {
       const dayIndex = getDaysDifference(this.ctx.period.start, assignment.date)
@@ -89,9 +92,9 @@ export class SolutionMapper {
 
     const mean = totalSlotsFilled / teamMemberIds.length
 
-    const variance =
-      teamMemberIds.reduce((acc, id) => {
-        return acc + Math.pow(slotsPerMember[id] - mean, 2)
+    const variance
+      = teamMemberIds.reduce((acc, id) => {
+        return acc + (slotsPerMember[id] - mean) ** 2
       }, 0) / teamMemberIds.length
 
     const fairnessStdDeviation = Math.sqrt(variance)

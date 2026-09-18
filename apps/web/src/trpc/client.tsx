@@ -1,12 +1,14 @@
 'use client'
 
-import type { AppRouter } from '@fuku/api'
-import type { QueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTRPCClient, httpBatchStreamLink, loggerLink } from '@trpc/client'
 import { createTRPCContext } from '@trpc/tanstack-react-query'
 import superjson from 'superjson'
+
+import type { AppRouter } from '@fuku/api'
+import type { QueryClient } from '@tanstack/react-query'
 
 import { createQueryClient } from '~/trpc/query-client'
 
@@ -14,8 +16,8 @@ import { createQueryClient } from '~/trpc/query-client'
  * Create and return tRPC client for React components (Client Side)
  */
 
-let clientQueryClientSingleton: QueryClient | undefined = undefined
-const getQueryClient = () => {
+let clientQueryClientSingleton: QueryClient | undefined
+function getQueryClient() {
   if (typeof window === 'undefined') {
     // For server: always make a new query client
     return createQueryClient()
@@ -31,8 +33,8 @@ const getQueryClient = () => {
 type TRPCContext = ReturnType<typeof createTRPCContext<AppRouter>>
 const trpcContext: TRPCContext = createTRPCContext<AppRouter>()
 export const useTRPC = trpcContext.useTRPC as typeof trpcContext.useTRPC
-export const TRPCProvider =
-  trpcContext.TRPCProvider as typeof trpcContext.TRPCProvider
+export const TRPCProvider
+  = trpcContext.TRPCProvider as typeof trpcContext.TRPCProvider
 
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
   const queryClient = getQueryClient()
@@ -41,11 +43,11 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
       links: [
         loggerLink({
           enabled: op =>
-            process.env.NODE_ENV === 'development' ||
-            (op.direction === 'down' && op.result instanceof Error),
+            process.env.NODE_ENV === 'development'
+            || (op.direction === 'down' && op.result instanceof Error),
         }),
         httpBatchStreamLink({
-          url: getBaseUrl() + '/api/trpc',
+          url: `${getBaseUrl()}/api/trpc`,
           transformer: superjson,
           headers() {
             const headers = new Headers()
@@ -65,7 +67,8 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
   )
 }
 
-const getBaseUrl = () => {
-  if (typeof window !== 'undefined') return window.location.origin
+function getBaseUrl() {
+  if (typeof window !== 'undefined')
+    return window.location.origin
   return `http://localhost:${process.env.PORT ?? 3000}`
 }

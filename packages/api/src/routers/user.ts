@@ -1,7 +1,9 @@
-import { TRPCError, TRPCRouterRecord } from '@trpc/server'
+import { TRPCError } from '@trpc/server'
 import * as z from 'zod/v4'
 
-import { UserTeam } from '../schemas'
+import type { UserTeam } from '../schemas'
+import type { TRPCRouterRecord } from '@trpc/server'
+
 import { protectedProcedure } from '../trpc'
 
 export const userRouter = {
@@ -9,11 +11,12 @@ export const userRouter = {
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
       const user = await ctx.db.user.findUnique({ where: { id: input.id } })
-      if (!user)
+      if (!user) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: `No user with id '${input.id}'`,
         })
+      }
 
       return user
     }),
@@ -21,20 +24,22 @@ export const userRouter = {
   byUsername: protectedProcedure
     .input(z.object({ username: z.string() }))
     .query(async ({ input, ctx }) => {
-      if (!input.username)
+      if (!input.username) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
           message: 'Username is required',
         })
+      }
 
       const user = await ctx.db.user.findUnique({
         where: { username: input.username },
       })
-      if (!user)
+      if (!user) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: `No user with username '${input.username}'`,
         })
+      }
 
       return user
     }),
@@ -95,7 +100,8 @@ export const userRouter = {
       },
     })
 
-    if (!user) return null
+    if (!user)
+      return null
 
     let lastActiveTeam = null
 
@@ -191,11 +197,12 @@ export const userRouter = {
       },
     })
 
-    if (!user)
+    if (!user) {
       return {
         teams: [],
         activeTeam: null,
       }
+    }
 
     const owned: UserTeam[] = user.ownedTeams.map(team => ({
       id: team.id,
@@ -238,7 +245,7 @@ export const userRouter = {
     }
     return {
       teams,
-      activeTeam: activeTeam,
+      activeTeam,
     }
   }),
 } satisfies TRPCRouterRecord

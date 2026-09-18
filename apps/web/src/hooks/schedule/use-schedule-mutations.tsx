@@ -1,4 +1,7 @@
-import {
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { DateTime } from 'luxon'
+
+import type {
   RuleConditionCreateInput,
   RuleConditionOutput,
   RuleConditionUpdateInput,
@@ -7,28 +10,26 @@ import {
   RuleUpdateInput,
   TeamOutput,
 } from '@fuku/api/schemas'
-import {
+import type {
   GenerateScheduleInput,
   GenerateScheduleOutput,
 } from '@fuku/domain/schemas'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { DateTime } from 'luxon'
 
 import { getCellKey } from '~/lib/schedule'
 import { useScheduleStore } from '~/store/schedule.store'
 import { useTRPC } from '~/trpc/client'
 
-interface ScheduleMutationsProps {
+type ScheduleMutationsProps = {
   team: TeamOutput | undefined
   start: Date
   end: Date
 }
 
-export const useScheduleMutations = ({
+export function useScheduleMutations({
   team,
   start,
   end,
-}: ScheduleMutationsProps) => {
+}: ScheduleMutationsProps) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
@@ -40,11 +41,12 @@ export const useScheduleMutations = ({
 
   const { mutateAsync: createRule } = useMutation({
     ...trpc.rule.create.mutationOptions(),
-    onSuccess: data => {
+    onSuccess: (data) => {
       queryClient.setQueryData(
         trpc.rule.groupById.queryKey({ teamId: team?.id ?? '' }),
         (oldData: Record<string, RuleOutput> | undefined) => {
-          if (!oldData) return oldData
+          if (!oldData)
+            return oldData
           return { ...oldData, [data.id]: data }
         },
       )
@@ -53,11 +55,12 @@ export const useScheduleMutations = ({
 
   const { mutateAsync: updateRule } = useMutation({
     ...trpc.rule.update.mutationOptions(),
-    onSuccess: data => {
+    onSuccess: (data) => {
       queryClient.setQueryData(
         trpc.rule.groupById.queryKey({ teamId: team?.id ?? '' }),
         (oldData: Record<string, RuleOutput> | undefined) => {
-          if (!oldData) return oldData
+          if (!oldData)
+            return oldData
           return { ...oldData, [data.id]: data }
         },
       )
@@ -66,11 +69,12 @@ export const useScheduleMutations = ({
 
   const { mutateAsync: deleteRule } = useMutation({
     ...trpc.rule.delete.mutationOptions(),
-    onSuccess: data => {
+    onSuccess: (data) => {
       queryClient.setQueryData(
         trpc.rule.groupById.queryKey({ teamId: team?.id ?? '' }),
         (oldData: Record<string, RuleOutput> | undefined) => {
-          if (!oldData) return oldData
+          if (!oldData)
+            return oldData
           const newData = { ...oldData }
           delete newData[data.id]
           return newData
@@ -81,11 +85,12 @@ export const useScheduleMutations = ({
 
   const { mutateAsync: createRuleCondition } = useMutation({
     ...trpc.ruleCondition.create.mutationOptions(),
-    onSuccess: data => {
+    onSuccess: (data) => {
       queryClient.setQueryData(
         trpc.ruleCondition.groupByRules.queryKey({ teamId: team?.id ?? '' }),
-        oldData => {
-          if (!oldData) return oldData
+        (oldData) => {
+          if (!oldData)
+            return oldData
           const ruleConditions = oldData[data.ruleId] ?? []
           return {
             ...oldData,
@@ -98,11 +103,12 @@ export const useScheduleMutations = ({
 
   const { mutateAsync: updateRuleCondition } = useMutation({
     ...trpc.ruleCondition.update.mutationOptions(),
-    onSuccess: data => {
+    onSuccess: (data) => {
       queryClient.setQueryData(
         trpc.ruleCondition.groupByRules.queryKey({ teamId: team?.id ?? '' }),
-        oldData => {
-          if (!oldData) return oldData
+        (oldData) => {
+          if (!oldData)
+            return oldData
           const ruleConditions = oldData[data.ruleId] ?? []
           const updatedRuleConditions = ruleConditions.map(rc =>
             rc.id === data.id ? data : rc,
@@ -115,11 +121,12 @@ export const useScheduleMutations = ({
 
   const { mutateAsync: deleteRuleCondition } = useMutation({
     ...trpc.ruleCondition.delete.mutationOptions(),
-    onSuccess: data => {
+    onSuccess: (data) => {
       queryClient.setQueryData(
         trpc.ruleCondition.groupByRules.queryKey({ teamId: team?.id ?? '' }),
-        oldData => {
-          if (!oldData) return oldData
+        (oldData) => {
+          if (!oldData)
+            return oldData
           const ruleConditions = oldData[data.ruleId] ?? []
           const updatedRuleConditions = ruleConditions.filter(
             rc => rc.id !== data.id,
@@ -132,15 +139,16 @@ export const useScheduleMutations = ({
 
   const { mutateAsync: createUnavailability } = useMutation({
     ...trpc.unavailability.create.mutationOptions(),
-    onSuccess: data => {
+    onSuccess: (data) => {
       queryClient.setQueryData(
         trpc.unavailability.list.queryKey({
           teamId: team?.id ?? '',
-          start: start,
-          end: end,
+          start,
+          end,
         }),
         (oldData: any) => {
-          if (!oldData) return oldData
+          if (!oldData)
+            return oldData
           return [...oldData, data]
         },
       )
@@ -149,15 +157,16 @@ export const useScheduleMutations = ({
 
   const { mutateAsync: deleteUnavailability } = useMutation({
     ...trpc.unavailability.deleteById.mutationOptions(),
-    onSuccess: data => {
+    onSuccess: (data) => {
       queryClient.setQueryData(
         trpc.unavailability.list.queryKey({
           teamId: team?.id ?? '',
-          start: start,
-          end: end,
+          start,
+          end,
         }),
         (oldData: any) => {
-          if (!oldData) return oldData
+          if (!oldData)
+            return oldData
           return oldData.filter((u: any) => u.id !== data.id)
         },
       )
@@ -200,8 +209,8 @@ export const useScheduleMutations = ({
 
   // Schedule generation mutation
 
-  const { mutateAsync: generateSchedule, isPending: isGenerating } =
-    useMutation({
+  const { mutateAsync: generateSchedule, isPending: isGenerating }
+    = useMutation({
       ...trpc.schedule.generate.mutationOptions(),
       onSuccess: (data: GenerateScheduleOutput) => {
         setSchedulerAssignments(data.assignments)
@@ -209,7 +218,8 @@ export const useScheduleMutations = ({
     })
 
   const handleGenerateSchedule = () => {
-    if (!team) return
+    if (!team)
+      return
 
     const country = team.country
     const timeZone = team.timeZone
@@ -218,7 +228,7 @@ export const useScheduleMutations = ({
     const endDate = DateTime.fromJSDate(end).endOf('day').toMillis()
 
     const unavailabilities = schedulerUnavailabilities
-      .filter(u => {
+      .filter((u) => {
         const unavailabilityDate = DateTime.fromJSDate(
           new Date(u.date),
         ).toMillis()
@@ -234,12 +244,12 @@ export const useScheduleMutations = ({
     )
 
     const assignments = schedulerAssignments
-      .filter(a => {
+      .filter((a) => {
         const assignmentDate = DateTime.fromJSDate(new Date(a.date)).toMillis()
         return (
-          !unavailabilityMap.has(getCellKey(a.teamMemberId, a.date)) &&
-          assignmentDate >= startDate &&
-          assignmentDate <= endDate
+          !unavailabilityMap.has(getCellKey(a.teamMemberId, a.date))
+          && assignmentDate >= startDate
+          && assignmentDate <= endDate
         )
       })
       .map(a => ({
@@ -258,7 +268,7 @@ export const useScheduleMutations = ({
         unavailabilities.length > 0 ? unavailabilities : undefined,
     }
 
-    console.log('Generating schedule with parameters:', input)
+    // console.log('Generating schedule with parameters:', input)
 
     generateSchedule(input)
   }

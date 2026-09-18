@@ -1,71 +1,46 @@
-import js from '@eslint/js'
-import eslintConfigPrettier from 'eslint-config-prettier/flat'
-import onlyWarn from 'eslint-plugin-only-warn'
-import turboPlugin from 'eslint-plugin-turbo'
-import unusedImports from 'eslint-plugin-unused-imports'
-import globals from 'globals'
-import tseslint from 'typescript-eslint'
+import antfu from '@antfu/eslint-config'
+
+import { sharedRules } from './shared-rules.mjs'
 
 /**
- * A shared ESLint configuration for the repository.
+ * A shared ESLint configuration for the repository, built on
+ * @antfu/eslint-config. Formatting now comes from ESLint Stylistic instead
+ * of Prettier — do not add eslint-config-prettier back.
  *
  * @type {import("eslint").Linter.Config[]}
- * */
-export const config = [
-  js.configs.recommended,
-  eslintConfigPrettier,
-  ...tseslint.configs.recommended,
-  turboPlugin.configs['flat/recommended'],
+ */
+export default antfu(
+  {
+    type: 'lib',
+    typescript: true,
+    pnpm: true,
 
-  {
-    plugins: {
-      onlyWarn,
+    stylistic: {
+      indent: 2, // tabWidth: 2
+      quotes: 'single', // singleQuote: true
+      semi: false, // semi: false
     },
+
+    // keep Prettier for css/html/markdown; JS/TS/JSX still go through
+    // ESLint Stylistic above, this doesn't touch that
+    formatters: true,
+
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      'generated/**',
+      '.pnpm-store/**',
+      '**/migrations/*',
+    ],
   },
-  {
-    ignores: ['dist/**', 'node_modules/**', 'generated/**'],
-  },
-  {
-    languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.browser,
-      },
-    },
-  },
-  {
-    settings: {
-      'import/resolver': {
-        typescript: {},
-      },
-    },
-  },
-  // Custom rules, overrides
-  // no-unused-imports
+
+  ...sharedRules,
+
+  // stylistic tweaks not covered by the `stylistic` shorthand above
   {
     rules: {
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        { argsIgnorePattern: '^_' },
-      ],
+      'style/jsx-quotes': ['error', 'prefer-single'], // jsxSingleQuote: true
+      'style/brace-style': ['error', '1tbs', { allowSingleLine: true }], // Prettier always collapses `} else {`
     },
   },
-  {
-    plugins: {
-      'unused-imports': unusedImports,
-    },
-    rules: {
-      'no-unused-vars': 'off', // or "@typescript-eslint/no-unused-vars": "off",
-      'unused-imports/no-unused-imports': 'error',
-      'unused-imports/no-unused-vars': [
-        'warn',
-        {
-          vars: 'all',
-          varsIgnorePattern: '^_',
-          args: 'after-used',
-          argsIgnorePattern: '^_',
-        },
-      ],
-    },
-  },
-]
+)

@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+
 import { db } from '@fuku/db'
 
 import { getSession } from '~/auth/server'
@@ -9,15 +10,16 @@ export default async function TeamLayout({
   params,
 }: {
   children: React.ReactNode
-  params: Promise<{ username: string; slug: string }>
+  params: Promise<{ username: string, slug: string }>
 }) {
   const session = await getSession()
   const { username, slug } = await params
-  if (!session || session.user.username !== username) redirect(`/login`)
+  if (!session || session.user.username !== username)
+    redirect(`/login`)
 
   const team = await db.team.findFirst({
     where: {
-      slug: slug,
+      slug,
       teamMembers: {
         some: { userId: session.user.id },
       },

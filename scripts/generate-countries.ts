@@ -1,7 +1,7 @@
-import fs from 'node:fs'
-import path from 'node:path'
 import countries from 'i18n-iso-countries'
 import en from 'i18n-iso-countries/langs/en.json'
+import fs from 'node:fs'
+import path from 'node:path'
 
 countries.registerLocale(en)
 
@@ -25,10 +25,10 @@ async function main() {
 export const ALL_COUNTRIES = ${JSON.stringify(allCountries, null, 2)} as const;
 
 export const ALL_COUNTRY_CODES = ${JSON.stringify(
-    allCountries.map(c => c.code),
-    null,
-    2,
-  )} as const;
+  allCountries.map(c => c.code),
+  null,
+  2,
+)} as const;
 
 export type CountryCode =
   (typeof ALL_COUNTRIES)[number]['code'];
@@ -65,10 +65,10 @@ export type CountryCode =
   const supportFile = `// AUTO-GENERATED FILE — DO NOT EDIT
 
 export const SUPPORTED_COUNTRY_CODES = ${JSON.stringify(
-    supportedCodes,
-    null,
-    2,
-  )} as const;
+  supportedCodes,
+  null,
+  2,
+)} as const;
 
 export const SUPPORTED_COUNTRY_SET = new Set(SUPPORTED_COUNTRY_CODES);
 `
@@ -79,7 +79,7 @@ export const SUPPORTED_COUNTRY_SET = new Set(SUPPORTED_COUNTRY_CODES);
   console.log(`Generated ${supportedCodes.length} supported countries`)
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(err)
   process.exit(1)
 })

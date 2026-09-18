@@ -1,6 +1,7 @@
-import type { VariantProps } from 'class-variance-authority'
 import { cva } from 'class-variance-authority'
 import { cn } from 'cn'
+
+import type { VariantProps } from 'class-variance-authority'
 
 function Empty({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -31,7 +32,7 @@ const emptyMediaVariants = cva(
     variants: {
       variant: {
         default: 'bg-transparent',
-        icon: "flex size-8 shrink-0 items-center justify-center rounded-none bg-muted text-foreground [&_svg:not([class*='size-'])]:size-4",
+        icon: 'bg-muted text-foreground flex size-8 shrink-0 items-center justify-center rounded-none [&_svg:not([class*=\'size-\'])]:size-4',
       },
     },
     defaultVariants: {
@@ -70,7 +71,7 @@ function EmptyDescription({ className, ...props }: React.ComponentProps<'p'>) {
     <div
       data-slot='empty-description'
       className={cn(
-        'text-xs/relaxed text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary',
+        'text-muted-foreground [&>a:hover]:text-primary text-xs/relaxed [&>a]:underline [&>a]:underline-offset-4',
         className,
       )}
       {...props}
@@ -93,9 +94,9 @@ function EmptyContent({ className, ...props }: React.ComponentProps<'div'>) {
 
 export {
   Empty,
-  EmptyHeader,
-  EmptyTitle,
-  EmptyDescription,
   EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
   EmptyMedia,
+  EmptyTitle,
 }

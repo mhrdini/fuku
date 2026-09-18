@@ -1,4 +1,3 @@
-import { ISODateString } from '@fuku/domain/schemas'
 import {
   createHolidayChecker,
   preloadHolidaysForRange,
@@ -6,8 +5,12 @@ import {
 import {
   addDays,
   getDaysBetweenInclusive,
-  HolidayService,
   toJSDateFromISO,
+} from '@fuku/scheduling'
+
+import type { ISODateString } from '@fuku/domain/schemas'
+import type {
+  HolidayService,
 } from '@fuku/scheduling'
 
 export class NagerHolidayService implements HolidayService {

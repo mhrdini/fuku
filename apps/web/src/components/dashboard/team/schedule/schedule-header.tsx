@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { TeamOutput } from '@fuku/api/schemas'
+
 import i18next from '@fuku/i18n/client'
 import { Trans, useTranslation } from '@fuku/i18n/react'
 import {
@@ -49,16 +49,19 @@ import {
 } from 'lucide-react'
 import { DateTime } from 'luxon'
 
-import { ScheduleData } from '~/hooks/schedule/useScheduleData'
-import { ScheduleDerivedData } from '~/hooks/schedule/useScheduleDerivedData'
-import { ScheduleFilters } from '~/hooks/schedule/useScheduleFilters'
-import { ScheduleMutations } from '~/hooks/schedule/useScheduleMutations'
-import { ScheduleViewState } from '~/hooks/schedule/useScheduleView'
+import type { TeamOutput } from '@fuku/api/schemas'
+
+import type { ScheduleData } from '~/hooks/schedule/use-schedule-data'
+import type { ScheduleDerivedData } from '~/hooks/schedule/use-schedule-derived-data'
+import type { ScheduleFilters } from '~/hooks/schedule/use-schedule-filters'
+import type { ScheduleMutations } from '~/hooks/schedule/use-schedule-mutations'
+import type { ScheduleViewState } from '~/hooks/schedule/use-schedule-view'
 import { convertToCSV } from '~/lib/csv'
 import { getByIdMap } from '~/lib/db'
 import { convertToPDF } from '~/lib/pdf'
 import { ViewOptionValues } from '~/lib/schedule'
 import { useScheduleStore } from '~/store/schedule.store'
+
 import RulePanelPopoverButton from './rule-panel/rule-panel-popover-button'
 
 type ScheduleHeaderProps = {
@@ -69,7 +72,7 @@ type ScheduleHeaderProps = {
   derivedData: ScheduleDerivedData
 }
 
-export const ScheduleHeader = ({
+export function ScheduleHeader({
   viewState: {
     view,
     start,
@@ -90,7 +93,7 @@ export const ScheduleHeader = ({
     isGenerating,
   },
   derivedData: { computeSchedulerMetrics },
-}: ScheduleHeaderProps) => {
+}: ScheduleHeaderProps) {
   const { t } = useTranslation()
 
   const locale = useMemo(
@@ -184,7 +187,8 @@ export const ScheduleHeader = ({
           onUpdate={({ range, view }) => {
             setStart(range.from)
             setEnd(range.to || range.from)
-            if (view) setView(view)
+            if (view)
+              setView(view)
             const metrics = computeSchedulerMetrics(
               schedulerAssignments,
               schedulerUnavailabilities,
@@ -247,7 +251,7 @@ export const ScheduleHeader = ({
                   <ScrollArea
                   // className='max-h-48'
                   >
-                    <CommandEmpty className='text-xs text-muted-foreground p-4'>
+                    <CommandEmpty className='text-muted-foreground p-4 text-xs'>
                       {t('noShiftTypesFound')}
                     </CommandEmpty>
                     <CommandGroup>
@@ -301,19 +305,23 @@ export const ScheduleHeader = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
           <DropdownMenuItem
-            className='block whitespace-nowrap cursor-pointer'
+            className='block cursor-pointer whitespace-nowrap'
             onClick={downloadCSV}
           >
             <Trans i18nKey='downloadAsCSV'>
-              Download as <span className='font-bold'>CSV</span>
+              Download as
+              {' '}
+              <span className='font-bold'>CSV</span>
             </Trans>
           </DropdownMenuItem>
           <DropdownMenuItem
-            className='block whitespace-nowrap cursor-pointer'
+            className='block cursor-pointer whitespace-nowrap'
             onClick={downloadPDF}
           >
             <Trans i18nKey='downloadAsPDF'>
-              Download as <span className='font-bold'>PDF</span>
+              Download as
+              {' '}
+              <span className='font-bold'>PDF</span>
             </Trans>
           </DropdownMenuItem>
         </DropdownMenuContent>

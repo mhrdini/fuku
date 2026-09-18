@@ -6,13 +6,15 @@ import UserDashboard from '~/components/dashboard/user-dashboard'
 export default async function UserDashboardPage() {
   const session = await getSession()
 
-  if (!session) return null
+  if (!session)
+    return null
 
   const user = await db.user.findFirst({
     where: { username: session.user.username },
   })
 
-  if (!user) return null
+  if (!user)
+    return null
 
   return <UserDashboard user={user} />
 }

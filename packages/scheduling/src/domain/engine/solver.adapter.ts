@@ -1,4 +1,4 @@
-import {
+import type {
   ObjectiveSense,
   Operator,
   OptimizationModel,
@@ -9,12 +9,12 @@ const SCALE = 1000
 const MAX_SAFE = 100000
 
 // ---- Generic ----
-export interface SolverAdapter {
-  solve(model: OptimizationModel): Promise<SolverResult>
+export type SolverAdapter = {
+  solve: (model: OptimizationModel) => Promise<SolverResult>
   variableTypeMap: Record<VariableType, string>
 }
 
-export interface SolverPayload {
+export type SolverPayload = {
   variables: {
     name: string
     type: string
@@ -39,7 +39,7 @@ export interface SolverPayload {
   }
   options?: Record<string, any>
 }
-export interface SolverResult {
+export type SolverResult = {
   status: string
   values?: Record<string, number>
   objectiveValue?: number

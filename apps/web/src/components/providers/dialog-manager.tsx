@@ -9,6 +9,7 @@ import {
 
 import { DialogId } from '~/lib/dialog'
 import { useDialogStore } from '~/store/dialog.store'
+
 import { RemoveLocationAlertDialog } from '../dashboard/team/locations/remove-location-alert-dialog'
 import { CreateMemberFormDialog } from '../dashboard/team/members/create-member-form-dialog'
 import { RemoveMemberAlertDialog } from '../dashboard/team/members/remove-member-alert-dialog'
@@ -16,7 +17,7 @@ import { UpdateMemberFormDialog } from '../dashboard/team/members/update-member-
 import { RemovePayGradeAlertDialog } from '../dashboard/team/pay-grades/remove-pay-grade-alert-dialog'
 import { RemoveShiftTypeAlertDialog } from '../dashboard/team/shift-types/remove-shift-type-alert-dialog'
 
-export const DialogManager = () => {
+export function DialogManager() {
   const { open, id, isAlert, closeDialog } = useDialogStore()
 
   const handleClose = () => closeDialog()

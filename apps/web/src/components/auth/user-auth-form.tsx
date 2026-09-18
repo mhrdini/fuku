@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import {
   LoginSchema,
-  LoginSchemaType,
   RegisterSchema,
-  RegisterSchemaType,
 } from '@fuku/api/schemas'
 import i18next from '@fuku/i18n/client'
 import { useTranslation } from '@fuku/i18n/react'
@@ -28,11 +28,16 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 
+import type {
+  LoginSchemaType,
+  RegisterSchemaType,
+} from '@fuku/api/schemas'
+
 import { authClient } from '~/auth/client'
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
+type UserAuthFormProps = {
   register?: boolean
-}
+} & React.HTMLAttributes<HTMLDivElement>
 
 type UserAuthSchemaType = LoginSchemaType | RegisterSchemaType
 
@@ -73,7 +78,7 @@ export function UserAuthForm({
   const onSubmit = async (data: UserAuthSchemaType) => {
     if (isRegister) {
       await authClient.signUp.email(data as RegisterSchemaType, {
-        onError: ctx => {
+        onError: (ctx) => {
           form.setError('root', { message: ctx.error.message })
         },
         onSuccess: () => {
@@ -82,7 +87,7 @@ export function UserAuthForm({
       })
     } else {
       await authClient.signIn.username(data as LoginSchemaType, {
-        onError: ctx => {
+        onError: (ctx) => {
           form.setError('root', { message: ctx.error.message })
         },
         onSuccess: () => {
@@ -94,7 +99,7 @@ export function UserAuthForm({
 
   return (
     <div className={className} {...props}>
-      <Card className='border-none w-full sm:max-w-md'>
+      <Card className='w-full border-none sm:max-w-md'>
         <CardHeader>
           <CardTitle>
             {isRegister ? t('createAccount', 'Create Account') : 'Login'}

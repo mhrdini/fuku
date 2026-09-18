@@ -1,18 +1,20 @@
-import { Button, buttonVariants, Spinner } from '@fuku/ui/components'
+import { Button, Spinner } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
-import { VariantProps } from 'class-variance-authority'
 
-export const LoadingButton = ({
+import type { buttonVariants } from '@fuku/ui/components'
+import type { VariantProps } from 'class-variance-authority'
+
+export function LoadingButton({
   loading,
   disabled,
   children,
   className,
   ...props
-}: React.ComponentProps<'button'> &
-  VariantProps<typeof buttonVariants> & {
+}: React.ComponentProps<'button'>
+  & VariantProps<typeof buttonVariants> & {
     asChild?: boolean
     loading: boolean
-  }) => {
+  }) {
   return (
     <Button
       {...props}

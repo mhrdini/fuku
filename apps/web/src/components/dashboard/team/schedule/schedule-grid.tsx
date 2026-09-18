@@ -1,8 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
+
 import { DragDropProvider } from '@dnd-kit/react'
-import { SchedulerAssignment } from '@fuku/domain/schemas'
 import i18next from '@fuku/i18n/client'
 import { useTranslation } from '@fuku/i18n/react'
 import { Badge, Button, ScrollArea, ScrollBar } from '@fuku/ui/components'
@@ -11,28 +11,31 @@ import { format } from 'date-fns'
 import { enGB, ja } from 'date-fns/locale'
 import { Plus } from 'lucide-react'
 
+import type { SchedulerAssignment } from '@fuku/domain/schemas'
+
+import { useScheduleActions } from '~/hooks/schedule/use-schedule-actions'
+import type { ScheduleData } from '~/hooks/schedule/use-schedule-data'
+import type { ScheduleDerivedData } from '~/hooks/schedule/use-schedule-derived-data'
+import type { ScheduleFilters } from '~/hooks/schedule/use-schedule-filters'
 import { useTeamMemberGroupBySort } from '~/hooks/schedule/use-team-member-group-by-sort'
-import { useScheduleActions } from '~/hooks/schedule/useScheduleActions'
-import { ScheduleData } from '~/hooks/schedule/useScheduleData'
-import { ScheduleDerivedData } from '~/hooks/schedule/useScheduleDerivedData'
-import { ScheduleFilters } from '~/hooks/schedule/useScheduleFilters'
 import { useScheduleStore } from '~/store/schedule.store'
+
 import { ScheduleRow } from './schedule-row'
 import { ScheduleTeamMemberHeaderCell } from './schedule-team-member-header-cell'
 
-interface ScheduleGridProps {
+type ScheduleGridProps = {
   data: ScheduleData
   filters: ScheduleFilters
   derivedData: ScheduleDerivedData
   className?: string
 }
 
-export const ScheduleGrid = ({
+export function ScheduleGrid({
   data: { payGrades },
   filters: { filteredTeamMembers, ...filters },
   derivedData: { daysRowList, cellMap, shiftTypeMap, payGradeMap },
   className,
-}: ScheduleGridProps) => {
+}: ScheduleGridProps) {
   const { t } = useTranslation()
 
   const locale = useMemo(
@@ -57,11 +60,12 @@ export const ScheduleGrid = ({
 
   return (
     <DragDropProvider
-      onDragEnd={event => {
+      onDragEnd={(event) => {
         const active = event.operation.source
         const over = event.operation.target
 
-        if (!active || !over) return
+        if (!active || !over)
+          return
 
         const activeCellKey = active.data.cellKey as string
         let overCellKey: string | null = null
@@ -74,13 +78,14 @@ export const ScheduleGrid = ({
           overCellKey = over.id as string
         }
 
-        if (!overCellKey) return
+        if (!overCellKey)
+          return
 
         const activeAssignment = active.data.assignment as SchedulerAssignment
-        console.log('moving active to over:', {
-          assignmentId: activeAssignment.id,
-          toCellKey: overCellKey,
-        })
+        // console.log('moving active to over:', {
+        //   assignmentId: activeAssignment.id,
+        //   toCellKey: overCellKey,
+        // })
 
         moveAssignmentToCell({
           assignmentId: activeAssignment.id,
@@ -91,13 +96,13 @@ export const ScheduleGrid = ({
           ?.schedulerAssignments[0] as SchedulerAssignment
 
         if (
-          overCellAssignment &&
-          overCellAssignment.id !== activeAssignment.id
+          overCellAssignment
+          && overCellAssignment.id !== activeAssignment.id
         ) {
-          console.log('moving over to active:', {
-            assignmentId: overCellAssignment.id,
-            toCellKey: activeCellKey,
-          })
+          // console.log('moving over to active:', {
+          //   assignmentId: overCellAssignment.id,
+          //   toCellKey: activeCellKey,
+          // })
 
           moveAssignmentToCell({
             assignmentId: overCellAssignment.id,
@@ -107,10 +112,10 @@ export const ScheduleGrid = ({
       }}
     >
       <ScrollArea
-        className={cn('h-[600px] border rounded-none border-input', className)}
+        className={cn('border-input h-[600px] rounded-none border', className)}
       >
         <div
-          className='grid min-w-max h-[600px] isolate'
+          className='isolate grid h-[600px] min-w-max'
           style={{
             gridTemplateColumns: `250px repeat(${daysRowList.length}, minmax(120px, 1fr))`,
             gridTemplateRows:
@@ -139,7 +144,7 @@ export const ScheduleGrid = ({
             <div
               id={day.id}
               key={day.id}
-              className='sticky top-0 z-30 border-b border-input flex items-center bg-background py-2 px-4 gap-1.5'
+              className='border-input bg-background sticky top-0 z-30 flex items-center gap-1.5 border-b px-4 py-2'
             >
               <span className='font-bold'>
                 {format(day.date, 'ccc', { locale })}
@@ -149,50 +154,54 @@ export const ScheduleGrid = ({
           ))}
 
           {/* member rows */}
-          {sortedTeamMembers.length === 0 ? (
-            <>
-              <div className='sticky left-0 z-20 p-4 flex items-start text-xs text-muted-foreground bg-background border-r border-input'>
-                {t('noMembersFound', 'No members .')}
-              </div>
+          {sortedTeamMembers.length === 0
+            ? (
+                <>
+                  <div className='text-muted-foreground bg-background border-input sticky left-0 z-20 flex items-start border-r p-4 text-xs'>
+                    {t('noMembersFound', 'No members .')}
+                  </div>
 
-              {daysRowList.map(day => (
-                <div
-                  id={`no-members-${day.id}`}
-                  key={`no-members-${day.id}`}
-                  className=''
-                />
-              ))}
-            </>
-          ) : (
-            sortedTeamMembers.map((tm, idx) => {
-              const isLastRow = idx === sortedTeamMembers.length - 1
-              return (
-                <ScheduleRow
-                  key={tm.id}
-                  teamMember={tm}
-                  isLastRow={isLastRow}
-                  days={daysRowList}
-                  data={{
-                    shiftTypeMap,
-                    cellMap,
-                  }}
-                  filters={{ filteredTeamMembers, ...filters }}
-                />
+                  {daysRowList.map(day => (
+                    <div
+                      id={`no-members-${day.id}`}
+                      key={`no-members-${day.id}`}
+                      className=''
+                    />
+                  ))}
+                </>
               )
-            })
-          )}
+            : (
+                sortedTeamMembers.map((tm, idx) => {
+                  const isLastRow = idx === sortedTeamMembers.length - 1
+                  return (
+                    <ScheduleRow
+                      key={tm.id}
+                      teamMember={tm}
+                      isLastRow={isLastRow}
+                      days={daysRowList}
+                      data={{
+                        shiftTypeMap,
+                        cellMap,
+                      }}
+                      filters={{ filteredTeamMembers, ...filters }}
+                    />
+                  )
+                })
+              )}
 
           {/* footer row */}
-          <div className='sticky left-0 bottom-0 z-30 border-t border-r border-input text-center bg-background p-2'>
+          <div className='border-input bg-background sticky bottom-0 left-0 z-30 border-t border-r p-2 text-center'>
             <Button className='w-full' variant='secondary'>
-              <Plus /> {t('addMember', 'Add member')}
+              <Plus />
+              {' '}
+              {t('addMember', 'Add member')}
             </Button>
           </div>
           {daysRowList.map(day => (
             <div
               id={`day-summary-${day.id}`}
               key={`day-summary-${day.id}`}
-              className='sticky bottom-0 z-10 border-t border-input flex items-center bg-background'
+              className='border-input bg-background sticky bottom-0 z-10 flex items-center border-t'
             >
               <Badge variant='outline' className='mx-auto'>
                 {t('lengthMembersAssigned', '{{length}} assigned', {

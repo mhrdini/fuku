@@ -1,7 +1,9 @@
-import { TRPCError, TRPCRouterRecord } from '@trpc/server'
+import { TRPCError } from '@trpc/server'
 import * as z from 'zod/v4'
 
-import { DayAssignmentOutputSchema } from '../../schemas/dayAssignment'
+import type { TRPCRouterRecord } from '@trpc/server'
+
+import { DayAssignmentOutputSchema } from '../../schemas/day-assignment'
 import { protectedProcedure } from '../../trpc'
 
 export const dayAssignmentRouter = {

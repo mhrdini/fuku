@@ -1,20 +1,27 @@
 import {
-  RuleConditionField,
   RuleConditionFieldValues,
-  RuleConditionOperator,
   RuleConditionOperatorValues,
-  RuleMetric,
   RuleMetricValues,
-  RuleScope,
   RuleScopeValues,
 } from '@fuku/domain/schemas'
 import {
   BadgeDollarSignIcon,
   ClockIcon,
   GlobeIcon,
-  LucideIcon,
   UserCircle2Icon,
 } from 'lucide-react'
+
+import type {
+  RuleConditionField,
+  RuleConditionOperator,
+  RuleMetric,
+  RuleScope,
+} from '@fuku/domain/schemas'
+import type {
+  LucideIcon,
+} from 'lucide-react'
+
+import { getMonthMap, getWeekdayMap } from '../date'
 
 export const RULE_CONDITION_FIELD_LABELS: Record<RuleConditionField, string> = {
   [RuleConditionFieldValues.MONTH]: 'Month',
@@ -35,16 +42,8 @@ export const RULE_CONDITION_OPERATOR_LABELS: Record<
 }
 
 export const RULE_CONDITION_VALUE_OPTIONS_BY_FIELD = {
-  [RuleConditionFieldValues.MONTH]: new Map<string, string>(
-    Array.from({ length: 12 }, (_, i) => i + 1)
-      .map(String)
-      .map(v => [v, 'MONTH_' + v]),
-  ),
-  [RuleConditionFieldValues.WEEKDAY]: new Map<string, string>(
-    Array.from({ length: 7 }, (_, i) => i + 1)
-      .map(String)
-      .map(v => [v, 'WEEKDAY_' + v]),
-  ),
+  [RuleConditionFieldValues.MONTH]: getMonthMap(),
+  [RuleConditionFieldValues.WEEKDAY]: getWeekdayMap(),
   [RuleConditionFieldValues.IS_HOLIDAY]: new Map<string, string>([
     ['true', 'true'],
     ['false', 'false'],

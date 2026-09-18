@@ -1,15 +1,19 @@
 'use client'
 
-import type { VariantProps } from 'class-variance-authority'
 import { useEffect, useRef, useState } from 'react'
+
 import { useTranslation } from '@fuku/i18n/react'
 import { useDebouncedCommit } from '@fuku/ui/hooks/use-debounced-commit'
 import { cn } from '@fuku/ui/lib/utils'
-import { format, Locale } from 'date-fns'
+import { format } from 'date-fns'
 import * as locales from 'date-fns/locale'
 import { CheckIcon, Minus } from 'lucide-react'
 
-import { Button, buttonVariants } from './button'
+import type { buttonVariants } from './button'
+import type { VariantProps } from 'class-variance-authority'
+import type { Locale } from 'date-fns'
+
+import { Button } from './button'
 import { Calendar } from './calendar'
 import { DateInput } from './date-input'
 import { Label } from './label'
@@ -28,7 +32,7 @@ const getMondayOffset = (date: Date) => (date.getDay() + 6) % 7
 // TODO: should be the same as view option in schedule content, need to unify
 type ViewOption = 'day' | 'week' | 'month'
 
-export interface DateRangePickerProps {
+export type DateRangePickerProps = {
   // controller
   value?: DateRange
   compareValue?: DateRange
@@ -57,11 +61,11 @@ export interface DateRangePickerProps {
   weekStartsOn?: 'sunday' | 'monday'
 }
 
-const formatDate = (date: Date, locale: Locale): string => {
+function formatDate(date: Date, locale: Locale): string {
   return format(date, 'PPP', { locale })
 }
 
-const getDateAdjustedForTimezone = (dateInput: Date | string): Date => {
+function getDateAdjustedForTimezone(dateInput: Date | string): Date {
   if (typeof dateInput === 'string') {
     // Split the date string to get year, month, and day parts
     const parts = dateInput.split('-').map(part => parseInt(part, 10))
@@ -75,12 +79,12 @@ const getDateAdjustedForTimezone = (dateInput: Date | string): Date => {
   }
 }
 
-export interface DateRange {
+export type DateRange = {
   from: Date
   to: Date | undefined
 }
 
-interface Preset {
+type Preset = {
   name: string
   label: string
 }
@@ -223,11 +227,12 @@ export function DateRangePicker({
 
   const getPresetRange = (presetName: string): DateRange => {
     const preset = PRESETS.find(({ name }) => name === presetName)
-    if (!preset) throw new Error(`Unknown date range preset: ${presetName}`)
+    if (!preset)
+      throw new Error(`Unknown date range preset: ${presetName}`)
     const from = new Date()
     const to = new Date()
-    const day =
-      weekStartsOn === 'monday' ? getMondayOffset(from) : from.getDay()
+    const day
+      = weekStartsOn === 'monday' ? getMondayOffset(from) : from.getDay()
     const first = from.getDate() - day
 
     switch (preset.name) {
@@ -263,22 +268,22 @@ export function DateRangePicker({
         to.setHours(23, 59, 59, 999)
         break
       case 'lastWeek': {
-        const day =
-          weekStartsOn === 'monday' ? getMondayOffset(from) : from.getDay()
+        const day
+          = weekStartsOn === 'monday' ? getMondayOffset(from) : from.getDay()
         from.setDate(from.getDate() - 7 - day)
-        const toDay =
-          weekStartsOn === 'monday' ? getMondayOffset(to) : to.getDay()
+        const toDay
+          = weekStartsOn === 'monday' ? getMondayOffset(to) : to.getDay()
         to.setDate(to.getDate() - toDay - 1)
         from.setHours(0, 0, 0, 0)
         to.setHours(23, 59, 59, 999)
         break
       }
       case 'nextWeek': {
-        const day =
-          weekStartsOn === 'monday' ? getMondayOffset(from) : from.getDay()
+        const day
+          = weekStartsOn === 'monday' ? getMondayOffset(from) : from.getDay()
         from.setDate(from.getDate() + (7 - day))
-        const toDay =
-          weekStartsOn === 'monday' ? getMondayOffset(to) : to.getDay()
+        const toDay
+          = weekStartsOn === 'monday' ? getMondayOffset(to) : to.getDay()
         to.setDate(to.getDate() + (13 - toDay))
         from.setHours(0, 0, 0, 0)
         to.setHours(23, 59, 59, 999)
@@ -373,8 +378,8 @@ export function DateRangePicker({
       )
 
       if (
-        normalizedRangeFrom.getTime() === normalizedPresetFrom.getTime() &&
-        normalizedRangeTo.getTime() === normalizedPresetTo.getTime()
+        normalizedRangeFrom.getTime() === normalizedPresetFrom.getTime()
+        && normalizedRangeTo.getTime() === normalizedPresetTo.getTime()
       ) {
         setSelectedPreset(preset.name)
         return
@@ -444,10 +449,11 @@ export function DateRangePicker({
 
   // Helper function to check if two date ranges are equal
   const areRangesEqual = (a?: DateRange, b?: DateRange): boolean => {
-    if (!a || !b) return a === b // If either is undefined, return true if both are undefined
+    if (!a || !b)
+      return a === b // If either is undefined, return true if both are undefined
     return (
-      a.from.getTime() === b.from.getTime() &&
-      (!a.to || !b.to || a.to.getTime() === b.to.getTime())
+      a.from.getTime() === b.from.getTime()
+      && (!a.to || !b.to || a.to.getTime() === b.to.getTime())
     )
   }
 
@@ -473,17 +479,21 @@ export function DateRangePicker({
         <Button size={size} variant={variant} className='group'>
           <div className='text-right'>
             <div className='py-1'>
-              <div>{`${formatDate(range.from, locale)}${
-                range.to != null && range.from.getDate() != range.to.getDate()
-                  ? ' - ' + formatDate(range.to, locale)
-                  : ''
-              }`}</div>
+              <div>
+                {`${formatDate(range.from, locale)}${
+                  range.to && range.from.getDate() !== range.to.getDate()
+                    ? ` - ${formatDate(range.to, locale)}`
+                    : ''
+                }`}
+              </div>
             </div>
-            {rangeCompare != null && (
-              <div className='opacity-60 text-xs -mt-1'>
+            {rangeCompare && (
+              <div className='-mt-1 text-xs opacity-60'>
                 <>
-                  vs. {formatDate(rangeCompare.from, locale)}
-                  {rangeCompare.to != null
+                  vs.
+                  {' '}
+                  {formatDate(rangeCompare.from, locale)}
+                  {rangeCompare.to
                     ? ` - ${formatDate(rangeCompare.to, locale)}`
                     : ''}
                 </>
@@ -501,9 +511,9 @@ export function DateRangePicker({
         <div className='flex py-2'>
           <div className='flex'>
             <div className='flex flex-col'>
-              <div className='flex flex-col lg:flex-row gap-2 px-3 justify-end items-center lg:items-start pb-4 lg:pb-0'>
+              <div className='flex flex-col items-center justify-end gap-2 px-3 pb-4 lg:flex-row lg:items-start lg:pb-0'>
                 {showCompare && (
-                  <div className='flex items-center space-x-2 pr-4 py-1'>
+                  <div className='flex items-center space-x-2 py-1 pr-4'>
                     <Switch
                       defaultChecked={Boolean(rangeCompare)}
                       onCheckedChange={(checked: boolean) => {
@@ -545,10 +555,10 @@ export function DateRangePicker({
                   <div className='flex gap-2'>
                     <DateInput
                       value={range.from}
-                      onChange={date => {
+                      onChange={(date) => {
                         let fromDate = date
-                        let toDate =
-                          range.to == null || date > range.to ? date : range.to
+                        let toDate
+                          = range.to === null || range.to === undefined || date > range.to ? date : range.to
                         if (view) {
                           const newRange = getRangeFromDate(date)
                           fromDate = newRange.from
@@ -566,8 +576,7 @@ export function DateRangePicker({
                     </div>
                     <DateInput
                       value={range.to}
-                      onChange={date => {
-                        console.log('to date change', date)
+                      onChange={(date) => {
                         let fromDate = date < range.from ? date : range.from
                         let toDate = date
                         if (view) {
@@ -583,14 +592,14 @@ export function DateRangePicker({
                       }}
                     />
                   </div>
-                  {rangeCompare != null && (
+                  {rangeCompare && (
                     <div className='flex gap-2'>
                       <DateInput
                         value={rangeCompare?.from}
-                        onChange={date => {
+                        onChange={(date) => {
                           if (rangeCompare) {
-                            const compareToDate =
-                              rangeCompare.to == null || date > rangeCompare.to
+                            const compareToDate
+                              = rangeCompare.to === null || rangeCompare.to === undefined || date > rangeCompare.to
                                 ? date
                                 : rangeCompare.to
                             setRangeCompare(prevRangeCompare => ({
@@ -609,10 +618,10 @@ export function DateRangePicker({
                       <div className='py-1'>-</div>
                       <DateInput
                         value={rangeCompare?.to}
-                        onChange={date => {
+                        onChange={(date) => {
                           if (rangeCompare && rangeCompare.from) {
-                            const compareFromDate =
-                              date < rangeCompare.from
+                            const compareFromDate
+                              = date < rangeCompare.from
                                 ? date
                                 : rangeCompare.from
                             setRangeCompare({
@@ -630,11 +639,11 @@ export function DateRangePicker({
               {isSmallScreen && (
                 <Select
                   defaultValue={selectedPreset}
-                  onValueChange={value => {
+                  onValueChange={(value) => {
                     setPreset(value)
                   }}
                 >
-                  <SelectTrigger className='w-[180px] mx-auto mb-2'>
+                  <SelectTrigger className='mx-auto mb-2 w-[180px]'>
                     <SelectValue placeholder={t('presets')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -654,12 +663,13 @@ export function DateRangePicker({
                   onDayMouseEnter={handleMouseEnter}
                   onDayMouseLeave={handleMouseLeave}
                   hoveredRange={hoveredRange}
-                  onSelect={(value: { from?: Date; to?: Date } | undefined) => {
+                  onSelect={(value: { from?: Date, to?: Date } | undefined) => {
                     // if clicked date is before range.from, the clicked date =
                     // value.from
                     // if clicked date is after range.to, the clicked date = value.to
 
-                    if (!value) return
+                    if (!value)
+                      return
                     if (value.from === range.from && value.to === range.to)
                       return
 
@@ -736,9 +746,9 @@ export function DateRangePicker({
             </div>
           </div>
           {!isSmallScreen && (
-            <div className='flex flex-col items-end gap-1 pr-2 pl-6 pb-6'>
+            <div className='flex flex-col items-end gap-1 pr-2 pb-6 pl-6'>
               <div>{t('presets')}</div>
-              <div className='flex w-full flex-col items-end gap-1 pr-2 pl-6 pb-6'>
+              <div className='flex w-full flex-col items-end gap-1 pr-2 pb-6 pl-6'>
                 {PRESETS.map(preset => (
                   <PresetButton
                     key={preset.name}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
+
 import { useTranslation } from '@fuku/i18n/react'
 import {
   AlertDialogAction,
@@ -17,7 +18,7 @@ import { toast } from 'sonner'
 import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 
-export const RemoveMemberAlertDialog = () => {
+export function RemoveMemberAlertDialog() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const trpc = useTRPC()
@@ -38,9 +39,34 @@ export const RemoveMemberAlertDialog = () => {
     enabled: !!currentTeamMemberId,
   })
 
+  const { mutateAsync: restoreMember } = useMutation({
+    ...trpc.teamMember.restore.mutationOptions(),
+    onError: (error) => {
+      toast.error('Error', {
+        description: t('message', '{{message}}', { message: error.message }),
+      })
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        trpc.teamMember.byId.queryKey({ id: data.id }),
+        data,
+      )
+      queryClient.invalidateQueries(
+        trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
+      )
+      toast.success('Team Member', {
+        description: t(
+          'givennamesFamilynameHasBeenRestored',
+          '{{givenNames}} {{familyName}} has been restored.',
+          { givenNames: data.givenNames, familyName: data.familyName },
+        ),
+      })
+    },
+  })
+
   const { mutateAsync: removeMember, isPending } = useMutation({
     ...trpc.teamMember.delete.mutationOptions(),
-    onError: error => {
+    onError: (error) => {
       toast.error(
         t('errorvalMessage', 'ERROR{{val}}: {{message}}', {
           val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
@@ -48,7 +74,7 @@ export const RemoveMemberAlertDialog = () => {
         }),
       )
     },
-    onSuccess: data => {
+    onSuccess: (data) => {
       queryClient.removeQueries({
         queryKey: trpc.teamMember.byId.queryKey({ id: data.id }),
       })
@@ -72,33 +98,9 @@ export const RemoveMemberAlertDialog = () => {
     },
   })
 
-  const { mutateAsync: restoreMember } = useMutation({
-    ...trpc.teamMember.restore.mutationOptions(),
-    onError: error => {
-      toast.error('Error', {
-        description: t('message', '{{message}}', { message: error.message }),
-      })
-    },
-    onSuccess: data => {
-      queryClient.setQueryData(
-        trpc.teamMember.byId.queryKey({ id: data.id }),
-        data,
-      )
-      queryClient.invalidateQueries(
-        trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
-      )
-      toast.success('Team Member', {
-        description: t(
-          'givennamesFamilynameHasBeenRestored',
-          '{{givenNames}} {{familyName}} has been restored.',
-          { givenNames: data.givenNames, familyName: data.familyName },
-        ),
-      })
-    },
-  })
-
   const onRemove = async () => {
-    if (!currentTeamMemberId) return
+    if (!currentTeamMemberId)
+      return
     try {
       await removeMember({ id: currentTeamMemberId, teamId: team?.id ?? '' })
     } catch {
@@ -111,29 +113,33 @@ export const RemoveMemberAlertDialog = () => {
       <AlertDialogTitle>
         {t('removeTeamMember', 'Remove Team Member')}
       </AlertDialogTitle>
-      {isLoadingTeamMember ? (
-        <AlertDialogDescription asChild>
-          <Skeleton className='inline-block h-4 w-10' />
-        </AlertDialogDescription>
-      ) : (
-        <AlertDialogDescription asChild>
-          <div>
-            <div>
-              {t(
-                'areYouSureYouWantToRemove',
-                'Are you sure you want to remove',
-              )}{' '}
-              {teamMember?.givenNames}?
-            </div>
-            <div className='font-semibold'>
-              {t(
-                'youCanRestoreItAfterDeletion',
-                'You can restore it after deletion.',
-              )}
-            </div>
-          </div>
-        </AlertDialogDescription>
-      )}
+      {isLoadingTeamMember
+        ? (
+            <AlertDialogDescription asChild>
+              <Skeleton className='inline-block h-4 w-10' />
+            </AlertDialogDescription>
+          )
+        : (
+            <AlertDialogDescription asChild>
+              <div>
+                <div>
+                  {t(
+                    'areYouSureYouWantToRemove',
+                    'Are you sure you want to remove',
+                  )}
+                  {' '}
+                  {teamMember?.givenNames}
+                  ?
+                </div>
+                <div className='font-semibold'>
+                  {t(
+                    'youCanRestoreItAfterDeletion',
+                    'You can restore it after deletion.',
+                  )}
+                </div>
+              </div>
+            </AlertDialogDescription>
+          )}
       <AlertDialogFooter>
         <AlertDialogCancel>{t('cancel', 'Cancel')}</AlertDialogCancel>
         <AlertDialogAction asChild>
@@ -142,7 +148,7 @@ export const RemoveMemberAlertDialog = () => {
             onClick={onRemove}
             loading={isPending}
             disabled={isLoadingTeamMember || isPending}
-            className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
+            className='bg-destructive hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-white'
           >
             {t('remove', 'Remove')}
           </LoadingButton>

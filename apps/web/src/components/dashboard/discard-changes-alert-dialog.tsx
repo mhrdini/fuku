@@ -11,13 +11,13 @@ import {
 
 import { useDialogStore } from '~/store/dialog.store'
 
-interface DiscardChangesAlertDialogProps {
+type DiscardChangesAlertDialogProps = {
   onDiscard?: () => void
 }
 
-export const DiscardChangesAlertDialogContent = ({
+export function DiscardChangesAlertDialogContent({
   onDiscard,
-}: DiscardChangesAlertDialogProps) => {
+}: DiscardChangesAlertDialogProps) {
   const { t } = useTranslation()
   const { closeDialog } = useDialogStore()
 
@@ -40,7 +40,7 @@ export const DiscardChangesAlertDialogContent = ({
           <Button
             onClick={onDiscard || closeDialog}
             variant='destructive'
-            className='bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60'
+            className='bg-destructive hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-white'
           >
             {t('discard', 'Discard')}
           </Button>

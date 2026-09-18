@@ -1,13 +1,16 @@
 import { useState } from 'react'
+
 import { DateTime } from 'luxon'
 
+import type {
+  ViewOption,
+} from '~/lib/schedule'
 import {
   defaultDateRangesByView,
   getDefaultDateRangeByView,
-  ViewOption,
 } from '~/lib/schedule'
 
-export const useScheduleView = () => {
+export function useScheduleView() {
   const [view, setView] = useState<ViewOption>('month')
   const [start, setStart] = useState(defaultDateRangesByView[view].from)
   const [end, setEnd] = useState(defaultDateRangesByView[view].to)

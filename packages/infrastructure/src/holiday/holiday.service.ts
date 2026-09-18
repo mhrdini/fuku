@@ -7,13 +7,11 @@ type Holiday = {
 const holidayCache = new Map<string, Set<string>>() // key = `${country}-${year}`
 const getCacheKey = (country: string, year: number) => `${country}-${year}`
 
-export const preloadHolidays = async (
-  year: number,
-  country: string,
-): Promise<void> => {
+export async function preloadHolidays(year: number, country: string): Promise<void> {
   const key = getCacheKey(country, year)
 
-  if (holidayCache.has(key)) return
+  if (holidayCache.has(key))
+    return
 
   const res = await fetch(
     `https://date.nager.at/api/v3/PublicHolidays/${year}/${country}`,
@@ -32,11 +30,11 @@ export const preloadHolidays = async (
   holidayCache.set(key, set)
 }
 
-export const preloadHolidaysForRange = async (input: {
+export async function preloadHolidaysForRange(input: {
   startDate: Date
   endDate: Date
   country: string
-}): Promise<void> => {
+}): Promise<void> {
   const { startDate, endDate, country } = input
 
   const startYear = startDate.getFullYear()
@@ -50,9 +48,7 @@ export const preloadHolidaysForRange = async (input: {
   await Promise.all(promises)
 }
 
-export const createHolidayChecker = (
-  country: string,
-): ((date: string) => boolean) => {
+export function createHolidayChecker(country: string): ((date: string) => boolean) {
   return (date: string) => {
     const year = new Date(date).getFullYear()
     const key = getCacheKey(country, year)
