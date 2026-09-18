@@ -22,7 +22,7 @@ function Command({
     <CommandPrimitive
       data-slot='command'
       className={cn(
-        'bg-popover text-popover-foreground flex size-full flex-col overflow-hidden rounded-none',
+        'flex size-full flex-col overflow-hidden rounded-none bg-popover text-popover-foreground',
         className,
       )}
       {...props}
@@ -71,7 +71,7 @@ function CommandInput({
       data-slot='command-input-wrapper'
       className={cn('border-b pb-0', className)}
     >
-      <InputGroup className='border-input/30 bg-input/30 h-8 border-none shadow-none! *:data-[slot=input-group-addon]:pl-2!'>
+      <InputGroup className='h-8 border-none border-input/30 bg-input/30 shadow-none! *:data-[slot=input-group-addon]:pl-2!'>
         <CommandPrimitive.Input
           data-slot='command-input'
           className='w-full text-xs outline-hidden disabled:cursor-not-allowed disabled:opacity-50'
@@ -108,7 +108,7 @@ function CommandEmpty({
   return (
     <CommandPrimitive.Empty
       data-slot='command-empty'
-      className={cn('text-muted-foreground p-4 text-center text-xs', className)}
+      className={cn('p-4 text-center text-xs text-muted-foreground', className)}
       {...props}
     />
   )
@@ -122,7 +122,7 @@ function CommandGroup({
     <CommandPrimitive.Group
       data-slot='command-group'
       className={cn(
-        'text-foreground **:[[cmdk-group-heading]]:text-muted-foreground overflow-hidden **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-xs',
+        'overflow-hidden text-foreground **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:text-muted-foreground',
         className,
       )}
       {...props}
@@ -137,7 +137,7 @@ function CommandSeparator({
   return (
     <CommandPrimitive.Separator
       data-slot='command-separator'
-      className={cn('bg-border -mx-1 h-px', className)}
+      className={cn('-mx-1 h-px bg-border', className)}
       {...props}
     />
   )
@@ -176,7 +176,7 @@ function CommandShortcut({
     <span
       data-slot='command-shortcut'
       className={cn(
-        'text-muted-foreground group-data-selected/command-item:text-foreground ml-auto text-xs tracking-widest',
+        'ml-auto text-xs tracking-widest text-muted-foreground group-data-selected/command-item:text-foreground',
         className,
       )}
       {...props}
