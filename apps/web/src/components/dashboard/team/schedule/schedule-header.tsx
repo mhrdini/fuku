@@ -304,21 +304,19 @@ export function ScheduleHeader({
             className='block cursor-pointer whitespace-nowrap'
             onClick={downloadCSV}
           >
-            <Trans i18nKey='downloadAsCSV'>
-              Download as
-              {' '}
-              <span className='font-bold'>CSV</span>
-            </Trans>
+            <Trans
+              i18nKey='downloadAsCSV'
+              components={{ bold: <span className='font-bold' /> }}
+            />
           </DropdownMenuItem>
           <DropdownMenuItem
             className='block cursor-pointer whitespace-nowrap'
             onClick={downloadPDF}
           >
-            <Trans i18nKey='downloadAsPDF'>
-              Download as
-              {' '}
-              <span className='font-bold'>PDF</span>
-            </Trans>
+            <Trans
+              i18nKey='downloadAsPDF'
+              components={{ bold: <span className='font-bold' /> }}
+            />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
