@@ -130,6 +130,7 @@
   "nameHasBeenCreated": "{{name}}が作成されました。",
   "nameHasBeenRemoved": "{{name}}が削除されました。",
   "nameHasBeenRestored": "{{name}}が復元されました。",
+  "new": "新規作成",
   "newLocation": "新しいロケーション",
   "newPayGrade": "新しい給与等級",
   "newShiftType": "新しいシフトタイプ",

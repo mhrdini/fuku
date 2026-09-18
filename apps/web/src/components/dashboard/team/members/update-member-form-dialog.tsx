@@ -39,6 +39,7 @@ import { CheckIcon, ChevronDownIcon } from 'lucide-react'
 import {
   Controller,
   useForm,
+  useWatch,
 } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -50,6 +51,7 @@ import type {
   SubmitHandler,
 } from 'react-hook-form'
 
+import { useCommittedNumberField } from '~/hooks/rule-panel/use-committed-number-field'
 import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 
@@ -94,6 +96,20 @@ export function UpdateMemberFormDialog() {
     },
     resolver: zodResolver(TeamMemberUpdateInputSchema),
   })
+
+  const rateMultiplier = useWatch({
+    control: form.control,
+    name: 'rateMultiplier',
+  })
+
+  const rateMultiplierField = useCommittedNumberField(
+    rateMultiplier,
+    value => form.setValue('rateMultiplier', value ?? 0, {
+      shouldValidate: true,
+      shouldTouch: true,
+      shouldDirty: true,
+    }),
+  )
 
   useEffect(() => {
     if (teamMemberFetched && teamMember && currentTeamMemberId) {
@@ -315,37 +331,31 @@ export function UpdateMemberFormDialog() {
                       )}
                 </Button>
               </Field>
-              <Controller
-                name='rateMultiplier'
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field
-                    data-invalid={fieldState.invalid}
-                    className='col-span-1'
-                  >
-                    <FieldLabel htmlFor='form-update-member-rate-multiplier'>
-                      {t('multiplier', 'Multiplier')}
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id='form-update-member-rate-multiplier'
-                      type='number'
-                      step='0.01'
-                      min='0'
-                      aria-invalid={fieldState.invalid}
-                      placeholder={t('rateMultiplier', 'Rate Multiplier')}
-                      autoComplete='off'
-                      onChange={e =>
-                        field.onChange(
-                          e.target.value === '' ? 0 : Number(e.target.value),
-                        )}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
+              <Field
+                data-invalid={!!form.formState.errors.rateMultiplier}
+                className='col-span-1'
+              >
+                <FieldLabel htmlFor='form-create-member-rate-multiplier'>
+                  {t('multiplier', 'Multiplier')}
+                </FieldLabel>
+
+                <Input
+                  {...rateMultiplierField.inputProps}
+                  id='form-create-member-rate-multiplier'
+                  type='number'
+                  step='0.01'
+                  min='0'
+                  aria-invalid={!!form.formState.errors.rateMultiplier}
+                  placeholder={t('rateMultiplier', 'Rate Multiplier')}
+                  autoComplete='off'
+                />
+
+                {form.formState.errors.rateMultiplier && (
+                  <FieldError
+                    errors={[form.formState.errors.rateMultiplier]}
+                  />
                 )}
-              />
+              </Field>
             </div>
             <FieldSeparator />
             <Controller

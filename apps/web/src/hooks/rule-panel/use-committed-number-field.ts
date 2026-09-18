@@ -5,10 +5,14 @@ export function useCommittedNumberField(
   onCommit: (value: number | null) => void,
   { allowNull = false }: { allowNull?: boolean } = {},
 ) {
-  const [input, setInput] = useState(value !== null || value !== undefined ? String(value) : '')
+  const [input, setInput] = useState(
+    value !== null && value !== undefined ? String(value) : '',
+  )
 
   useEffect(() => {
-    setInput(value !== null || value !== undefined ? String(value) : '')
+    setInput(
+      value !== null && value !== undefined ? String(value) : '',
+    )
   }, [value])
 
   const commit = () => {
