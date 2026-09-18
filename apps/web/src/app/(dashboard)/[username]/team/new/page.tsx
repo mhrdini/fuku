@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
 import { TeamCreateInputSchema } from '@fuku/api/schemas'
-import i18next from '@fuku/i18n/client'
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Badge,
@@ -93,6 +92,7 @@ import {
   useFieldArray,
   useForm,
   useFormContext,
+  useWatch,
 } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -108,6 +108,7 @@ import { CountryController } from '~/components/country-controller'
 import { useSession } from '~/components/providers/session-context'
 import { TimeZoneController } from '~/components/timezone-controller'
 import type { Step } from '~/components/ui/stepper'
+import { useCommittedNumberField } from '~/hooks/rule-panel/use-committed-number-field'
 import { useDebouncedCommit } from '~/hooks/use-debounced-commit'
 import { useStepper } from '~/hooks/use-stepper'
 import { useTeamStore } from '~/store/team.store'
@@ -140,24 +141,24 @@ const AdditionalDetailsSectionSchema = TeamCreateFormSchema.pick({
   shiftTypes: true,
 })
 
-const steps: Step[] = [
-  {
-    label: i18next.t('basicInfo', 'Basic Info'),
-    schema: BasicInfoSectionSchema,
-  },
-  {
-    label: i18next.t('teamMembers', 'Team Members'),
-    schema: TeamMembersSectionSchema,
-  },
-  {
-    label: i18next.t('additionalDetails', 'Additional Details'),
-    schema: AdditionalDetailsSectionSchema,
-  },
-]
-
 export default function NewTeamPage() {
   const { t } = useTranslation()
   const { setOpenTeamSelect } = useTeamStore()
+
+  const steps: Step[] = useMemo(() => ([
+    {
+      label: t('basicInfo', 'Basic Info'),
+      schema: BasicInfoSectionSchema,
+    },
+    {
+      label: t('teamMembers', 'Team Members'),
+      schema: TeamMembersSectionSchema,
+    },
+    {
+      label: t('additionalDetails', 'Additional Details'),
+      schema: AdditionalDetailsSectionSchema,
+    },
+  ]), [t])
 
   const router = useRouter()
   const { stepper, index, prevStep, nextStep, currentStep } = useStepper(steps)
@@ -254,6 +255,10 @@ export default function NewTeamPage() {
     },
   })
 
+  const cancel = () => {
+    router.back()
+  }
+
   const onSubmit: SubmitHandler<TeamCreateFormType> = (values) => {
     try {
       createTeam(values)
@@ -285,6 +290,7 @@ export default function NewTeamPage() {
               type='button'
               variant='outline'
               className={cn(index > 0 && 'hidden', 'ml-auto')}
+              onClick={cancel}
             >
               {t('cancel', 'Cancel')}
             </Button>
@@ -662,6 +668,21 @@ function TeamMemberSheet({
     resolver: zodResolver(TeamMemberFormSchema),
   })
 
+  const rateMultiplier = useWatch({
+    control: form.control,
+    name: 'rateMultiplier',
+  })
+
+  const rateMultiplierField = useCommittedNumberField(
+    rateMultiplier,
+    value =>
+      form.setValue('rateMultiplier', value ?? 0, {
+        shouldValidate: true,
+        shouldTouch: true,
+        shouldDirty: true,
+      }),
+  )
+
   useEffect(() => {
     if (editingIndex !== null) {
       form.reset(fields[editingIndex], {
@@ -845,37 +866,29 @@ function TeamMemberSheet({
                       )}
                 </Button>
               </Field>
-              <Controller
-                name='rateMultiplier'
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field
-                    data-invalid={fieldState.invalid}
-                    className='col-span-1'
-                  >
-                    <FieldLabel htmlFor='form-create-member-rate-multiplier'>
-                      {t('multiplier', 'Multiplier')}
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id='form-create-member-rate-multiplier'
-                      type='number'
-                      step='0.01'
-                      min='0'
-                      aria-invalid={fieldState.invalid}
-                      placeholder={t('rateMultiplier', 'Rate Multiplier')}
-                      autoComplete='off'
-                      onChange={e =>
-                        field.onChange(
-                          e.target.value === '' ? 0 : Number(e.target.value),
-                        )}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
+              <Field
+                data-invalid={!!form.formState.errors.rateMultiplier}
+                className='col-span-1'
+              >
+                <FieldLabel htmlFor='form-create-member-rate-multiplier'>
+                  {t('multiplier', 'Multiplier')}
+                </FieldLabel>
+
+                <Input
+                  {...rateMultiplierField.inputProps}
+                  id='form-create-member-rate-multiplier'
+                  type='number'
+                  step='0.01'
+                  min='0'
+                  aria-invalid={!!form.formState.errors.rateMultiplier}
+                  placeholder={t('rateMultiplier', 'Rate Multiplier')}
+                  autoComplete='off'
+                />
+
+                {form.formState.errors.rateMultiplier && (
+                  <FieldError errors={[form.formState.errors.rateMultiplier]} />
                 )}
-              />
+              </Field>
             </div>
 
             <div className='flex gap-2 pt-4'>
@@ -1008,7 +1021,6 @@ function PayGradeItem({
 }) {
   const { t } = useTranslation()
   const [name, setName] = useState(field.name ?? '')
-  const [baseRate, setBaseRate] = useState(field.baseRate ?? 0)
 
   const latestRef = useRef({
     name: field.name ?? '',
@@ -1020,10 +1032,15 @@ function PayGradeItem({
     latestRef.current.name = field.name ?? ''
   }, [field.name])
 
-  useEffect(() => {
-    setBaseRate(field.baseRate ?? 0)
-    latestRef.current.baseRate = field.baseRate ?? 0
-  }, [field.baseRate])
+  const baseRateField = useCommittedNumberField(
+    field.baseRate,
+    (value) => {
+      update(index, {
+        ...field,
+        baseRate: value ?? 0,
+      })
+    },
+  )
 
   const commit = () => {
     update(index, {
@@ -1052,18 +1069,11 @@ function PayGradeItem({
         />
 
         <Input
+          {...baseRateField.inputProps}
           type='number'
-          value={baseRate}
           placeholder={t('baseRate2', 'Base rate')}
           className='col-span-2'
           aria-invalid={!!error?.baseRate}
-          onChange={(e) => {
-            const value = Number(e.target.value)
-            setBaseRate(value)
-            latestRef.current.baseRate = value
-            schedule()
-          }}
-          onBlur={flush}
         />
       </ItemContent>
 
