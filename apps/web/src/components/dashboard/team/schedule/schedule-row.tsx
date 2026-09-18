@@ -38,7 +38,7 @@ export function ScheduleRow({
 
     const entries = Array.from(shiftTypeMap.values())
       .filter(st =>
-        st.eligiblePayGrades.some(pgst => pgst.payGradeId === tm.payGradeId),
+        st.deletedAt === null && st.eligiblePayGrades.some(pgst => pgst.payGradeId === tm.payGradeId),
       )
       .map(st => [st.id, st] as const)
 

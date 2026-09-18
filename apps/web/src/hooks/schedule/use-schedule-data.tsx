@@ -29,7 +29,7 @@ export function useScheduleData({ start, end }: ScheduleDataProps) {
   })
 
   const { data: shiftTypes } = useQuery({
-    ...trpc.shiftType.list.queryOptions({ teamId: team?.id ?? '' }),
+    ...trpc.shiftType.list.queryOptions({ teamId: team?.id ?? '', includeDeleted: true }),
     enabled: !!team,
     refetchOnWindowFocus: false,
   })
