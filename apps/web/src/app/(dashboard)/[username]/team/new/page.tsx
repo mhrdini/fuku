@@ -105,7 +105,7 @@ import type {
 import type * as z from 'zod/v4'
 
 import { CountryController } from '~/components/country-controller'
-import { useSession } from '~/components/providers/session-provider'
+import { useSession } from '~/components/providers/session-context'
 import { TimeZoneController } from '~/components/timezone-controller'
 import type { Step } from '~/components/ui/stepper'
 import { useDebouncedCommit } from '~/hooks/use-debounced-commit'

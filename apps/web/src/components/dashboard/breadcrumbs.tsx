@@ -20,7 +20,7 @@ import { Home } from 'lucide-react'
 
 import { useTRPC } from '~/trpc/client'
 
-import { useSession } from '../providers/session-provider'
+import { useSession } from '../providers/session-context'
 
 const MAX_VISIBLE = 3
 const MAX_TRAILING = 1
