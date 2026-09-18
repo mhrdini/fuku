@@ -31,28 +31,25 @@ export async function convertToPDF(
   // Filter assignments by date range
   // --------------------------------------------
 
-  const filteredData = data.filter((assignment) => {
-    const assignmentDate = DateTime.fromISO(String(assignment.date)).startOf(
-      'day',
-    )
+  const start = DateTime.fromJSDate(startDate).startOf('day')
+  const end = DateTime.fromJSDate(endDate).startOf('day')
 
-    return (
-      assignmentDate >= DateTime.fromJSDate(startDate).startOf('day')
-      && assignmentDate <= DateTime.fromJSDate(endDate).startOf('day')
-    )
+  const filteredData = data.filter((assignment) => {
+    const assignmentDate = DateTime.fromISO(
+      String(assignment.date),
+    ).startOf('day')
+
+    return assignmentDate >= start && assignmentDate <= end
   })
 
   // --------------------------------------------
   // Team members (columns)
   // --------------------------------------------
 
-  const teamMemberIds = Array.from(
-    new Set(filteredData.map(a => a.teamMemberId)),
-  )
+  const teamMemberIds = Object.keys(teamMemberById)
 
   teamMemberIds.sort((a, b) => {
     const nameA = getTeamMemberName(teamMemberById[a])
-
     const nameB = getTeamMemberName(teamMemberById[b])
 
     return nameA.localeCompare(nameB)
@@ -62,13 +59,15 @@ export async function convertToPDF(
   // Dates (rows)
   // --------------------------------------------
 
-  const dates = Array.from(
-    new Set(
-      filteredData.map(a =>
-        DateTime.fromISO(String(a.date)).toFormat('yyyy/MM/dd'),
-      ),
-    ),
-  ).sort()
+  const dates: string[] = []
+
+  for (
+    let date = start;
+    date <= end;
+    date = date.plus({ days: 1 })
+  ) {
+    dates.push(date.toFormat('yyyy/MM/dd'))
+  }
 
   // --------------------------------------------
   // Assignment lookup
@@ -81,9 +80,14 @@ export async function convertToPDF(
       'yyyy/MM/dd',
     )
 
-    const shiftName = getShiftTypeName(shiftTypeById[assignment.shiftTypeId])
+    const shiftName = getShiftTypeName(
+      shiftTypeById[assignment.shiftTypeId],
+    )
 
-    assignmentMap.set(`${date}-${assignment.teamMemberId}`, shiftName)
+    assignmentMap.set(
+      `${date}-${assignment.teamMemberId}`,
+      shiftName,
+    )
   }
 
   // --------------------------------------------
