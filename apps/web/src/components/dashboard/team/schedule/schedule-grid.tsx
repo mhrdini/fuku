@@ -1,14 +1,10 @@
 'use client'
 
-import { useMemo } from 'react'
-
 import { DragDropProvider } from '@dnd-kit/react'
-import i18next from '@fuku/i18n/client'
 import { useTranslation } from '@fuku/i18n/react'
 import { Badge, Button, ScrollArea, ScrollBar } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { format } from 'date-fns'
-import { enGB, ja } from 'date-fns/locale'
 import { PlusIcon } from 'lucide-react'
 
 import type { SchedulerAssignment } from '@fuku/domain/schemas'
@@ -18,6 +14,7 @@ import type { ScheduleData } from '~/hooks/schedule/use-schedule-data'
 import type { ScheduleDerivedData } from '~/hooks/schedule/use-schedule-derived-data'
 import type { ScheduleFilters } from '~/hooks/schedule/use-schedule-filters'
 import { useTeamMemberGroupBySort } from '~/hooks/schedule/use-team-member-group-by-sort'
+import { getDateFnsLocale } from '~/lib/date-fns'
 import { useScheduleStore } from '~/store/schedule.store'
 
 import { ScheduleRow } from './schedule-row'
@@ -36,12 +33,9 @@ export function ScheduleGrid({
   derivedData: { daysRowList, cellMap, shiftTypeMap, payGradeMap },
   className,
 }: ScheduleGridProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
-  const locale = useMemo(
-    () => (i18next.language === 'en' ? enGB : ja),
-    [i18next.language],
-  )
+  const locale = getDateFnsLocale(i18n.language)
 
   const { dayMetricsMap } = useScheduleStore()
 

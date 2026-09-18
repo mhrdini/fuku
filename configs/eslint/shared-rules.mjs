@@ -149,7 +149,7 @@ export const sharedRules = [
       'better-tailwindcss': {
         // Point this at your real Tailwind entry file. Required for v4
         // (a .css file); for v3 point it at your tailwind.config.js instead.
-        entryPoint: './styles/globals.css',
+        entryPoint: '../../packages/ui/src/styles.css',
         attributes: ['className'],
         // cn/cva/clsx/twMerge are auto-detected already — no need to list them
       },

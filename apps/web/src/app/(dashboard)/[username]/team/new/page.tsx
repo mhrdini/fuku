@@ -261,12 +261,13 @@ export default function NewTeamPage() {
   }
 
   const onError: SubmitErrorHandler<TeamCreateFormType> = (errors) => {
+    console.error('new team page submit error:', errors)
   }
 
   const sections = [
-    <BasicInfoSection />,
-    <TeamMembersSection />,
-    <AdditionalDetailsSection />,
+    <BasicInfoSection key='basic-info-section' />,
+    <TeamMembersSection key='team-member-section' />,
+    <AdditionalDetailsSection key='additional-details-section' />,
   ] as const
 
   return (
