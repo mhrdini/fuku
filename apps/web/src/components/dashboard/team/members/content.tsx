@@ -56,7 +56,7 @@ export default function TeamMembersContent() {
   const { t } = useTranslation()
   const trpc = useTRPC()
   const params = useParams()
-  const username = params?.username as string
+  // const username = params?.username as string
   const slug = params?.slug as string
   const { data: team } = useQuery({
     ...trpc.team.bySlug.queryOptions({ slug: slug! }),
@@ -86,14 +86,14 @@ export default function TeamMembersContent() {
       id: DialogId.UPDATE_TEAM_MEMBER,
       editingId: id,
     })
-  }, [])
+  }, [openDialog])
 
   const onRemoveMember = useCallback((id: string) => {
     openAlertDialog({
       id: DialogId.REMOVE_TEAM_MEMBER,
       editingId: id,
     })
-  }, [])
+  }, [openAlertDialog])
 
   const columns = useMemo<ColumnDef<TeamMemberUI, any>[]>(
     () => [
@@ -194,7 +194,7 @@ export default function TeamMembersContent() {
             : 'N/A',
       },
     ],
-    [],
+    [onRemoveMember, onUpdateMember, t],
   )
 
   const defaultHiddenColumns = useMemo(() => {
