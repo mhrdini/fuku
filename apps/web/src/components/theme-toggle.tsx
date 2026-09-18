@@ -3,7 +3,7 @@ import { Button } from '@fuku/ui/components'
 import { SunMoon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
-export const ThemeToggle = () => {
+export function ThemeToggle() {
   const { t } = useTranslation()
   const { setTheme, resolvedTheme } = useTheme()
 

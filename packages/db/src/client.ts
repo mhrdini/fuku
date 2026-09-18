@@ -7,11 +7,11 @@ const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient
 }
 
-const db =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    adapter: new PrismaPg({ connectionString }),
-  })
+const db
+  = globalForPrisma.prisma
+    ?? new PrismaClient({
+      adapter: new PrismaPg({ connectionString }),
+    })
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = db

@@ -16,16 +16,15 @@
     "@fuku/infrastructure": "workspace:*",
     "@fuku/scheduling": "workspace:*",
     "@trpc/server": "catalog:",
-    "nanoid": "^5.1.6",
+    "nanoid": "catalog:",
     "superjson": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
-    "@fuku/config-prettier": "workspace:*",
+
     "@fuku/config-typescript": "workspace:*",
     "prettier": "catalog:",
     "typescript": "catalog:"
-  },
-  "prettier": "@fuku/config-prettier"
+  }
 }

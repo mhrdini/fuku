@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server'
+
 import { appRouter, createTRPCContext } from '@fuku/api'
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 
@@ -8,14 +9,14 @@ import { auth } from '~/auth/server'
  * Configure basic CORS headers
  * You should extend this to match your needs
  */
-const setCorsHeaders = (res: Response) => {
+function setCorsHeaders(res: Response) {
   res.headers.set('Access-Control-Allow-Origin', '*')
   res.headers.set('Access-Control-Request-Method', '*')
   res.headers.set('Access-Control-Allow-Methods', 'OPTIONS, GET, POST')
   res.headers.set('Access-Control-Allow-Headers', '*')
 }
 
-export const OPTIONS = () => {
+export function OPTIONS() {
   const response = new Response(null, {
     status: 204,
   })
@@ -23,14 +24,14 @@ export const OPTIONS = () => {
   return response
 }
 
-const handler = async (req: NextRequest) => {
+async function handler(req: NextRequest) {
   const response = await fetchRequestHandler({
     endpoint: '/api/trpc',
     router: appRouter,
     req,
     createContext: () =>
       createTRPCContext({
-        auth: auth,
+        auth,
         headers: req.headers,
       }),
   })

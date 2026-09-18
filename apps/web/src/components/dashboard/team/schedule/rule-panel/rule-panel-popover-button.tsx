@@ -1,18 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import {
-  PayGradeOutput,
-  RuleConditionCreateInput,
-  RuleConditionOutput,
-  RuleConditionUpdateInput,
-  RuleCreateInput,
-  RuleOutput,
-  RuleUpdateInput,
-  ShiftTypeOutput,
-  TeamMemberOutput,
-  TeamOutput,
-} from '@fuku/api/schemas'
+
 import {
   RuleMetricValues,
   RuleOperatorValues,
@@ -64,11 +53,24 @@ import {
   WorkflowIcon,
 } from 'lucide-react'
 
+import type {
+  PayGradeOutput,
+  RuleConditionCreateInput,
+  RuleConditionOutput,
+  RuleConditionUpdateInput,
+  RuleCreateInput,
+  RuleOutput,
+  RuleUpdateInput,
+  ShiftTypeOutput,
+  TeamMemberOutput,
+  TeamOutput,
+} from '@fuku/api/schemas'
+
 import { useRuleEditor } from '~/hooks/rule-panel/use-rule-editor'
 import { useRuleFilters } from '~/hooks/rule-panel/use-rule-filters'
 import { useRuleGroupBySort } from '~/hooks/rule-panel/use-rule-group-by-sort'
 import { preventCloseOnSelect } from '~/lib/event'
-import { MutationMode } from '~/lib/query'
+import type { MutationMode } from '~/lib/query'
 import {
   RULE_GROUP_BY_KEYS,
   RULE_METRIC_LABELS,
@@ -77,21 +79,22 @@ import {
   RULE_SORT_KEYS,
   WEEKDAY_CONDITION_ID_PREFIX,
 } from '~/lib/rule-panel/rule.constants'
-import { RuleGroupByKey, RuleSortKey } from '~/lib/rule-panel/rule.helpers'
+import type { RuleGroupByKey, RuleSortKey } from '~/lib/rule-panel/rule.helpers'
+
 import RulePanelItem from './rule-panel-item'
 
 function getRuleSearchValue(
   rule: RuleOutput,
   conditions: RuleConditionOutput[],
-  scopeOptions: Record<string, { value: string; label: string }[]>,
+  scopeOptions: Record<string, { value: string, label: string }[]>,
 ) {
-  const scopeLabel =
-    rule.scope === 'GLOBAL'
+  const scopeLabel
+    = rule.scope === 'GLOBAL'
       ? 'global'
       : (scopeOptions[rule.scope].find(
           opt =>
-            opt.value ===
-            (rule.teamMemberId ?? rule.payGradeId ?? rule.shiftTypeId),
+            opt.value
+            === (rule.teamMemberId ?? rule.payGradeId ?? rule.shiftTypeId),
         )?.label ?? '')
 
   return [
@@ -110,7 +113,8 @@ function getShiftTypeWeekdayCondition(
   rule: RuleOutput,
   shiftType: ShiftTypeOutput,
 ) {
-  if (!rule.shiftTypeId) return null
+  if (!rule.shiftTypeId)
+    return null
   if (!shiftType.allowedWeekdays || shiftType.allowedWeekdays.length === 0)
     return null
   const weekdayCondition: RuleConditionOutput = {
@@ -140,7 +144,7 @@ type RulePanelPopoverButtonProps = {
   ) => Promise<RuleConditionOutput>
 }
 
-export const RulePanelPopoverButton = ({
+export function RulePanelPopoverButton({
   team,
   rules: initialRules,
   ruleConditions: initialRuleConditions,
@@ -149,7 +153,7 @@ export const RulePanelPopoverButton = ({
   payGrades,
   mutateRule,
   mutateRuleCondition,
-}: RulePanelPopoverButtonProps) => {
+}: RulePanelPopoverButtonProps) {
   const { t } = useTranslation()
   const {
     rules,
@@ -195,19 +199,23 @@ export const RulePanelPopoverButton = ({
   const weekdayConditionsMap = useMemo(() => {
     const map = new Map<string, RuleConditionOutput>()
     for (const rule of Object.values(rules)) {
-      if (!rule.shiftTypeId) continue
+      if (!rule.shiftTypeId)
+        continue
       const shiftType = shiftTypes.find(st => st.id === rule.shiftTypeId)
-      if (!shiftType) continue
-      const weekdayCondition: RuleConditionOutput | null =
-        getShiftTypeWeekdayCondition(rule, shiftType)
-      if (!weekdayCondition) continue
+      if (!shiftType)
+        continue
+      const weekdayCondition: RuleConditionOutput | null
+        = getShiftTypeWeekdayCondition(rule, shiftType)
+      if (!weekdayCondition)
+        continue
       map.set(rule.id, weekdayCondition)
     }
     return map
   }, [shiftTypes, rules])
 
   const handleCreateRule = () => {
-    if (team.id === undefined) return
+    if (team.id === undefined)
+      return
     createRule({
       teamId: team.id,
       scope: RuleScopeValues.GLOBAL,
@@ -238,10 +246,10 @@ export const RulePanelPopoverButton = ({
       </PopoverTrigger>
       <PopoverContent
         align='start'
-        className='min-w-fit min-h-0 flex flex-col max-h-[40rem] p-0 border border-border shadow-2xl '
+        className='border-border flex max-h-[40rem] min-h-0 min-w-fit flex-col border p-0 shadow-2xl '
       >
         <Command>
-          <div className='p-2 w-full flex gap-1'>
+          <div className='flex w-full gap-1 p-2'>
             {/* rule search bar */}
             <CommandInput
               className='w-full'
@@ -289,7 +297,7 @@ export const RulePanelPopoverButton = ({
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
                     <DropdownMenuGroup>
-                      {Object.values(RuleScopeValues).map(value => {
+                      {Object.values(RuleScopeValues).map((value) => {
                         const Icon = RULE_SCOPE_ICONS[value]
                         return (
                           <DropdownMenuCheckboxItem
@@ -315,7 +323,7 @@ export const RulePanelPopoverButton = ({
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
                     <DropdownMenuGroup>
-                      {Object.values(RuleMetricValues).map(value => {
+                      {Object.values(RuleMetricValues).map((value) => {
                         return (
                           <DropdownMenuCheckboxItem
                             key={value}
@@ -334,7 +342,7 @@ export const RulePanelPopoverButton = ({
                 </DropdownMenuSub>
                 <DropdownMenuSeparator />
                 <Button
-                  className='w-full text-muted-foreground'
+                  className='text-muted-foreground w-full'
                   variant='ghost'
                 >
                   {t('clearFilters', 'Clear filters')}
@@ -350,15 +358,14 @@ export const RulePanelPopoverButton = ({
               </PopoverTrigger>
               <PopoverContent align='end' className='max-w-max p-0'>
                 <Command>
-                  <div className='p-2 grid gap-2 grid-cols-2 *:flex *:items-center *:min-w-0 *:flex-1 *:w-full *:odd:text-muted-foreground'>
+                  <div className='*:odd:text-muted-foreground grid grid-cols-2 gap-2 p-2 *:flex *:w-full *:min-w-0 *:flex-1 *:items-center'>
                     <div>{t('grouping')}</div>
                     <Select
                       value={groupByKey ?? 'undefined'}
                       onValueChange={value =>
                         value === 'undefined'
                           ? setGroupByKey(undefined)
-                          : setGroupByKey(value as RuleGroupByKey)
-                      }
+                          : setGroupByKey(value as RuleGroupByKey)}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -376,7 +383,7 @@ export const RulePanelPopoverButton = ({
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-                    <div className='flex gap-2 justify-between'>
+                    <div className='flex justify-between gap-2'>
                       <div>{t('sorting')}</div>
                       <Button
                         hidden={sortKey === undefined}
@@ -404,8 +411,7 @@ export const RulePanelPopoverButton = ({
                       onValueChange={value =>
                         value === 'undefined'
                           ? setSortKey(undefined)
-                          : setSortKey(value as RuleSortKey)
-                      }
+                          : setSortKey(value as RuleSortKey)}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -433,53 +439,55 @@ export const RulePanelPopoverButton = ({
             </Popover>
           </div>
           <CommandSeparator />
-          <ScrollArea className='group/rules flex flex-col min-w-fit overflow-y-auto overflow-x-clip'>
-            {sortedRules && Object.keys(sortedRules).length ? (
-              Object.entries(sortedRules).map(([ruleId, rule]) => (
-                <div key={ruleId}>
-                  <CommandItem
-                    noHighlight
-                    value={getRuleSearchValue(
-                      rule,
-                      ruleConditions ? ruleConditions[rule.id] || [] : [],
-                      scopeOptions,
-                    )}
-                    className='pr-4'
-                  >
-                    <RulePanelItem
-                      rule={rule}
-                      ruleConditions={
-                        ruleConditions
-                          ? weekdayConditionsMap
-                            ? [
-                                ...(weekdayConditionsMap.get(rule.id)
-                                  ? [weekdayConditionsMap.get(rule.id)!]
-                                  : []),
-                                ...(ruleConditions[rule.id] || []),
-                              ]
-                            : ruleConditions[rule.id] || []
-                          : []
-                      }
-                      scopeOptions={scopeOptions}
-                      createRule={createRule}
-                      updateRule={updateRule}
-                      deleteRule={deleteRule}
-                      createRuleCondition={createRuleCondition}
-                      updateRuleCondition={updateRuleCondition}
-                      deleteRuleCondition={deleteRuleCondition}
-                    />
-                  </CommandItem>
-                  <CommandSeparator />
-                </div>
-              ))
-            ) : (
-              <div className='text-muted-foreground p-4'>
-                {t('noRulesFound', 'No rules found.')}
-              </div>
-            )}
+          <ScrollArea className='group/rules flex min-w-fit flex-col overflow-x-clip overflow-y-auto'>
+            {sortedRules && Object.keys(sortedRules).length
+              ? (
+                  Object.entries(sortedRules).map(([ruleId, rule]) => (
+                    <div key={ruleId}>
+                      <CommandItem
+                        noHighlight
+                        value={getRuleSearchValue(
+                          rule,
+                          ruleConditions ? ruleConditions[rule.id] || [] : [],
+                          scopeOptions,
+                        )}
+                        className='pr-4'
+                      >
+                        <RulePanelItem
+                          rule={rule}
+                          ruleConditions={
+                            ruleConditions
+                              ? weekdayConditionsMap
+                                ? [
+                                    ...(weekdayConditionsMap.get(rule.id)
+                                      ? [weekdayConditionsMap.get(rule.id)!]
+                                      : []),
+                                    ...(ruleConditions[rule.id] || []),
+                                  ]
+                                : ruleConditions[rule.id] || []
+                              : []
+                          }
+                          scopeOptions={scopeOptions}
+                          createRule={createRule}
+                          updateRule={updateRule}
+                          deleteRule={deleteRule}
+                          createRuleCondition={createRuleCondition}
+                          updateRuleCondition={updateRuleCondition}
+                          deleteRuleCondition={deleteRuleCondition}
+                        />
+                      </CommandItem>
+                      <CommandSeparator />
+                    </div>
+                  ))
+                )
+              : (
+                  <div className='text-muted-foreground p-4'>
+                    {t('noRulesFound', 'No rules found.')}
+                  </div>
+                )}
           </ScrollArea>
           <CommandSeparator />
-          <div className='p-2 w-full flex'>
+          <div className='flex w-full p-2'>
             <Button
               className='w-full'
               variant='secondary'

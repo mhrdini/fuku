@@ -30,8 +30,8 @@ type RuleConditionOperatorsByField = {
 }
 
 // operator
-export type RuleConditionOperator =
-  RuleConditionOperatorsByField[keyof RuleConditionOperatorsByField]
+export type RuleConditionOperator
+  = RuleConditionOperatorsByField[keyof RuleConditionOperatorsByField]
 
 export function isMultiOperator(op: RuleConditionOperator) {
   return op === 'IN' || op === 'NOT_IN'
@@ -40,14 +40,14 @@ export function isMultiOperator(op: RuleConditionOperator) {
 export function getRuleConditionOperatorsByField<F extends RuleConditionField>(
   field: F,
 ) {
-  return RULE_CONDITION_OPTIONS_CONFIG[field]['operators']
+  return RULE_CONDITION_OPTIONS_CONFIG[field].operators
 }
 
 // value
 export function getRuleConditionDefaultValueByField<
   F extends RuleConditionField,
 >(field: F) {
-  return RULE_CONDITION_OPTIONS_CONFIG[field]['defaultValue']
+  return RULE_CONDITION_OPTIONS_CONFIG[field].defaultValue
 }
 
 export function normalizeConditionValue(
@@ -58,7 +58,7 @@ export function normalizeConditionValue(
   const config = RULE_CONDITION_OPTIONS_CONFIG[field]
   const multi = isMultiOperator(operator)
 
-  const arr = Array.isArray(raw) ? raw : raw != null ? [raw] : []
+  const arr = Array.isArray(raw) ? raw : raw !== null || raw !== undefined ? [raw] : []
 
   let parsed
 

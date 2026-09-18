@@ -1,5 +1,6 @@
-import { ISODateString, TimeZone } from '@fuku/domain/schemas'
 import { DateTime } from 'luxon'
+
+import type { ISODateString, TimeZone } from '@fuku/domain/schemas'
 
 export function toISODateFromJS(date: Date, timeZone?: TimeZone): string {
   if (!timeZone) {
@@ -22,7 +23,7 @@ export function toISODateTime(date: DateTime) {
   return date.toISO()!
 }
 
-export interface Period {
+export type Period = {
   start: ISODateString
   end: ISODateString
   timeZone: TimeZone
@@ -64,40 +65,39 @@ export function getDateTimeFromMinutesFromMidnight(
   return DateTime.fromObject({ hour: hours, minute: minutes })
 }
 
-export const parseISODate = (date: ISODateString) =>
-  DateTime.fromFormat(date, 'yyyy-MM-dd')
+export function parseISODate(date: ISODateString) {
+  return DateTime.fromFormat(date, 'yyyy-MM-dd')
+}
 
-export const addDays = (date: ISODateString, days: number): ISODateString =>
-  parseISODate(date).plus({ days }).toISODate()!
+export function addDays(date: ISODateString, days: number): ISODateString {
+  return parseISODate(date).plus({ days }).toISODate()!
+}
 
-export const getWeekday = (date: ISODateString): number =>
-  parseISODate(date).weekday
+export function getWeekday(date: ISODateString): number {
+  return parseISODate(date).weekday
+}
 
-export const getMonth = (date: ISODateString): number =>
-  parseISODate(date).month
+export function getMonth(date: ISODateString): number {
+  return parseISODate(date).month
+}
 
-export const getDaysBetweenInclusive = (
-  start: ISODateString,
-  end: ISODateString,
-): number =>
-  Math.floor(parseISODate(end).diff(parseISODate(start), 'days').as('days')) + 1
+export function getDaysBetweenInclusive(start: ISODateString, end: ISODateString): number {
+  return Math.floor(parseISODate(end).diff(parseISODate(start), 'days').as('days')) + 1
+}
 
-export const getMinutesBetweenTimes = (start: string, end: string): number => {
+export function getMinutesBetweenTimes(start: string, end: string): number {
   const s = DateTime.fromFormat(start, 'HH:mm')
   const e = DateTime.fromFormat(end, 'HH:mm')
 
   return e.diff(s, 'minutes').as('minutes')
 }
 
-export const timeToMinutes = (time: string): number => {
+export function timeToMinutes(time: string): number {
   const [hour, minute] = time.split(':').map(Number)
   return hour * 60 + minute
 }
 
-export const getDaysDifference = (
-  startDate: string,
-  endDate: string,
-): number => {
+export function getDaysDifference(startDate: string, endDate: string): number {
   return Math.floor(
     DateTime.fromISO(endDate)
       .startOf('day')

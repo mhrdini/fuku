@@ -1,12 +1,16 @@
 import 'server-only'
 
 import { cache } from 'react'
+
 import { headers } from 'next/headers'
-import { initAuth, Session } from '@fuku/auth'
+
+import { initAuth } from '@fuku/auth'
 import { nextCookies } from 'better-auth/next-js'
 
-const baseUrl =
-  process.env.NODE_ENV === 'production'
+import type { Session } from '@fuku/auth'
+
+const baseUrl
+  = process.env.NODE_ENV === 'production'
     ? process.env.PRODUCTION_URL || 'http://localhost:3000'
     : process.env.BASE_URL || 'http://localhost:3000'
 

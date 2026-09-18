@@ -1,9 +1,3 @@
-import { config } from '@fuku/config-eslint/base'
-import { defineConfig } from 'eslint/config'
+import config from '@fuku/config-eslint/base'
 
-export default defineConfig(
-  {
-    ignores: ['dist/**'],
-  },
-  config,
-)
+export default config

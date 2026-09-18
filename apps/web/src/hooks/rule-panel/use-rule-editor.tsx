@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import {
+
+import i18next from '@fuku/i18n/client'
+
+import type {
   PayGradeOutput,
   RuleConditionCreateInput,
   RuleConditionOutput,
@@ -10,9 +13,8 @@ import {
   ShiftTypeOutput,
   TeamMemberOutput,
 } from '@fuku/api/schemas'
-import i18next from '@fuku/i18n/client'
 
-import { MutationMode } from '~/lib/query'
+import type { MutationMode } from '~/lib/query'
 
 type RuleEditorProps = {
   initialRules: Record<string, RuleOutput>
@@ -30,7 +32,7 @@ type RuleEditorProps = {
   ) => Promise<RuleConditionOutput>
 }
 
-export const useRuleEditor = ({
+export function useRuleEditor({
   initialRules,
   initialRuleConditions,
   teamMembers,
@@ -38,7 +40,7 @@ export const useRuleEditor = ({
   payGrades,
   mutateRule,
   mutateRuleCondition,
-}: RuleEditorProps) => {
+}: RuleEditorProps) {
   const [rules, setRules] = useState<Record<string, RuleOutput>>(initialRules)
   const [ruleConditions, setRuleConditions] = useState<
     Record<string, RuleConditionOutput[]>
@@ -77,58 +79,6 @@ export const useRuleEditor = ({
     [teamMembers, shiftTypes, payGrades],
   )
 
-  // Rules
-  const createRule = async (rule: RuleCreateInput): Promise<RuleOutput> => {
-    const created = await mutateRule('create', rule)
-    setRules(prev => ({ ...prev, [created.id]: created }))
-    requestAnimationFrame(() => {
-      const el = document.getElementById(`rule-${created.id}`)
-      el?.focus()
-      el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-      el?.classList.add('animate-rule-flash')
-      setTimeout(() => {
-        el?.classList.remove('animate-rule-flash')
-      }, 1200)
-    })
-    // for now, create rule conditions on this layer, not in API layer
-
-    const ruleConditions: RuleConditionOutput[] = []
-    for (const condition of rule.ruleConditions ?? []) {
-      await createRuleCondition({
-        ...condition,
-        ruleId: created.id,
-      })
-    }
-    setRuleConditions(prev => ({
-      ...prev,
-      [created.id]: ruleConditions,
-    }))
-
-    return created
-  }
-
-  const updateRule = async (rule: RuleUpdateInput): Promise<RuleOutput> => {
-    setRules(prev => ({ ...prev, [rule.id]: { ...prev[rule.id], ...rule } }))
-    return await mutateRule('update', rule)
-  }
-
-  const deleteRule = async (ruleId: string): Promise<RuleOutput> => {
-    setRules(prev => {
-      const { [ruleId]: _, ...updated } = prev
-      return updated
-    })
-
-    const deleted = await mutateRule('delete', ruleId)
-
-    setRuleConditions(prev => {
-      const next = { ...prev }
-      delete next[ruleId]
-      return next
-    })
-
-    return deleted
-  }
-
   // Rule Conditions
   const createRuleCondition = async (
     condition: RuleConditionCreateInput,
@@ -162,6 +112,59 @@ export const useRuleEditor = ({
       ...prev,
       [deleted.ruleId]: prev[deleted.ruleId].filter(c => c.id !== deleted.id),
     }))
+    return deleted
+  }
+
+  // Rules
+  const createRule = async (rule: RuleCreateInput): Promise<RuleOutput> => {
+    const created = await mutateRule('create', rule)
+    setRules(prev => ({ ...prev, [created.id]: created }))
+    requestAnimationFrame(() => {
+      const el = document.getElementById(`rule-${created.id}`)
+      el?.focus()
+      el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+      el?.classList.add('animate-rule-flash')
+      setTimeout(() => {
+        el?.classList.remove('animate-rule-flash')
+      }, 1200)
+    })
+
+    // for now, create rule conditions on this layer, not in API layer
+
+    const ruleConditions: RuleConditionOutput[] = []
+    for (const condition of rule.ruleConditions ?? []) {
+      await createRuleCondition({
+        ...condition,
+        ruleId: created.id,
+      })
+    }
+    setRuleConditions(prev => ({
+      ...prev,
+      [created.id]: ruleConditions,
+    }))
+
+    return created
+  }
+
+  const updateRule = async (rule: RuleUpdateInput): Promise<RuleOutput> => {
+    setRules(prev => ({ ...prev, [rule.id]: { ...prev[rule.id], ...rule } }))
+    return await mutateRule('update', rule)
+  }
+
+  const deleteRule = async (ruleId: string): Promise<RuleOutput> => {
+    setRules((prev) => {
+      const { [ruleId]: _, ...updated } = prev
+      return updated
+    })
+
+    const deleted = await mutateRule('delete', ruleId)
+
+    setRuleConditions((prev) => {
+      const next = { ...prev }
+      delete next[ruleId]
+      return next
+    })
+
     return deleted
   }
 

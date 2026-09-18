@@ -11,9 +11,8 @@
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
+
     "@fuku/config-typescript": "workspace:*",
-    "@fuku/config-prettier": "workspace:*",
     "prettier": "catalog:"
-  },
-  "prettier": "@fuku/config-prettier"
+  }
 }

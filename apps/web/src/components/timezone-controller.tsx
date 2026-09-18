@@ -1,4 +1,5 @@
 import { useId, useMemo, useState } from 'react'
+
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
@@ -18,14 +19,18 @@ import {
 import { cn } from '@fuku/ui/lib/utils'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
 import {
-  Control,
   Controller,
+} from 'react-hook-form'
+
+import type {
+  Control,
   FieldValues,
   Path,
   UseFormResetField,
 } from 'react-hook-form'
 
-import { getGroupedTimeZones, TimeZoneOption } from '~/lib/date'
+import type { TimeZoneOption } from '~/lib/date'
+import { getGroupedTimeZones } from '~/lib/date'
 
 const GROUPED_TIMEZONES = getGroupedTimeZones()
 
@@ -78,13 +83,15 @@ export function TimeZoneController<T extends FieldValues>({
                 className='w-full justify-between'
               >
                 <span className='truncate'>
-                  {field.value ? (
-                    TIMEZONE_LABELS[field.value]
-                  ) : (
-                    <span className='text-muted-foreground'>
-                      {t('selectTimezone', 'Select timezone')}
-                    </span>
-                  )}
+                  {field.value
+                    ? (
+                        TIMEZONE_LABELS[field.value]
+                      )
+                    : (
+                        <span className='text-muted-foreground'>
+                          {t('selectTimezone', 'Select timezone')}
+                        </span>
+                      )}
                 </span>
 
                 <ChevronsUpDownIcon
@@ -102,9 +109,9 @@ export function TimeZoneController<T extends FieldValues>({
             >
               <Command>
                 <CommandInput
-                  className='border-none rounded-none'
+                  className='rounded-none border-none'
                   placeholder={t('searchTimezone', 'Search timezone...')}
-                  onKeyDown={e => {
+                  onKeyDown={(e) => {
                     if (e.key === 'Escape') {
                       resetField(name)
                       setOpen(false)
@@ -142,11 +149,11 @@ export function TimeZoneController<T extends FieldValues>({
                           }}
                           className='gap-2'
                         >
-                          <span className='text-muted-foreground text-xs shrink-0'>
+                          <span className='text-muted-foreground shrink-0 text-xs'>
                             {zone.offset}
                           </span>
 
-                          <span className='truncate flex-1'>{zone.label}</span>
+                          <span className='flex-1 truncate'>{zone.label}</span>
 
                           <CheckIcon
                             size={16}

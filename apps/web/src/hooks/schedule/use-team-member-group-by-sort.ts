@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 
-import { TeamMemberData } from '~/lib/schedule'
+import type { TeamMemberData } from '~/lib/schedule'
+import type {
+  TeamMemberGroupByKey,
+  TeamMemberSortKey,
+} from '~/lib/team-member'
 import {
   groupTeamMembers,
   sortTeamMembers,
-  TeamMemberGroupByKey,
-  TeamMemberSortKey,
 } from '~/lib/team-member'
 
 export function useTeamMemberGroupBySort(

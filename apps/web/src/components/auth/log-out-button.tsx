@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+
 import { useTranslation } from '@fuku/i18n/react'
 import { Button } from '@fuku/ui/components'
 import { LogOut } from 'lucide-react'

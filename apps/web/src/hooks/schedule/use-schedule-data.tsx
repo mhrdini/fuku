@@ -1,14 +1,15 @@
 import { useParams } from 'next/navigation'
+
 import { useQuery } from '@tanstack/react-query'
 
 import { useTRPC } from '~/trpc/client'
 
-interface ScheduleDataProps {
+type ScheduleDataProps = {
   start: Date
   end: Date
 }
 
-export const useScheduleData = ({ start, end }: ScheduleDataProps) => {
+export function useScheduleData({ start, end }: ScheduleDataProps) {
   const params = useParams()
   const slug = params.slug as string
   const trpc = useTRPC()
@@ -42,8 +43,8 @@ export const useScheduleData = ({ start, end }: ScheduleDataProps) => {
   const { data: dbAssignments } = useQuery({
     ...trpc.dayAssignment.list.queryOptions({
       teamId: team?.id ?? '',
-      start: start,
-      end: end,
+      start,
+      end,
     }),
     enabled: !!team,
     refetchOnWindowFocus: false,
@@ -52,8 +53,8 @@ export const useScheduleData = ({ start, end }: ScheduleDataProps) => {
   const { data: dbUnavailabilities } = useQuery({
     ...trpc.unavailability.list.queryOptions({
       teamId: team?.id ?? '',
-      start: start,
-      end: end,
+      start,
+      end,
     }),
     enabled: !!team,
     refetchOnWindowFocus: false,

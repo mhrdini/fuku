@@ -1,10 +1,15 @@
-import type { AppRouter } from '@fuku/api'
 import { cache } from 'react'
+
 import { headers } from 'next/headers'
+
 import { appRouter, createTRPCContext } from '@fuku/api'
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query'
 import {
   createTRPCOptionsProxy,
+} from '@trpc/tanstack-react-query'
+
+import type { AppRouter } from '@fuku/api'
+import type {
   TRPCQueryOptions,
 } from '@trpc/tanstack-react-query'
 

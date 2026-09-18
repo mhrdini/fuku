@@ -6,17 +6,16 @@
   },
   "dependencies": {
     "@fuku/domain": "workspace:*",
-    "heap-js": "^2.7.1",
+    "heap-js": "catalog:",
     "luxon": "catalog:"
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
-    "@fuku/config-prettier": "workspace:*",
+
     "@fuku/config-typescript": "workspace:*",
     "@types/luxon": "catalog:",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"
-  },
-  "prettier": "@fuku/config-prettier"
+  }
 }

@@ -1,12 +1,15 @@
 import {
   StaffingRequirementSchema,
-  WeekdayKey,
   WeekdayKeySchema,
 } from '@fuku/domain/schemas'
 import * as z from 'zod/v4'
 
-export const StaffingRequirementCreateInputSchema =
-  StaffingRequirementSchema.omit({
+import type {
+  WeekdayKey,
+} from '@fuku/domain/schemas'
+
+export const StaffingRequirementCreateInputSchema
+  = StaffingRequirementSchema.omit({
     createdAt: true,
     updatedAt: true,
   })
@@ -15,8 +18,8 @@ export type StaffingRequirementCreateInput = z.infer<
   typeof StaffingRequirementCreateInputSchema
 >
 
-export const StaffingRequirementUpdateInputSchema =
-  StaffingRequirementCreateInputSchema.partial().extend({
+export const StaffingRequirementUpdateInputSchema
+  = StaffingRequirementCreateInputSchema.partial().extend({
     teamId: StaffingRequirementCreateInputSchema.shape.teamId,
     weekday: StaffingRequirementCreateInputSchema.shape.weekday,
   })

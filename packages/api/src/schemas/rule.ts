@@ -1,7 +1,7 @@
 import { RuleSchema } from '@fuku/domain/schemas'
 import * as z from 'zod/v4'
 
-import { RuleConditionCreateInputSchema } from './ruleCondition'
+import { RuleConditionCreateInputSchema } from './rule-condition'
 
 export const RuleCreateInputSchema = RuleSchema.omit({
   id: true,

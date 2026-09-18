@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+
 import {
   defaultShouldDehydrateQuery,
   QueryCache,
@@ -7,8 +8,8 @@ import {
 import { TRPCClientError } from '@trpc/client'
 import superjson from 'superjson'
 
-export const createQueryClient = () =>
-  new QueryClient({
+export function createQueryClient() {
+  return new QueryClient({
     defaultOptions: {
       queries: {
         staleTime: 30 * 1000,
@@ -16,8 +17,8 @@ export const createQueryClient = () =>
       dehydrate: {
         serializeData: superjson.serialize,
         shouldDehydrateQuery: query =>
-          defaultShouldDehydrateQuery(query) ||
-          query.state.status === 'pending',
+          defaultShouldDehydrateQuery(query)
+          || query.state.status === 'pending',
         shouldRedactErrors: () => {
           return false
         },
@@ -28,7 +29,9 @@ export const createQueryClient = () =>
     },
     queryCache: new QueryCache({
       onError(error) {
-        if (!(error instanceof TRPCClientError)) return
+        if (!(error instanceof TRPCClientError)) {
+          return
+        }
 
         switch (error.data?.code) {
           case 'UNAUTHORIZED':
@@ -43,3 +46,4 @@ export const createQueryClient = () =>
       },
     }),
   })
+}

@@ -1,7 +1,7 @@
 import { cn } from '@fuku/ui/lib/utils'
 import { LineSquiggleIcon } from 'lucide-react'
 
-export const Logo = ({
+export function Logo({
   onClick,
   className,
   iconClassName,
@@ -11,12 +11,12 @@ export const Logo = ({
   className?: string
   iconClassName?: string
   textClassName?: string
-}) => {
+}) {
   return (
     <div
       onClick={onClick}
       className={cn(
-        'bg-transparent px-4 py-2 rounded-full cursor-pointer hover:bg-bg-transparent active:bg-bg-transparent focus:bg-bg-transparent flex items-center gap-1',
+        'hover:bg-bg-transparent active:bg-bg-transparent focus:bg-bg-transparent flex cursor-pointer items-center gap-1 rounded-full bg-transparent px-4 py-2',
         className,
       )}
     >

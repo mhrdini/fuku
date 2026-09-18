@@ -1,7 +1,7 @@
 import * as z from 'zod/v4'
 
-import { LeaveAssignmentSchema } from './leaveAssignment'
-import { ShiftAssignmentSchema } from './shiftAssignment'
+import { LeaveAssignmentSchema } from './leave-assignment'
+import { ShiftAssignmentSchema } from './shift-assignment'
 
 export const DayAssignmentSchema = z.object({
   id: z.string(),

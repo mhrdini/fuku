@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
-    "@fuku/config-prettier": "workspace:*",
+
     "@fuku/config-typescript": "workspace:*",
     "eslint": "catalog:",
     "prettier": "catalog:",

@@ -1,10 +1,9 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
+
 import { CollisionPriority } from '@dnd-kit/abstract'
 import { useSortable } from '@dnd-kit/react/sortable'
-import { ShiftTypeOutput } from '@fuku/api/schemas'
-import { SchedulerAssignment } from '@fuku/domain/schemas'
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
@@ -19,9 +18,12 @@ import {
 import { cn } from '@fuku/ui/lib/utils'
 import { ChevronDown, Trash } from 'lucide-react'
 
-import { useScheduleActions } from '~/hooks/schedule/useScheduleActions'
+import type { ShiftTypeOutput } from '@fuku/api/schemas'
+import type { SchedulerAssignment } from '@fuku/domain/schemas'
 
-interface ScheduleAssignmentCardProps {
+import { useScheduleActions } from '~/hooks/schedule/use-schedule-actions'
+
+type ScheduleAssignmentCardProps = {
   cellKey: string
   assignment: SchedulerAssignment
   data: {
@@ -31,12 +33,12 @@ interface ScheduleAssignmentCardProps {
   className?: string
 }
 
-export const ScheduleAssignmentCard = ({
+export function ScheduleAssignmentCard({
   cellKey,
   assignment,
   data: { eligibleShifts, shiftTypeMap },
   className,
-}: ScheduleAssignmentCardProps) => {
+}: ScheduleAssignmentCardProps) {
   const { t } = useTranslation()
 
   const { ref } = useSortable({
@@ -50,8 +52,8 @@ export const ScheduleAssignmentCard = ({
     collisionPriority: CollisionPriority.Lowest,
   })
 
-  const { updateAssignmentShiftType, deleteAssignmentById } =
-    useScheduleActions()
+  const { updateAssignmentShiftType, deleteAssignmentById }
+    = useScheduleActions()
 
   const handleUpdateShiftType = (shiftTypeId: string) => {
     if (shiftTypeId !== assignment.shiftTypeId)
@@ -76,13 +78,13 @@ export const ScheduleAssignmentCard = ({
       ref={ref}
       className={cn(
         'min-h-12',
-        'relative group/assignment rounded-none py-1 px-2 border border-input bg-muted flex flex-col',
-        'transition-all opacity-100',
+        'group/assignment border-input bg-muted relative flex flex-col rounded-none border px-2 py-1',
+        'opacity-100 transition-all',
         className,
       )}
     >
-      <div className='font-bold text-sm'>{shiftType?.name ?? ''}</div>
-      <div className='text-xs text-muted-foreground'>
+      <div className='text-sm font-bold'>{shiftType?.name ?? ''}</div>
+      <div className='text-muted-foreground text-xs'>
         {shiftType?.startTime ?? ''}
         {shiftType?.endTime ? t('key', ' - ') + shiftType?.endTime : ''}
       </div>
@@ -91,7 +93,7 @@ export const ScheduleAssignmentCard = ({
           <Button
             size='icon-chip'
             variant='secondary'
-            className='absolute top-1.5 right-2 opacity-0 group-hover/assignment:opacity-100 transition-opacity'
+            className='absolute top-1.5 right-2 opacity-0 transition-opacity group-hover/assignment:opacity-100'
             // className='flex items-center bg-ring/50 text-secondary-foreground/80 hover:text-secondary-foreground active:text-secondary-foreground hover:bg-ring/80 p-1'
           >
             <ChevronDown />

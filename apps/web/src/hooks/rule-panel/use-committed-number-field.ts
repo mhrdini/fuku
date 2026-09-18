@@ -5,19 +5,21 @@ export function useCommittedNumberField(
   onCommit: (value: number | null) => void,
   { allowNull = false }: { allowNull?: boolean } = {},
 ) {
-  const [input, setInput] = useState(value != null ? String(value) : '')
+  const [input, setInput] = useState(value !== null || value !== undefined ? String(value) : '')
 
   useEffect(() => {
-    setInput(value != null ? String(value) : '')
+    setInput(value !== null || value !== undefined ? String(value) : '')
   }, [value])
 
   const commit = () => {
     if (input.trim() === '') {
-      if (allowNull) onCommit(null)
+      if (allowNull)
+        onCommit(null)
       return
     }
     const num = Number(input)
-    if (Number.isNaN(num) || num < 0 || num === value) return
+    if (Number.isNaN(num) || num < 0 || num === value)
+      return
     onCommit(num)
   }
 
@@ -27,7 +29,8 @@ export function useCommittedNumberField(
       setInput(e.target.value),
     onBlur: commit,
     onKeyDown: (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === 'Escape') commit()
+      if (e.key === 'Enter' || e.key === 'Escape')
+        commit()
     },
   }
 

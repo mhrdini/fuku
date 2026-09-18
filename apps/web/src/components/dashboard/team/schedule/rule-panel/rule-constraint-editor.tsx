@@ -1,18 +1,19 @@
 'use client'
 
-import { RuleOutput, RuleUpdateInput } from '@fuku/api/schemas'
 import { useTranslation } from '@fuku/i18n/react'
 import { Input, ToggleGroup, ToggleGroupItem } from '@fuku/ui/components'
 
+import type { RuleOutput, RuleUpdateInput } from '@fuku/api/schemas'
+
 import { useCommittedNumberField } from '~/hooks/rule-panel/use-committed-number-field'
 
-const RuleConstraintEditor = ({
+function RuleConstraintEditor({
   rule,
   updateRule,
 }: {
   rule: RuleOutput
   updateRule: (rule: RuleUpdateInput) => Promise<RuleOutput>
-}) => {
+}) {
   const { t } = useTranslation()
 
   const penalty = useCommittedNumberField(
@@ -22,7 +23,8 @@ const RuleConstraintEditor = ({
   )
 
   const handleToggleHardConstraint = (hardConstraint: boolean | string) => {
-    if (hardConstraint === rule.hardConstraint) return
+    if (hardConstraint === rule.hardConstraint)
+      return
     if (typeof hardConstraint === 'string') {
       hardConstraint = hardConstraint === 'true'
     }
@@ -61,7 +63,7 @@ const RuleConstraintEditor = ({
         value={penalty.input}
         onChange={e => penalty.setInput(e.target.value)}
         onBlur={penalty.commit}
-        onKeyDown={e => {
+        onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === 'Escape') {
             e.stopPropagation()
             penalty.commit()

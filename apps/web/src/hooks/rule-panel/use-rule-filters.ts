@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react'
-import { RuleOutput } from '@fuku/api/schemas'
-import { RuleMetric, RuleScope } from '@fuku/domain/schemas'
 
+import type { RuleOutput } from '@fuku/api/schemas'
+import type { RuleMetric, RuleScope } from '@fuku/domain/schemas'
+
+import type {
+  RuleFilters,
+} from '~/lib/rule-panel/rule.helpers'
 import {
   matchesRuleFilters,
-  RuleFilters,
   toggleListValue,
 } from '~/lib/rule-panel/rule.helpers'
 

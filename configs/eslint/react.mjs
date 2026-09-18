@@ -1,40 +1,47 @@
-import js from '@eslint/js'
-import eslintConfigPrettier from 'eslint-config-prettier'
-import pluginReact from 'eslint-plugin-react'
-import pluginReactHooks from 'eslint-plugin-react-hooks'
-import globals from 'globals'
-import tseslint from 'typescript-eslint'
+import antfu from '@antfu/eslint-config'
 
-import { config as baseConfig } from './base.mjs'
+import { sharedRules } from './shared-rules.mjs'
 
 /**
  * A custom ESLint configuration for libraries that use React.
+ * `react: true` pulls in eslint-plugin-react + eslint-plugin-react-hooks
+ * and sets `settings.react.version: 'detect'` for you — no manual wiring
+ * needed like before.
  *
- * @type {import("eslint").Linter.Config[]} */
-export const config = [
-  ...baseConfig,
-  js.configs.recommended,
-  eslintConfigPrettier,
-  ...tseslint.configs.recommended,
-  pluginReact.configs.flat.recommended,
+ * @type {import("eslint").Linter.Config[]}
+ */
+export default antfu(
   {
-    languageOptions: {
-      ...pluginReact.configs.flat.recommended.languageOptions,
-      globals: {
-        ...globals.serviceworker,
-        ...globals.browser,
-      },
+    type: 'lib',
+    pnpm: true,
+    typescript: true,
+    react: true,
+
+    stylistic: {
+      indent: 2,
+      quotes: 'single',
+      semi: false,
     },
+
+    // keep Prettier for css/html/markdown; JS/TS/JSX still go through
+    // ESLint Stylistic above, this doesn't touch that
+    formatters: true,
+
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      'generated/**',
+      '.pnpm-store/**',
+      '**/migrations/*',
+    ],
   },
+
+  ...sharedRules,
+
   {
-    plugins: {
-      'react-hooks': pluginReactHooks,
-    },
-    settings: { react: { version: 'detect' } },
     rules: {
-      ...pluginReactHooks.configs.recommended.rules,
-      // React scope no longer necessary with new JSX transform.
-      'react/react-in-jsx-scope': 'off',
+      'style/jsx-quotes': ['error', 'prefer-single'],
+      'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
     },
   },
-]
+)

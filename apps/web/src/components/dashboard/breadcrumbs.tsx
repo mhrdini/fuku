@@ -1,8 +1,10 @@
 'use client'
 
 import { Fragment, useMemo } from 'react'
+
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
+
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Breadcrumb,
@@ -17,6 +19,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Home } from 'lucide-react'
 
 import { useTRPC } from '~/trpc/client'
+
 import { useSession } from '../providers/session-provider'
 
 const MAX_VISIBLE = 3
@@ -50,15 +53,17 @@ export function Breadcrumbs() {
       })
       .filter(Boolean)
       .map((segment, idx, arr) => {
-        if (!segment) return null
-        if (segment === '…') return { href: '', label: '…' }
+        if (!segment)
+          return null
+        if (segment === '…')
+          return { href: '', label: '…' }
 
-        let href =
-          '/' +
-          arr
-            .slice(0, idx + 1)
-            .filter(s => s !== '…')
-            .join('/')
+        let href
+          = `/${
+            arr
+              .slice(0, idx + 1)
+              .filter(s => s !== '…')
+              .join('/')}`
 
         // kebab case to capitalised with spaces
         // let label: string = decodeURIComponent(segment)
@@ -73,18 +78,20 @@ export function Breadcrumbs() {
           )
           .join('')
 
-        if (segment === session?.user.username) label = t('home', 'Home')
+        if (segment === session?.user.username)
+          label = t('home', 'Home')
         if (segment === team?.slug)
           label = team ? t('overview', 'Overview') : ''
         if (segment === 'team') {
-          if (!team) return null
+          if (!team)
+            return null
           label = team.name
           href = ''
         }
 
         return { href, label: t(label, label) }
       })
-      .filter(Boolean) as { href: string; label: string }[]
+      .filter(Boolean) as { href: string, label: string }[]
   }, [segments, team, session?.user.username])
 
   return (
@@ -92,37 +99,43 @@ export function Breadcrumbs() {
       <BreadcrumbList>
         {crumbs.map((crumb, idx) => (
           <Fragment key={crumb.href}>
-            {idx === 0 ? (
-              crumbs.length === 1 ? (
-                <>
-                  <BreadcrumbLink asChild>
-                    <Link href={crumb.href}>
-                      <Home className='size-4.5' />
-                    </Link>
-                  </BreadcrumbLink>
+            {idx === 0
+              ? (
+                  crumbs.length === 1
+                    ? (
+                        <>
+                          <BreadcrumbLink asChild>
+                            <Link href={crumb.href}>
+                              <Home className='size-4.5' />
+                            </Link>
+                          </BreadcrumbLink>
+                          <BreadcrumbSeparator />
+                        </>
+                      )
+                    : null
+                )
+              : (
                   <BreadcrumbSeparator />
-                </>
-              ) : null
-            ) : (
-              <BreadcrumbSeparator />
-            )}
+                )}
             <BreadcrumbItem>
-              {idx === crumbs.length - 1 || !crumb.href ? (
-                <BreadcrumbPage
-                  className={cn(
-                    idx === crumbs.length - 1 && 'font-semibold',
-                    'cursor-default whitespace-nowrap w-max flex gap-2 items-center',
+              {idx === crumbs.length - 1 || !crumb.href
+                ? (
+                    <BreadcrumbPage
+                      className={cn(
+                        idx === crumbs.length - 1 && 'font-semibold',
+                        'flex w-max cursor-default items-center gap-2 whitespace-nowrap',
+                      )}
+                    >
+                      {crumb.label}
+                    </BreadcrumbPage>
+                  )
+                : (
+                    <BreadcrumbLink asChild>
+                      <Link href={crumb.href}>
+                        {idx === 0 ? <Home className='size-4.5' /> : crumb.label}
+                      </Link>
+                    </BreadcrumbLink>
                   )}
-                >
-                  {crumb.label}
-                </BreadcrumbPage>
-              ) : (
-                <BreadcrumbLink asChild>
-                  <Link href={crumb.href}>
-                    {idx === 0 ? <Home className='size-4.5' /> : crumb.label}
-                  </Link>
-                </BreadcrumbLink>
-              )}
             </BreadcrumbItem>
           </Fragment>
         ))}

@@ -56,7 +56,7 @@ export default function TeamDashboard() {
 
   return (
     <Dialog>
-      <h1 className='font-semibold text-xl'>{}</h1>
+      <h1 className='text-xl font-semibold'>{}</h1>
       {teams && teams.length > 0 ? renderTeamContent() : renderEmptyContent()}
     </Dialog>
   )

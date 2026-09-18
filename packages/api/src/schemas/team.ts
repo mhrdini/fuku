@@ -13,19 +13,19 @@ import {
 import {
   OperationalHourCreateInputSchema,
   OperationalHourUpdateInputSchema,
-} from './operationalHour'
+} from './operational-hour'
 import {
   PayGradeCreateInputSchema,
   PayGradeUpdateInputSchema,
-} from './payGrade'
+} from './pay-grade'
 import {
   ShiftTypeCreateInputSchema,
   ShiftTypeUpdateInputSchema,
-} from './shiftType'
+} from './shift-type'
 import {
   TeamMemberCreateInputSchema,
   TeamMemberUpdateInputSchema,
-} from './teamMember'
+} from './team-member'
 
 export const TeamCreateInputSchema = TeamSchema.extend({
   teamMembers: z.array(

@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react'
-import { RuleOutput } from '@fuku/api/schemas'
 
-import {
-  groupRules,
+import type { RuleOutput } from '@fuku/api/schemas'
+
+import type {
   RuleGroupByKey,
   RuleSortKey,
+} from '~/lib/rule-panel/rule.helpers'
+import {
+  groupRules,
   sortRules,
 } from '~/lib/rule-panel/rule.helpers'
 

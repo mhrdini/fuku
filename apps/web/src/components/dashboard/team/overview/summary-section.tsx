@@ -1,7 +1,9 @@
 'use client'
 
 import { useMemo } from 'react'
+
 import { useParams, useRouter } from 'next/navigation'
+
 import i18next from '@fuku/i18n/client'
 import { useTranslation } from '@fuku/i18n/react'
 import {
@@ -23,7 +25,7 @@ import { useTRPC } from '~/trpc/client'
 
 const MAX_VISIBLE = 3
 
-interface SummaryCardProps<T> {
+type SummaryCardProps<T> = {
   title: string
   items: T[] | undefined
   renderItem: (item: T) => React.ReactNode
@@ -46,26 +48,28 @@ function SummaryCard<T>({
       <CardHeader className='gap-0'>
         <CardTitle className='text-sm'>{title}</CardTitle>
         <CardDescription className='text-xs'>
-          {description ??
-            t('valItems', '{{val}} items', { val: items?.length ?? 0 })}
+          {description
+            ?? t('valItems', '{{val}} items', { val: items?.length ?? 0 })}
         </CardDescription>
       </CardHeader>
       <Separator />
       <CardContent className='flex flex-1 flex-col gap-2'>
-        {items && items.length > 0 ? (
-          items.slice(0, MAX_VISIBLE).map(renderItem)
-        ) : (
-          <div
-            className='text-sm text-muted-foreground'
-            aria-description={t('noItems', 'no items')}
-          >
-            —
-          </div>
-        )}
+        {items && items.length > 0
+          ? (
+              items.slice(0, MAX_VISIBLE).map(renderItem)
+            )
+          : (
+              <div
+                className='text-muted-foreground text-sm'
+                aria-description={t('noItems', 'no items')}
+              >
+                —
+              </div>
+            )}
       </CardContent>
-      <div className='p-0 mt-auto border-t'>
+      <div className='mt-auto border-t p-0'>
         <Button
-          className='w-full rounded-b-none rounded-t-none'
+          className='w-full rounded-t-none rounded-b-none'
           onClick={onManage}
           variant='ghost'
         >
@@ -77,7 +81,7 @@ function SummaryCard<T>({
   )
 }
 
-export const SummarySection = () => {
+export function SummarySection() {
   const { t } = useTranslation()
   const session = useSession()
   const params = useParams()
@@ -187,8 +191,10 @@ export const SummarySection = () => {
       items={members}
       renderItem={member => (
         <div key={member.id} className='flex items-center justify-between'>
-          <div className='text-sm flex gap-1 items-center'>
-            {member.givenNames} {member.familyName}
+          <div className='flex items-center gap-1 text-sm'>
+            {member.givenNames}
+            {' '}
+            {member.familyName}
             {/* {member.teamMemberRole === 'ADMIN' && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -218,7 +224,7 @@ export const SummarySection = () => {
           <Badge variant='outline'>
             <span
               style={{ ['--bg-color' as any]: location.color }}
-              className='bg-[var(--bg-color)] rounded-none size-2'
+              className='size-2 rounded-none bg-[var(--bg-color)]'
             />
             <span>{location.name}</span>
           </Badge>
@@ -237,11 +243,11 @@ export const SummarySection = () => {
           <Badge variant='outline'>
             <span
               style={{ ['--bg-color' as any]: st.color }}
-              className='bg-[var(--bg-color)] rounded-none size-2'
+              className='size-2 rounded-none bg-[var(--bg-color)]'
             />
             <span>{st.name}</span>
           </Badge>
-          <div className='text-sm text-muted-foreground'>
+          <div className='text-muted-foreground text-sm'>
             {t('starttimeEndtime', '{{startTime}} - {{endTime}}', {
               startTime: st.startTime,
               endTime: st.endTime,
@@ -270,15 +276,15 @@ export const SummarySection = () => {
   )
 
   return (
-    <div className='flex flex-col gap-4 w-full'>
-      <div className='flex flex-row w-full'>
+    <div className='flex w-full flex-col gap-4'>
+      <div className='flex w-full flex-row'>
         <h2>{t('summary', 'Summary')}</h2>
         <Button size='sm' className='ml-auto' onClick={handleGenerateSchedule}>
           <CalendarPlus />
           {t('generateSchedule', 'Generate Schedule')}
         </Button>
       </div>
-      <div className='grid grid-cols-1 @[24rem]/main:grid-cols-2 @[50rem]/main:grid-cols-4 gap-4'>
+      <div className='grid grid-cols-1 gap-4 @[24rem]/main:grid-cols-2 @[50rem]/main:grid-cols-4'>
         {teamMembersSummary}
         {payGradeSummary}
         {shiftTypesSummary}

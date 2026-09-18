@@ -1,7 +1,7 @@
 import { Button, ButtonGroup, Input } from '@fuku/ui/components'
 import { Minus, Plus } from 'lucide-react'
 
-interface NumberStepperInputProps {
+type NumberStepperInputProps = {
   value: number
   min?: number
   max?: number

@@ -1,4 +1,5 @@
 import * as React from 'react'
+
 import { cn } from 'cn'
 import { ChevronRightIcon, MoreHorizontalIcon } from 'lucide-react'
 import { Slot } from 'radix-ui'
@@ -19,7 +20,7 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
     <ol
       data-slot='breadcrumb-list'
       className={cn(
-        'flex flex-wrap items-center gap-1.5 text-xs wrap-break-word text-muted-foreground',
+        'text-muted-foreground flex flex-wrap items-center gap-1.5 text-xs wrap-break-word',
         className,
       )}
       {...props}
@@ -49,7 +50,7 @@ function BreadcrumbLink({
   return (
     <Comp
       data-slot='breadcrumb-link'
-      className={cn('transition-colors hover:text-foreground', className)}
+      className={cn('hover:text-foreground transition-colors', className)}
       {...props}
     />
   )
@@ -62,7 +63,7 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
       role='link'
       aria-disabled='true'
       aria-current='page'
-      className={cn('font-normal text-foreground', className)}
+      className={cn('text-foreground font-normal', className)}
       {...props}
     />
   )
@@ -109,10 +110,10 @@ function BreadcrumbEllipsis({
 
 export {
   Breadcrumb,
-  BreadcrumbList,
+  BreadcrumbEllipsis,
   BreadcrumbItem,
   BreadcrumbLink,
+  BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-  BreadcrumbEllipsis,
 }

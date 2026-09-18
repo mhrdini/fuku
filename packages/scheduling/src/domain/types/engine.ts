@@ -1,13 +1,5 @@
-import {
-  ISODateString,
-  JsonValue,
-  RuleConditionField,
-  RuleConditionOperator,
-  Rule as RuleType,
-} from '@fuku/domain/schemas'
-
-import { Period } from '../../shared/utils/date'
-import {
+import type { Period } from '../../shared/utils/date'
+import type {
   Assignment,
   OperationalHour,
   OperationalHours,
@@ -18,26 +10,32 @@ import {
   StaffingRequirements,
   Unavailability,
 } from './schedule'
-import { Team, TeamMember } from './team'
+import type { Team, TeamMember } from './team'
+import type {
+  ISODateString,
+  JsonValue,
+  RuleConditionField,
+  RuleConditionOperator,
+  Rule as RuleType,
+} from '@fuku/domain/schemas'
 
-export interface RuleCondition {
+export type RuleCondition = {
   field: RuleConditionField
   operator: RuleConditionOperator
   value: JsonValue
 }
-export interface Rule
-  extends Omit<
-    RuleType,
-    'payGradeId' | 'shiftTypeId' | 'teamMemberId' | 'penalty'
-  > {
+export type Rule = {
   payGradeId: string | null
   shiftTypeId: string | null
   teamMemberId: string | null
   penalty: number | null
   ruleConditions: RuleCondition[]
-}
+} & Omit<
+  RuleType,
+    'payGradeId' | 'shiftTypeId' | 'teamMemberId' | 'penalty'
+>
 
-export interface TeamSnapshot {
+export type TeamSnapshot = {
   team: Team
   teamMembers: TeamMember[]
   payGrades: PayGrade[]
@@ -51,20 +49,19 @@ export interface TeamSnapshot {
   period: Period
 }
 
-export interface SchedulerContext
-  extends Omit<TeamSnapshot, 'operationalHours' | 'staffingRequirements'> {
+export type SchedulerContext = {
   operationalHours: OperationalHours
   staffingRequirements: StaffingRequirements
   holidays: Set<ISODateString> // yyyy-MM-dd
-}
+} & Omit<TeamSnapshot, 'operationalHours' | 'staffingRequirements'>
 
-export interface SchedulerResult {
+export type SchedulerResult = {
   success: boolean
   proposedAssignments: ProposedAssignment[]
   metrics: SchedulerMetrics
 }
 
-export interface SchedulerMetrics {
+export type SchedulerMetrics = {
   totalSlotsRequired: number
   totalSlotsFilled: number
   totalOperationalCoverage: number
@@ -73,7 +70,7 @@ export interface SchedulerMetrics {
   totalSoftPenalty: number
 }
 
-export interface ProposedAssignment {
+export type ProposedAssignment = {
   date: ISODateString
   teamMemberId: string
   shiftTypeId: string

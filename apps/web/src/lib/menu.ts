@@ -1,18 +1,23 @@
 'use client'
 
 import { useMemo } from 'react'
+
 import { useParams } from 'next/navigation'
-import { UserTeam } from '@fuku/api/schemas'
+
 import { useTranslation } from '@fuku/i18n/react'
 import {
   BadgeDollarSign,
   Calendar,
   Clock,
   Cog,
-  LucideIcon,
   MapPin,
   UserCircle2,
   Users2,
+} from 'lucide-react'
+
+import type { UserTeam } from '@fuku/api/schemas'
+import type {
+  LucideIcon,
 } from 'lucide-react'
 
 export type MenuGroup = {
@@ -28,7 +33,7 @@ export type Menu = {
   submenus?: Menu[]
 }
 
-export const useSidebarMenu = (team: UserTeam | null): MenuGroup[] => {
+export function useSidebarMenu(team: UserTeam | null): MenuGroup[] {
   const { t } = useTranslation()
   const params = useParams()
   const username = params.username as string
@@ -64,13 +69,11 @@ export const useSidebarMenu = (team: UserTeam | null): MenuGroup[] => {
       ]
 }
 
-export const useNavigationMenu = (
-  username: string | null,
-  team: UserTeam | null,
-): Menu[] => {
+export function useNavigationMenu(username: string | null, team: UserTeam | null): Menu[] {
   const { t, i18n } = useTranslation()
   const menu = useMemo(() => {
-    if (!username || !team) return []
+    if (!username || !team)
+      return []
 
     return [
       {

@@ -1,10 +1,8 @@
-import type { ColumnDef } from '@tanstack/react-table'
 import i18next from '@fuku/i18n/server'
 
-export const getHiddenColumns = (
-  visibleColumnKeys: string[],
-  allColumns: ColumnDef<any>[],
-) => {
+import type { ColumnDef } from '@tanstack/react-table'
+
+export function getHiddenColumns(visibleColumnKeys: string[], allColumns: ColumnDef<any>[]) {
   return allColumns
     .filter(
       (col): col is ColumnDef<any> & { accessorKey: string } =>
@@ -14,7 +12,7 @@ export const getHiddenColumns = (
     .filter(key => !visibleColumnKeys.includes(key))
 }
 
-export const prettifyHeader = (key: string): string => {
+export function prettifyHeader(key: string): string {
   return key
     .replace(/([a-z])([A-Z])/g, '$1 $2') // split camelCase
     .replace(/_/g, ' ') // split snake_case

@@ -5,8 +5,8 @@ import {
 } from '@fuku/domain/schemas'
 import * as z from 'zod/v4'
 
-import { LeaveAssignmentOutputSchema } from './leaveAssignment'
-import { ShiftAssignmentOutputSchema } from './shiftAssignment'
+import { LeaveAssignmentOutputSchema } from './leave-assignment'
+import { ShiftAssignmentOutputSchema } from './shift-assignment'
 
 export const DayAssignmentCreateInputSchema = DayAssignmentSchema.partial({
   id: true,

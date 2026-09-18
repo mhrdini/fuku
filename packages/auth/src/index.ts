@@ -1,8 +1,9 @@
-import type { BetterAuthOptions, BetterAuthPlugin } from 'better-auth'
 import { db } from '@fuku/db'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { username } from 'better-auth/plugins'
+
+import type { BetterAuthOptions, BetterAuthPlugin } from 'better-auth'
 
 export function initAuth<
   TExtraPlugins extends BetterAuthPlugin[] = [],
@@ -25,7 +26,7 @@ export function initAuth<
     plugins: [
       username({
         usernameValidator(username) {
-          return /^[a-zA-Z0-9_-]+$/.test(username)
+          return /^[\w-]+$/.test(username)
         },
         usernameNormalization: username => username.toLowerCase(),
         displayUsernameNormalization: displayUsername =>

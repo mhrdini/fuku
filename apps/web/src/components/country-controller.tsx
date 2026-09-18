@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+
 import { ALL_COUNTRIES } from '@fuku/domain/country'
 import { useTranslation } from '@fuku/i18n/react'
 import {
@@ -19,8 +20,11 @@ import {
 import { cn } from '@fuku/ui/lib/utils'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import {
-  Control,
   Controller,
+} from 'react-hook-form'
+
+import type {
+  Control,
   FieldValues,
   Path,
   UseFormResetField,
@@ -39,7 +43,6 @@ type CountryControllerProps<T extends FieldValues> = {
 
 export function CountryController<T extends FieldValues>({
   control,
-  resetField,
   name = 'country' as Path<T>,
   disabled = false,
 }: CountryControllerProps<T>) {
@@ -67,13 +70,15 @@ export function CountryController<T extends FieldValues>({
                 className='w-full justify-between'
               >
                 <span className='truncate'>
-                  {field.value ? (
-                    COUNTRY_LABELS[field.value]
-                  ) : (
-                    <span className='text-muted-foreground'>
-                      {t('selectCountryOptional', 'Select country (optional)')}
-                    </span>
-                  )}
+                  {field.value
+                    ? (
+                        COUNTRY_LABELS[field.value]
+                      )
+                    : (
+                        <span className='text-muted-foreground'>
+                          {t('selectCountryOptional', 'Select country (optional)')}
+                        </span>
+                      )}
                 </span>
 
                 <ChevronsUpDown
@@ -92,7 +97,7 @@ export function CountryController<T extends FieldValues>({
               <Command className='max-h-80'>
                 <CommandInput
                   placeholder={t('searchCountry', 'Search country...')}
-                  className='border-none rounded-none'
+                  className='rounded-none border-none'
                 />
 
                 <CommandList className='max-h-60 overflow-y-auto'>

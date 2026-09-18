@@ -1,7 +1,9 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
+
 import { useParams } from 'next/navigation'
+
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Badge,
@@ -13,7 +15,6 @@ import {
   DropdownMenuTrigger,
 } from '@fuku/ui/components'
 import { useQueries, useQuery } from '@tanstack/react-query'
-import { Column, ColumnDef } from '@tanstack/react-table'
 import {
   ArrowDown,
   ArrowUp,
@@ -23,24 +24,32 @@ import {
   Trash,
 } from 'lucide-react'
 
+import type { Column, ColumnDef } from '@tanstack/react-table'
+
 import { isEntity } from '~/lib/db'
 import { DialogId } from '~/lib/dialog'
 import { getHiddenColumns } from '~/lib/table'
-import { TeamMemberUI, toTeamMemberUI } from '~/lib/team-member'
+import type { TeamMemberUI } from '~/lib/team-member'
+import { toTeamMemberUI } from '~/lib/team-member'
 import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
+
 import { MembersDataTableSection } from './members-data-table-section'
 
 const defaultVisibleColumns = ['fullName', 'payGradeName']
 
-const getMultiSortIcon = (column: Column<any, any>) => {
-  return column.getIsSorted() === 'asc' ? (
-    <ArrowUp />
-  ) : column.getIsSorted() === 'desc' ? (
-    <ArrowDown />
-  ) : (
-    <ArrowUpDown />
-  )
+function getMultiSortIcon(column: Column<any, any>) {
+  return column.getIsSorted() === 'asc'
+    ? (
+        <ArrowUp />
+      )
+    : column.getIsSorted() === 'desc'
+      ? (
+          <ArrowDown />
+        )
+      : (
+          <ArrowUpDown />
+        )
 }
 
 export default function TeamMembersContent() {
@@ -101,7 +110,7 @@ export default function TeamMembersContent() {
           return (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant='ghost' className='size-8 -mx-1 -my-1'>
+                <Button variant='ghost' className='-mx-1 -my-1 size-8'>
                   <span className='sr-only'>{t('openMenu', 'Open menu')}</span>
                   <Ellipsis />
                 </Button>
@@ -112,7 +121,9 @@ export default function TeamMembersContent() {
                     onUpdateMember(teamMember.id)
                   }}
                 >
-                  <Pencil /> {t('edit', 'Edit')}
+                  <Pencil />
+                  {' '}
+                  {t('edit', 'Edit')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -121,7 +132,9 @@ export default function TeamMembersContent() {
                     onRemoveMember(teamMember.id)
                   }}
                 >
-                  <Trash /> {t('remove', 'Remove')}
+                  <Trash />
+                  {' '}
+                  {t('remove', 'Remove')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -131,9 +144,6 @@ export default function TeamMembersContent() {
       {
         accessorKey: 'fullName',
         enableHiding: false,
-        meta: {
-          label: 'Name',
-        },
         header: ({ column }) => {
           return (
             <Button
@@ -141,7 +151,7 @@ export default function TeamMembersContent() {
               className='-ml-3'
               onClick={() => column.toggleSorting()}
             >
-              Name
+              {t('name', 'Name')}
               {getMultiSortIcon(column)}
             </Button>
           )
@@ -150,9 +160,6 @@ export default function TeamMembersContent() {
       {
         accessorKey: 'payGradeName',
         filterFn: 'arrIncludesSome',
-        meta: {
-          label: t('payGrade', 'Pay Grade'),
-        },
         header: ({ column }) => {
           return (
             <Button
@@ -171,21 +178,18 @@ export default function TeamMembersContent() {
       },
       {
         accessorKey: 'baseRate',
-        meta: { label: t('baseRate', 'Base Rate') },
-        header: ({ column }) => column.columnDef.meta?.label,
+        header: () => t('baseRate', 'Base Rate'),
       },
       {
         accessorKey: 'rateMultiplier',
-        meta: { label: t('rateMultiplier', 'Rate Multiplier') },
-        header: ({ column }) => column.columnDef.meta?.label,
+        header: () => t('rateMultiplier', 'Rate Multiplier'),
         cell: info => info.getValue<number>().toFixed(2),
       },
       {
         accessorKey: 'effectiveRate',
-        meta: { label: t('effectiveRate', 'Effective Rate') },
-        header: ({ column }) => column.columnDef.meta?.label,
+        header: () => t('effectiveRate', 'Effective Rate'),
         cell: info =>
-          info.getValue<number>() != null
+          info.getValue<number>()
             ? `${info.getValue<number>()}`
             : 'N/A',
       },

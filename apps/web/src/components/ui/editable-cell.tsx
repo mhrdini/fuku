@@ -1,13 +1,17 @@
 'use client'
 
-import { JSX, memo, useState } from 'react'
+import type { JSX } from 'react'
+
+import { memo, useState } from 'react'
+
 import { useTranslation } from '@fuku/i18n/react'
 import { Input } from '@fuku/ui/components'
-import { Getter } from '@tanstack/react-table'
 import { TRPCClientError } from '@trpc/client'
 import { toast } from 'sonner'
 
-import { TRPCUpdatePayload } from '~/lib/db'
+import type { Getter } from '@tanstack/react-table'
+
+import type { TRPCUpdatePayload } from '~/lib/db'
 
 type EditableCellProps<
   DataType extends { id: string },
@@ -17,8 +21,8 @@ type EditableCellProps<
   row: DataType
   columnName: ColumnKey
   renderValue: Getter<any>
-  editingCell: { rowId: string; columnKey: string } | null
-  setEditingCell: (cell: { rowId: string; columnKey: string } | null) => void
+  editingCell: { rowId: string, columnKey: string } | null
+  setEditingCell: (cell: { rowId: string, columnKey: string } | null) => void
   onSave: (update: TRPCUpdatePayload<DataType>) => Promise<ReturnType>
   isUpdating: boolean
   children?: React.ReactNode
@@ -38,14 +42,14 @@ function EditableCellInner<
 }: EditableCellProps<DataType, ColumnKey, ReturnType>) {
   const { t } = useTranslation()
   const [value, setValue] = useState<string>(
-    row[columnName] == null ? '' : String(row[columnName]),
+    row[columnName] === null ? '' : String(row[columnName]),
   )
 
-  const isEditing =
-    editingCell?.rowId === row.id && editingCell?.columnKey === columnName
+  const isEditing
+    = editingCell?.rowId === row.id && editingCell?.columnKey === columnName
 
   const cancelChanges = () => {
-    setValue(row[columnName] == null ? '' : String(row[columnName]))
+    setValue(row[columnName] === null ? '' : String(row[columnName]))
     setEditingCell(null)
   }
 
@@ -65,8 +69,8 @@ function EditableCellInner<
         const issue = zodError?.fieldErrors?.[columnName as string]?.[0]
         toast.error('Error', {
           description:
-            issue ??
-            t('invalidValuePleaseTryAgain', 'Invalid value. Please try again.'),
+            issue
+            ?? t('invalidValuePleaseTryAgain', 'Invalid value. Please try again.'),
         })
       } else {
         toast.error('Error', {
@@ -80,24 +84,25 @@ function EditableCellInner<
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') cancelChanges()
-    else if (e.key === 'Enter') saveChanges()
+    if (e.key === 'Escape')
+      cancelChanges()
+    else if (e.key === 'Enter')
+      saveChanges()
   }
 
   return (
-    <div className='relative h-5 w-full min-w-0 overflow-hidden flex items-center'>
-      {children ? (
-        children
-      ) : (
+    <div className='relative flex h-5 w-full min-w-0 items-center overflow-hidden'>
+      {children || (
         <Input
           id={row.id}
-          className='absolute inset-0 w-full h-full min-w-0 leading-none text-sm p-0 m-0 border-none rounded-none focus-visible:ring-0 shadow-none !bg-transparent'
+          className='absolute inset-0 m-0 h-full w-full min-w-0 rounded-none border-none !bg-transparent p-0 text-sm leading-none shadow-none focus-visible:ring-0'
           value={value}
           autoFocus
           onChange={e => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={() => {
-            if (value !== String(row[columnName] ?? '')) saveChanges()
+            if (value !== String(row[columnName] ?? ''))
+              saveChanges()
             else cancelChanges()
           }}
         />

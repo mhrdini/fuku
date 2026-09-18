@@ -1,6 +1,6 @@
 import * as z from 'zod/v4'
 
-import { WorkHourSchema } from './workHour'
+import { WorkHourSchema } from './work-hour'
 
 export const ShiftAssignmentSchema = z.object({
   id: z.string(),

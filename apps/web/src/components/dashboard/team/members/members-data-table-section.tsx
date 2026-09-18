@@ -1,6 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+
+import { useParams } from 'next/navigation'
+
+import { useTranslation } from '@fuku/i18n/react'
 import {
   Badge,
   Button,
@@ -30,16 +34,11 @@ import {
 } from '@fuku/ui/components'
 import { useQuery } from '@tanstack/react-query'
 import {
-  Column,
-  ColumnDef,
-  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  RowData,
-  SortingState,
   useReactTable,
 } from '@tanstack/react-table'
 import {
@@ -50,24 +49,22 @@ import {
   Settings2,
 } from 'lucide-react'
 
-import { TeamMemberUI } from '~/lib/team-member'
-import { useDialogStore } from '~/store/dialog.store'
-import { useTRPC } from '~/trpc/client'
-
-import './create-member-form-dialog'
-
-import { useParams } from 'next/navigation'
-import { useTranslation } from '@fuku/i18n/react'
+import type {
+  Column,
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+} from '@tanstack/react-table'
 
 import { DialogId } from '~/lib/dialog'
 
-declare module '@tanstack/react-table' {
-  interface ColumnMeta<TData extends RowData, TValue> {
-    label: string
-  }
-}
+import './create-member-form-dialog'
 
-interface MembersDataTableProps<TData, TValue> {
+import type { TeamMemberUI } from '~/lib/team-member'
+import { useDialogStore } from '~/store/dialog.store'
+import { useTRPC } from '~/trpc/client'
+
+type MembersDataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   defaultHiddenColumns?: string[]
@@ -181,10 +178,9 @@ export function MembersDataTableSection({
                     key={pg.id}
                     value={pg.name}
                     onSelect={value =>
-                      toggleFilter(table.getColumn('payGradeName')!, value)
-                    }
+                      toggleFilter(table.getColumn('payGradeName')!, value)}
                   >
-                    <div className='flex gap-2 items-center justify-center'>
+                    <div className='flex items-center justify-center gap-2'>
                       <Checkbox
                         id={pg.id}
                         value={pg.name}
@@ -232,7 +228,7 @@ export function MembersDataTableSection({
           {table
             .getAllColumns()
             .filter(column => column.getCanHide())
-            .map(column => {
+            .map((column) => {
               return (
                 <DropdownMenuCheckboxItem
                   key={column.id}
@@ -240,7 +236,7 @@ export function MembersDataTableSection({
                   checked={column.getIsVisible()}
                   onCheckedChange={value => column.toggleVisibility(!!value)}
                 >
-                  {column.columnDef.meta?.label as string}
+                  {t(column.columnDef.id!)}
                 </DropdownMenuCheckboxItem>
               )
             })}
@@ -260,7 +256,7 @@ export function MembersDataTableSection({
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map(header => {
+                {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
                       {header.isPlaceholder
@@ -276,32 +272,34 @@ export function MembersDataTableSection({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map(row => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id} className='cursor-default'>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+            {table.getRowModel().rows?.length
+              ? (
+                  table.getRowModel().rows.map(row => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && 'selected'}
+                    >
+                      {row.getVisibleCells().map(cell => (
+                        <TableCell key={cell.id} className='cursor-default'>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                )
+              : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className='h-24 text-center'
+                    >
+                      {t('noResults', 'No results.')}
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className='h-24 text-center'
-                >
-                  {t('noResults', 'No results.')}
-                </TableCell>
-              </TableRow>
-            )}
+                  </TableRow>
+                )}
           </TableBody>
         </Table>
       </div>

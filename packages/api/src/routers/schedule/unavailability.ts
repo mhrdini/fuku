@@ -1,5 +1,6 @@
-import { TRPCRouterRecord } from '@trpc/server'
 import * as z from 'zod/v4'
+
+import type { TRPCRouterRecord } from '@trpc/server'
 
 import { UnavailabilityCreateInputSchema } from '../../schemas'
 import { protectedProcedure } from '../../trpc'

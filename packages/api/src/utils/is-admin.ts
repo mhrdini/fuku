@@ -1,8 +1,8 @@
 import { TRPCError } from '@trpc/server'
 
-import { TRPCContext } from '../trpc'
+import type { TRPCContext } from '../trpc'
 
-interface CheckAdminInput {
+type CheckAdminInput = {
   ctx: TRPCContext
   teamId?: string
   teamSlug?: string
