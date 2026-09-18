@@ -130,6 +130,7 @@
   "nameHasBeenCreated": "{{name}} has been created.",
   "nameHasBeenRemoved": "{{name}} has been removed.",
   "nameHasBeenRestored": "{{name}} has been restored.",
+  "new": "New",
   "newLocation": "New location",
   "newPayGrade": "New pay grade",
   "newShiftType": "New shift type",
