@@ -38,15 +38,11 @@ export function convertToCSV(
   // Team members (columns)
   // --------------------------------------------
 
-  const teamMemberIds = Array.from(
-    new Set(filteredData.map(a => a.teamMemberId)),
-  )
+  const teamMemberIds = Object.keys(teamMemberById)
 
   teamMemberIds.sort((a, b) => {
     const nameA = getTeamMemberName(teamMemberById[a])
-
     const nameB = getTeamMemberName(teamMemberById[b])
-
     return nameA.localeCompare(nameB)
   })
 
