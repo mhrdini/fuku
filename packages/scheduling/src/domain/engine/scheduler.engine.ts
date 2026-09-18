@@ -1,10 +1,11 @@
-import { SchedulerContext, SchedulerResult } from '../types'
+import type { SchedulerContext, SchedulerResult } from '../types'
+
 import { ConstraintModelBuilder } from './model.builder'
 import { SolutionMapper } from './solution.mapper'
 import { CpSatSolverAdapter } from './solver.adapter'
 
-export interface SchedulerEngine {
-  run(context: SchedulerContext): Promise<SchedulerResult>
+export type SchedulerEngine = {
+  run: (context: SchedulerContext) => Promise<SchedulerResult>
 }
 
 export class DefaultSchedulerEngine implements SchedulerEngine {

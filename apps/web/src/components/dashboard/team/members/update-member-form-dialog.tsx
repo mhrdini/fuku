@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import { useParams } from 'next/navigation'
+
 import {
-  TeamMemberUpdateInput,
   TeamMemberUpdateInputSchema,
 } from '@fuku/api/schemas'
 import { useTranslation } from '@fuku/i18n/react'
@@ -37,17 +38,24 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronDown } from 'lucide-react'
 import {
   Controller,
-  SubmitErrorHandler,
-  SubmitHandler,
   useForm,
 } from 'react-hook-form'
 import { toast } from 'sonner'
 
+import type {
+  TeamMemberUpdateInput,
+} from '@fuku/api/schemas'
+import type {
+  SubmitErrorHandler,
+  SubmitHandler,
+} from 'react-hook-form'
+
 import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
+
 import { DiscardChangesAlertDialogContent } from '../../discard-changes-alert-dialog'
 
-export const UpdateMemberFormDialog = () => {
+export function UpdateMemberFormDialog() {
   const { t } = useTranslation()
   const { editingId: currentTeamMemberId, closeDialog } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
@@ -109,7 +117,7 @@ export const UpdateMemberFormDialog = () => {
 
   const { mutateAsync: updateMember } = useMutation({
     ...trpc.teamMember.update.mutationOptions(),
-    onError: error => {
+    onError: (error) => {
       toast.error('Error', {
         description: t('valMessage', '{{val}}: {{message}}', {
           val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
@@ -117,7 +125,7 @@ export const UpdateMemberFormDialog = () => {
         }),
       })
     },
-    onSuccess: data => {
+    onSuccess: (data) => {
       queryClient.setQueryData(
         trpc.teamMember.byId.queryKey({ id: data.id }),
         data,
@@ -133,7 +141,7 @@ export const UpdateMemberFormDialog = () => {
     },
   })
 
-  const onSubmit: SubmitHandler<TeamMemberUpdateInput> = async data => {
+  const onSubmit: SubmitHandler<TeamMemberUpdateInput> = async (data) => {
     if (!form.formState.isDirty) {
       form.setError('root', {
         message: t('thereAreNoChangesToSave', 'There are no changes to save.'),
@@ -147,7 +155,7 @@ export const UpdateMemberFormDialog = () => {
     }
   }
 
-  const onError: SubmitErrorHandler<TeamMemberUpdateInput> = errors => {
+  const onError: SubmitErrorHandler<TeamMemberUpdateInput> = (errors) => {
     console.error('update member errors:', errors)
     console.error('update member values:', form.getValues())
   }
@@ -251,7 +259,7 @@ export const UpdateMemberFormDialog = () => {
                                 <CommandItem
                                   key={pg.id}
                                   value={pg.id}
-                                  onSelect={currentValue => {
+                                  onSelect={(currentValue) => {
                                     form.setValue('payGradeId', currentValue, {
                                       shouldValidate: true,
                                       shouldTouch: true,
@@ -297,12 +305,14 @@ export const UpdateMemberFormDialog = () => {
                   disabled
                   className='items-center justify-start disabled:opacity-100'
                 >
-                  {payGrades && form.getValues('payGradeId') ? (
-                    payGrades.find(pg => pg.id === form.getValues('payGradeId'))
-                      ?.baseRate
-                  ) : (
-                    <span className='text-muted-foreground'>N/A</span>
-                  )}
+                  {payGrades && form.getValues('payGradeId')
+                    ? (
+                        payGrades.find(pg => pg.id === form.getValues('payGradeId'))
+                          ?.baseRate
+                      )
+                    : (
+                        <span className='text-muted-foreground'>N/A</span>
+                      )}
                 </Button>
               </Field>
               <Controller
@@ -328,8 +338,7 @@ export const UpdateMemberFormDialog = () => {
                       onChange={e =>
                         field.onChange(
                           e.target.value === '' ? 0 : Number(e.target.value),
-                        )
-                      }
+                        )}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -366,16 +375,18 @@ export const UpdateMemberFormDialog = () => {
             <Field orientation='responsive'>
               <FieldError errors={[form.formState.errors.root]} />
               <AlertDialog>
-                {form.formState.isDirty ? (
-                  <>
-                    <AlertDialogTrigger asChild>
-                      {cancelButton}
-                    </AlertDialogTrigger>
-                    <DiscardChangesAlertDialogContent />
-                  </>
-                ) : (
-                  <DialogClose asChild>{cancelButton}</DialogClose>
-                )}
+                {form.formState.isDirty
+                  ? (
+                      <>
+                        <AlertDialogTrigger asChild>
+                          {cancelButton}
+                        </AlertDialogTrigger>
+                        <DiscardChangesAlertDialogContent />
+                      </>
+                    )
+                  : (
+                      <DialogClose asChild>{cancelButton}</DialogClose>
+                    )}
               </AlertDialog>
               <LoadingButton
                 loading={isPending}

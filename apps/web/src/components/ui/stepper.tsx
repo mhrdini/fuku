@@ -1,18 +1,20 @@
 'use client'
 
 import { Fragment, useCallback } from 'react'
+
 import { useTranslation } from '@fuku/i18n/react'
 import { Button, Label, Separator } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { ZodObject } from 'zod/v4'
+
+import type { ZodObject } from 'zod/v4'
 
 export type Step = {
   label: string
   schema: ZodObject
 }
 
-interface StepperProps {
+type StepperProps = {
   steps: Step[]
   currentIndex: number
   setCurrentIndex: (index: number) => void
@@ -50,19 +52,21 @@ export default function Stepper({
                 className={cn(
                   'gap-2',
                   currentIndex !== index
-                    ? 'hidden md:flex items-center justify-center'
-                    : 'flex justify-center items-center',
+                    ? 'hidden items-center justify-center md:flex'
+                    : 'flex items-center justify-center',
                 )}
               >
                 <Label className='flex md:hidden'>
-                  {t('step', 'Step')} {index + 1}
+                  {t('step', 'Step')}
+                  {' '}
+                  {index + 1}
                   {t('ofLength', 'of {{length}}', { length: steps.length })}
                 </Label>
                 <Button
                   size='icon-sm'
                   role='tab'
                   variant={index === currentIndex ? 'default' : 'secondary'}
-                  className='hidden md:flex rounded-none' // TODO: or rounded-full?
+                  className='hidden rounded-none md:flex' // TODO: or rounded-full?
                   onClick={() => setStep(index)}
                   aria-current={currentIndex === index ? 'step' : undefined}
                   aria-posinset={index + 1}
@@ -74,7 +78,7 @@ export default function Stepper({
                 <Label
                   onClick={() => setStep(index)}
                   className={cn(
-                    'text-center text-sm underline underline-offset-4  cursor-default md:no-underline md:cursor-pointer',
+                    'cursor-default text-center text-sm underline  underline-offset-4 md:cursor-pointer md:no-underline',
                     currentIndex === index && 'font-medium',
                     currentIndex !== index && 'text-muted-foreground',
                   )}
@@ -85,7 +89,7 @@ export default function Stepper({
               {index < steps.length - 1 && (
                 <Separator
                   className={cn(
-                    'hidden md:flex !w-4',
+                    'hidden !w-4 md:flex',
                     currentIndex > index && 'bg-primary',
                   )}
                 />

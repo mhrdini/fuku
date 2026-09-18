@@ -1,12 +1,14 @@
-import { Auth, Session } from '@fuku/auth'
 import { db } from '@fuku/db'
-import { DefaultSchedulerService, SchedulerService } from '@fuku/scheduling'
+import { DefaultSchedulerService } from '@fuku/scheduling'
 /**
  * 3. Middlewares
  */
 import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
 import { z, ZodError } from 'zod/v4'
+
+import type { Auth, Session } from '@fuku/auth'
+import type { SchedulerService } from '@fuku/scheduling'
 
 import { PrismaTeamRepository } from './adapters/db/prisma-team.repository'
 import { NagerHolidayService } from './adapters/holiday/nager-holiday.service'
@@ -25,10 +27,10 @@ export type TRPCContext = {
   schedulerService: SchedulerService
 }
 
-export const createTRPCContext = async (options: {
+export async function createTRPCContext(options: {
   headers: Headers
   auth: Auth
-}): Promise<TRPCContext> => {
+}): Promise<TRPCContext> {
   const authApi = options.auth.api
   const session = await authApi.getSession({
     headers: options.headers,

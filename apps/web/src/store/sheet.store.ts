@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { SheetId } from '~/lib/sheet'
+import type { SheetId } from '~/lib/sheet'
 
 type SheetOptions = {
   id: SheetId | null

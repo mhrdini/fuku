@@ -1,16 +1,17 @@
 'use client'
 
 import { LogOutButton } from '~/components/auth/log-out-button'
+
 import { LanguageSelect } from '../language-select'
 import { ThemeToggle } from '../theme-toggle'
 import { Breadcrumbs } from './breadcrumbs'
 import { DashboardNavigationMenu } from './dashboard-navigation-menu'
 import { TeamSelectDropdownMenu } from './team-select-dropdown-menu'
 
-export const DashboardHeader = () => {
+export function DashboardHeader() {
   return (
-    <header className='bg-card sticky top-0 z-50 *:flex *:items-center border-b *:gap-4 *:xl:gap-6 *:py-2'>
-      <div className='*:flex *:items-center breakpoint-container justify-between border-b'>
+    <header className='bg-card sticky top-0 z-50 border-b *:flex *:items-center *:gap-4 *:py-2 *:xl:gap-6'>
+      <div className='breakpoint-container justify-between border-b *:flex *:items-center'>
         <div className='gap-4'>
           {/* <SidebarTrigger className='[&_svg]:!size-5' /> */}
           {/* <Separator orientation='vertical' className='hidden !h-4 sm:block' /> */}
@@ -23,7 +24,7 @@ export const DashboardHeader = () => {
           <LogOutButton />
         </div>
       </div>
-      <div className='*:flex *:items-center breakpoint-container'>
+      <div className='breakpoint-container *:flex *:items-center'>
         <Breadcrumbs />
       </div>
     </header>

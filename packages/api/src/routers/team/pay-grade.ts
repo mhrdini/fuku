@@ -1,8 +1,9 @@
-import type { TRPCRouterRecord } from '@trpc/server'
 import * as z from 'zod/v4'
 
+import type { TRPCRouterRecord } from '@trpc/server'
+
 import { protectedProcedure } from '../../trpc'
-import { numberFromInput } from '../../utils/numberFromInput'
+import { numberFromInput } from '../../utils/number-from-input'
 
 export const payGradeRouter = {
   byId: protectedProcedure

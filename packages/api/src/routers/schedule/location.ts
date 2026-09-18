@@ -1,6 +1,7 @@
-import type { TRPCRouterRecord } from '@trpc/server'
 import { ColorHex } from '@fuku/domain/schemas'
 import * as z from 'zod/v4'
+
+import type { TRPCRouterRecord } from '@trpc/server'
 
 import { protectedProcedure } from '../../trpc'
 

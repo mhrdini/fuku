@@ -16,7 +16,7 @@ export const UserSchema = z.object({
     .max(30, {
       error: 'invalid_username_length',
     })
-    .regex(/^[a-zA-Z0-9_-]+$/, {
+    .regex(/^[\w-]+$/, {
       error: 'invalid_username_characters',
     }),
   displayUsername: z.string(),

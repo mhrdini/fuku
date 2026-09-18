@@ -1,6 +1,5 @@
 'use client'
 
-import { RuleOutput, RuleUpdateInput } from '@fuku/api/schemas'
 import { RuleScopeValues } from '@fuku/domain/schemas'
 import { useTranslation } from '@fuku/i18n/react'
 import {
@@ -12,21 +11,23 @@ import {
   Switch,
 } from '@fuku/ui/components'
 
+import type { RuleOutput, RuleUpdateInput } from '@fuku/api/schemas'
+
 import { RULE_SCOPE_LABELS } from '~/lib/rule-panel/rule.constants'
 import {
   buildScopeIdUpdate,
   buildScopeTypeUpdate,
 } from '~/lib/rule-panel/rule.helpers'
 
-const RuleScopeSelect = ({
+function RuleScopeSelect({
   rule,
   scopeOptions,
   updateRule,
 }: {
   rule: RuleOutput
-  scopeOptions: Record<string, { value: string; label: string }[]>
+  scopeOptions: Record<string, { value: string, label: string }[]>
   updateRule: (rule: RuleUpdateInput) => Promise<RuleOutput>
-}) => {
+}) {
   const { t } = useTranslation()
 
   const handleUpdateActive = (active: boolean) => {
@@ -34,7 +35,8 @@ const RuleScopeSelect = ({
   }
 
   const handleUpdateScopeType = (scope: string) => {
-    if (scope === rule.scope) return
+    if (scope === rule.scope)
+      return
     updateRule({
       ...rule,
       ...buildScopeTypeUpdate(rule, scope, scopeOptions),
@@ -43,12 +45,13 @@ const RuleScopeSelect = ({
 
   const handleUpdateScopeId = (id: string) => {
     const update = buildScopeIdUpdate(rule, id)
-    if (update) updateRule({ ...rule, ...update })
+    if (update)
+      updateRule({ ...rule, ...update })
   }
 
   return (
     <>
-      {/* scope type*/}
+      {/* scope type */}
       <Select value={rule.scope} onValueChange={handleUpdateScopeType}>
         <SelectTrigger size='sm' variant='secondary'>
           <SelectValue placeholder={t('scope')} />
@@ -57,8 +60,8 @@ const RuleScopeSelect = ({
           {Object.values(RuleScopeValues)
             .filter(
               value =>
-                scopeOptions[value].length > 0 ||
-                value === RuleScopeValues.GLOBAL,
+                scopeOptions[value].length > 0
+                || value === RuleScopeValues.GLOBAL,
             )
             .map(value => (
               <SelectItem key={value} value={value}>

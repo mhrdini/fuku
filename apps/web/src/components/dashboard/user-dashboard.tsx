@@ -3,7 +3,7 @@
 import { useTranslation } from '@fuku/i18n/react'
 import { Card, CardContent, CardHeader } from '@fuku/ui/components'
 
-interface UserDashboardProps {
+type UserDashboardProps = {
   user: {
     name: string
     image: string | null

@@ -1,20 +1,24 @@
 import { useMemo } from 'react'
+
 import { CollisionPriority } from '@dnd-kit/abstract'
 import { useDroppable } from '@dnd-kit/react'
-import { ShiftTypeOutput, UnavailabilityOutput } from '@fuku/api/schemas'
-import { SchedulerAssignment } from '@fuku/domain/schemas'
 import { useTranslation } from '@fuku/i18n/react'
 import { Button, buttonVariants, Toggle } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { Ban, Plus } from 'lucide-react'
 import { DateTime } from 'luxon'
 
-import { useScheduleActions } from '~/hooks/schedule/useScheduleActions'
-import { ScheduleFilters } from '~/hooks/schedule/useScheduleFilters'
-import { CellData, getCellKey, parseCellKey } from '~/lib/schedule'
+import type { ShiftTypeOutput, UnavailabilityOutput } from '@fuku/api/schemas'
+import type { SchedulerAssignment } from '@fuku/domain/schemas'
+
+import { useScheduleActions } from '~/hooks/schedule/use-schedule-actions'
+import type { ScheduleFilters } from '~/hooks/schedule/use-schedule-filters'
+import type { CellData } from '~/lib/schedule'
+import { getCellKey, parseCellKey } from '~/lib/schedule'
+
 import { ScheduleAssignmentCard } from './schedule-assignment-card'
 
-interface ScheduleCellProps {
+type ScheduleCellProps = {
   cellKey: string
   isLastRow: boolean
   isLastCol: boolean
@@ -28,14 +32,14 @@ interface ScheduleCellProps {
   className?: string
 }
 
-export const ScheduleCell = ({
+export function ScheduleCell({
   cellKey,
   isLastRow,
   isLastCol,
   data: { eligibleShifts, cellData, shiftTypeMap, previewAssignment },
   filters: { filteredShiftTypes },
   className,
-}: ScheduleCellProps) => {
+}: ScheduleCellProps) {
   const { t } = useTranslation()
   const { isDropTarget, ref } = useDroppable({
     id: cellKey,
@@ -62,8 +66,8 @@ export const ScheduleCell = ({
     const { teamMemberId, date } = parseCellKey(cellKey)
     const unavailability = cellData?.schedulerUnavailabilities?.find(
       ua =>
-        ua.teamMemberId === teamMemberId &&
-        DateTime.fromJSDate(ua.date).hasSame(DateTime.fromJSDate(date), 'day'),
+        ua.teamMemberId === teamMemberId
+        && DateTime.fromJSDate(ua.date).hasSame(DateTime.fromJSDate(date), 'day'),
     )
     return unavailability ? (unavailability as UnavailabilityOutput) : null
   }, [cellData?.schedulerUnavailabilities])
@@ -88,8 +92,8 @@ export const ScheduleCell = ({
 
   const previewAssignmentCellKey = useMemo(
     () =>
-      previewAssignment &&
-      getCellKey(previewAssignment.teamMemberId, previewAssignment.date),
+      previewAssignment
+      && getCellKey(previewAssignment.teamMemberId, previewAssignment.date),
     [previewAssignment],
   )
 
@@ -118,7 +122,7 @@ export const ScheduleCell = ({
         // 'outline-none focus-visible:border-ring focus-visible:ring-ring/50
         // focus-visible:ring-[3px] focus-visible:outline-1
         // focus-visible:-ring-offset-1',
-        unavailability && 'hover:bg-transparent *:not-only:not-last:opacity-40',
+        unavailability && '*:not-only:not-last:opacity-40 hover:bg-transparent',
         isDropTarget && 'bg-muted/50',
         'relative',
         className,
@@ -126,48 +130,50 @@ export const ScheduleCell = ({
       // tabIndex={0}
     >
       {/* preview assignment as swap intent */}
-      {previewAssignment &&
-        previewAssignmentCellKey !== cellKey &&
-        previewAssignmentShiftType && (
-          <div
-            className={cn(
-              'absolute left-1 right-1',
-              'group/assignment rounded-none py-1 px-2 border border-input bg-muted flex flex-col',
-              'border-2 border-dashed border-info-foreground',
-            )}
-          >
-            <div className='font-bold text-sm'>
-              {previewAssignmentShiftType.name ?? ''}
-            </div>
-            <div className='text-xs text-muted-foreground'>
-              {previewAssignmentShiftType.startTime ?? ''}
-              {previewAssignmentShiftType.endTime
-                ? t('key', ' - ') + previewAssignmentShiftType.endTime
-                : ''}
-            </div>
+      {previewAssignment
+        && previewAssignmentCellKey !== cellKey
+        && previewAssignmentShiftType && (
+        <div
+          className={cn(
+            'absolute right-1 left-1',
+            'group/assignment border-input bg-muted flex flex-col rounded-none border px-2 py-1',
+            'border-info-foreground border-2 border-dashed',
+          )}
+        >
+          <div className='text-sm font-bold'>
+            {previewAssignmentShiftType.name ?? ''}
           </div>
-        )}
+          <div className='text-muted-foreground text-xs'>
+            {previewAssignmentShiftType.startTime ?? ''}
+            {previewAssignmentShiftType.endTime
+              ? t('key', ' - ') + previewAssignmentShiftType.endTime
+              : ''}
+          </div>
+        </div>
+      )}
       {/* real assignments */}
-      {assignments &&
-        assignments.length > 0 &&
-        assignments.map(a => {
-          return filteredShiftTypes.size == 0 ||
-            (filteredShiftTypes.size > 0 &&
-              filteredShiftTypes.has(a.shiftTypeId)) ? (
-            <ScheduleAssignmentCard
-              key={a.id}
-              cellKey={cellKey}
-              assignment={a}
-              data={{
-                eligibleShifts,
-                shiftTypeMap,
-              }}
-            />
-          ) : null
+      {assignments
+        && assignments.length > 0
+        && assignments.map((a) => {
+          return filteredShiftTypes.size === 0
+            || (filteredShiftTypes.size > 0
+              && filteredShiftTypes.has(a.shiftTypeId))
+            ? (
+                <ScheduleAssignmentCard
+                  key={a.id}
+                  cellKey={cellKey}
+                  assignment={a}
+                  data={{
+                    eligibleShifts,
+                    shiftTypeMap,
+                  }}
+                />
+              )
+            : null
         })}
       <div
         className={cn(
-          'pointer-events-none opacity-0 md:pointer-events-auto  md:flex md:gap-1 md:flex-col size-full items-center justify-end *:w-full transition-opacity text-xs text-muted-foreground group-hover:opacity-100 group-focus-visible:opacity-100',
+          'text-muted-foreground pointer-events-none size-full  items-center justify-end text-xs opacity-0 transition-opacity *:w-full group-hover:opacity-100 group-focus-visible:opacity-100 md:pointer-events-auto md:flex md:flex-col md:gap-1',
           'has-[*[data-state=on]]:opacity-100',
           'has-[*[data-state=on]]:[&>*]:hidden',
           'has-[*[data-state=on]]:[&>*[data-state=on]]:flex',
@@ -178,10 +184,10 @@ export const ScheduleCell = ({
         <Button
           hidden={assignments && assignments.length > 0}
           disabled={
-            !!unavailability ||
-            !cellKey ||
-            eligibleShifts.size === 0 ||
-            cellData?.schedulerAssignments.length === 1
+            !!unavailability
+            || !cellKey
+            || eligibleShifts.size === 0
+            || cellData?.schedulerAssignments.length === 1
           }
           variant='success-secondary'
           size='icon-chip'

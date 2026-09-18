@@ -2,7 +2,7 @@ export type VariableType = 'binary' | 'integer'
 export type Operator = '<=' | '>=' | '=='
 export type ObjectiveSense = 'maximize' | 'minimize'
 
-export interface Variable {
+export type Variable = {
   name: string
   type: VariableType
   min?: number
@@ -11,24 +11,24 @@ export interface Variable {
 
 export type CoefficientMap = Record<string, number>
 
-export interface Constraint {
+export type Constraint = {
   name: string
   coefficients: CoefficientMap
   operator: Operator
   rhs: number
 }
 
-export interface Objective {
+export type Objective = {
   sense: ObjectiveSense
   terms: ObjectiveTerm[]
 }
 
-export interface ObjectiveTerm {
+export type ObjectiveTerm = {
   variable: string
   coefficient: number
 }
 
-export interface OptimizationModel {
+export type OptimizationModel = {
   variables: Variable[]
   constraints: Constraint[]
   objective?: Objective

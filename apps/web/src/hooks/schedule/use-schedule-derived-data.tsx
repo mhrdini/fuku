@@ -1,33 +1,37 @@
 import { useCallback, useEffect, useMemo } from 'react'
-import {
+
+import { DateTime } from 'luxon'
+
+import type { ScheduleData } from './use-schedule-data'
+import type { ScheduleViewState } from './use-schedule-view'
+import type {
   PayGradeOutput,
   ShiftTypeOutput,
   UnavailabilityOutput,
 } from '@fuku/api/schemas'
-import { SchedulerAssignment } from '@fuku/domain/schemas'
-import { DateTime } from 'luxon'
+import type { SchedulerAssignment } from '@fuku/domain/schemas'
 
-import {
+import type {
   CellData,
   Day,
   DayMetrics,
-  getCellKey,
-  getDayId,
-  getInitialCellData,
   SchedulerMetrics,
   TeamMemberData,
   TeamMemberMetrics,
 } from '~/lib/schedule'
+import {
+  getCellKey,
+  getDayId,
+  getInitialCellData,
+} from '~/lib/schedule'
 import { useScheduleStore } from '~/store/schedule.store'
-import { ScheduleData } from './useScheduleData'
-import { ScheduleViewState } from './useScheduleView'
 
-interface ScheduleDerivedDataProps {
+type ScheduleDerivedDataProps = {
   viewState: ScheduleViewState
   data: ScheduleData
 }
 
-export const useScheduleDerivedData = ({
+export function useScheduleDerivedData({
   viewState: { start, end },
   data: {
     teamMembers,
@@ -36,7 +40,7 @@ export const useScheduleDerivedData = ({
     dbAssignments,
     dbUnavailabilities,
   },
-}: ScheduleDerivedDataProps) => {
+}: ScheduleDerivedDataProps) {
   const {
     schedulerAssignments,
     schedulerUnavailabilities,
@@ -46,7 +50,8 @@ export const useScheduleDerivedData = ({
   } = useScheduleStore()
 
   const teamMemberMap = useMemo(() => {
-    if (!teamMembers) return new Map<string, TeamMemberData>()
+    if (!teamMembers)
+      return new Map<string, TeamMemberData>()
     const map = new Map<string, TeamMemberData>()
     for (const tm of teamMembers) {
       const teamMemberData = {
@@ -60,7 +65,8 @@ export const useScheduleDerivedData = ({
   }, [teamMembers])
 
   const shiftTypeMap = useMemo(() => {
-    if (!shiftTypes) return new Map<string, ShiftTypeOutput>()
+    if (!shiftTypes)
+      return new Map<string, ShiftTypeOutput>()
     const map = new Map<string, ShiftTypeOutput>()
     for (const st of shiftTypes) {
       map.set(st.id, st)
@@ -69,7 +75,8 @@ export const useScheduleDerivedData = ({
   }, [shiftTypes])
 
   const payGradeMap = useMemo(() => {
-    if (!payGrades) return new Map<string, PayGradeOutput>()
+    if (!payGrades)
+      return new Map<string, PayGradeOutput>()
     const map = new Map<string, PayGradeOutput>()
     for (const pg of payGrades) {
       map.set(pg.id, pg)
@@ -85,7 +92,8 @@ export const useScheduleDerivedData = ({
       const end = DateTime.fromFormat(st.endTime, 'HH:mm')
 
       let diff = end.diff(start, 'hours').hours
-      if (diff < 0) diff += 24
+      if (diff < 0)
+        diff += 24
 
       map.set(id, diff)
     }
@@ -112,16 +120,18 @@ export const useScheduleDerivedData = ({
           new Date(assignment.date),
         ).toMillis()
 
-        if (assignmentDate < startDate || assignmentDate > endDate) continue
+        if (assignmentDate < startDate || assignmentDate > endDate)
+          continue
 
-        const shiftDurationHours =
-          shiftDurationMap.get(assignment.shiftTypeId) ?? 0
+        const shiftDurationHours
+          = shiftDurationMap.get(assignment.shiftTypeId) ?? 0
 
         const teamMemberId = assignment.teamMemberId
         const dayId = getDayId(assignment.date)
         const cellKey = getCellKey(teamMemberId, assignment.date)
 
-        if (unavailabilitySet.has(cellKey)) continue
+        if (unavailabilitySet.has(cellKey))
+          continue
 
         const currentMemberMetrics = teamMemberMetricsMap.get(teamMemberId) ?? {
           totalAssignedShifts: 0,
@@ -161,7 +171,8 @@ export const useScheduleDerivedData = ({
 
       for (const da of dbAssignments) {
         // TODO: only shift assignments, deal with leave assignments
-        if (!da.shiftAssignment) continue
+        if (!da.shiftAssignment)
+          continue
         const a: SchedulerAssignment = {
           id: da.id,
           teamMemberId: da.teamMemberId,
@@ -199,12 +210,12 @@ export const useScheduleDerivedData = ({
 
   useEffect(() => {
     if (shiftTypeMap.size > 0) {
-      console.log('scheduler assignments changed:', schedulerAssignments)
+      // console.log('scheduler assignments changed:', schedulerAssignments)
       const metrics = computeSchedulerMetrics(
         schedulerAssignments,
         schedulerUnavailabilities,
       )
-      console.log('computed metrics:', metrics)
+      // console.log('computed metrics:', metrics)
       setSchedulerMetrics(metrics)
     }
   }, [

@@ -1,6 +1,7 @@
-import { ShiftTypeOutput, TeamMemberOutput } from '@fuku/api/schemas'
-import { SchedulerAssignment } from '@fuku/domain/schemas'
 import { DateTime } from 'luxon'
+
+import type { ShiftTypeOutput, TeamMemberOutput } from '@fuku/api/schemas'
+import type { SchedulerAssignment } from '@fuku/domain/schemas'
 
 import { getShiftTypeName } from './shift-types'
 import { getTeamMemberName } from './team-member'
@@ -22,14 +23,14 @@ export function convertToCSV(
   // Filter assignments by date range
   // --------------------------------------------
 
-  const filteredData = data.filter(assignment => {
+  const filteredData = data.filter((assignment) => {
     const assignmentDate = DateTime.fromISO(String(assignment.date)).startOf(
       'day',
     )
 
     return (
-      assignmentDate >= DateTime.fromJSDate(startDate).startOf('day') &&
-      assignmentDate <= DateTime.fromJSDate(endDate).startOf('day')
+      assignmentDate >= DateTime.fromJSDate(startDate).startOf('day')
+      && assignmentDate <= DateTime.fromJSDate(endDate).startOf('day')
     )
   })
 
@@ -94,7 +95,7 @@ export function convertToCSV(
   const rows = dates.map(date => [
     date,
 
-    ...teamMemberIds.map(teamMemberId => {
+    ...teamMemberIds.map((teamMemberId) => {
       return assignmentMap.get(`${date}-${teamMemberId}`) ?? ''
     }),
   ])

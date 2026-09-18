@@ -1,9 +1,11 @@
-import type { VariantProps } from 'class-variance-authority'
 import * as React from 'react'
+
 import { Separator } from '@fuku/ui/components/ui/separator'
 import { cva } from 'class-variance-authority'
 import { cn } from 'cn'
 import { Slot } from 'radix-ui'
+
+import type { VariantProps } from 'class-variance-authority'
 
 function ItemGroup({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -34,13 +36,13 @@ function ItemSeparator({
 }
 
 const itemVariants = cva(
-  'group/item flex w-full flex-wrap items-center rounded-none border text-xs transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-muted',
+  'group/item focus-visible:border-ring focus-visible:ring-ring/50 [a]:hover:bg-muted flex w-full flex-wrap items-center rounded-none border text-xs transition-colors duration-100 outline-none focus-visible:ring-[3px] [a]:transition-colors',
   {
     variants: {
       variant: {
         default: 'border-transparent',
         outline: 'border-border',
-        muted: 'border-transparent bg-muted/50',
+        muted: 'bg-muted/50 border-transparent',
       },
       size: {
         default: 'gap-2.5 px-3 py-2.5',
@@ -61,8 +63,8 @@ function Item({
   size = 'default',
   asChild = false,
   ...props
-}: React.ComponentProps<'div'> &
-  VariantProps<typeof itemVariants> & { asChild?: boolean }) {
+}: React.ComponentProps<'div'>
+  & VariantProps<typeof itemVariants> & { asChild?: boolean }) {
   const Comp = asChild ? Slot.Root : 'div'
   return (
     <Comp
@@ -81,7 +83,7 @@ const itemMediaVariants = cva(
     variants: {
       variant: {
         default: 'bg-transparent',
-        icon: "[&_svg:not([class*='size-'])]:size-4",
+        icon: '[&_svg:not([class*=\'size-\'])]:size-4',
         image:
           'size-10 overflow-hidden rounded-none group-data-[size=sm]/item:size-8 group-data-[size=xs]/item:size-6 [&_img]:size-full [&_img]:object-cover',
       },
@@ -139,7 +141,7 @@ function ItemDescription({ className, ...props }: React.ComponentProps<'p'>) {
     <p
       data-slot='item-description'
       className={cn(
-        'line-clamp-2 text-left text-xs/relaxed font-normal text-muted-foreground group-data-[size=xs]/item:text-xs/relaxed [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary',
+        'text-muted-foreground [&>a:hover]:text-primary line-clamp-2 text-left text-xs/relaxed font-normal group-data-[size=xs]/item:text-xs/relaxed [&>a]:underline [&>a]:underline-offset-4',
         className,
       )}
       {...props}
@@ -185,13 +187,13 @@ function ItemFooter({ className, ...props }: React.ComponentProps<'div'>) {
 
 export {
   Item,
-  ItemMedia,
-  ItemContent,
   ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemFooter,
   ItemGroup,
+  ItemHeader,
+  ItemMedia,
   ItemSeparator,
   ItemTitle,
-  ItemDescription,
-  ItemHeader,
-  ItemFooter,
 }

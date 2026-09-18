@@ -1,12 +1,16 @@
-import { TRPCError, TRPCRouterRecord } from '@trpc/server'
+import { TRPCError } from '@trpc/server'
 import { customAlphabet } from 'nanoid'
 import * as z from 'zod/v4'
+
+import type {
+  UserTeam,
+} from '../../schemas'
+import type { TRPCRouterRecord } from '@trpc/server'
 
 import {
   TeamCreateInputSchema,
   TeamOutputSchema,
   TeamUpdateInputSchema,
-  UserTeam,
 } from '../../schemas'
 import { protectedProcedure } from '../../trpc'
 
@@ -119,7 +123,8 @@ export const teamRouter = {
       },
     })
 
-    if (!user) return []
+    if (!user)
+      return []
 
     const owned: UserTeam[] = user.ownedTeams.map(team => ({
       id: team.id,
@@ -424,15 +429,15 @@ export const teamRouter = {
         orderBy: { createdAt: 'asc' },
       })
 
-      const nextActiveTeamId =
-        remainingTeams.length > 0 ? remainingTeams[0].id : null
+      const nextActiveTeamId
+        = remainingTeams.length > 0 ? remainingTeams[0].id : null
 
       await ctx.db.user.update({
         where: { id: userId },
         data: { lastActiveTeamId: nextActiveTeamId },
       })
 
-      return { team: team, activeTeamId: nextActiveTeamId, deletedAt: now }
+      return { team, activeTeamId: nextActiveTeamId, deletedAt: now }
     }),
 
   restore: protectedProcedure

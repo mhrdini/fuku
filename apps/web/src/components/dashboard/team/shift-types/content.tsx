@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+
 import { useParams } from 'next/navigation'
+
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
@@ -29,23 +31,26 @@ import {
 } from '@fuku/ui/components'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
 import { Ellipsis, Plus, Trash } from 'lucide-react'
 
+import type {
+  ColumnDef,
+} from '@tanstack/react-table'
+
 import { EditableCell } from '~/components/ui/editable-cell'
 import { TimeInput } from '~/components/ui/time-input'
 import { DialogId } from '~/lib/dialog'
 import { SheetId } from '~/lib/sheet'
-import { ShiftTypeUI } from '~/lib/shift-types'
+import type { ShiftTypeUI } from '~/lib/shift-types'
 import { useDialogStore } from '~/store/dialog.store'
 import { useSheetStore } from '~/store/sheet.store'
 import { useTRPC } from '~/trpc/client'
 
-export const TeamShiftTypesContent = () => {
+export function TeamShiftTypesContent() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const trpc = useTRPC()
@@ -73,7 +78,7 @@ export const TeamShiftTypesContent = () => {
 
   const { mutateAsync: updateShiftType, isPending: isUpdating } = useMutation({
     ...trpc.shiftType.update.mutationOptions(),
-    onSuccess: data => {
+    onSuccess: (data) => {
       queryClient.setQueryData(
         trpc.shiftType.byId.queryKey({ id: data.id }),
         data,
@@ -126,7 +131,7 @@ export const TeamShiftTypesContent = () => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant='ghost' className='size-8 -mx-1 -my-1'>
+              <Button variant='ghost' className='-mx-1 -my-1 size-8'>
                 <span className='sr-only'>{t('openMenu', 'Open menu')}</span>
                 <Ellipsis />
               </Button>
@@ -136,7 +141,9 @@ export const TeamShiftTypesContent = () => {
                 variant='destructive'
                 onClick={() => onRemoveShiftType(shiftType.id)}
               >
-                <Trash /> {t('remove', 'Remove')}
+                <Trash />
+                {' '}
+                {t('remove', 'Remove')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -218,9 +225,10 @@ export const TeamShiftTypesContent = () => {
               <ComboboxValue>
                 {(ids: string[]) => (
                   <>
-                    {ids.map(id => {
+                    {ids.map((id) => {
                       const pg = payGrades?.find(pg => pg.id === id)
-                      if (!pg) return null
+                      if (!pg)
+                        return null
 
                       return <ComboboxChip key={id}>{pg.name}</ComboboxChip>
                     })}
@@ -241,23 +249,22 @@ export const TeamShiftTypesContent = () => {
                 )}
               </ComboboxList>
               <ComboboxSeparator className='m-0' />
-              <div className='flex flex-row w-full justify-between'>
+              <div className='flex w-full flex-row justify-between'>
                 <Button
                   variant='link'
-                  className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                  className='text-muted-foreground hover:text-foreground px-3 text-center hover:no-underline'
                   type='button'
                   onClick={() =>
                     updateShiftType({
                       id: row.original.id,
                       connectPayGrades: payGrades?.map(pg => pg.id) ?? [],
-                    })
-                  }
+                    })}
                 >
                   {t('selectAll', 'Select all')}
                 </Button>
                 <Button
                   variant='link'
-                  className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                  className='text-muted-foreground hover:text-foreground px-3 text-center hover:no-underline'
                   type='button'
                   onClick={() =>
                     updateShiftType({
@@ -265,8 +272,7 @@ export const TeamShiftTypesContent = () => {
                       disconnectPayGrades: row.original.eligiblePayGrades.map(
                         epg => epg.payGradeId,
                       ),
-                    })
-                  }
+                    })}
                 >
                   {t('clearAll', 'Clear all')}
                 </Button>
@@ -305,32 +311,34 @@ export const TeamShiftTypesContent = () => {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map(row => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+            {table.getRowModel().rows?.length
+              ? (
+                  table.getRowModel().rows.map(row => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && 'selected'}
+                    >
+                      {row.getVisibleCells().map(cell => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                )
+              : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className='h-24 text-center'
+                    >
+                      {t('noResults', 'No results.')}
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className='h-24 text-center'
-                >
-                  {t('noResults', 'No results.')}
-                </TableCell>
-              </TableRow>
-            )}
+                  </TableRow>
+                )}
           </TableBody>
         </Table>
       </div>

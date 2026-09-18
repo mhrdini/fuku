@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import { useParams } from 'next/navigation'
+
 import {
-  ShiftTypeCreateInput,
   ShiftTypeCreateInputSchema,
 } from '@fuku/api/schemas'
 import { useTranslation } from '@fuku/i18n/react'
@@ -36,6 +37,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
+import type {
+  ShiftTypeCreateInput,
+} from '@fuku/api/schemas'
+
 import { SheetId } from '~/lib/sheet'
 import { useSheetStore } from '~/store/sheet.store'
 import { useTRPC } from '~/trpc/client'
@@ -44,7 +49,7 @@ const ShiftTypeCreateFormSchema = ShiftTypeCreateInputSchema
 
 type ShiftTypeCreateFormType = ShiftTypeCreateInput
 
-export const CreateShiftTypeFormSheet = () => {
+export function CreateShiftTypeFormSheet() {
   const { t } = useTranslation()
   const title = t('createNewShiftType', 'Create New Shift Type')
   const { id, closeSheet } = useSheetStore()
@@ -86,7 +91,7 @@ export const CreateShiftTypeFormSheet = () => {
 
   const { mutateAsync: createShiftType, isPending } = useMutation({
     ...trpc.shiftType.create.mutationOptions(),
-    onError: error => {
+    onError: (error) => {
       toast.error('Error', {
         description: t('valMessage', '{{val}}: {{message}}', {
           val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
@@ -94,7 +99,7 @@ export const CreateShiftTypeFormSheet = () => {
         }),
       })
     },
-    onSuccess: data => {
+    onSuccess: (data) => {
       closeSheet()
       queryClient.setQueryData(
         trpc.shiftType.byId.queryKey({ id: data.id }),
@@ -128,10 +133,10 @@ export const CreateShiftTypeFormSheet = () => {
       </SheetHeader>
       <form
         id='form-create-shift-type'
-        className='flex flex-col gap-4 h-full'
+        className='flex h-full flex-col gap-4'
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <FieldSet className='grid gap-4 auto-rows-min px-4'>
+        <FieldSet className='grid auto-rows-min gap-4 px-4'>
           <FieldGroup>
             <Controller
               name='name'
@@ -220,9 +225,10 @@ export const CreateShiftTypeFormSheet = () => {
                       <ComboboxValue>
                         {(ids: string[]) => (
                           <>
-                            {ids.map(id => {
+                            {ids.map((id) => {
                               const pg = payGrades?.find(pg => pg.id === id)
-                              if (!pg) return null
+                              if (!pg)
+                                return null
 
                               return (
                                 <ComboboxChip key={id}>{pg.name}</ComboboxChip>
@@ -245,23 +251,22 @@ export const CreateShiftTypeFormSheet = () => {
                         )}
                       </ComboboxList>
                       <ComboboxSeparator className='m-0' />
-                      <div className='flex flex-row w-full justify-between'>
+                      <div className='flex w-full flex-row justify-between'>
                         <Button
                           variant='link'
-                          className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                          className='text-muted-foreground hover:text-foreground px-3 text-center hover:no-underline'
                           type='button'
                           onClick={() =>
                             form.setValue(
                               'connectPayGrades',
                               payGrades?.map(pg => pg.id),
-                            )
-                          }
+                            )}
                         >
                           {t('selectAll', 'Select all')}
                         </Button>
                         <Button
                           variant='link'
-                          className='text-center px-3 text-muted-foreground hover:text-foreground hover:no-underline'
+                          className='text-muted-foreground hover:text-foreground px-3 text-center hover:no-underline'
                           type='button'
                           onClick={() => form.setValue('connectPayGrades', [])}
                         >

@@ -1,15 +1,16 @@
 'use client'
 
-import { useScheduleData } from '~/hooks/schedule/useScheduleData'
-import { useScheduleDerivedData } from '~/hooks/schedule/useScheduleDerivedData'
-import { useScheduleFilters } from '~/hooks/schedule/useScheduleFilters'
-import { useScheduleMutations } from '~/hooks/schedule/useScheduleMutations'
-import { useScheduleView } from '~/hooks/schedule/useScheduleView'
+import { useScheduleData } from '~/hooks/schedule/use-schedule-data'
+import { useScheduleDerivedData } from '~/hooks/schedule/use-schedule-derived-data'
+import { useScheduleFilters } from '~/hooks/schedule/use-schedule-filters'
+import { useScheduleMutations } from '~/hooks/schedule/use-schedule-mutations'
+import { useScheduleView } from '~/hooks/schedule/use-schedule-view'
+
 import { ScheduleFooter } from './schedule-footer'
 import { ScheduleGrid } from './schedule-grid'
 import { ScheduleHeader } from './schedule-header'
 
-export const TeamScheduleContent = () => {
+export function TeamScheduleContent() {
   const viewState = useScheduleView()
   const data = useScheduleData({
     start: viewState.start,

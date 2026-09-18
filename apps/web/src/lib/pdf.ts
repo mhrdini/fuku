@@ -1,8 +1,9 @@
-import { ShiftTypeOutput, TeamMemberOutput } from '@fuku/api/schemas'
-import { SchedulerAssignment } from '@fuku/domain/schemas'
-import { jsPDF } from 'jspdf'
+import { jsPDF as JsPDF } from 'jspdf'
 import { autoTable } from 'jspdf-autotable'
 import { DateTime } from 'luxon'
+
+import type { ShiftTypeOutput, TeamMemberOutput } from '@fuku/api/schemas'
+import type { SchedulerAssignment } from '@fuku/domain/schemas'
 
 import { getShiftTypeName } from './shift-types'
 import { getTeamMemberName } from './team-member'
@@ -30,14 +31,14 @@ export async function convertToPDF(
   // Filter assignments by date range
   // --------------------------------------------
 
-  const filteredData = data.filter(assignment => {
+  const filteredData = data.filter((assignment) => {
     const assignmentDate = DateTime.fromISO(String(assignment.date)).startOf(
       'day',
     )
 
     return (
-      assignmentDate >= DateTime.fromJSDate(startDate).startOf('day') &&
-      assignmentDate <= DateTime.fromJSDate(endDate).startOf('day')
+      assignmentDate >= DateTime.fromJSDate(startDate).startOf('day')
+      && assignmentDate <= DateTime.fromJSDate(endDate).startOf('day')
     )
   })
 
@@ -100,7 +101,7 @@ export async function convertToPDF(
   const body = dates.map(date => [
     date,
 
-    ...teamMemberIds.map(teamMemberId => {
+    ...teamMemberIds.map((teamMemberId) => {
       return assignmentMap.get(`${date}-${teamMemberId}`) ?? ''
     }),
   ])
@@ -119,7 +120,7 @@ export async function convertToPDF(
   // Create PDF
   // --------------------------------------------
 
-  const doc = new jsPDF({
+  const doc = new JsPDF({
     orientation: 'landscape',
     unit: 'mm',
     format: 'a4',
@@ -178,7 +179,7 @@ export async function convertToPDF(
       },
     },
 
-    didParseCell: data => {
+    didParseCell: (data) => {
       const text = String(data.cell.raw ?? '')
 
       if (text === 'OFF') {

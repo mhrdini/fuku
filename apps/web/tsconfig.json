@@ -1,8 +1,6 @@
 {
   "extends": "@fuku/config-typescript/nextjs.json",
   "compilerOptions": {
-    "declaration": false,
-    "declarationMap": false,
     "baseUrl": "./src",
     "paths": {
       "~/*": ["./*"],
@@ -12,6 +10,8 @@
       "@fuku/db": ["../../packages/db/src/*"],
       "@fuku/domain": ["../../packages/domain/src/*"]
     },
+    "declaration": false,
+    "declarationMap": false,
     "plugins": [{ "name": "next" }]
   },
   "include": [

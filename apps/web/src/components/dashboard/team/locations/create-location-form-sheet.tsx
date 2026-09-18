@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import { useParams } from 'next/navigation'
+
 import {
-  LocationCreateInput,
   LocationCreateInputSchema,
 } from '@fuku/api/schemas'
 import { useTranslation } from '@fuku/i18n/react'
@@ -23,11 +24,17 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Controller,
-  SubmitErrorHandler,
-  SubmitHandler,
   useForm,
 } from 'react-hook-form'
 import { toast } from 'sonner'
+
+import type {
+  LocationCreateInput,
+} from '@fuku/api/schemas'
+import type {
+  SubmitErrorHandler,
+  SubmitHandler,
+} from 'react-hook-form'
 
 import { SheetId } from '~/lib/sheet'
 import { useSheetStore } from '~/store/sheet.store'
@@ -37,7 +44,7 @@ const LocationCreateFormSchema = LocationCreateInputSchema
 
 type LocationCreateFormType = LocationCreateInput
 
-export const CreateLocationFormSheet = () => {
+export function CreateLocationFormSheet() {
   const { t } = useTranslation()
   const title = t('createNewLocation', 'Create New Location')
   const { id, closeSheet } = useSheetStore()
@@ -74,7 +81,7 @@ export const CreateLocationFormSheet = () => {
 
   const { mutateAsync: createLocation, isPending } = useMutation({
     ...trpc.location.create.mutationOptions(),
-    onError: error => {
+    onError: (error) => {
       toast.error('Error', {
         description: t('valMessage', '{{val}}: {{message}}', {
           val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
@@ -82,7 +89,7 @@ export const CreateLocationFormSheet = () => {
         }),
       })
     },
-    onSuccess: data => {
+    onSuccess: (data) => {
       closeSheet()
       queryClient.setQueryData(
         trpc.location.byId.queryKey({ id: data.id }),
@@ -105,7 +112,7 @@ export const CreateLocationFormSheet = () => {
       })
     },
   })
-  const onSubmit: SubmitHandler<LocationCreateFormType> = async data => {
+  const onSubmit: SubmitHandler<LocationCreateFormType> = async (data) => {
     try {
       await createLocation(data)
     } catch {
@@ -113,9 +120,9 @@ export const CreateLocationFormSheet = () => {
     }
   }
 
-  const onError: SubmitErrorHandler<LocationCreateFormType> = errors => {
-    console.log('create location form errors:', errors)
-    console.log('create location form values:', form.getValues())
+  const onError: SubmitErrorHandler<LocationCreateFormType> = (errors) => {
+    console.error('create location form errors:', errors)
+    console.error('create location form values:', form.getValues())
   }
 
   return (
@@ -125,10 +132,10 @@ export const CreateLocationFormSheet = () => {
       </SheetHeader>
       <form
         id='form-create-location'
-        className='flex flex-col gap-4 h-full'
+        className='flex h-full flex-col gap-4'
         onSubmit={form.handleSubmit(onSubmit, onError)}
       >
-        <FieldSet className='grid gap-4 flex-1 auto-rows-min px-4'>
+        <FieldSet className='grid flex-1 auto-rows-min gap-4 px-4'>
           <FieldGroup>
             <Controller
               name='name'

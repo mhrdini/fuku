@@ -1,5 +1,6 @@
 import { UnavailabilitySchema } from '@fuku/domain/schemas'
-import * as z from 'zod/v4'
+
+import type * as z from 'zod/v4'
 
 export const UnavailabilityCreateInputSchema = UnavailabilitySchema.omit({
   id: true,

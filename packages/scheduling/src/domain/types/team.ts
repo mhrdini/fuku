@@ -1,8 +1,8 @@
-export interface Team {
+export type Team = {
   id: string
 }
 
-export interface TeamMember {
+export type TeamMember = {
   id: string
   payGradeId: string | null
 }

@@ -1,4 +1,4 @@
-import { OptimizationModel, Variable, VariableType } from './optimization.model'
+import type { OptimizationModel, Variable, VariableType } from './optimization.model'
 
 export class VariableBuilder {
   constructor(private model: OptimizationModel) {}

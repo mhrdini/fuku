@@ -1,18 +1,23 @@
-import { db as PrismaClient } from '@fuku/db'
-import { SchedulerAssignment } from '@fuku/domain/schemas'
 import {
+  toISODateFromJS,
+  toJSDateFromISO,
+} from '@fuku/scheduling'
+
+import type {
+  RuleConditionOutput,
+} from '../../schemas/rule-condition'
+import type { db as PrismaClient } from '@fuku/db'
+import type { SchedulerAssignment } from '@fuku/domain/schemas'
+import type {
   Assignment,
   Period,
   TeamRepository,
-  toISODateFromJS,
-  toJSDateFromISO,
   Unavailability,
 } from '@fuku/scheduling'
 
 import {
-  RuleConditionOutput,
   RuleConditionOutputSchema,
-} from '../../schemas/ruleCondition'
+} from '../../schemas/rule-condition'
 
 export class PrismaTeamRepository implements TeamRepository {
   constructor(private db: typeof PrismaClient) {}
@@ -183,9 +188,10 @@ export class PrismaTeamRepository implements TeamRepository {
       staffingRequirements: team.staffingRequirements,
       unavailabilities,
       assignments,
-      period: period,
+      period,
     }
   }
+
   async persistSchedule(
     teamId: string,
     period: Period,

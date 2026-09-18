@@ -1,8 +1,9 @@
-import { TeamMemberOutput, TeamMemberOutputSchema } from '@fuku/api/schemas'
+import { TeamMemberOutputSchema } from '@fuku/api/schemas'
 import i18next from '@fuku/i18n/server'
 import * as z from 'zod/v4'
 
-import { TeamMemberData } from './schedule'
+import type { TeamMemberData } from './schedule'
+import type { TeamMemberOutput } from '@fuku/api/schemas'
 
 // from the procedure and also with UI-specific fields
 export const TeamMemberUISchema = TeamMemberOutputSchema.extend({
@@ -16,30 +17,30 @@ export const TeamMemberUISchema = TeamMemberOutputSchema.extend({
 
 export type TeamMemberUI = z.infer<typeof TeamMemberUISchema>
 
-export const toTeamMemberUI = (
-  m: NonNullable<TeamMemberOutput>,
-): TeamMemberUI => ({
-  ...m,
-  fullName: i18next.t('givennamesFamilyname', '{{givenNames}} {{familyName}}', {
-    givenNames: m.givenNames,
-    familyName: m.familyName,
-  }),
-  payGradeName: m.payGrade?.name ?? 'Unassigned',
-  baseRate: m.payGrade?.baseRate ?? null,
-  effectiveRate: m.payGrade ? m.payGrade.baseRate * m.rateMultiplier : null,
-  username: m.user ? m.user.username : null,
-})
+export function toTeamMemberUI(m: NonNullable<TeamMemberOutput>): TeamMemberUI {
+  return {
+    ...m,
+    fullName: i18next.t('givennamesFamilyname', '{{givenNames}} {{familyName}}', {
+      givenNames: m.givenNames,
+      familyName: m.familyName,
+    }),
+    payGradeName: m.payGrade?.name ?? 'Unassigned',
+    baseRate: m.payGrade?.baseRate ?? null,
+    effectiveRate: m.payGrade ? m.payGrade.baseRate * m.rateMultiplier : null,
+    username: m.user ? m.user.username : null,
+  }
+}
 
-export const getTeamMemberName = (
-  tm: TeamMemberOutput | TeamMemberUI,
-): string =>
-  i18next.t('givennamesFamilyname', '{{givenNames}} {{familyName}}', {
+export function getTeamMemberName(tm: TeamMemberOutput | TeamMemberUI): string {
+  return i18next.t('givennamesFamilyname', '{{givenNames}} {{familyName}}', {
     givenNames: tm.givenNames,
     familyName: tm.familyName,
   })
+}
 
-export const getTeamMemberTotalEarnings = (tm: TeamMemberData): number =>
-  tm.totalHours * (tm.payGrade ? tm.payGrade.baseRate : 0)
+export function getTeamMemberTotalEarnings(tm: TeamMemberData): number {
+  return tm.totalHours * (tm.payGrade ? tm.payGrade.baseRate : 0)
+}
 
 // team member sorting
 export const TEAM_MEMBER_SORT_KEYS = [
@@ -70,7 +71,8 @@ export function sortTeamMembers(
   sortBy: TeamMemberSortKey | undefined,
   direction: 'asc' | 'desc' = 'asc',
 ): TeamMemberData[] {
-  if (!sortBy) return tms
+  if (!sortBy)
+    return tms
   const sorted = [...tms].sort(TEAM_MEMBER_SORT_COMPARATORS[sortBy])
   return direction === 'asc' ? sorted : sorted.reverse()
 }
@@ -91,10 +93,11 @@ export function groupTeamMembers(
   tms: TeamMemberData[],
   groupBy: TeamMemberGroupByKey | undefined,
 ): TeamMemberData[][] {
-  if (!groupBy) return [tms]
+  if (!groupBy)
+    return [tms]
   const groups = new Map<string, TeamMemberData[]>()
 
-  tms.forEach(tm => {
+  tms.forEach((tm) => {
     const key = TEAM_MEMBER_GROUP_BY_GETTERS[groupBy](tm)
     if (!groups.has(key)) {
       groups.set(key, [])

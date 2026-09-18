@@ -1,6 +1,5 @@
 'use client'
 
-import { RuleOutput, RuleUpdateInput } from '@fuku/api/schemas'
 import {
   RuleMetricSchema,
   RuleMetricValues,
@@ -19,24 +18,26 @@ import {
   SelectValue,
 } from '@fuku/ui/components'
 
+import type { RuleOutput, RuleUpdateInput } from '@fuku/api/schemas'
+
 import { useCommittedNumberField } from '~/hooks/rule-panel/use-committed-number-field'
 import { RULE_METRIC_LABELS } from '~/lib/rule-panel/rule.constants'
 
-const RuleMetricEditor = ({
+function RuleMetricEditor({
   rule,
   updateRule,
 }: {
   rule: RuleOutput
   updateRule: (rule: RuleUpdateInput) => Promise<RuleOutput>
-}) => {
+}) {
   const { t } = useTranslation()
 
   const threshold = useCommittedNumberField(rule.threshold, num =>
-    updateRule({ ...rule, threshold: num! } as RuleUpdateInput),
-  )
+    updateRule({ ...rule, threshold: num! } as RuleUpdateInput))
 
   const handleUpdateRuleMetric = (metric: string) => {
-    if (metric === rule.metric) return
+    if (metric === rule.metric)
+      return
     updateRule({
       ...rule,
       metric: RuleMetricSchema.parse(metric),
@@ -44,7 +45,8 @@ const RuleMetricEditor = ({
   }
 
   const handleUpdateOperator = (operator: string) => {
-    if (operator === rule.operator) return
+    if (operator === rule.operator)
+      return
     updateRule({
       ...rule,
       operator: RuleOperatorSchema.parse(operator),
@@ -52,7 +54,8 @@ const RuleMetricEditor = ({
   }
 
   const handleUpdateRuleTimeWindow = (timeWindow: string) => {
-    if (timeWindow === rule.timeWindow) return
+    if (timeWindow === rule.timeWindow)
+      return
     updateRule({
       ...rule,
       timeWindow: RuleTimeWindowSchema.parse(timeWindow),
@@ -98,8 +101,9 @@ const RuleMetricEditor = ({
         value={threshold.input}
         onChange={e => threshold.setInput(e.target.value)}
         onBlur={threshold.commit}
-        onKeyDown={e => {
-          if (e.key === 'Enter' || e.key === 'Escape') threshold.commit()
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === 'Escape')
+            threshold.commit()
         }}
       />
       {/* time window */}

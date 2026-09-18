@@ -1,23 +1,18 @@
 'use client'
 
-import { createContext, useContext } from 'react'
-import { Session } from '@fuku/auth'
+import type { Session } from '@fuku/auth'
 
-interface SessionProviderProps {
+import { SessionContext } from './session-context'
+
+type SessionProviderProps = {
   session: Session | null
   children: React.ReactNode
 }
 
-const SessionContext = createContext<Session | null>(null)
-
 export function SessionProvider({ session, children }: SessionProviderProps) {
   return (
-    <SessionContext.Provider value={session}>
+    <SessionContext value={session}>
       {children}
-    </SessionContext.Provider>
+    </SessionContext>
   )
-}
-
-export function useSession() {
-  return useContext(SessionContext)
 }

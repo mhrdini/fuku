@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation'
+
 import i18next from '@fuku/i18n/server'
 
 import { getSession } from '~/auth/server'
 
-const IndexPage = async () => {
+async function IndexPage() {
   const session = await getSession()
 
   if (session) {

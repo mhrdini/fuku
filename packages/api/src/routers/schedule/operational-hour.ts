@@ -1,10 +1,13 @@
-import { Weekday } from '@fuku/domain/schemas'
-import { TRPCRouterRecord } from '@trpc/server'
 import * as z from 'zod/v4'
+
+import type {
+  OperationalHoursOutput,
+} from '../../schemas'
+import type { Weekday } from '@fuku/domain/schemas'
+import type { TRPCRouterRecord } from '@trpc/server'
 
 import {
   OperationalHourCreateInputSchema,
-  OperationalHoursOutput,
   OperationalHoursOutputSchema,
   OperationalHourUpdateInputSchema,
 } from '../../schemas'
@@ -131,7 +134,7 @@ export const operationalHourRouter = {
             where: {
               teamId_weekday: {
                 teamId: oh.teamId,
-                weekday: weekday,
+                weekday,
               },
             },
             update: {
@@ -144,7 +147,7 @@ export const operationalHourRouter = {
             },
             create: {
               teamId: oh.teamId,
-              weekday: weekday,
+              weekday,
               startTime: oh.startTime,
               endTime: oh.endTime,
               deletedAt: oh.deletedAt ? new Date() : null,

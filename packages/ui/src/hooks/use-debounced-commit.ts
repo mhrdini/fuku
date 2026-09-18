@@ -7,7 +7,8 @@ export function useDebouncedCommit<T extends any[]>(
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const schedule = (...args: T) => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    if (timeoutRef.current)
+      clearTimeout(timeoutRef.current)
 
     timeoutRef.current = setTimeout(() => {
       fn(...args)
@@ -25,7 +26,8 @@ export function useDebouncedCommit<T extends any[]>(
 
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      if (timeoutRef.current)
+        clearTimeout(timeoutRef.current)
     }
   }, [])
 

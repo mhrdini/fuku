@@ -8,16 +8,16 @@ type SectionCardProps = {
   children?: React.ReactNode
 }
 
-export const SectionCard = ({
+export function SectionCard({
   title,
   icon: Icon,
   className,
   children,
-}: SectionCardProps) => {
+}: SectionCardProps) {
   return (
-    <Card className={cn('p-6 gap-0', className)}>
+    <Card className={cn('gap-0 p-6', className)}>
       {title && (
-        <CardTitle className='flex items-center gap-2 mb-2 text-lg font-semibold'>
+        <CardTitle className='mb-2 flex items-center gap-2 text-lg font-semibold'>
           {Icon && <Icon className='size-3.5' />}
           {title}
         </CardTitle>

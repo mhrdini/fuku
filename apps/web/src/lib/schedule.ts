@@ -1,6 +1,7 @@
-import { TeamMemberOutput, UnavailabilityOutput } from '@fuku/api/schemas'
-import { SchedulerAssignment } from '@fuku/domain/schemas'
 import { DateTime } from 'luxon'
+
+import type { TeamMemberOutput, UnavailabilityOutput } from '@fuku/api/schemas'
+import type { SchedulerAssignment } from '@fuku/domain/schemas'
 
 export const ViewOptionValues = ['day', 'week', 'month'] as const
 export type ViewOption = (typeof ViewOptionValues)[number]
@@ -17,7 +18,7 @@ export const widthsByView: Record<ViewOption, string> = {
 
 export const defaultDateRangesByView: Record<
   ViewOption,
-  { from: Date; to: Date }
+  { from: Date, to: Date }
 > = {
   day: {
     from: DateTime.now().startOf('day').toJSDate(),
@@ -33,24 +34,22 @@ export const defaultDateRangesByView: Record<
     to: DateTime.now().endOf('month').toJSDate(),
   },
 }
+export function getDefaultDateRangeByView(view: ViewOption, currentStart?: Date) {
+  let start: DateTime
 
-export const getDefaultDateRangeByView = (
-  view: ViewOption,
-  currentStart?: Date,
-) => {
   switch (view) {
     case 'day':
-      const day = currentStart
+      start = currentStart
         ? DateTime.fromJSDate(currentStart)
         : DateTime.now()
       return {
-        from: day.startOf('day').toJSDate(),
-        to: day.endOf('day').toJSDate(),
+        from: start.startOf('day').toJSDate(),
+        to: start.endOf('day').toJSDate(),
       }
     case 'week': {
       // always start on monday regardless of locale
       // even though date range picker has option to start on sunday (monday by default)
-      const start = currentStart
+      start = currentStart
         ? DateTime.fromJSDate(currentStart).startOf('day')
         : DateTime.now().startOf('week')
       return {
@@ -59,7 +58,7 @@ export const getDefaultDateRangeByView = (
       }
     }
     case 'month': {
-      const start = currentStart
+      start = currentStart
         ? DateTime.fromJSDate(currentStart).startOf('month')
         : DateTime.now().startOf('month')
       return {
@@ -91,22 +90,22 @@ export type CellData = {
   schedulerUnavailabilities: UnavailabilityOutput[]
 }
 
-export const getDayId = (date: Date | string) => {
+export function getDayId(date: Date | string) {
   const d = typeof date === 'string' ? new Date(date) : date
   return DateTime.fromJSDate(d).toFormat('yyyy-MM-dd')
 }
 
-export const getCellKey = (teamMemberId: string, date: Date | string) => {
+export function getCellKey(teamMemberId: string, date: Date | string) {
   const dayId = getDayId(date)
   return `${teamMemberId}_${dayId}`
 }
 
-export const splitCellKey = (cellKey: string) => {
+export function splitCellKey(cellKey: string) {
   const [teamMemberId, date] = cellKey.split('_')
   return { teamMemberId, date }
 }
 
-export const parseCellKey = (cellKey: string, asString: boolean = false) => {
+export function parseCellKey(cellKey: string, asString: boolean = false) {
   const { teamMemberId, date } = splitCellKey(cellKey)
   return {
     teamMemberId,
@@ -114,7 +113,9 @@ export const parseCellKey = (cellKey: string, asString: boolean = false) => {
   }
 }
 
-export const getInitialCellData = (): CellData => ({
-  schedulerAssignments: [],
-  schedulerUnavailabilities: [],
-})
+export function getInitialCellData(): CellData {
+  return {
+    schedulerAssignments: [],
+    schedulerUnavailabilities: [],
+  }
+}

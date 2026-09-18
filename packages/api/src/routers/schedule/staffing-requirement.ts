@@ -1,11 +1,15 @@
-import { Weekday, WeekdaySchema } from '@fuku/domain/schemas'
-import { TRPCRouterRecord } from '@trpc/server'
+import { WeekdaySchema } from '@fuku/domain/schemas'
 import * as z from 'zod/v4'
 
-import {
+import type {
   StaffingRequirementsOutput,
+} from '../../schemas/staffing-requirement'
+import type { Weekday } from '@fuku/domain/schemas'
+import type { TRPCRouterRecord } from '@trpc/server'
+
+import {
   StaffingRequirementsOutputSchema,
-} from '../../schemas/staffingRequirement'
+} from '../../schemas/staffing-requirement'
 import { protectedProcedure } from '../../trpc'
 
 export const staffingRequirementRouter = {

@@ -1,6 +1,8 @@
 import { TeamMemberRoleValues, TeamMemberSchema } from '@fuku/domain/schemas'
-import { TRPCError, TRPCRouterRecord } from '@trpc/server'
+import { TRPCError } from '@trpc/server'
 import * as z from 'zod/v4'
+
+import type { TRPCRouterRecord } from '@trpc/server'
 
 import { TeamMemberCreateInputSchema } from '../../schemas'
 import { protectedProcedure } from '../../trpc'

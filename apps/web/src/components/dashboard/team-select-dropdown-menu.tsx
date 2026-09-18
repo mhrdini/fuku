@@ -1,4 +1,5 @@
 import { useParams, useRouter } from 'next/navigation'
+
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
@@ -15,13 +16,13 @@ import { Check, ChevronsUpDown, Plus, Users2 } from 'lucide-react'
 import { useTeamStore } from '~/store/team.store'
 import { useTRPC } from '~/trpc/client'
 
-export const TeamSelectDropdownMenu = () => {
+export function TeamSelectDropdownMenu() {
   const { t } = useTranslation()
   const params = useParams()
   const username = params.username as string
 
-  const { openTeamSelect, setOpenTeamSelect, activeTeamId, setActiveTeamId } =
-    useTeamStore()
+  const { openTeamSelect, setOpenTeamSelect, activeTeamId, setActiveTeamId }
+    = useTeamStore()
 
   const trpc = useTRPC()
   const queryClient = useQueryClient()
@@ -43,7 +44,8 @@ export const TeamSelectDropdownMenu = () => {
   }
 
   const onSelectTeam = async (id: string, slug: string) => {
-    if (id === activeTeamId) return
+    if (id === activeTeamId)
+      return
     setActiveTeamId(id)
     await setLastActiveTeam({ teamId: id })
     router.push(`/${username}/team/${slug}`)
@@ -55,9 +57,9 @@ export const TeamSelectDropdownMenu = () => {
         <Button
           size='lg'
           className={cn(
-            !sidebarState?.teams.length &&
-              'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
-            'h-12 w-[14rem] text-sm px-4 has-[>svg]:px-2',
+            !sidebarState?.teams.length
+            && 'bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border shadow-xs',
+            'h-12 w-[14rem] px-4 text-sm has-[>svg]:px-2',
           )}
           onClick={!sidebarState?.teams.length ? onNewTeam : undefined}
           variant='outline'
@@ -86,10 +88,10 @@ export const TeamSelectDropdownMenu = () => {
                 </span>
                 <span className='truncate text-xs'>
                   {sidebarState?.activeTeam?.teamMembers.length}
-                  {' ' +
-                    (sidebarState?.activeTeam?.teamMembers.length === 1
+                  {` ${
+                    sidebarState?.activeTeam?.teamMembers.length === 1
                       ? t('memberCount', 'member')
-                      : t('membersCount', 'members'))}
+                      : t('membersCount', 'members')}`}
                 </span>
               </div>
               <ChevronsUpDown className='ml-auto' />
@@ -118,7 +120,9 @@ export const TeamSelectDropdownMenu = () => {
         )}
 
         <DropdownMenuItem onClick={onNewTeam}>
-          <Plus /> {t('createANewTeam', 'Create a new team')}
+          <Plus />
+          {' '}
+          {t('createANewTeam', 'Create a new team')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

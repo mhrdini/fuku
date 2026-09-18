@@ -1,7 +1,7 @@
 import { ColorHex, ShiftTypeSchema } from '@fuku/domain/schemas'
 import * as z from 'zod/v4'
 
-import { PayGradeShiftTypeOutputSchema } from './payGradeShiftType'
+import { PayGradeShiftTypeOutputSchema } from './pay-grade-shift-type'
 
 export const ShiftTypeOutputSchema = ShiftTypeSchema.extend({
   description: z.string().nullable(),

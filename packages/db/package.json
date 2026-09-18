@@ -31,7 +31,7 @@
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "prisma": "catalog:",
-    "rimraf": "^5.0.5",
+    "rimraf": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:"
   }
