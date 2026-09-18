@@ -236,7 +236,7 @@ export function MembersDataTableSection({
                   checked={column.getIsVisible()}
                   onCheckedChange={value => column.toggleVisibility(!!value)}
                 >
-                  {t(column.columnDef.id!)}
+                  {t(column.id)}
                 </DropdownMenuCheckboxItem>
               )
             })}

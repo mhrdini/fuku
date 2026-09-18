@@ -146,8 +146,13 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+
+  svg {
+    @apply size-4 shrink-0;
   }
 
   button:not(:disabled),
