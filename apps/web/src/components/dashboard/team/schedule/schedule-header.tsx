@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react'
 
-import i18next from '@fuku/i18n/client'
 import { Trans, useTranslation } from '@fuku/i18n/react'
 import {
   Badge,
@@ -36,7 +35,6 @@ import {
   Spinner,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
-import { enGB, ja } from 'date-fns/locale'
 import {
   CheckIcon,
   ChevronDownIcon,
@@ -57,6 +55,7 @@ import type { ScheduleFilters } from '~/hooks/schedule/use-schedule-filters'
 import type { ScheduleMutations } from '~/hooks/schedule/use-schedule-mutations'
 import type { ScheduleViewState } from '~/hooks/schedule/use-schedule-view'
 import { convertToCSV } from '~/lib/csv'
+import { getDateFnsLocale } from '~/lib/date-fns'
 import { getByIdMap } from '~/lib/db'
 import { convertToPDF } from '~/lib/pdf'
 import { ViewOptionValues } from '~/lib/schedule'
@@ -94,12 +93,9 @@ export function ScheduleHeader({
   },
   derivedData: { computeSchedulerMetrics },
 }: ScheduleHeaderProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
-  const locale = useMemo(
-    () => (i18next.language === 'en' ? enGB : ja),
-    [i18next.language],
-  )
+  const locale = getDateFnsLocale(i18n.language)
 
   const {
     schedulerAssignments,

@@ -747,8 +747,8 @@ export function DateRangePicker({
           </div>
           {!isSmallScreen && (
             <div className='flex flex-col items-end gap-1 pr-2 pb-6 pl-6'>
-              <div>{t('presets')}</div>
               <div className='flex w-full flex-col items-end gap-1 pr-2 pb-6 pl-6'>
+                <div className='text-muted-foreground my-auto flex h-6 items-center justify-center pr-2'>{t('presets')}</div>
                 {PRESETS.map(preset => (
                   <PresetButton
                     key={preset.name}

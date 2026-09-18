@@ -182,8 +182,6 @@ export function RulePanelPopoverButton({
     toggleActive,
     toggleScope,
     toggleMetric,
-    hasActiveFilters,
-    clearFilters,
   } = useRuleFilters(allRules)
   const {
     sortedRules,
