@@ -31,6 +31,7 @@ export const shiftTypeRouter = {
       z.object({
         teamId: z.string(),
         limit: z.number().optional(),
+        includeDeleted: z.boolean().default(false),
       }),
     )
     .query(async ({ input, ctx }) => {
@@ -39,7 +40,7 @@ export const shiftTypeRouter = {
           team: {
             id: input.teamId,
           },
-          deletedAt: null,
+          ...(!input.includeDeleted && { deletedAt: null }),
         },
         ...(input.limit && { take: input.limit }),
         orderBy: {
@@ -55,6 +56,7 @@ export const shiftTypeRouter = {
       z.object({
         teamId: z.string(),
         limit: z.number().optional(),
+        includeDeleted: z.boolean().default(false),
       }),
     )
     .query(async ({ input, ctx }) => {
@@ -63,7 +65,7 @@ export const shiftTypeRouter = {
           team: {
             id: input.teamId,
           },
-          deletedAt: null,
+          ...(!input.includeDeleted && { deletedAt: null }),
         },
         ...(input.limit && { take: input.limit }),
         include: {
