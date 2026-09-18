@@ -5,7 +5,7 @@ import { Fragment, useCallback } from 'react'
 import { useTranslation } from '@fuku/i18n/react'
 import { Button, Label, Separator } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 
 import type { ZodObject } from 'zod/v4'
 
@@ -42,7 +42,7 @@ export default function Stepper({
         className={cn('flex md:hidden', currentIndex === 0 && 'invisible')}
         onClick={() => setStep(currentIndex - 1)}
       >
-        <ChevronLeft />
+        <ChevronLeftIcon />
       </Button>
       <ol className='flex items-center justify-center gap-2'>
         {steps.map((step, index) => {
@@ -108,7 +108,7 @@ export default function Stepper({
         )}
         onClick={() => setStep(currentIndex + 1)}
       >
-        <ChevronRight />
+        <ChevronRightIcon />
       </Button>
     </div>
   )

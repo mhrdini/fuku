@@ -11,7 +11,7 @@ import {
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, ChevronsUpDown, Plus, Users2 } from 'lucide-react'
+import { CheckIcon, ChevronsUpDownIcon, PlusIcon, Users2Icon } from 'lucide-react'
 
 import { useTeamStore } from '~/store/team.store'
 import { useTRPC } from '~/trpc/client'
@@ -68,7 +68,7 @@ export function TeamSelectDropdownMenu() {
             // no sidebarState.teams
             <>
               <div className='flex aspect-square size-8 items-center justify-center rounded-none'>
-                <Plus className='size-4' />
+                <PlusIcon className='size-4' />
               </div>
               <div className='grid flex-1 text-left text-sm leading-tight'>
                 <span className='truncate font-medium'>
@@ -80,7 +80,7 @@ export function TeamSelectDropdownMenu() {
             // has sidebarState.teams
             <>
               <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-none'>
-                <Users2 className='size-4' />
+                <Users2Icon className='size-4' />
               </div>
               <div className='grid flex-1 text-left text-sm leading-tight'>
                 <span className='truncate font-medium'>
@@ -94,7 +94,7 @@ export function TeamSelectDropdownMenu() {
                       : t('membersCount', 'members')}`}
                 </span>
               </div>
-              <ChevronsUpDown className='ml-auto' />
+              <ChevronsUpDownIcon className='ml-auto' />
             </>
           )}
         </Button>
@@ -110,7 +110,7 @@ export function TeamSelectDropdownMenu() {
           >
             {team.name}
             {sidebarState?.activeTeam?.id === team.id && (
-              <Check className='ml-auto' />
+              <CheckIcon className='ml-auto' />
             )}
           </DropdownMenuItem>
         ))}
@@ -120,7 +120,7 @@ export function TeamSelectDropdownMenu() {
         )}
 
         <DropdownMenuItem onClick={onNewTeam}>
-          <Plus />
+          <PlusIcon />
           {' '}
           {t('createANewTeam', 'Create a new team')}
         </DropdownMenuItem>

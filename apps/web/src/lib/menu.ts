@@ -6,13 +6,13 @@ import { useParams } from 'next/navigation'
 
 import { useTranslation } from '@fuku/i18n/react'
 import {
-  BadgeDollarSign,
-  Calendar,
-  Clock,
-  Cog,
-  MapPin,
-  UserCircle2,
-  Users2,
+  BadgeDollarSignIcon,
+  CalendarIcon,
+  ClockIcon,
+  CogIcon,
+  MapPinIcon,
+  UserCircle2Icon,
+  Users2Icon,
 } from 'lucide-react'
 
 import type { UserTeam } from '@fuku/api/schemas'
@@ -47,22 +47,22 @@ export function useSidebarMenu(team: UserTeam | null): MenuGroup[] {
             {
               href: `/${username}/team/${team.slug}`,
               label: t('overview', 'Overview'),
-              icon: Users2,
+              icon: Users2Icon,
             },
             {
               href: `/${username}/team/${team.slug}/schedule`,
               label: t('schedule', 'Schedule'),
-              icon: Calendar,
+              icon: CalendarIcon,
             },
             {
               href: `/${username}/team/${team.slug}/members`,
               label: t('members', 'Members'),
-              icon: UserCircle2,
+              icon: UserCircle2Icon,
             },
             {
               href: `/${username}/team/${team.slug}/settings`,
               label: t('settings', 'Settings'),
-              icon: Cog,
+              icon: CogIcon,
             },
           ],
         },
@@ -79,44 +79,44 @@ export function useNavigationMenu(username: string | null, team: UserTeam | null
       {
         label: t('team', 'Team'),
         href: `/${username}/team`,
-        icon: Users2,
+        icon: Users2Icon,
         submenus: [
           {
             label: t('overview', 'Overview'),
             href: `/${username}/team/${team.slug}`,
-            icon: Users2,
+            icon: Users2Icon,
           },
           {
             label: t('members', 'Members'),
             href: `/${username}/team/${team.slug}/members`,
-            icon: UserCircle2,
+            icon: UserCircle2Icon,
           },
           {
             label: t('payGrades', 'Pay Grades'),
             href: `/${username}/team/${team.slug}/pay-grades`,
-            icon: BadgeDollarSign,
+            icon: BadgeDollarSignIcon,
           },
           {
             label: t('shiftTypes', 'Shift Types'),
             href: `/${username}/team/${team.slug}/shift-types`,
-            icon: Clock,
+            icon: ClockIcon,
           },
           {
             label: t('locations', 'Locations'),
             href: `/${username}/team/${team.slug}/locations`,
-            icon: MapPin,
+            icon: MapPinIcon,
           },
           {
             label: t('settings', 'Settings'),
             href: `/${username}/team/${team.slug}/settings`,
-            icon: Cog,
+            icon: CogIcon,
           },
         ],
       },
       {
         label: t('schedule', 'Schedule'),
         href: `/${username}/team/${team.slug}/schedule`,
-        icon: Calendar,
+        icon: CalendarIcon,
       },
     ]
   }, [username, team, i18n.resolvedLanguage])

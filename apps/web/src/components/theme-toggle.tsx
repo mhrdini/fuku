@@ -1,6 +1,6 @@
 import { useTranslation } from '@fuku/i18n/react'
 import { Button } from '@fuku/ui/components'
-import { SunMoon } from 'lucide-react'
+import { SunMoonIcon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
 export function ThemeToggle() {
@@ -17,7 +17,7 @@ export function ThemeToggle() {
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
       aria-description={t('toggleTheme', 'Toggle theme')}
     >
-      <SunMoon />
+      <SunMoonIcon />
     </Button>
   )
 }

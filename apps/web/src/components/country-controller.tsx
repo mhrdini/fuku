@@ -18,7 +18,7 @@ import {
   PopoverTrigger,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
-import { Check, ChevronsUpDown } from 'lucide-react'
+import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
 import {
   Controller,
 } from 'react-hook-form'
@@ -81,7 +81,7 @@ export function CountryController<T extends FieldValues>({
                       )}
                 </span>
 
-                <ChevronsUpDown
+                <ChevronsUpDownIcon
                   className='text-muted-foreground/80 shrink-0'
                   aria-hidden='true'
                 />
@@ -123,7 +123,7 @@ export function CountryController<T extends FieldValues>({
                       >
                         <span className='truncate'>{name}</span>
 
-                        <Check
+                        <CheckIcon
                           size={16}
                           className={cn(
                             'ml-auto',

@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
-import { ChevronDownIcon, X } from 'lucide-react'
+import { ChevronDownIcon, XIcon } from 'lucide-react'
 
 import type {
   RuleConditionOutput,
@@ -262,7 +262,7 @@ function RuleConditionPanelItem({
           isWeekdayCondition && 'hidden',
         )}
       >
-        <X />
+        <XIcon />
       </Button>
     </div>
   )

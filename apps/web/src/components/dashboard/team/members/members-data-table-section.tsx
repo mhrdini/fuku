@@ -42,11 +42,11 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import {
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  PlusCircle,
-  Settings2,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  PlusCircleIcon,
+  PlusIcon,
+  Settings2Icon,
 } from 'lucide-react'
 
 import type {
@@ -145,7 +145,7 @@ export function MembersDataTableSection({
             role='combobox'
             className='justify-between border-dashed py-0'
           >
-            <PlusCircle />
+            <PlusCircleIcon />
             {t('payGrade', 'Pay Grade')}
             {(table.getColumn('payGradeName')?.getFilterValue() as string[])
               ?.length > 0 && (
@@ -220,7 +220,7 @@ export function MembersDataTableSection({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant='outline'>
-            <Settings2 />
+            <Settings2Icon />
             <span className='hidden md:inline-flex'>{t('view', 'View')}</span>
           </Button>
         </DropdownMenuTrigger>
@@ -309,7 +309,7 @@ export function MembersDataTableSection({
           className='text-muted-foreground'
           onClick={onCreateMember}
         >
-          <Plus />
+          <PlusIcon />
           <span className='hidden sm:inline'>
             {t('newTeamMember', 'New team member')}
           </span>
@@ -322,7 +322,7 @@ export function MembersDataTableSection({
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          <ChevronLeft />
+          <ChevronLeftIcon />
         </Button>
         <Button
           variant='outline'
@@ -331,7 +331,7 @@ export function MembersDataTableSection({
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          <ChevronRight />
+          <ChevronRightIcon />
         </Button>
       </div>
     </div>

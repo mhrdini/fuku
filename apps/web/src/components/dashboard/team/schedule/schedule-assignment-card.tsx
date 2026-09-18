@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
-import { ChevronDown, Trash } from 'lucide-react'
+import { ChevronDownIcon, TrashIcon } from 'lucide-react'
 
 import type { ShiftTypeOutput } from '@fuku/api/schemas'
 import type { SchedulerAssignment } from '@fuku/domain/schemas'
@@ -96,7 +96,7 @@ export function ScheduleAssignmentCard({
             className='absolute top-1.5 right-2 opacity-0 transition-opacity group-hover/assignment:opacity-100'
             // className='flex items-center bg-ring/50 text-secondary-foreground/80 hover:text-secondary-foreground active:text-secondary-foreground hover:bg-ring/80 p-1'
           >
-            <ChevronDown />
+            <ChevronDownIcon />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className='max-w-min' align='end' side='bottom'>
@@ -115,7 +115,7 @@ export function ScheduleAssignmentCard({
             onSelect={handleDeleteAssignment}
             variant='destructive'
           >
-            <Trash />
+            <TrashIcon />
             <div className='whitespace-nowrap'>{t('delete', 'Delete')}</div>
           </DropdownMenuItem>
         </DropdownMenuContent>

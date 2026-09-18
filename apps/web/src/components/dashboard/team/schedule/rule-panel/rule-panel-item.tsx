@@ -15,7 +15,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@fuku/ui/components'
-import { ChevronRight, Copy, Plus, Trash } from 'lucide-react'
+import { ChevronRightIcon, CopyIcon, PlusIcon, TrashIcon } from 'lucide-react'
 
 import type {
   RuleConditionCreateInput,
@@ -113,7 +113,7 @@ function RulePanelItem({
                 className='ml-auto'
                 onClick={handleDuplicateRule}
               >
-                <Copy />
+                <CopyIcon />
               </Button>
             </TooltipTrigger>
             <TooltipContent>{t('duplicate', 'Duplicate')}</TooltipContent>
@@ -125,7 +125,7 @@ function RulePanelItem({
                 variant='error-ghost'
                 onClick={handleDeleteRule}
               >
-                <Trash />
+                <TrashIcon />
               </Button>
             </TooltipTrigger>
             <TooltipContent>{t('delete', 'Delete')}</TooltipContent>
@@ -134,7 +134,7 @@ function RulePanelItem({
         <div>
           <CollapsibleTrigger asChild>
             <Button variant='link'>
-              <ChevronRight className=' transition-transform duration-300 ease-in-out group-data-[state=open]/rule:rotate-90' />
+              <ChevronRightIcon className=' transition-transform duration-300 ease-in-out group-data-[state=open]/rule:rotate-90' />
               {t('lengthConditions', '{{length}} conditions', {
                 length: ruleConditions.length,
               })}
@@ -152,7 +152,7 @@ function RulePanelItem({
           />
         ))}
         <Button variant='secondary' size='sm' onClick={handleCreateCondition}>
-          <Plus />
+          <PlusIcon />
           {t('addCondition', 'Add condition')}
         </Button>
       </CollapsibleContent>
