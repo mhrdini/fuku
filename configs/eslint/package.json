@@ -13,7 +13,6 @@
 
     "@next/eslint-plugin-next": "catalog:",
     "eslint": "catalog:",
-    "eslint-config-expo": "catalog:",
     "eslint-import-resolver-typescript": "catalog:",
     "eslint-plugin-better-tailwindcss": "catalog:",
     "eslint-plugin-format": "catalog:",
