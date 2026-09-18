@@ -114,7 +114,6 @@ export const sharedRules = [
               elementNamePattern: ['^next$', '^next/'],
             },
             { groupName: 'next', elementNamePattern: ['^next$', '^next/'] },
-            { groupName: 'expo', elementNamePattern: '^expo' },
             {
               groupName: 'mj-type',
               modifiers: ['type'],
@@ -128,7 +127,6 @@ export const sharedRules = [
             'react',
             'next-type',
             'next',
-            'expo',
             ['value-builtin', 'value-external'], // third-party modules
             'type-import', // remaining type-only imports
             'mj-type',
@@ -144,20 +142,32 @@ export const sharedRules = [
 
   // --- tailwind class sorting, replaces prettier-plugin-tailwindcss ---
   {
+    files: ['apps/web/**/*.{js,jsx,ts,tsx}'],
     plugins: { 'better-tailwindcss': betterTailwindcss },
     settings: {
       'better-tailwindcss': {
-        // Point this at your real Tailwind entry file. Required for v4
-        // (a .css file); for v3 point it at your tailwind.config.js instead.
-        entryPoint: '../../packages/ui/src/styles.css',
+        cwd: './apps/web',
+        entryPoint: 'src/globals.css',
         attributes: ['className'],
-        // cn/cva/clsx/twMerge are auto-detected already — no need to list them
       },
     },
     rules: {
       'better-tailwindcss/enforce-consistent-class-order': 'warn',
-      // Prettier's printWidth-driven class wrapping isn't a faithful port —
-      // turn this off rather than fight it. Flip to 'warn' if you want it.
+      'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
+    },
+  },
+  {
+    files: ['packages/ui/**/*.{js,jsx,ts,tsx}'],
+    plugins: { 'better-tailwindcss': betterTailwindcss },
+    settings: {
+      'better-tailwindcss': {
+        cwd: './packages/ui',
+        entryPoint: 'src/styles.css',
+        attributes: ['className'],
+      },
+    },
+    rules: {
+      'better-tailwindcss/enforce-consistent-class-order': 'warn',
       'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
     },
   },
