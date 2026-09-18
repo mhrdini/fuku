@@ -257,11 +257,11 @@
   "MIN": "最小",
   "MAX": "最大",
 
-  "DAY": "1日あたり",
-  "WEEK": "1週間あたり",
-  "MONTH": "1か月あたり",
-  "ROLLING_WEEK": "7日ごと",
-  "ROLLING_MONTH": "ローリング月ごと",
+  "PER_DAY": "1日あたり",
+  "PER_WEEK": "1週間あたり",
+  "PER_MONTH": "1ヶ月あたり",
+  "PER_ROLLING_WEEK": "7日ごと",
+  "PER_ROLLING_MONTH": "ローリング月ごと",
 
   "noGrouping": "グループ化なし",
   "created": "作成済み",
@@ -277,5 +277,35 @@
   "nextWeek": "来週",
   "lastMonth": "先月",
   "thisMonth": "今月",
-  "nextMonth": "来月"
+  "nextMonth": "来月",
+
+  "MONTH": "月",
+  "WEEKDAY": "曜日",
+  "IS_HOLIDAY": "祝日",
+
+  "global": "グローバル",
+
+  "MONTH_1": "1月",
+  "MONTH_2": "2月",
+  "MONTH_3": "3月",
+  "MONTH_4": "4月",
+  "MONTH_5": "5月",
+  "MONTH_6": "6月",
+  "MONTH_7": "7月",
+  "MONTH_8": "8月",
+  "MONTH_9": "9月",
+  "MONTH_10": "10月",
+  "MONTH_11": "11月",
+  "MONTH_12": "12月",
+
+  "WEEKDAY_1": "月曜日",
+  "WEEKDAY_2": "火曜日",
+  "WEEKDAY_3": "水曜日",
+  "WEEKDAY_4": "木曜日",
+  "WEEKDAY_5": "金曜日",
+  "WEEKDAY_6": "土曜日",
+  "WEEKDAY_7": "日曜日",
+
+  "true": "はい",
+  "false": "いいえ"
 }
