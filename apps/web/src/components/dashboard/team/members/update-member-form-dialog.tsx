@@ -35,7 +35,7 @@ import {
 import { cn } from '@fuku/ui/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, ChevronDown } from 'lucide-react'
+import { CheckIcon, ChevronDownIcon } from 'lucide-react'
 import {
   Controller,
   useForm,
@@ -245,7 +245,7 @@ export function UpdateMemberFormDialog() {
                           {field.value && payGrades
                             ? payGrades.find(pg => pg.id === field.value)?.name
                             : t('selectPayGrade', 'Select pay grade...')}
-                          <ChevronDown className='opacity-50' />
+                          <ChevronDownIcon className='opacity-50' />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className='p-0' align='start'>
@@ -274,7 +274,7 @@ export function UpdateMemberFormDialog() {
                                   }}
                                 >
                                   {pg.name}
-                                  <Check
+                                  <CheckIcon
                                     className={cn(
                                       'ml-auto',
                                       pg.id === field.value

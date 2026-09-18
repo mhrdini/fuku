@@ -24,7 +24,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { Ellipsis, Plus, Trash } from 'lucide-react'
+import { EllipsisIcon, PlusIcon, TrashIcon } from 'lucide-react'
 
 import type {
   ColumnDef,
@@ -102,7 +102,7 @@ export function TeamLocationsContent() {
             <DropdownMenuTrigger asChild>
               <Button variant='ghost' className='-mx-1 -my-1 size-8'>
                 <span className='sr-only'>{t('openMenu', 'Open menu')}</span>
-                <Ellipsis />
+                <EllipsisIcon />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='start'>
@@ -112,7 +112,7 @@ export function TeamLocationsContent() {
                   onRemoveLocation(location.id)
                 }}
               >
-                <Trash />
+                <TrashIcon />
                 {' '}
                 {t('remove', 'Remove')}
               </DropdownMenuItem>
@@ -217,7 +217,7 @@ export function TeamLocationsContent() {
           className='text-muted-foreground'
           onClick={onNewLocation}
         >
-          <Plus />
+          <PlusIcon />
           <span className='hidden sm:inline'>
             {t('newLocation', 'New location')}
           </span>

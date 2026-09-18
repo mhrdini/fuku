@@ -16,12 +16,12 @@ import {
 } from '@fuku/ui/components'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  Ellipsis,
-  Pencil,
-  Trash,
+  ArrowDownIcon,
+  ArrowUpDownIcon,
+  ArrowUpIcon,
+  EllipsisIcon,
+  PencilIcon,
+  TrashIcon,
 } from 'lucide-react'
 
 import type { Column, ColumnDef } from '@tanstack/react-table'
@@ -41,14 +41,14 @@ const defaultVisibleColumns = ['fullName', 'payGradeName']
 function getMultiSortIcon(column: Column<any, any>) {
   return column.getIsSorted() === 'asc'
     ? (
-        <ArrowUp />
+        <ArrowUpIcon />
       )
     : column.getIsSorted() === 'desc'
       ? (
-          <ArrowDown />
+          <ArrowDownIcon />
         )
       : (
-          <ArrowUpDown />
+          <ArrowUpDownIcon />
         )
 }
 
@@ -112,7 +112,7 @@ export default function TeamMembersContent() {
               <DropdownMenuTrigger asChild>
                 <Button variant='ghost' className='-mx-1 -my-1 size-8'>
                   <span className='sr-only'>{t('openMenu', 'Open menu')}</span>
-                  <Ellipsis />
+                  <EllipsisIcon />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align='start'>
@@ -121,7 +121,7 @@ export default function TeamMembersContent() {
                     onUpdateMember(teamMember.id)
                   }}
                 >
-                  <Pencil />
+                  <PencilIcon />
                   {' '}
                   {t('edit', 'Edit')}
                 </DropdownMenuItem>
@@ -132,7 +132,7 @@ export default function TeamMembersContent() {
                     onRemoveMember(teamMember.id)
                   }}
                 >
-                  <Trash />
+                  <TrashIcon />
                   {' '}
                   {t('remove', 'Remove')}
                 </DropdownMenuItem>

@@ -1,7 +1,7 @@
 import i18next from '@fuku/i18n/client'
 import { useTranslation } from '@fuku/i18n/react'
 import { Button } from '@fuku/ui/components'
-import { Globe } from 'lucide-react'
+import { GlobeIcon } from 'lucide-react'
 
 export function LanguageSelect() {
   const { t } = useTranslation()
@@ -16,7 +16,7 @@ export function LanguageSelect() {
       onClick={toggleLanguage}
       aria-description={t('toggleTheme', 'Toggle theme')}
     >
-      <Globe />
+      <GlobeIcon />
     </Button>
   )
 }
