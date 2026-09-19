@@ -54,7 +54,7 @@ import type {
 } from 'react-hook-form'
 
 import { useCommittedNumberField } from '~/hooks/rule-panel/use-committed-number-field'
-import { DialogId } from '~/lib/dialog'
+import type { CreateMemberDraft } from '~/store/dialog.store'
 import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 
@@ -66,7 +66,7 @@ type TeamMemberCreateFormType = TeamMemberCreateInput
 
 export function CreateMemberFormDialog() {
   const { t } = useTranslation()
-  const { id, closeDialog } = useDialogStore()
+  const { closeDialog, createMemberDraft, setCreateMemberDraft, clearCreateMemberDraft } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
 
   const params = useParams()
@@ -80,24 +80,25 @@ export function CreateMemberFormDialog() {
   })
 
   const form = useForm<TeamMemberCreateFormType>({
-    defaultValues: {
+    defaultValues: createMemberDraft ?? ({
       givenNames: '',
       familyName: '',
       rateMultiplier: 1,
       teamMemberRole: TeamMemberRoleValues.STAFF,
       payGradeId: null,
-    },
+    }),
     resolver: zodResolver(TeamMemberCreateFormSchema),
   })
 
   const rateMultiplier = useWatch({
     control: form.control,
     name: 'rateMultiplier',
+
   })
 
   const rateMultiplierField = useCommittedNumberField(
     rateMultiplier,
-    value => form.setValue('rateMultiplier', value ?? 0, {
+    value => form.setValue('rateMultiplier', value ?? 1, {
       shouldValidate: true,
       shouldTouch: true,
       shouldDirty: true,
@@ -105,19 +106,18 @@ export function CreateMemberFormDialog() {
   )
 
   useEffect(() => {
-    if (id === DialogId.CREATE_TEAM_MEMBER && team && team.id) {
-      form.reset(
-        {
-          teamId: team.id,
-          teamMemberRole: TeamMemberRoleValues.STAFF,
-        },
-        {
-          keepDefaultValues: true,
-          keepDirty: false,
-        },
-      )
+    if (team?.id && !form.getValues('teamId')) {
+      form.setValue('teamId', team.id)
     }
-  }, [id, team])
+  }, [team?.id, form])
+
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      setCreateMemberDraft(values as CreateMemberDraft)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [form, setCreateMemberDraft])
 
   const { data: payGrades } = useQuery({
     ...trpc.payGrade.list.queryOptions({ teamId: team?.id ?? '' }),
@@ -135,6 +135,9 @@ export function CreateMemberFormDialog() {
       })
     },
     onSuccess: (data) => {
+      form.reset()
+      clearCreateMemberDraft()
+
       closeDialog()
       queryClient.setQueryData(
         trpc.teamMember.byId.queryKey({ id: data.id }),
@@ -331,18 +334,16 @@ export function CreateMemberFormDialog() {
                 <FieldLabel htmlFor='form-create-member-rate-multiplier'>
                   {t('multiplier', 'Multiplier')}
                 </FieldLabel>
-
                 <Input
                   {...rateMultiplierField.inputProps}
                   id='form-create-member-rate-multiplier'
                   type='number'
                   step='0.01'
-                  min='0'
+                  min='1'
                   aria-invalid={!!form.formState.errors.rateMultiplier}
                   placeholder={t('rateMultiplier', 'Rate Multiplier')}
                   autoComplete='off'
                 />
-
                 {form.formState.errors.rateMultiplier && (
                   <FieldError
                     errors={[form.formState.errors.rateMultiplier]}
@@ -400,7 +401,7 @@ export function CreateMemberFormDialog() {
                 </Field>
               )}
             />
-            <Field orientation='responsive'>
+            <Field orientation='horizontal'>
               <FieldError errors={[form.formState.errors.root]} />
               {form.formState.isDirty
                 ? (

@@ -1,3 +1,5 @@
+import type React from 'react'
+
 import { useEffect, useState } from 'react'
 
 export function useCommittedNumberField(
@@ -29,6 +31,7 @@ export function useCommittedNumberField(
 
   const inputProps = {
     value: input,
+
     onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
       setInput(e.target.value),
     onBlur: commit,

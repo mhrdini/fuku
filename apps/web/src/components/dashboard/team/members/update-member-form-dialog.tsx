@@ -100,11 +100,12 @@ export function UpdateMemberFormDialog() {
   const rateMultiplier = useWatch({
     control: form.control,
     name: 'rateMultiplier',
+    defaultValue: 1,
   })
 
   const rateMultiplierField = useCommittedNumberField(
     rateMultiplier,
-    value => form.setValue('rateMultiplier', value ?? 0, {
+    value => form.setValue('rateMultiplier', value ?? 1, {
       shouldValidate: true,
       shouldTouch: true,
       shouldDirty: true,
@@ -129,7 +130,7 @@ export function UpdateMemberFormDialog() {
         },
       )
     }
-  }, [teamMemberFetched, teamMember, currentTeamMemberId])
+  }, [teamMemberFetched, teamMember, currentTeamMemberId, form])
 
   const { mutateAsync: updateMember } = useMutation({
     ...trpc.teamMember.update.mutationOptions(),
@@ -382,7 +383,7 @@ export function UpdateMemberFormDialog() {
               )}
             />
 
-            <Field orientation='responsive'>
+            <Field orientation='horizontal'>
               <FieldError errors={[form.formState.errors.root]} />
               <AlertDialog>
                 {form.formState.isDirty
