@@ -1,6 +1,19 @@
+import { TeamMemberRoleValues } from '@fuku/domain/schemas'
 import { create } from 'zustand'
 
+import type { TeamMemberRole } from '@fuku/domain/schemas'
+
 import type { DialogId } from '~/lib/dialog'
+
+export type CreateMemberDraft = {
+  givenNames: string
+  familyName: string
+  teamId?: string
+  rateMultiplier: number
+  teamMemberRole: TeamMemberRole
+  payGradeId: string | null
+  username?: string
+}
 
 type DialogOptions = {
   id: DialogId | null
@@ -13,6 +26,9 @@ type DialogStore = DialogOptions & {
   openDialog: (options: DialogOptions) => void
   openAlertDialog: (options: DialogOptions) => void
   closeDialog: () => void
+  createMemberDraft: CreateMemberDraft
+  setCreateMemberDraft: (draft: CreateMemberDraft) => void
+  clearCreateMemberDraft: () => void
 }
 
 export const useDialogStore = create<DialogStore>(set => ({
@@ -35,4 +51,23 @@ export const useDialogStore = create<DialogStore>(set => ({
       isAlert: true,
     }),
   closeDialog: () => set({ open: false }),
+  createMemberDraft: {
+    givenNames: '',
+    familyName: '',
+    teamId: '',
+    rateMultiplier: 1,
+    teamMemberRole: TeamMemberRoleValues.STAFF,
+    payGradeId: null,
+    username: '',
+  },
+  setCreateMemberDraft: (draft: CreateMemberDraft) => set(({ createMemberDraft: draft })),
+  clearCreateMemberDraft: () => set({ createMemberDraft: {
+    givenNames: '',
+    familyName: '',
+    teamId: '',
+    rateMultiplier: 1,
+    teamMemberRole: TeamMemberRoleValues.STAFF,
+    payGradeId: null,
+    username: '',
+  } }),
 }))
