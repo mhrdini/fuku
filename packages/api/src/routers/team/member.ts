@@ -9,6 +9,17 @@ import { protectedProcedure } from '../../trpc'
 
 export const teamMemberRouter = {
   // source of truth for a member -> create / update / restore
+  countActive: protectedProcedure.input(z.object({
+    teamId: z.string(),
+  })).query(async ({ ctx, input }) => {
+    const { teamId } = input
+    return ctx.db.teamMember.count({
+      where: {
+        teamId,
+        deletedAt: null,
+      },
+    })
+  }),
   byId: protectedProcedure
     .input(
       z.object({

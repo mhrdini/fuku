@@ -17,7 +17,7 @@ import { UsersIcon } from 'lucide-react'
 
 import { useTRPC } from '~/trpc/client'
 
-import { DailyRequirementsSection } from './daily-requirements'
+import { ScheduleRequirements } from '../../schedule-requirements'
 import { SummarySection } from './summary-section'
 
 export default function TeamOverviewContent() {
@@ -34,7 +34,7 @@ export default function TeamOverviewContent() {
     ? (
         <div className='flex flex-col gap-6'>
           <SummarySection />
-          <DailyRequirementsSection teamId={team?.id ?? ''} />
+          <ScheduleRequirements teamId={team?.id ?? ''} />
         </div>
       )
     : (

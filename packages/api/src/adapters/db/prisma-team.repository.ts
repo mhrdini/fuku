@@ -74,6 +74,9 @@ export class PrismaTeamRepository implements TeamRepository {
             startTime: true,
             endTime: true,
           },
+          where: {
+            deletedAt: null,
+          },
         },
         staffingRequirements: {
           select: {
