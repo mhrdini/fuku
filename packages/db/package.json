@@ -26,6 +26,7 @@
     "@prisma/client": "catalog:"
   },
   "devDependencies": {
+    "@faker-js/faker": "catalog:",
     "@fuku/config-eslint": "workspace:*",
     "@fuku/config-typescript": "workspace:*",
     "@types/node": "catalog:",
