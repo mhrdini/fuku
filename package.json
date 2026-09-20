@@ -1,5 +1,6 @@
 {
   "name": "fuku",
+  "type": "module",
   "private": true,
   "packageManager": "pnpm@10.12.4",
   "engines": {
@@ -26,7 +27,11 @@
     "generate": "turbo run generate",
     "lint": "turbo run lint",
     "prepare": "husky",
-    "barrels": "node scripts/generate-barrels.js"
+    "barrels": "node scripts/generate-barrels.js",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "turbo run test:e2e"
   },
   "peerDependencies": {
     "inquirer": "catalog:"
@@ -37,9 +42,9 @@
     "@commitlint/cz-commitlint": "catalog:",
     "@eslint-react/eslint-plugin": "catalog:",
     "@fuku/config-eslint": "workspace:*",
-
     "@fuku/config-typescript": "workspace:*",
     "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "barrelsby": "catalog:",
     "commitizen": "catalog:",
     "dotenv": "catalog:",
@@ -49,11 +54,13 @@
     "eslint-plugin-react-refresh": "catalog:",
     "husky": "catalog:",
     "i18n-iso-countries": "catalog:",
+    "jsdom": "catalog:",
     "lint-staged": "catalog:",
     "prettier": "catalog:",
     "tsx": "catalog:",
     "turbo": "catalog:",
-    "validate-branch-name": "catalog:"
+    "validate-branch-name": "catalog:",
+    "vitest": "catalog:"
   },
   "validate-branch-name": {
     "pattern": "^(main|staging|docs){1}$|^(feat|fix|hotfix|release|chore)/.+$",

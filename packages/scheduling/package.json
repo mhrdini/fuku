@@ -11,7 +11,6 @@
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
-
     "@fuku/config-typescript": "workspace:*",
     "@types/luxon": "catalog:",
     "eslint": "catalog:",
