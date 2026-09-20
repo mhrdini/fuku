@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { OperationalHourSchema } from '../operational-hour'
+import { OperationalHourSchema } from './operational-hour'
 
 describe('operationalHourSchema', () => {
   const valid = {

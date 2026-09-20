@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { RuleConditionSchema } from '../rule-condition'
+import { RuleConditionSchema } from './rule-condition'
 
 describe('ruleConditionSchema', () => {
   const validMonthCondition = {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { DayAssignmentSchema } from '../day-assignment'
+import { DayAssignmentSchema } from './day-assignment'
 
 describe('dayAssignmentSchema', () => {
   const valid = {
