@@ -30,6 +30,7 @@ export default defineConfig({
           name: 'db',
           include: ['packages/db/**/*.test.ts'],
           environment: 'node',
+          setupFiles: ['./src/testing/setup.ts'],
         },
       },
 
