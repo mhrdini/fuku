@@ -39,7 +39,7 @@ export function RemoveShiftTypeAlertDialog() {
   const { mutateAsync: restoreShiftType } = useMutation({
     ...trpc.shiftType.restore.mutationOptions(),
     onError: (error) => {
-      toast.error('Error', {
+      toast.error(t('error'), {
         description: t('message', '{{message}}', { message: error.message }),
       })
     },
@@ -51,7 +51,7 @@ export function RemoveShiftTypeAlertDialog() {
       queryClient.invalidateQueries(
         trpc.shiftType.listIds.queryOptions({ teamId: team?.id ?? '' }),
       )
-      toast.success('Shift Type', {
+      toast.success(t('shiftType'), {
         description: t('nameHasBeenRestored', '{{name}} has been restored.', {
           name: data.name,
         }),
@@ -62,7 +62,7 @@ export function RemoveShiftTypeAlertDialog() {
   const { mutateAsync: removeShiftType, isPending } = useMutation({
     ...trpc.shiftType.delete.mutationOptions(),
     onError: (error) => {
-      toast.error('Error', {
+      toast.error(t('error'), {
         // TODO: Internationalize server errors according to message type
         description: t('valMessage', '{{val}}: {{message}}', {
           val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
@@ -80,7 +80,7 @@ export function RemoveShiftTypeAlertDialog() {
       queryClient.invalidateQueries(
         trpc.shiftType.list.queryOptions({ teamId: team?.id ?? '' }),
       )
-      const toastId = toast('Shift Type', {
+      const toastId = toast(t('shiftType'), {
         description: t('nameHasBeenRemoved', '{{name}} has been removed.', {
           name: data.name,
         }),

@@ -90,7 +90,7 @@ export function CreatePayGradeFormSheet() {
   const { mutateAsync: createPayGrade, isPending } = useMutation({
     ...trpc.payGrade.create.mutationOptions(),
     onError: (error) => {
-      toast.error('Error', {
+      toast.error(t('error'), {
         description: t('valMessage', '{{val}}: {{message}}', {
           val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
           message: error.message,
@@ -109,7 +109,7 @@ export function CreatePayGradeFormSheet() {
       queryClient.invalidateQueries(
         trpc.payGrade.list.queryOptions({ teamId: team?.id ?? '' }),
       )
-      toast.success('Pay Grade', {
+      toast.success(t('payGrade'), {
         description: t('nameHasBeenCreated', '{{name}} has been created.', {
           name: data.name,
         }),

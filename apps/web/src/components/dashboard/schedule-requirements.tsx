@@ -133,14 +133,14 @@ export function ScheduleRequirements({ teamId, autoUpdateOnChange = true }: { te
     onSuccess: () => {
       form.reset(form.getValues())
       if (!autoUpdateOnChange) {
-        toast.success('Operational Hours', {
+        toast.success(t('operationalHours'), {
           description: t('changesSaved', 'Changes saved!'),
         })
       }
       queryClient.invalidateQueries(trpc.operationalHour.list.queryOptions({ teamId }))
     },
     onError: (error) => {
-      toast.error('Operational Hours', {
+      toast.error(t('operationalHours'), {
         description: error.message,
       })
     },
@@ -151,13 +151,13 @@ export function ScheduleRequirements({ teamId, autoUpdateOnChange = true }: { te
     onSuccess: () => {
       form.reset(form.getValues())
       if (!autoUpdateOnChange) {
-        toast.success('Staffing Requirements', {
+        toast.success(t('staffingRequirements'), {
           description: t('changesSaved', 'Changes saved!'),
         })
       }
     },
     onError: (error) => {
-      toast.error('Staffing Requirements', {
+      toast.error(t('staffingRequirements'), {
         description: error.message,
       })
     },

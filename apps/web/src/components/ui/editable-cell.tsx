@@ -67,13 +67,13 @@ function EditableCellInner<
       if (error instanceof TRPCClientError) {
         const zodError = error.data?.zodError
         const issue = zodError?.fieldErrors?.[columnName as string]?.[0]
-        toast.error('Error', {
+        toast.error(t('error'), {
           description:
             issue
             ?? t('invalidValuePleaseTryAgain', 'Invalid value. Please try again.'),
         })
       } else {
-        toast.error('Error', {
+        toast.error(t('error'), {
           description: t(
             'somethingWentWrongPleaseTryAgain',
             'Something went wrong. Please try again.',
