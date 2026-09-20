@@ -10,7 +10,6 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:",
-
     "@next/eslint-plugin-next": "catalog:",
     "eslint": "catalog:",
     "eslint-import-resolver-typescript": "catalog:",
