@@ -4,7 +4,7 @@ import { WorkHourSchema } from './work-hour'
 
 export const ShiftAssignmentSchema = z.object({
   id: z.string(),
-  locationId: z.string().optional(),
+  locationId: z.string().nullish(),
   shiftTypeId: z.string(),
   dayAssignmentId: z.string(),
   workHour: WorkHourSchema.optional(),
