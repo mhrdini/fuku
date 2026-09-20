@@ -39,7 +39,7 @@ export function RemovePayGradeAlertDialog() {
   const { mutateAsync: removePayGrade, isPending } = useMutation({
     ...trpc.payGrade.delete.mutationOptions(),
     onError: (error) => {
-      toast.error('Error', {
+      toast.error(t('error'), {
         description: t('valMessage', '{{val}}: {{message}}', {
           val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
           message: error.message,
@@ -56,7 +56,7 @@ export function RemovePayGradeAlertDialog() {
       queryClient.invalidateQueries(
         trpc.payGrade.list.queryOptions({ teamId: team?.id ?? '' }),
       )
-      toast('Pay Grade', {
+      toast(t('payGrade'), {
         description: t('nameHasBeenRemoved', '{{name}} has been removed.', {
           name: data.name,
         }),

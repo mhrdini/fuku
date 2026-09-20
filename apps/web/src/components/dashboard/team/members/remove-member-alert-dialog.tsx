@@ -42,7 +42,7 @@ export function RemoveMemberAlertDialog() {
   const { mutateAsync: restoreMember } = useMutation({
     ...trpc.teamMember.restore.mutationOptions(),
     onError: (error) => {
-      toast.error('Error', {
+      toast.error(t('error'), {
         description: t('message', '{{message}}', { message: error.message }),
       })
     },
@@ -54,7 +54,7 @@ export function RemoveMemberAlertDialog() {
       queryClient.invalidateQueries(
         trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
       )
-      toast.success('Team Member', {
+      toast.success(t('teamMember'), {
         description: t(
           'givennamesFamilynameHasBeenRestored',
           '{{givenNames}} {{familyName}} has been restored.',
@@ -81,7 +81,7 @@ export function RemoveMemberAlertDialog() {
       queryClient.invalidateQueries(
         trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
       )
-      const toastId = toast('Team Member', {
+      const toastId = toast(t('teamMember'), {
         description: t(
           'givennamesFamilynameHasBeenRemoved',
           '{{givenNames}} {{familyName}} has been removed.',

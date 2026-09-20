@@ -129,7 +129,7 @@ export function CreateMemberFormDialog() {
   const { mutateAsync: createMember, isPending } = useMutation({
     ...trpc.teamMember.create.mutationOptions(),
     onError: (error) => {
-      toast.error('Error', {
+      toast.error(t('error'), {
         description: t('valMessage', '{{val}}: {{message}}', {
           val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
           message: error.message,
@@ -149,7 +149,7 @@ export function CreateMemberFormDialog() {
         trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
       )
 
-      toast.success('Team Member', {
+      toast.success(t('teamMember'), {
         description: t(
           'givennamesFamilynameHasBeenAddedToTheTeam',
           '{{givenNames}} {{familyName}} has been added to the team.',

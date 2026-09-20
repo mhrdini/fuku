@@ -94,7 +94,7 @@ export function TeamSettingsContent() {
       queryClient.invalidateQueries(
         trpc.team.bySlug.queryOptions({ slug: data!.slug }),
       )
-      toast.success('Team', {
+      toast.success(t('team'), {
         description: t('changesSaved', 'Changes saved!'),
       })
     },

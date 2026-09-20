@@ -39,7 +39,7 @@ export function RemoveLocationAlertDialog() {
   const { mutateAsync: restoreLocation } = useMutation({
     ...trpc.location.restore.mutationOptions(),
     onError: (error) => {
-      toast.error('Error', {
+      toast.error(t('error'), {
         description: t('message', '{{message}}', { message: error.message }),
       })
     },
@@ -54,7 +54,7 @@ export function RemoveLocationAlertDialog() {
       queryClient.invalidateQueries(
         trpc.location.list.queryOptions({ teamId: team?.id ?? '' }),
       )
-      toast.success('Location', {
+      toast.success(t('location'), {
         description: t('nameHasBeenRestored', '{{name}} has been restored.', {
           name: data.name,
         }),
@@ -65,7 +65,7 @@ export function RemoveLocationAlertDialog() {
   const { mutateAsync: removeLocation, isPending } = useMutation({
     ...trpc.location.delete.mutationOptions(),
     onError: (error) => {
-      toast.error('Error', {
+      toast.error(t('error'), {
         description: t('valMessage', '{{val}}: {{message}}', {
           val: error.data?.httpStatus && ` (${error.data.httpStatus})`,
           message: error.message,
@@ -82,7 +82,7 @@ export function RemoveLocationAlertDialog() {
       queryClient.invalidateQueries(
         trpc.location.list.queryOptions({ teamId: team?.id ?? '' }),
       )
-      const toastId = toast('Location', {
+      const toastId = toast(t('location'), {
         description: t('nameHasBeenRemoved', '{{name}} has been removed.', {
           name: data.name,
         }),

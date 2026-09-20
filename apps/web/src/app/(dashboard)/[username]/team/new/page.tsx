@@ -247,7 +247,7 @@ export default function NewTeamPage() {
       setOpenTeamSelect(false)
       queryClient.invalidateQueries(trpc.user.getSidebarState.queryOptions())
       router.push(`/${session?.user.username}/team/${data.slug}`)
-      toast.success('Team', {
+      toast.success(t('team'), {
         description: t('nameHasBeenCreated', '{{name}} has been created.', {
           name: data.name,
         }),
@@ -487,7 +487,7 @@ function TeamMembersSection() {
                       return pg
                         ? t('nameBaserate', '{{name}} ({{baseRate}})', {
                             name: pg.name,
-                            baseRate: pg.baseRate,
+                            baseRate: pg.baseRate * field.rateMultiplier,
                           })
                         : 'Unassigned'
                     })()}
