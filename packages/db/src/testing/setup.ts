@@ -4,7 +4,7 @@ import {
   migrateTestDatabase,
   resetDatabase,
   testDb,
-} from '.'
+} from './database'
 
 beforeAll(() => {
   migrateTestDatabase()
