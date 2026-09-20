@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { RuleSchema } from '../rule'
+import { RuleSchema } from './rule'
 
 describe('ruleSchema', () => {
   const valid = {

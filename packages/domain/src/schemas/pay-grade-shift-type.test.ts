@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { PayGradeShiftTypeSchema } from '../pay-grade-shift-type'
+import { PayGradeShiftTypeSchema } from './pay-grade-shift-type'
 
 describe('payGradeShiftTypeSchema', () => {
   const valid = {
