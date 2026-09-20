@@ -1,5 +1,5 @@
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 import { execSync } from 'node:child_process'
 
 const connectionString = process.env.DATABASE_URL
@@ -50,3 +50,5 @@ export async function resetDatabase() {
     ),
   )
 }
+
+export { Prisma }
