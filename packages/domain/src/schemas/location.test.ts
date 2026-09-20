@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { LocationSchema } from '../location'
+import { LocationSchema } from './location'
 
 describe('locationSchema', () => {
   const valid = {

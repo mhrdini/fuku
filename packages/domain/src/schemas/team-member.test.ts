@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { TeamMemberSchema } from '../team-member'
+import { TeamMemberSchema } from './team-member'
 
 describe('teamMemberSchema', () => {
   const valid = {

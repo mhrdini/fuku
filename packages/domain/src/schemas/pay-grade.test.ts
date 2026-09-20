@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { PayGradeSchema } from '../pay-grade'
+import { PayGradeSchema } from './pay-grade'
 
 describe('payGradeSchema', () => {
   const valid = {

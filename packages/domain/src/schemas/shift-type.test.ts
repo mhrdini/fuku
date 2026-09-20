@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { ShiftTypeSchema } from '../shift-type'
+import { ShiftTypeSchema } from './shift-type'
 
 describe('shiftTypeSchema', () => {
   const valid = {

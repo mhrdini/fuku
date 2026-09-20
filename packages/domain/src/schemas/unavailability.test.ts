@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { UnavailabilitySchema } from '../unavailability'
+import { UnavailabilitySchema } from './unavailability'
 
 describe('unavailabilitySchema', () => {
   const valid = {

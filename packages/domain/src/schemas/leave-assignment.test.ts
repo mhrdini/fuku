@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { LeaveAssignmentSchema } from '../leave-assignment'
+import { LeaveAssignmentSchema } from './leave-assignment'
 
 describe('leaveAssignmentSchema', () => {
   const valid = {

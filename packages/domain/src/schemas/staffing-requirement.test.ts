@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { StaffingRequirementSchema } from '../staffing-requirement'
+import { StaffingRequirementSchema } from './staffing-requirement'
 
 describe('staffingRequirementSchema', () => {
   const valid = {

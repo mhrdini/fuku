@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { ShiftAssignmentSchema } from '../shift-assignment'
+import { ShiftAssignmentSchema } from './shift-assignment'
 
 describe('shiftAssignmentSchema', () => {
   const valid = {
