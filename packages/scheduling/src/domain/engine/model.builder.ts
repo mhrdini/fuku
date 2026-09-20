@@ -65,7 +65,10 @@ export class ConstraintModelBuilder {
     this.addEligibilityConstraints(model)
     this.addAvailabilityConstraints(model)
 
-    // step 1: can staffing even be satisfied?
+    // step 0
+    this.addClosedDayConstraints(model)
+
+    // step 1
     this.addMaxOneShiftTypePerDayConstraints(model)
     this.addStaffingRequirementsConstraints(model)
 
@@ -215,6 +218,13 @@ export class ConstraintModelBuilder {
     for (let dayIndex = 0; dayIndex < this.numDays; dayIndex++) {
       const coefficients: Record<string, number> = {}
       const day = addDays(this.ctx.period.start, dayIndex)
+
+      const operationalHours = this.ctx.operationalHours[getWeekday(day)]
+
+      if (!operationalHours) {
+        log('[STAFFING] no operational hours for weekday:', getWeekday(day))
+        continue
+      }
 
       const staffingRequirement = this.ctx.staffingRequirements[getWeekday(day)]
 
@@ -465,6 +475,30 @@ export class ConstraintModelBuilder {
           )
 
           windowIndex++
+        }
+      }
+    }
+  }
+
+  private addClosedDayConstraints(model: OptimizationModel) {
+    for (let dayIndex = 0; dayIndex < this.numDays; dayIndex++) {
+      const day = addDays(this.ctx.period.start, dayIndex)
+      const weekday = getWeekday(day)
+      const operationalHours = this.ctx.operationalHours[weekday]
+
+      if (operationalHours)
+        continue
+
+      for (const tm of this.ctx.teamMembers) {
+        for (const st of this.ctx.shiftTypes) {
+          const varName = getAssignmentVariableName(tm.id, dayIndex, st.id)
+
+          model.constraints.push({
+            name: `closedDay__${tm.id}__${dayIndex}__${st.id}`,
+            coefficients: { [varName]: 1 },
+            operator: '==',
+            rhs: 0,
+          })
         }
       }
     }

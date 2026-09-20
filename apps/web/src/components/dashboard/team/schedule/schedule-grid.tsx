@@ -106,7 +106,7 @@ export function ScheduleGrid({
       }}
     >
       <ScrollArea
-        className={cn('border-input h-[600px] rounded-none border', className)}
+        className={cn('h-[600px] rounded-none border-input border-t', className)}
       >
         <div
           className='isolate grid h-[600px] min-w-max'

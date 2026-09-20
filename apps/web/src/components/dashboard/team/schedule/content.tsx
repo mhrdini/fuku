@@ -9,6 +9,7 @@ import { useScheduleView } from '~/hooks/schedule/use-schedule-view'
 import { ScheduleFooter } from './schedule-footer'
 import { ScheduleGrid } from './schedule-grid'
 import { ScheduleHeader } from './schedule-header'
+import { ScheduleRequirementsPanel } from './schedule-requirements-panel'
 
 export function TeamScheduleContent() {
   const viewState = useScheduleView()
@@ -40,12 +41,15 @@ export function TeamScheduleContent() {
       />
       {/* TODO: mobile */}
       {/* desktop */}
-      <ScheduleGrid
-        className='hidden md:block'
-        data={data}
-        filters={filters}
-        derivedData={derivedData}
-      />
+      <div className='border border-input'>
+        <ScheduleRequirementsPanel teamId={data.team?.id} />
+        <ScheduleGrid
+          className='hidden md:block'
+          data={data}
+          filters={filters}
+          derivedData={derivedData}
+        />
+      </div>
       <ScheduleFooter />
     </div>
   )

@@ -105,7 +105,7 @@ export function DashboardSidebar({ username }: { username: string }) {
               !sidebarState.teams?.length
               && 'bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border shadow-xs',
             )}
-            onClick={!sidebarState.teams?.length ? onNewTeam : undefined}
+            onClick={onNewTeam}
           >
             {!sidebarState.activeTeam ? (
               // no sidebarState.teams
