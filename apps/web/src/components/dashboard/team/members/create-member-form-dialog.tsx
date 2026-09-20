@@ -54,7 +54,7 @@ import type {
 } from 'react-hook-form'
 
 import { useCommittedNumberField } from '~/hooks/rule-panel/use-committed-number-field'
-import type { CreateMemberDraft } from '~/store/dialog.store'
+import type { TeamMemberDraft } from '~/store/dialog.store'
 import { useDialogStore } from '~/store/dialog.store'
 import { useTRPC } from '~/trpc/client'
 
@@ -107,13 +107,15 @@ export function CreateMemberFormDialog() {
 
   useEffect(() => {
     if (team?.id && !form.getValues('teamId')) {
-      form.setValue('teamId', team.id)
+      form.setValue('teamId', team.id, {
+        shouldDirty: false,
+      })
     }
   }, [team?.id, form])
 
   useEffect(() => {
     const subscription = form.watch((values) => {
-      setCreateMemberDraft(values as CreateMemberDraft)
+      setCreateMemberDraft(values as TeamMemberDraft)
     })
 
     return () => subscription.unsubscribe()
@@ -186,7 +188,18 @@ export function CreateMemberFormDialog() {
 
   return (
     <>
-      <DialogTitle>{t('newTeamMember2', 'New Team Member')}</DialogTitle>
+      <DialogTitle>
+        <div className='flex items-center'>
+          <div>{t('newTeamMember2', 'New Team Member')}</div>
+          {/* <div className={cn(
+            'ml-auto text-xs text-muted-foreground flex items-center',
+            !form.formState.isDirty && 'hidden',
+          )}
+          >
+            <span>Draft</span>
+          </div> */}
+        </div>
+      </DialogTitle>
       <FieldDescription>
         {t('createANewMemberToYourTeam', 'Create a new member to your team.')}
       </FieldDescription>

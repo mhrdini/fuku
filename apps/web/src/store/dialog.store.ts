@@ -1,11 +1,10 @@
-import { TeamMemberRoleValues } from '@fuku/domain/schemas'
 import { create } from 'zustand'
 
 import type { TeamMemberRole } from '@fuku/domain/schemas'
 
 import type { DialogId } from '~/lib/dialog'
 
-export type CreateMemberDraft = {
+export type TeamMemberDraft = {
   givenNames: string
   familyName: string
   teamId?: string
@@ -21,21 +20,31 @@ type DialogOptions = {
   isAlert?: boolean
 }
 
-type DialogStore = DialogOptions & {
+type FormOptions = {
+  isDirty: boolean
+  setIsDirty: (isDirty: boolean) => void
+  createMemberDraft: TeamMemberDraft | null
+  setCreateMemberDraft: (draft: TeamMemberDraft) => void
+  clearCreateMemberDraft: () => void
+}
+
+type DialogStore = DialogOptions & FormOptions & {
   open: boolean
+  discardOpen: boolean
   openDialog: (options: DialogOptions) => void
   openAlertDialog: (options: DialogOptions) => void
   closeDialog: () => void
-  createMemberDraft: CreateMemberDraft
-  setCreateMemberDraft: (draft: CreateMemberDraft) => void
-  clearCreateMemberDraft: () => void
+  toggleDiscardDialog: () => void
 }
 
 export const useDialogStore = create<DialogStore>(set => ({
   open: false,
+  discardOpen: false,
   id: null,
   editingId: null,
   isAlert: false,
+  isDirty: false,
+  setIsDirty: (isDirty: boolean) => set({ isDirty }),
   openDialog: ({ id, editingId = null, isAlert = false }) =>
     set({
       open: true,
@@ -51,23 +60,8 @@ export const useDialogStore = create<DialogStore>(set => ({
       isAlert: true,
     }),
   closeDialog: () => set({ open: false }),
-  createMemberDraft: {
-    givenNames: '',
-    familyName: '',
-    teamId: '',
-    rateMultiplier: 1,
-    teamMemberRole: TeamMemberRoleValues.STAFF,
-    payGradeId: null,
-    username: '',
-  },
-  setCreateMemberDraft: (draft: CreateMemberDraft) => set(({ createMemberDraft: draft })),
-  clearCreateMemberDraft: () => set({ createMemberDraft: {
-    givenNames: '',
-    familyName: '',
-    teamId: '',
-    rateMultiplier: 1,
-    teamMemberRole: TeamMemberRoleValues.STAFF,
-    payGradeId: null,
-    username: '',
-  } }),
+  toggleDiscardDialog: () => set(state => ({ discardOpen: !state.discardOpen })),
+  createMemberDraft: null,
+  setCreateMemberDraft: (draft: TeamMemberDraft) => set(({ createMemberDraft: draft })),
+  clearCreateMemberDraft: () => set({ createMemberDraft: null }),
 }))

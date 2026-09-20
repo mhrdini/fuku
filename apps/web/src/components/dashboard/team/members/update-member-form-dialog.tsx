@@ -59,7 +59,7 @@ import { DiscardChangesAlertDialogContent } from '../../discard-changes-alert-di
 
 export function UpdateMemberFormDialog() {
   const { t } = useTranslation()
-  const { editingId: currentTeamMemberId, closeDialog } = useDialogStore()
+  const { editingId: currentTeamMemberId, closeDialog, discardOpen, toggleDiscardDialog, setIsDirty } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
 
   const queryClient = useQueryClient()
@@ -111,6 +111,10 @@ export function UpdateMemberFormDialog() {
       shouldDirty: true,
     }),
   )
+
+  useEffect(() => {
+    setIsDirty(form.formState.isDirty)
+  }, [form.formState.isDirty, setIsDirty])
 
   useEffect(() => {
     if (teamMemberFetched && teamMember && currentTeamMemberId) {
@@ -385,7 +389,7 @@ export function UpdateMemberFormDialog() {
 
             <Field orientation='horizontal'>
               <FieldError errors={[form.formState.errors.root]} />
-              <AlertDialog>
+              <AlertDialog open={discardOpen} onOpenChange={toggleDiscardDialog}>
                 {form.formState.isDirty
                   ? (
                       <>
@@ -401,7 +405,7 @@ export function UpdateMemberFormDialog() {
               </AlertDialog>
               <LoadingButton
                 loading={isPending}
-                disabled={!teamMember || !payGrades}
+                disabled={!teamMember || !payGrades || !form.formState.isDirty}
               >
                 {t('save', 'Save')}
               </LoadingButton>
