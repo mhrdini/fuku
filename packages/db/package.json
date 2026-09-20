@@ -2,7 +2,8 @@
   "name": "@fuku/db",
   "version": "1.0.0",
   "exports": {
-    ".": "./src/client.ts"
+    ".": "./src/client.ts",
+    "./testing": "./src/testing/database.ts"
   },
   "prisma": {
     "schema": "./prisma"
