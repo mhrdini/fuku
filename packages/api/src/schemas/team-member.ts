@@ -18,8 +18,8 @@ export const TeamMemberOutputSchema = TeamMemberSchema.extend({
 export type TeamMemberOutput = z.infer<typeof TeamMemberOutputSchema>
 
 export const TeamMemberCreateInputSchema = TeamMemberSchema.extend({
-  username: z.string().optional(),
   userId: z.string().optional(),
+  username: z.string().optional(),
   payGradeId: z.string().nullish(),
   payGradeClientId: z.string().nullish(),
 }).omit({
@@ -28,10 +28,17 @@ export const TeamMemberCreateInputSchema = TeamMemberSchema.extend({
   updatedAt: true,
   deletedAt: true,
   deletedById: true,
+  // userId: true,
 })
 export type TeamMemberCreateInput = z.infer<typeof TeamMemberCreateInputSchema>
 
-export const TeamMemberUpdateInputSchema = TeamMemberOutputSchema.extend({
-  username: z.string().optional(),
+export const TeamMemberUpdateInputSchema = TeamMemberOutputSchema.partial().extend({
+  id: z.string(),
+  username: z.string().nullish(),
+}).omit({
+  payGrade: true,
+  user: true,
+  userId: true,
 })
+
 export type TeamMemberUpdateInput = z.infer<typeof TeamMemberUpdateInputSchema>

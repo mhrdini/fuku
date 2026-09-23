@@ -88,7 +88,6 @@ export const UserTeamSchema = TeamSchema.pick({
 export type UserTeam = z.infer<typeof UserTeamSchema>
 
 export const TeamUpdateInputSchema = TeamSchema.pick({
-  id: true,
   name: true,
   country: true,
   description: true,

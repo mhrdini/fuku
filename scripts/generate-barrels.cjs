@@ -18,12 +18,18 @@ const mappings = [
     directory: 'packages/ui/src/components',
     outFile: 'packages/ui/src/components/index.ts',
   },
+  {
+    directory: 'packages/db/src/testing/factories',
+    outFile: 'packages/db/src/testing/factories/index.ts',
+  },
 ]
+
+const exclude = '\\.test\\.|\\.spec\\.'
 
 for (const map of mappings) {
   console.log(`Generating barrel for ${map.directory}...`)
   execSync(
-    `barrelsby --directory ${map.directory} --outFile ${map.outFile} --delete --exclude node_modules --exclude dist`,
+    `barrelsby --directory ${map.directory} --outFile ${map.outFile} --delete --exclude node_modules --exclude dist --exclude "${exclude}"`,
     { stdio: 'inherit' },
   )
 }

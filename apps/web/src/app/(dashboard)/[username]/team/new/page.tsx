@@ -1203,64 +1203,66 @@ function AdditionalDetailsSection() {
               </ItemHeader>
               <ItemContent>
                 <ItemDescription>
-                  {shiftTypeFields.length ? (
-                    <Card className='gap-0 divide-y py-0'>
-                      {shiftTypeFields.map(st => (
-                        <CardContent
-                          key={st.id}
-                          className='space-y-1 px-0 py-1.5'
-                        >
-                          {/* Header Row */}
-                          <div className='flex items-center justify-between'>
-                            <CardTitle>{st.name}</CardTitle>
-                            <CardDescription className='flex items-center gap-1 '>
-                              {st.startTime}
-                              <ArrowRightIcon size={16} />
-                              {st.endTime}
-                            </CardDescription>
-                          </div>
+                  {shiftTypeFields.length
+                    ? (
+                        <Card className='gap-0 divide-y py-0'>
+                          {shiftTypeFields.map(st => (
+                            <CardContent
+                              key={st.id}
+                              className='space-y-1 px-0 py-1.5'
+                            >
+                              {/* Header Row */}
+                              <div className='flex items-center justify-between'>
+                                <CardTitle>{st.name}</CardTitle>
+                                <CardDescription className='flex items-center gap-1 '>
+                                  {st.startTime}
+                                  <ArrowRightIcon size={16} />
+                                  {st.endTime}
+                                </CardDescription>
+                              </div>
 
-                          {/* Pay Grades */}
-                          {st.connectPayGrades?.length
-                            ? (
-                                <div className='flex flex-wrap gap-2'>
-                                  <span className='text-muted-foreground'>
-                                    {t(
-                                      'assignedToPayGrades',
-                                      'Assigned to pay grades:',
-                                    )}
-                                  </span>
-                                  {st.connectPayGrades.map((pgId) => {
-                                    const pg = payGradeFields.find(
-                                      p => p.id === pgId,
-                                    )
-                                    if (!pg)
-                                      return null
+                              {/* Pay Grades */}
+                              {st.connectPayGrades?.length
+                                ? (
+                                    <div className='flex flex-wrap gap-2'>
+                                      <span className='text-muted-foreground'>
+                                        {t(
+                                          'assignedToPayGrades',
+                                          'Assigned to pay grades:',
+                                        )}
+                                      </span>
+                                      {st.connectPayGrades.map((pgId) => {
+                                        const pg = payGradeFields.find(
+                                          p => p.id === pgId,
+                                        )
+                                        if (!pg)
+                                          return null
 
-                                    return (
-                                      <Badge key={pgId} variant='secondary'>
-                                        {pg.name}
-                                      </Badge>
-                                    )
-                                  })}
-                                </div>
-                              )
-                            : (
-                                <div className='text-muted-foreground text-xs'>
-                                  {t(
-                                    'noPayGradesAssigned',
-                                    'No pay grades assigned',
+                                        return (
+                                          <Badge key={pgId} variant='secondary'>
+                                            {pg.name}
+                                          </Badge>
+                                        )
+                                      })}
+                                    </div>
+                                  )
+                                : (
+                                    <div className='text-muted-foreground text-xs'>
+                                      {t(
+                                        'noPayGradesAssigned',
+                                        'No pay grades assigned',
+                                      )}
+                                    </div>
                                   )}
-                                </div>
-                              )}
-                        </CardContent>
-                      ))}
-                    </Card>
-                  ) : (
-                    <span className='text-muted-foreground'>
-                      {t('noShiftTypesAdded', 'No shift added')}
-                    </span>
-                  )}
+                            </CardContent>
+                          ))}
+                        </Card>
+                      )
+                    : (
+                        <span className='text-muted-foreground'>
+                          {t('noShiftTypesAdded', 'No shift added')}
+                        </span>
+                      )}
                 </ItemDescription>
               </ItemContent>
             </Item>
