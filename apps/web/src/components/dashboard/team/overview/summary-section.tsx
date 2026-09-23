@@ -107,7 +107,7 @@ export function SummarySection() {
   ] = useQueries({
     queries: [
       {
-        ...trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
+        ...trpc.teamMember.listIds.queryOptions({}),
         enabled: !!team,
       },
       {

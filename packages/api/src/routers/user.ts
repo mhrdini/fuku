@@ -248,4 +248,19 @@ export const userRouter = {
       activeTeam,
     }
   }),
+  updateProfile: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().min(1).max(100).optional(),
+        username: z.string().min(1).max(50).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.user.update({
+        where: {
+          id: ctx.session.user.id,
+        },
+        data: input,
+      })
+    }),
 } satisfies TRPCRouterRecord

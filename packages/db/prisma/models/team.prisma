@@ -78,6 +78,7 @@ model TeamMember {
   deletedById String?   @map("deleted_by_id")
   rules       Rule[]
 
+  @@unique([teamId, userId])
   @@index([teamId])
   @@index([payGradeId])
   @@index([deletedAt])

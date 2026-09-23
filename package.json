@@ -15,6 +15,7 @@
     "up:test": "docker compose -p fuku-test -f docker-compose.test.yml --env-file .env.test up -d",
     "down:test": "docker compose -p fuku-test -f docker-compose.test.yml --env-file .env.test down",
 
+    "db:generate": "pnpm --filter @fuku/db exec prisma generate",
     "db:migrate:dev": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:dev",
     "db:migrate:dev:auto": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:dev:auto",
     "db:migrate:dev:deploy": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:deploy",
@@ -35,12 +36,12 @@
     "generate": "turbo run generate",
     "lint": "turbo run lint",
     "prepare": "husky",
-    "barrels": "node scripts/generate-barrels.js",
+    "barrels": "node scripts/generate-barrels.cjs",
 
-    "test": "dotenv -e .env.test -- vitest",
-    "test:run": "dotenv -e .env.test -- vitest run",
-    "test:coverage": "dotenv -e .env.test -- vitest run --coverage",
-    "test:e2e": "dotenv -e .env.test -- turbo run test:e2e"
+    "test": "pnpm db:generate && dotenv -e .env.test -- vitest",
+    "test:run": "pnpm db:generate && dotenv -e .env.test -- vitest run",
+    "test:coverage": "pnpm db:generate && dotenv -e .env.test -- vitest run --coverage",
+    "test:e2e": "pnpm db:generate && dotenv -e .env.test -- turbo run test:e2e"
   },
   "peerDependencies": {
     "inquirer": "catalog:"

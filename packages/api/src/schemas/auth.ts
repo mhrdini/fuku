@@ -24,3 +24,6 @@ export const LoginSchema = UserSchema.pick({
 
 export type RegisterSchemaType = z.infer<typeof RegisterSchema>
 export type LoginSchemaType = z.infer<typeof LoginSchema>
+
+export const UserOutputSchema = UserSchema
+export type UserOutput = z.infer<typeof UserOutputSchema>

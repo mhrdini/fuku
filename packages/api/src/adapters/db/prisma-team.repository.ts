@@ -6,7 +6,7 @@ import {
 import type {
   RuleConditionOutput,
 } from '../../schemas/rule-condition'
-import type { db as PrismaClient } from '@fuku/db'
+import type {　PrismaClient } from '@fuku/db'
 import type { SchedulerAssignment } from '@fuku/domain/schemas'
 import type {
   Assignment,
@@ -20,7 +20,7 @@ import {
 } from '../../schemas/rule-condition'
 
 export class PrismaTeamRepository implements TeamRepository {
-  constructor(private db: typeof PrismaClient) {}
+  constructor(private db: PrismaClient) {}
   async getTeamSnapshot(
     teamId: string,
     period: Period,

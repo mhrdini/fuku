@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 
-import type { Prisma } from '@prisma/client'
+import type { Prisma } from '../../generated/prisma/client'
 
 import { testDb } from '../database'
 
@@ -17,5 +17,6 @@ export async function createTeamMember(
       teamId,
       ...overrides,
     },
+    include: { payGrade: true, user: true },
   })
 }

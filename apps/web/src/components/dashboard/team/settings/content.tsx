@@ -61,7 +61,6 @@ export function TeamSettingsContent() {
 
   const form = useForm<TeamSettingsFormType>({
     defaultValues: {
-      id: team?.id || '',
       name: team?.name || '',
       country: team?.country || undefined,
       description: team?.description || null,
@@ -77,7 +76,6 @@ export function TeamSettingsContent() {
   useEffect(() => {
     if (team) {
       form.reset({
-        id: team.id,
         name: team.name,
         country: team.country,
         description: team.description,
@@ -153,7 +151,7 @@ export function TeamSettingsContent() {
     if (!team)
       return
     try {
-      await deleteTeam({ id: team.id })
+      await deleteTeam()
     } catch {
       // TODO: handle errors
     }
