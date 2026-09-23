@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 
-import type { ConditionField, ConditionOperator, Prisma } from '@prisma/client'
+import type { ConditionField, ConditionOperator, Prisma } from '../../generated/prisma/client'
 
 import { testDb } from '../database'
 

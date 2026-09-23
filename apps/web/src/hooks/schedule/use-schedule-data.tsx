@@ -23,7 +23,7 @@ export function useScheduleData({ start, end }: ScheduleDataProps) {
   })
 
   const { data: teamMembers } = useQuery({
-    ...trpc.teamMember.list.queryOptions({ teamId: team?.id ?? '' }),
+    ...trpc.teamMember.list.queryOptions({}),
     enabled: !!team,
     refetchOnWindowFocus: false,
   })

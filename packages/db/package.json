@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "exports": {
     ".": "./src/client.ts",
-    "./testing": "./src/testing/database.ts"
+    "./enums": "./src/enums.ts",
+    "./testing": "./src/testing/database.ts",
+    "./testing/factories": "./src/testing/factories/index.ts"
   },
   "prisma": {
     "schema": "./prisma"

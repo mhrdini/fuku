@@ -21,6 +21,7 @@ export default antfu(
       indent: 2,
       quotes: 'single',
       semi: false,
+      jsx: true,
     },
 
     // keep Prettier for css/html/markdown; JS/TS/JSX still go through

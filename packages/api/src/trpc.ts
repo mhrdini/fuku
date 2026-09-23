@@ -1,4 +1,5 @@
 import { db } from '@fuku/db'
+import { TeamMemberRoleValues } from '@fuku/domain/schemas'
 import { DefaultSchedulerService } from '@fuku/scheduling'
 /**
  * 3. Middlewares
@@ -83,6 +84,69 @@ const authMiddleware = t.middleware(({ ctx, next }) => {
   })
 })
 
+const teamScopedMiddleware = authMiddleware.unstable_pipe(
+  async ({ ctx, next }) => {
+    const user = await ctx.db.user.findUnique({
+      where: {
+        id: ctx.session.user.id,
+      },
+      select: {
+        lastActiveTeamId: true,
+      },
+    })
+
+    if (!user?.lastActiveTeamId) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'No active team',
+      })
+    }
+
+    const membership = await ctx.db.teamMember.findFirst({
+      where: {
+        teamId: user.lastActiveTeamId,
+        userId: ctx.session.user.id,
+        deletedAt: null,
+        team: {
+          deletedAt: null,
+        },
+      },
+      select: {
+        id: true,
+        teamId: true,
+        teamMemberRole: true,
+      },
+    })
+
+    if (!membership) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'You do not have access to the active team',
+      })
+    }
+
+    return next({
+      ctx: {
+        activeTeamId: user.lastActiveTeamId,
+        membership,
+      },
+    })
+  },
+)
+
+const teamAdminMiddleware = teamScopedMiddleware.unstable_pipe(
+  ({ ctx, next }) => {
+    if (ctx.membership.teamMemberRole !== TeamMemberRoleValues.ADMIN) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'Team admin access required',
+      })
+    }
+
+    return next()
+  },
+)
+
 /**
  * 4. Routers & Procedures
  * This section defines the routers and procedures of the tRPC API.
@@ -91,3 +155,9 @@ export const createTRPCRouter = t.router
 export const createCallerFactory = t.createCallerFactory
 export const publicProcedure = t.procedure
 export const protectedProcedure = t.procedure.use(authMiddleware)
+export const teamScopedProcedure = protectedProcedure.use(
+  teamScopedMiddleware,
+)
+export const teamAdminProcedure = teamScopedProcedure.use(
+  teamAdminMiddleware,
+)

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 
-import type { Metric, Prisma, RuleOperator, RuleScope, TimeWindow } from '@prisma/client'
+import type { Metric, Prisma, RuleOperator, RuleScope, TimeWindow } from '../../generated/prisma/client'
 
 import { testDb } from '../database'
 

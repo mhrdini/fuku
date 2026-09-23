@@ -20,8 +20,10 @@ export default defineConfig({
       {
         test: {
           name: 'api',
-          include: ['packages/api/**/*.test.ts'],
+          include: ['packages/api/tests/**/*.test.ts'],
           environment: 'node',
+          setupFiles: ['packages/db/src/testing/setup.ts'],
+          fileParallelism: false,
         },
       },
 
@@ -30,7 +32,8 @@ export default defineConfig({
           name: 'db',
           include: ['packages/db/**/*.test.ts'],
           environment: 'node',
-          setupFiles: ['./src/testing/setup.ts'],
+          setupFiles: ['packages/db/src/testing/setup.ts'],
+          fileParallelism: false,
         },
       },
 

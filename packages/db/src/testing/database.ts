@@ -1,6 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg'
-import { Prisma, PrismaClient } from '@prisma/client'
 import { execSync } from 'node:child_process'
+
+import { Prisma, PrismaClient } from '../generated/prisma/client'
 
 const connectionString = process.env.DATABASE_URL
 
@@ -28,19 +29,19 @@ export function migrateTestDatabase() {
 }
 
 const tableNames = [
-  'ShiftAssignment',
-  'DayAssignment',
-  'Unavailability',
-  'Rule',
-  'StaffingRequirement',
-  'OperationalHour',
-  'ShiftType',
-  'PayGrade',
-  'Location',
-  'TeamMember',
-  'Team',
-  'Session',
-  'User',
+  'shift_assignment',
+  'day_assignment',
+  'unavailability',
+  'rule',
+  'staffing_requirement',
+  'operational_hour',
+  'shift_type',
+  'pay_grade',
+  'location',
+  'team_member',
+  'team',
+  'session',
+  'user',
 ]
 
 export async function resetDatabase() {

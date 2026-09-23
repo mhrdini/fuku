@@ -122,10 +122,7 @@ export function UpdateMemberFormDialog() {
         {
           ...teamMember,
           id: currentTeamMemberId,
-          userId: teamMember.user?.id || null,
-          user: teamMember.user || null,
-          payGrade: teamMember.payGrade || null,
-          username: teamMember.user?.username || '',
+          username: teamMember.user?.username ?? '',
         },
         {
           keepDirty: false,
@@ -170,7 +167,10 @@ export function UpdateMemberFormDialog() {
       return
     }
     try {
-      await updateMember(data)
+      await updateMember({
+        ...data,
+        username: data.username ?? null,
+      })
     } catch {
       // Handled in onError
     }
@@ -286,11 +286,6 @@ export function UpdateMemberFormDialog() {
                                       shouldTouch: true,
                                       shouldDirty: true,
                                     })
-                                    form.setValue('payGrade', pg, {
-                                      shouldValidate: true,
-                                      shouldTouch: true,
-                                      shouldDirty: true,
-                                    })
                                     setPayGradeOpen(false)
                                   }}
                                 >
@@ -373,6 +368,7 @@ export function UpdateMemberFormDialog() {
                   </FieldLabel>
                   <Input
                     {...field}
+                    value={field.value as string | undefined}
                     id='form-update-member-username'
                     aria-invalid={fieldState.invalid}
                     placeholder={t('usernameOptional', 'Username (optional)')}

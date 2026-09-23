@@ -146,7 +146,7 @@ export function CreateMemberFormDialog() {
         data,
       )
       queryClient.invalidateQueries(
-        trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
+        trpc.teamMember.listIds.queryOptions({}),
       )
 
       toast.success(t('teamMember'), {

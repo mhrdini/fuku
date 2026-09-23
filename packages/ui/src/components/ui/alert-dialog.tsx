@@ -6,6 +6,8 @@ import { Button } from '@fuku/ui/components/ui/button'
 import { cn } from 'cn'
 import { AlertDialog as AlertDialogPrimitive } from 'radix-ui'
 
+import type { ButtonProps } from '@fuku/ui/components/ui/button'
+
 function AlertDialog({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
@@ -153,7 +155,7 @@ function AlertDialogAction({
   size = 'default',
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Action>
-  & Pick<React.ComponentProps<typeof Button>, 'variant' | 'size'>) {
+  & ButtonProps) {
   return (
     <Button variant={variant} size={size} asChild>
       <AlertDialogPrimitive.Action
@@ -171,7 +173,7 @@ function AlertDialogCancel({
   size = 'default',
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Cancel>
-  & Pick<React.ComponentProps<typeof Button>, 'variant' | 'size'>) {
+  & ButtonProps) {
   return (
     <Button variant={variant} size={size} asChild>
       <AlertDialogPrimitive.Cancel

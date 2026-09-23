@@ -2,9 +2,7 @@ import { TRPCError } from '@trpc/server'
 import { customAlphabet } from 'nanoid'
 import * as z from 'zod/v4'
 
-import type {
-  UserTeam,
-} from '../../schemas'
+import type { UserTeam } from '../../schemas'
 import type { TRPCRouterRecord } from '@trpc/server'
 
 import {
@@ -12,29 +10,27 @@ import {
   TeamOutputSchema,
   TeamUpdateInputSchema,
 } from '../../schemas'
-import { protectedProcedure } from '../../trpc'
+import {
+  protectedProcedure,
+  teamAdminProcedure,
+  teamScopedProcedure,
+} from '../../trpc'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 8)
 
 export const teamRouter = {
-  byId: protectedProcedure
+  byId: teamScopedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const team = await ctx.db.team.findFirst({
         where: {
           id: input.id,
           deletedAt: null,
-          OR: [
-            { adminUsers: { some: { id: ctx.session.user.id } } },
-            {
-              teamMembers: {
-                some: { userId: ctx.session.user.id, deletedAt: null },
-              },
-            },
-          ],
         },
         include: {
-          teamMembers: { where: { deletedAt: null } },
+          teamMembers: {
+            where: { deletedAt: null },
+          },
         },
       })
 
@@ -44,24 +40,20 @@ export const teamRouter = {
 
       return team
     }),
-  bySlug: protectedProcedure
+
+  bySlug: teamScopedProcedure
     .input(z.object({ slug: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
       const team = await ctx.db.team.findFirst({
         where: {
+          id: ctx.activeTeamId,
           slug: input.slug,
           deletedAt: null,
-          OR: [
-            { adminUsers: { some: { id: ctx.session.user.id } } },
-            {
-              teamMembers: {
-                some: { userId: ctx.session.user.id, deletedAt: null },
-              },
-            },
-          ],
         },
         include: {
-          teamMembers: { where: { deletedAt: null } },
+          teamMembers: {
+            where: { deletedAt: null },
+          },
         },
       })
 
@@ -71,15 +63,19 @@ export const teamRouter = {
 
       return TeamOutputSchema.parse(team)
     }),
+
   getAllOwned: protectedProcedure.query(async ({ ctx }) => {
-    const userId = ctx.session.user.id
     const teams = await ctx.db.team.findMany({
       where: {
-        adminUsers: { some: { id: userId } },
+        adminUsers: {
+          some: { id: ctx.session.user.id },
+        },
         deletedAt: null,
       },
       include: {
-        teamMembers: { where: { deletedAt: null } },
+        teamMembers: {
+          where: { deletedAt: null },
+        },
       },
     })
 
@@ -123,8 +119,9 @@ export const teamRouter = {
       },
     })
 
-    if (!user)
+    if (!user) {
       return []
+    }
 
     const owned: UserTeam[] = user.ownedTeams.map(team => ({
       id: team.id,
@@ -145,28 +142,34 @@ export const teamRouter = {
         description: m.team!.description,
         teamMembers: m.team!.teamMembers,
         createdAt: m.team!.createdAt,
-        role: m.teamMemberRole, // STAFF or ADMIN
+        role: m.teamMemberRole,
       }))
 
-    // Deduplicate by team id (owned team might also appear as membership)
     const byId = new Map<string, UserTeam>()
 
-    for (const t of member) byId.set(t.id, t)
-    for (const t of owned) byId.set(t.id, t)
+    for (const team of member) {
+      byId.set(team.id, team)
+    }
 
-    const teams = [...byId.values()]
-    return teams
+    for (const team of owned) {
+      byId.set(team.id, team)
+    }
+
+    return [...byId.values()]
   }),
 
   create: protectedProcedure
     .input(TeamCreateInputSchema)
     .mutation(async ({ input, ctx }) => {
       let slug: string
+
       while (true) {
         const candidate = nanoid()
+
         const existing = await ctx.db.team.findUnique({
           where: { slug: candidate },
         })
+
         if (!existing) {
           slug = candidate
           break
@@ -174,8 +177,8 @@ export const teamRouter = {
       }
 
       const adminUserIds = input.teamMembers
-        .filter(m => m.teamMemberRole === 'ADMIN' && m.userId)
-        .map(m => ({ id: m.userId! }))
+        .filter(m => m.teamMemberRole === 'ADMIN' && m.userId !== undefined)
+        .map(m => ({ id: m.userId }))
 
       const daysOfWeek = Array.from({ length: 7 }, (_, i) => i + 1)
 
@@ -185,23 +188,27 @@ export const teamRouter = {
           name: input.name,
           description: input.description,
           timeZone: input.timeZone,
+
           locations: {
-            create: input.locations.map(l => ({
-              name: l.name,
-              ...(l.color && { color: l.color }),
+            create: input.locations.map(location => ({
+              name: location.name,
+              ...(location.color && { color: location.color }),
             })),
           },
+
           shiftTypes: {
-            create: input.shiftTypes.map(s => ({
-              name: s.name,
-              startTime: s.startTime,
-              endTime: s.endTime,
+            create: input.shiftTypes.map(shiftType => ({
+              name: shiftType.name,
+              startTime: shiftType.startTime,
+              endTime: shiftType.endTime,
             })),
           },
+
           adminUsers: {
             connect: adminUserIds,
           },
         },
+
         include: {
           adminUsers: true,
           locations: true,
@@ -209,7 +216,6 @@ export const teamRouter = {
         },
       })
 
-      // create default staffing requirements
       await Promise.all(
         daysOfWeek.map(day =>
           ctx.db.staffingRequirement.create({
@@ -221,26 +227,27 @@ export const teamRouter = {
         ),
       )
 
-      // to map between payGradeClientId and payGradeId
       const payGrades = await Promise.all(
-        input.payGrades.map(pg =>
+        input.payGrades.map(payGrade =>
           ctx.db.payGrade.create({
             data: {
               teamId: newTeam.id,
-              name: pg.name,
-              baseRate: pg.baseRate,
+              name: payGrade.name,
+              baseRate: payGrade.baseRate,
             },
           }),
         ),
       )
 
       const payGradeMap = new Map<string, string>()
-      input.payGrades.forEach((pg, i) => {
-        payGradeMap.set(pg.id, payGrades[i].id)
+
+      input.payGrades.forEach((payGrade, index) => {
+        payGradeMap.set(payGrade.id, payGrades[index].id)
       })
 
-      for (const [i, shift] of input.shiftTypes.entries()) {
-        const shiftTypeId = newTeam.shiftTypes[i].id
+      for (const [index, shift] of input.shiftTypes.entries()) {
+        const shiftTypeId = newTeam.shiftTypes[index].id
+
         const eligiblePayGrades = shift.connectPayGrades?.map(id => ({
           payGradeId: payGradeMap.get(id)!,
           shiftTypeId,
@@ -255,17 +262,17 @@ export const teamRouter = {
       }
 
       const teamMembers = await Promise.all(
-        input.teamMembers.map(tm =>
+        input.teamMembers.map(teamMember =>
           ctx.db.teamMember.create({
             data: {
               teamId: newTeam.id,
-              userId: tm.userId ?? null,
-              familyName: tm.familyName,
-              givenNames: tm.givenNames,
-              teamMemberRole: tm.teamMemberRole,
-              rateMultiplier: tm.rateMultiplier,
-              payGradeId: tm.payGradeClientId
-                ? (payGradeMap.get(tm.payGradeClientId) ?? null)
+              userId: teamMember.userId ?? null,
+              familyName: teamMember.familyName,
+              givenNames: teamMember.givenNames,
+              teamMemberRole: teamMember.teamMemberRole,
+              rateMultiplier: teamMember.rateMultiplier,
+              payGradeId: teamMember.payGradeClientId
+                ? (payGradeMap.get(teamMember.payGradeClientId) ?? null)
                 : null,
             },
           }),
@@ -277,18 +284,22 @@ export const teamRouter = {
         data: { lastActiveTeamId: newTeam.id },
       })
 
-      return { ...newTeam, teamMembers, payGrades }
+      return {
+        ...newTeam,
+        teamMembers,
+        payGrades,
+      }
     }),
 
-  update: protectedProcedure
+  update: teamAdminProcedure
     .input(TeamUpdateInputSchema)
     .mutation(async ({ input, ctx }) => {
-      const { id, ...data } = input
+      const { ...data } = input
+
       const updatedCount = await ctx.db.team.updateMany({
         where: {
-          id,
+          id: ctx.activeTeamId,
           deletedAt: null,
-          adminUsers: { some: { id: ctx.session.user.id } },
         },
         data: {
           ...data,
@@ -299,22 +310,24 @@ export const teamRouter = {
       if (updatedCount.count === 0) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: `No team with id '${id}' found or you do not have permission to update it`,
+          message: 'Active team not found',
         })
       }
 
-      return ctx.db.team.findUnique({ where: { id } })
+      return ctx.db.team.findUnique({
+        where: { id: ctx.activeTeamId },
+      })
     }),
 
-  delete: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ input, ctx }) => {
+  delete: teamAdminProcedure
+    .mutation(async ({ ctx }) => {
+      const teamId = ctx.activeTeamId
       const userId = ctx.session.user.id
+
       const team = await ctx.db.team.findFirst({
         where: {
-          id: input.id,
+          id: teamId,
           deletedAt: null,
-          adminUsers: { some: { id: userId } },
         },
         include: {
           teamMembers: true,
@@ -327,14 +340,16 @@ export const teamRouter = {
       if (!team) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: `No team with id '${input.id}' found or you do not have permission to delete it`,
+          message: 'Active team not found',
         })
       }
 
       await ctx.db.shiftAssignment.deleteMany({
         where: {
           dayAssignment: {
-            teamMember: { teamId: input.id },
+            teamMember: {
+              teamId,
+            },
           },
         },
       })
@@ -342,20 +357,26 @@ export const teamRouter = {
       await ctx.db.leaveAssignment.deleteMany({
         where: {
           dayAssignment: {
-            teamMember: { teamId: input.id },
+            teamMember: {
+              teamId,
+            },
           },
         },
       })
 
       await ctx.db.dayAssignment.deleteMany({
         where: {
-          teamMember: { teamId: input.id },
+          teamMember: {
+            teamId,
+          },
         },
       })
 
       await ctx.db.unavailability.deleteMany({
         where: {
-          teamMember: { teamId: input.id },
+          teamMember: {
+            teamId,
+          },
         },
       })
 
@@ -363,7 +384,7 @@ export const teamRouter = {
 
       await ctx.db.teamMember.updateMany({
         where: {
-          teamId: input.id,
+          teamId,
           deletedAt: null,
         },
         data: {
@@ -375,7 +396,7 @@ export const teamRouter = {
 
       await ctx.db.location.updateMany({
         where: {
-          teamId: input.id,
+          teamId,
           deletedAt: null,
         },
         data: {
@@ -386,7 +407,7 @@ export const teamRouter = {
 
       await ctx.db.shiftType.updateMany({
         where: {
-          teamId: input.id,
+          teamId,
           deletedAt: null,
         },
         data: {
@@ -397,47 +418,65 @@ export const teamRouter = {
 
       await ctx.db.payGrade.deleteMany({
         where: {
-          teamId: input.id,
+          teamId,
         },
       })
 
-      const deletedCount = await ctx.db.team.updateMany({
+      await ctx.db.team.updateMany({
         where: {
-          id: input.id,
+          id: teamId,
           deletedAt: null,
-          adminUsers: { some: { id: userId } },
         },
-        data: { deletedAt: now, deletedById: userId },
+        data: {
+          deletedAt: now,
+          deletedById: userId,
+        },
       })
-
-      if (deletedCount.count === 0) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: `No team with id '${input.id}' found or you do not have permission to delete it`,
-        })
-      }
 
       const remainingTeams = await ctx.db.team.findMany({
         where: {
           deletedAt: null,
           OR: [
-            { adminUsers: { some: { id: userId } } },
-            { teamMembers: { some: { userId, deletedAt: null } } },
+            {
+              adminUsers: {
+                some: { id: userId },
+              },
+            },
+            {
+              teamMembers: {
+                some: {
+                  userId,
+                  deletedAt: null,
+                },
+              },
+            },
           ],
         },
-        select: { id: true },
-        orderBy: { createdAt: 'asc' },
+        select: {
+          id: true,
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
       })
 
       const nextActiveTeamId
-        = remainingTeams.length > 0 ? remainingTeams[0].id : null
+        = remainingTeams.length > 0
+          ? remainingTeams[0].id
+          : null
 
       await ctx.db.user.update({
         where: { id: userId },
-        data: { lastActiveTeamId: nextActiveTeamId },
+        data: {
+          lastActiveTeamId: nextActiveTeamId,
+        },
       })
 
-      return { team, activeTeamId: nextActiveTeamId, deletedAt: now }
+      return {
+        team,
+        activeTeamId: nextActiveTeamId,
+        deletedAt: now,
+      }
     }),
 
   restore: protectedProcedure
@@ -447,9 +486,14 @@ export const teamRouter = {
         where: {
           id: input.id,
           deletedAt: { not: null },
-          adminUsers: { some: { id: ctx.session.user.id } },
+          adminUsers: {
+            some: { id: ctx.session.user.id },
+          },
         },
-        data: { deletedAt: null, deletedById: null },
+        data: {
+          deletedAt: null,
+          deletedById: null,
+        },
       })
 
       if (restoredCount.count === 0) {
@@ -459,6 +503,8 @@ export const teamRouter = {
         })
       }
 
-      return ctx.db.team.findUnique({ where: { id: input.id } })
+      return ctx.db.team.findUnique({
+        where: { id: input.id },
+      })
     }),
 } satisfies TRPCRouterRecord
