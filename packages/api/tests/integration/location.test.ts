@@ -23,6 +23,7 @@ describe('location', () => {
         teamId: team.id,
       })
     })
+
     it('returns null for a non-existing location', async () => {
       const user = await createUser()
       await createTeam(user.id)
@@ -36,6 +37,7 @@ describe('location', () => {
       ).resolves.toBeNull()
     })
   })
+
   describe('listIds', () => {
     it('returns active location ids ordered by ascending create date', async () => {
       const user = await createUser()
@@ -57,6 +59,7 @@ describe('location', () => {
         { id: locationC.id },
       ])
     })
+
     it('excludes deleted locations', async () => {
       const user = await createUser()
       const team = await createTeam(user.id)
@@ -75,6 +78,7 @@ describe('location', () => {
         id: location.id,
       })
     })
+
     it('returns correct location ids given a limit', async () => {
       const user = await createUser()
       const team = await createTeam(user.id)
@@ -92,6 +96,7 @@ describe('location', () => {
       })
       expect(locationIds).toHaveLength(limit)
     })
+
     it('does not return locations from another team', async () => {
       const userA = await createUser()
       const teamA = await createTeam(userA.id)
@@ -110,6 +115,7 @@ describe('location', () => {
       })
     })
   })
+
   describe('list', () => {
     it('returns active locations', async () => {
       const user = await createUser()
@@ -131,6 +137,7 @@ describe('location', () => {
         locationA,
       ])
     })
+
     it('returns correct locations given a limit', async () => {
       const user = await createUser()
       const team = await createTeam(user.id)
@@ -149,6 +156,7 @@ describe('location', () => {
       expect(locations).toHaveLength(limit)
       expect(locations).toContainEqual(locationA)
     })
+
     it('does not return locations from another team', async () => {
       const userA = await createUser()
       const teamA = await createTeam(userA.id)
@@ -169,6 +177,7 @@ describe('location', () => {
       )
     })
   })
+
   describe('create', () => {
     it('creates a location with the supplied fields', async () => {
       const user = await createUser()
@@ -191,6 +200,7 @@ describe('location', () => {
       })
     })
   })
+
   describe('update', () => {
     it('updates the supplied fields', async () => {
       const user = await createUser()
@@ -214,6 +224,7 @@ describe('location', () => {
         address: 'Updated address',
       })
     })
+
     it('updates color', async () => {
       const user = await createUser()
       const team = await createTeam(user.id)
@@ -234,6 +245,7 @@ describe('location', () => {
       })
     })
   })
+
   describe('delete', () => {
     it('soft-deletes a location', async () => {
       const user = await createUser()
@@ -262,6 +274,7 @@ describe('location', () => {
       })
     })
   })
+
   describe('restore', () => {
     it('restores a deleted location', async () => {
       const user = await createUser()
