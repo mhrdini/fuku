@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 
+import { resolveActiveTeam } from '@fuku/api'
 import { db } from '@fuku/db'
 
 import { getSession } from '~/auth/server'
@@ -32,6 +33,26 @@ export default async function TeamLayout({
   })
 
   if (!team) {
+    const nextTeam = await resolveActiveTeam({ db, userId: session.user.id })
+
+    console.log({
+      username,
+      publicId,
+      nextTeam: nextTeam
+        ? {
+            id: nextTeam.id,
+            publicId: nextTeam.publicId,
+          }
+        : null,
+      redirectUrl: nextTeam
+        ? `/${username}/team/${nextTeam.publicId}`
+        : `/${username}`,
+    })
+
+    if (nextTeam) {
+      redirect(`/${username}/team/${nextTeam.publicId}`)
+    }
+
     redirect(`/${username}`)
   }
 
@@ -39,6 +60,5 @@ export default async function TeamLayout({
     where: { id: session.user.id },
     data: { lastActiveTeamId: team.id },
   })
-
   return <>{children}</>
 }
