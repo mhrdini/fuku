@@ -68,14 +68,14 @@ export const staffingRequirementRouter = {
               },
             },
             update: {
-              ...(st.minMembers ? { minMembers: st.minMembers } : {}),
-              ...(st.maxMembers ? { maxMembers: st.maxMembers } : {}),
+              ...(st.minMembers !== undefined && st.minMembers >= 0 ? { minMembers: st.minMembers } : {}),
+              ...(st.maxMembers !== undefined && st.maxMembers >= 0 ? { maxMembers: st.maxMembers } : {}),
             },
             create: {
               teamId: input.teamId,
               weekday,
-              ...(st.minMembers ? { minMembers: st.minMembers } : {}),
-              ...(st.maxMembers ? { maxMembers: st.maxMembers } : {}),
+              ...(st.minMembers !== undefined && st.minMembers >= 0 ? { minMembers: st.minMembers } : {}),
+              ...(st.maxMembers !== undefined && st.maxMembers >= 0 ? { maxMembers: st.maxMembers } : {}),
             },
           })
         }
