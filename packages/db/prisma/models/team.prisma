@@ -1,6 +1,6 @@
 model Team {
   id          String  @id @default(uuid())
-  slug        String  @unique
+  publicId    String  @unique @map("public_id")
   name        String
   description String?
 

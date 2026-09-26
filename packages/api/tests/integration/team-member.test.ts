@@ -1,3 +1,4 @@
+import { testDb } from '@fuku/db/testing'
 import { createPayGrade, createTeam, createTeamMember, createUser } from '@fuku/db/testing/factories'
 import { assert, describe, expect, it } from 'vitest'
 
@@ -38,7 +39,10 @@ describe('team member', () => {
     it('does not let a user read another team\'s member', async () => {
       const userA = await createUser()
       const teamA = await createTeam(userA.id)
-      const memberA = teamA.teamMembers[0]
+      const callerA = createCaller({
+        session: createSessionContext(userA),
+      })
+      const memberA = (await callerA.user.getMyMemberships())[0]
 
       const userB = await createUser()
       const callerB = createCaller({
@@ -52,15 +56,14 @@ describe('team member', () => {
       ).rejects.toThrow()
     })
 
-    it('scopes by the authenticated active team', async () => {
+    it('scopes by authenticated active team', async () => {
       const userA = await createUser()
       const teamA = await createTeam(userA.id)
-      const memberA = teamA.teamMembers[0]
-      const teamB = await createTeam(userA.id)
-
       const callerA = createCaller({
         session: createSessionContext(userA),
       })
+      const memberA = (await callerA.user.getMyMemberships())[0]
+      const teamB = await createTeam(userA.id)
 
       await callerA.user.setLastActiveTeam({
         teamId: teamA.id,
@@ -417,6 +420,14 @@ describe('team member', () => {
       ).resolves.not.toBe(teamA.id)
     })
 
+    it('creates admin member with a linked user', async () => {
+
+    })
+
+    it('rejects creating admin member without a linked user', async () => {
+
+    })
+
     it('throws when creating a member for a non-existent user', async () => {
       const userA = await createUser()
       const teamA = await createTeam(userA.id)
@@ -727,12 +738,15 @@ describe('team member', () => {
         session: createSessionContext(userA),
       })
 
+      const userB = await createUser()
+
       const adminMember = await callerA.teamMember.create({
         givenNames: 'Jane',
         familyName: 'Smith',
         teamId: teamA.id,
         teamMemberRole: 'ADMIN',
         rateMultiplier: 1,
+        username: userB.username,
       })
 
       const staffMember = await callerA.teamMember.create({
@@ -823,21 +837,16 @@ describe('team member', () => {
       const userB = await createUser()
       const teamB = await createTeam(userB.id)
 
-      const callerB = createCaller({
-        session: createSessionContext(userB),
-      })
-
-      const memberB = await callerB.teamMember.create({
-        givenNames: userB.name,
-        familyName: userB.name,
-        teamId: teamB.id,
-        teamMemberRole: 'ADMIN',
-        rateMultiplier: 1,
+      const memberB = await testDb.teamMember.findFirst({
+        where: {
+          userId: userB.id,
+          teamId: teamB.id,
+        },
       })
 
       await expect(
         callerA.teamMember.delete({
-          id: memberB.id,
+          id: memberB!.id,
         }),
       ).rejects.toThrow()
     })

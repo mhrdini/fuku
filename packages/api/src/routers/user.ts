@@ -60,7 +60,7 @@ export const userRouter = {
         lastActiveTeam: {
           select: {
             id: true,
-            slug: true,
+            publicId: true,
             name: true,
             description: true,
             teamMembers: true,
@@ -72,7 +72,7 @@ export const userRouter = {
           orderBy: { createdAt: 'asc' },
           select: {
             id: true,
-            slug: true,
+            publicId: true,
             name: true,
             description: true,
             teamMembers: true,
@@ -89,7 +89,7 @@ export const userRouter = {
             team: {
               select: {
                 id: true,
-                slug: true,
+                publicId: true,
                 name: true,
                 description: true,
                 teamMembers: true,
@@ -164,17 +164,30 @@ export const userRouter = {
       where: { id: ctx.session.user.id },
       select: {
         lastActiveTeamId: true,
+
         ownedTeams: {
           where: { deletedAt: null },
           select: {
             id: true,
-            slug: true,
+            publicId: true,
             name: true,
             description: true,
-            teamMembers: true,
             createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
+            deletedById: true,
+            timeZone: true,
+            country: true,
+            _count: {
+              select: {
+                teamMembers: {
+                  where: { deletedAt: null },
+                },
+              },
+            },
           },
         },
+
         memberships: {
           where: {
             deletedAt: null,
@@ -184,11 +197,22 @@ export const userRouter = {
             team: {
               select: {
                 id: true,
-                slug: true,
+                publicId: true,
                 name: true,
                 description: true,
-                teamMembers: true,
                 createdAt: true,
+                updatedAt: true,
+                deletedAt: true,
+                deletedById: true,
+                timeZone: true,
+                country: true,
+                _count: {
+                  select: {
+                    teamMembers: {
+                      where: { deletedAt: null },
+                    },
+                  },
+                },
               },
             },
             teamMemberRole: true,
@@ -204,63 +228,55 @@ export const userRouter = {
       }
     }
 
-    const owned: UserTeam[] = user.ownedTeams.map(team => ({
-      id: team.id,
-      slug: team.slug,
-      name: team.name,
-      description: team.description,
-      teamMembers: team.teamMembers,
-      createdAt: team.createdAt,
-      role: 'ADMIN',
-    }))
+    const owned = user.ownedTeams.map((team) => {
+      const { _count, ...data } = team
 
-    const member: UserTeam[] = user.memberships
+      return ({
+        ...data,
+        teamMembersCount: team._count.teamMembers,
+        teamMemberRole: 'ADMIN',
+      }) as UserTeam
+    })
+
+    const memberships = user.memberships
       .filter(m => m.team)
-      .map(m => ({
-        id: m.team?.id ?? '',
-        slug: m.team!.slug,
-        name: m.team!.name,
-        description: m.team!.description,
-        teamMembers: m.team!.teamMembers,
-        createdAt: m.team!.createdAt,
-        role: m.teamMemberRole, // STAFF or ADMIN
-      }))
+      .map((m) => {
+        const { _count, ...data } = m.team
+
+        return ({
+          ...data,
+          teamMembersCount: m.team._count.teamMembers,
+          teamMemberRole: m.teamMemberRole,
+        }) as UserTeam
+      })
 
     // Deduplicate by team id (owned team might also appear as membership)
-    const byId = new Map<string, UserTeam>()
+    const teamById = new Map<string, UserTeam>()
 
-    for (const t of member) byId.set(t.id, t)
-    for (const t of owned) byId.set(t.id, t)
+    for (const team of memberships) {
+      teamById.set(team.id, team)
+    }
 
-    const teams: UserTeam[] = [...byId.values()]
+    for (const team of owned) {
+      teamById.set(team.id, team)
+    }
 
-    let activeTeam = teams.find(t => t.id === user!.lastActiveTeamId) ?? null
+    const teams: UserTeam[] = [...teamById.values()]
+
+    let activeTeam = teams.find(t => t.id === user.lastActiveTeamId) ?? null
 
     if (!activeTeam && teams.length > 0) {
       activeTeam = teams[0]
+
       await ctx.db.user.update({
         where: { id: ctx.session.user.id },
         data: { lastActiveTeamId: activeTeam.id },
       })
     }
+
     return {
       teams,
       activeTeam,
     }
   }),
-  updateProfile: protectedProcedure
-    .input(
-      z.object({
-        name: z.string().min(1).max(100).optional(),
-        username: z.string().min(1).max(50).optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      return ctx.db.user.update({
-        where: {
-          id: ctx.session.user.id,
-        },
-        data: input,
-      })
-    }),
 } satisfies TRPCRouterRecord

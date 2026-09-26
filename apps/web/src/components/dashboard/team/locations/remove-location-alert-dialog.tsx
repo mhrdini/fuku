@@ -1,7 +1,5 @@
 'use client'
 
-import { useParams } from 'next/navigation'
-
 import { useTranslation } from '@fuku/i18n/react'
 import {
   AlertDialogAction,
@@ -20,16 +18,13 @@ import { useTRPC } from '~/trpc/client'
 
 export function RemoveLocationAlertDialog() {
   const { t } = useTranslation()
-  const params = useParams()
-  const slug = params?.slug as string
 
   const { editingId: currentLocationId } = useDialogStore()
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
   const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
   })
   const { data: location, isPending: isLoadingLocation } = useQuery({
     ...trpc.location.byId.queryOptions({ id: currentLocationId! }),

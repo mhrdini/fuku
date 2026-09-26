@@ -3,7 +3,7 @@
 import { Fragment, useMemo } from 'react'
 
 import Link from 'next/link'
-import { useParams, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 
 import { useTranslation } from '@fuku/i18n/react'
 import {
@@ -13,6 +13,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
+  Skeleton,
 } from '@fuku/ui/components'
 import { cn } from '@fuku/ui/lib/utils'
 import { useQuery } from '@tanstack/react-query'
@@ -33,11 +34,8 @@ export function Breadcrumbs() {
   const segments = pathname.split('/').filter(Boolean)
   const trpc = useTRPC()
 
-  const params = useParams()
-  const slug = params.slug as string | undefined
   const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
     refetchOnWindowFocus: false,
   })
 
@@ -80,7 +78,7 @@ export function Breadcrumbs() {
 
         if (segment === session?.user.username)
           label = t('home', 'Home')
-        if (segment === team?.slug)
+        if (segment === team?.publicId)
           label = team ? t('overview', 'Overview') : ''
         if (segment === 'team') {
           if (!team)
@@ -92,7 +90,7 @@ export function Breadcrumbs() {
         return { href, label: t(label, label) }
       })
       .filter(Boolean) as { href: string, label: string }[]
-  }, [segments, team, session?.user.username])
+  }, [segments, team, session?.user.username, t])
 
   return (
     <Breadcrumb>
@@ -126,13 +124,13 @@ export function Breadcrumbs() {
                         'flex w-max cursor-default items-center gap-2 whitespace-nowrap',
                       )}
                     >
-                      {crumb.label}
+                      {team ? (crumb.label) : <Skeleton className='h-4 w-9' />}
                     </BreadcrumbPage>
                   )
                 : (
                     <BreadcrumbLink asChild>
                       <Link href={crumb.href}>
-                        {idx === 0 ? <HomeIcon className='size-4.5' /> : crumb.label}
+                        {idx === 0 ? <HomeIcon className='size-4.5' /> : team ? crumb.label : <Skeleton className='h-4 w-9' />}
                       </Link>
                     </BreadcrumbLink>
                   )}

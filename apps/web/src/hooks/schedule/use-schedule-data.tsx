@@ -1,5 +1,3 @@
-import { useParams } from 'next/navigation'
-
 import { useQuery } from '@tanstack/react-query'
 
 import { useTRPC } from '~/trpc/client'
@@ -10,15 +8,12 @@ type ScheduleDataProps = {
 }
 
 export function useScheduleData({ start, end }: ScheduleDataProps) {
-  const params = useParams()
-  const slug = params.slug as string
   const trpc = useTRPC()
 
   // API data
 
   const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
     refetchOnWindowFocus: false,
   })
 

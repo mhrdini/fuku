@@ -2,8 +2,6 @@
 
 import { useEffect } from 'react'
 
-import { useParams } from 'next/navigation'
-
 import {
   ShiftTypeCreateInputSchema,
 } from '@fuku/api/schemas'
@@ -57,11 +55,8 @@ export function CreateShiftTypeFormSheet() {
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-  const params = useParams()
-  const slug = params?.slug as string
   const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
   })
 
   const { data: payGrades } = useQuery({
