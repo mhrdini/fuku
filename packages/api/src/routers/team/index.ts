@@ -14,6 +14,7 @@ import {
   protectedProcedure,
   teamAdminProcedure,
 } from '../../trpc'
+import { resolveActiveTeam } from '../../utils/resolve-active-team'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 8)
 
@@ -52,63 +53,9 @@ export const teamRouter = {
     }),
 
   getActiveTeam: protectedProcedure.query(async ({ ctx }) => {
-    const user = await ctx.db.user.findUnique({
-      where: {
-        id: ctx.session.user.id,
-      },
-      select: {
-        lastActiveTeamId: true,
-      },
-    })
+    const team = await resolveActiveTeam({ db: ctx.db, userId: ctx.session.user.id })
 
-    if (user?.lastActiveTeamId) {
-      const activeTeam = await ctx.db.team.findFirst({
-        where: {
-          id: user.lastActiveTeamId,
-          deletedAt: null,
-          teamMembers: {
-            some: {
-              userId: ctx.session.user.id,
-              deletedAt: null,
-            },
-          },
-        },
-      })
-
-      if (activeTeam) {
-        return TeamOutputSchema.parse(activeTeam)
-      }
-    }
-
-    const nextTeam = await ctx.db.team.findFirst({
-      where: {
-        deletedAt: null,
-        AND: [
-          {
-            teamMembers: {
-              some: {
-                userId: ctx.session.user.id,
-                deletedAt: null,
-              },
-            },
-          },
-        ],
-      },
-      orderBy: {
-        createdAt: 'asc',
-      },
-    })
-
-    await ctx.db.user.update({
-      where: {
-        id: ctx.session.user.id,
-      },
-      data: {
-        lastActiveTeamId: nextTeam?.id ?? null,
-      },
-    })
-
-    return nextTeam ? TeamOutputSchema.parse(nextTeam) : null
+    return team ? TeamOutputSchema.parse(team) : null
   }),
 
   getAllOwned: protectedProcedure.query(async ({ ctx }) => {

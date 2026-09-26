@@ -38,7 +38,7 @@ describe('team member', () => {
   describe('byId', () => {
     it('does not let a user read another team\'s member', async () => {
       const userA = await createUser()
-      const teamA = await createTeam(userA.id)
+      const _teamA = await createTeam(userA.id)
       const callerA = createCaller({
         session: createSessionContext(userA),
       })
