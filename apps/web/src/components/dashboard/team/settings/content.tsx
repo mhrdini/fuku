@@ -79,7 +79,7 @@ export function TeamSettingsContent() {
         timeZone: team.timeZone,
       })
     }
-  }, [team])
+  }, [form, team])
 
   const { mutateAsync: updateTeam, isPending: isSaving } = useMutation({
     ...trpc.team.update.mutationOptions(),

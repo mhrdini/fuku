@@ -71,7 +71,7 @@ export function DashboardSidebar({ username }: { username: string }) {
 
   const onMenuButtonClick = useCallback((url: string) => {
     router.push(url)
-  }, [])
+  }, [router])
 
   const onNewTeam = () => {
     router.push(`/${username}/team/new`)
@@ -86,88 +86,92 @@ export function DashboardSidebar({ username }: { username: string }) {
   }
 
   const teamsHeader
-    = sidebarState === undefined ? (
-      <>
-        <div className='bg-muted flex aspect-square size-8 items-center justify-center rounded-none'>
-          <Skeleton className='size-4 rounded' />
-        </div>
-        <div className='grid flex-1 gap-1'>
-          <Skeleton className='h-3 w-24' />
-          <Skeleton className='h-2 w-16' />
-        </div>
-      </>
-    ) : (
-      <DropdownMenu open={openTeamSelect} onOpenChange={setOpenTeamSelect}>
-        <DropdownMenuTrigger asChild>
-          <SidebarMenuButton
-            size='lg'
-            className={cn(
-              !sidebarState.teams?.length
-              && 'bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border shadow-xs',
-            )}
-            onClick={onNewTeam}
-          >
-            {!sidebarState.activeTeam ? (
-              // no sidebarState.teams
-              <>
-                <div className='flex aspect-square size-8 items-center justify-center rounded-none'>
-                  <PlusIcon className='size-4' />
-                </div>
-                <div className='grid flex-1 text-left text-sm leading-tight'>
-                  <span className='truncate font-medium'>
-                    {t('createYourFirstTeam', 'Create your first team')}
-                  </span>
-                </div>
-              </>
-            ) : (
-              // has sidebarState.teams
-              <>
-                <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-none'>
-                  <Users2Icon className='size-4' />
-                </div>
-                <div className='grid flex-1 text-left text-sm leading-tight'>
-                  <span className='truncate font-medium'>
-                    {sidebarState.activeTeam.name}
-                  </span>
-                  <span className='truncate text-xs'>
-                    {t('teamMembersCounter', {
-                      count: sidebarState.activeTeam.teamMembersCount,
-                    })}
-                  </span>
-                </div>
-                <ChevronsUpDownIcon className='ml-auto' />
-              </>
-            )}
-          </SidebarMenuButton>
-        </DropdownMenuTrigger>
-        {sidebarState.teams.length > 0 && (
-          <DropdownMenuContent
-            className='w-[var(--radix-dropdown-menu-trigger-width)]'
-            side='bottom'
-          >
-            {sidebarState.teams.map(team => (
-              <DropdownMenuItem
-                key={team.id}
-                onClick={() => onSelectTeam(team.id, team.publicId)}
-              >
-                {team.name}
-                {sidebarState.activeTeam?.id === team.id && (
-                  <CheckIcon className='ml-auto' />
+    = sidebarState === undefined
+      ? (
+          <>
+            <div className='bg-muted flex aspect-square size-8 items-center justify-center rounded-none'>
+              <Skeleton className='size-4 rounded' />
+            </div>
+            <div className='grid flex-1 gap-1'>
+              <Skeleton className='h-3 w-24' />
+              <Skeleton className='h-2 w-16' />
+            </div>
+          </>
+        )
+      : (
+          <DropdownMenu open={openTeamSelect} onOpenChange={setOpenTeamSelect}>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton
+                size='lg'
+                className={cn(
+                  !sidebarState.teams?.length
+                  && 'bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border shadow-xs',
                 )}
-              </DropdownMenuItem>
-            ))}
+                onClick={onNewTeam}
+              >
+                {!sidebarState.activeTeam
+                  ? (
+                // no sidebarState.teams
+                      <>
+                        <div className='flex aspect-square size-8 items-center justify-center rounded-none'>
+                          <PlusIcon className='size-4' />
+                        </div>
+                        <div className='grid flex-1 text-left text-sm leading-tight'>
+                          <span className='truncate font-medium'>
+                            {t('createYourFirstTeam', 'Create your first team')}
+                          </span>
+                        </div>
+                      </>
+                    )
+                  : (
+                // has sidebarState.teams
+                      <>
+                        <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-none'>
+                          <Users2Icon className='size-4' />
+                        </div>
+                        <div className='grid flex-1 text-left text-sm leading-tight'>
+                          <span className='truncate font-medium'>
+                            {sidebarState.activeTeam.name}
+                          </span>
+                          <span className='truncate text-xs'>
+                            {t('teamMembersCounter', {
+                              count: sidebarState.activeTeam.teamMembersCount,
+                            })}
+                          </span>
+                        </div>
+                        <ChevronsUpDownIcon className='ml-auto' />
+                      </>
+                    )}
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            {sidebarState.teams.length > 0 && (
+              <DropdownMenuContent
+                className='w-[var(--radix-dropdown-menu-trigger-width)]'
+                side='bottom'
+              >
+                {sidebarState.teams.map(team => (
+                  <DropdownMenuItem
+                    key={team.id}
+                    onClick={() => onSelectTeam(team.id, team.publicId)}
+                  >
+                    {team.name}
+                    {sidebarState.activeTeam?.id === team.id && (
+                      <CheckIcon className='ml-auto' />
+                    )}
+                  </DropdownMenuItem>
+                ))}
 
-            {sidebarState.teams.length > 1 && <DropdownMenuSeparator />}
+                {sidebarState.teams.length > 1 && <DropdownMenuSeparator />}
 
-            <DropdownMenuItem onClick={onNewTeam}>
-              <PlusIcon />
-              {' '}
-              {t('createANewTeam', 'Create a new team')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        )}
-      </DropdownMenu>
-    )
+                <DropdownMenuItem onClick={onNewTeam}>
+                  <PlusIcon />
+                  {' '}
+                  {t('createANewTeam', 'Create a new team')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            )}
+          </DropdownMenu>
+        )
 
   return (
     <Sidebar collapsible='icon'>

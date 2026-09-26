@@ -35,13 +35,13 @@ export function createQueryClient() {
 
         switch (error.data?.code) {
           case 'UNAUTHORIZED':
-            redirect('/login')
+            return redirect('/login')
 
           case 'FORBIDDEN':
-            redirect('/')
+            return redirect('/')
 
           case 'INTERNAL_SERVER_ERROR':
-            redirect('/error')
+            return redirect('/error')
         }
       },
     }),

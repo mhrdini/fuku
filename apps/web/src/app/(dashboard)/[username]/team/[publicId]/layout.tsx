@@ -35,20 +35,6 @@ export default async function TeamLayout({
   if (!team) {
     const nextTeam = await resolveActiveTeam({ db, userId: session.user.id })
 
-    console.log({
-      username,
-      publicId,
-      nextTeam: nextTeam
-        ? {
-            id: nextTeam.id,
-            publicId: nextTeam.publicId,
-          }
-        : null,
-      redirectUrl: nextTeam
-        ? `/${username}/team/${nextTeam.publicId}`
-        : `/${username}`,
-    })
-
     if (nextTeam) {
       redirect(`/${username}/team/${nextTeam.publicId}`)
     }

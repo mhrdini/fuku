@@ -79,7 +79,7 @@ function RuleConditionPanelItem({
     return t(
       RULE_CONDITION_VALUE_OPTIONS_BY_FIELD[ruleCondition.field].get(uiValue)!,
     )
-  }, [])
+  }, [ruleCondition.field, t])
 
   const uiValue = useMemo(() => {
     const v = ruleCondition.value
@@ -97,7 +97,7 @@ function RuleConditionPanelItem({
             RULE_CONDITION_OPTIONS_CONFIG[ruleCondition.field].defaultValue,
           ),
         )
-  }, [ruleCondition.value, ruleCondition.field, isMulti])
+  }, [ruleCondition.value, ruleCondition.field, isMulti, getLocalisedValue])
 
   const handleUpdateField = (field: string) => {
     if (field === ruleCondition.field)

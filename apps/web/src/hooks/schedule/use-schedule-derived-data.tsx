@@ -184,7 +184,7 @@ export function useScheduleDerivedData({
       }
       setSchedulerAssignments(Array.from(updatedAssignments.values()))
     }
-  }, [dbAssignments])
+  }, [dbAssignments, schedulerAssignments, setSchedulerAssignments])
 
   useEffect(() => {
     if (dbUnavailabilities && dbUnavailabilities.length > 0) {
@@ -200,13 +200,14 @@ export function useScheduleDerivedData({
           id: du.id,
           teamMemberId: du.teamMemberId,
           date: du.date,
+          reason: du.reason,
         }
         const cellKey = getCellKey(u.teamMemberId, u.date)
         updatedUnavailabilities.set(cellKey, u)
       }
       setSchedulerUnavailabilities(Array.from(updatedUnavailabilities.values()))
     }
-  }, [dbUnavailabilities])
+  }, [dbUnavailabilities, schedulerUnavailabilities, setSchedulerUnavailabilities])
 
   useEffect(() => {
     if (shiftTypeMap.size > 0) {
@@ -218,13 +219,7 @@ export function useScheduleDerivedData({
       // console.log('computed metrics:', metrics)
       setSchedulerMetrics(metrics)
     }
-  }, [
-    schedulerAssignments,
-    schedulerUnavailabilities,
-    shiftTypeMap,
-    start,
-    end,
-  ])
+  }, [schedulerAssignments, schedulerUnavailabilities, shiftTypeMap, start, end, computeSchedulerMetrics, setSchedulerMetrics])
 
   const daysRowList = useMemo<Day[]>(() => {
     const startDT = DateTime.fromJSDate(start).startOf('day')
