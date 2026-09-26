@@ -1,7 +1,6 @@
 import {
   CountrySchema,
   TeamMemberRoleSchema,
-  TeamMemberSchema,
   TeamSchema,
 } from '@fuku/domain/schemas'
 import * as z from 'zod/v4'
@@ -31,6 +30,7 @@ export const TeamCreateInputSchema = TeamSchema.extend({
   teamMembers: z.array(
     TeamMemberCreateInputSchema.extend({
       id: z.string(),
+      teamId: z.string().optional(),
     }),
   ),
   payGrades: z.array(
@@ -65,7 +65,7 @@ export const TeamCreateInputSchema = TeamSchema.extend({
     .optional(),
 }).omit({
   id: true,
-  slug: true,
+  publicId: true,
   createdAt: true,
   updatedAt: true,
   deletedAt: true,
@@ -74,26 +74,7 @@ export const TeamCreateInputSchema = TeamSchema.extend({
 
 export type TeamCreateInput = z.infer<typeof TeamCreateInputSchema>
 
-export const UserTeamSchema = TeamSchema.pick({
-  id: true,
-  slug: true,
-  name: true,
-  description: true,
-  createdAt: true,
-}).extend({
-  role: TeamMemberRoleSchema,
-  teamMembers: z.array(TeamMemberSchema),
-})
-
-export type UserTeam = z.infer<typeof UserTeamSchema>
-
-export const TeamUpdateInputSchema = TeamSchema.pick({
-  id: true,
-  name: true,
-  country: true,
-  description: true,
-  timeZone: true,
-}).extend({
+export const TeamUpdateInputSchema = TeamSchema.partial().extend({
   teamMembers: z.array(TeamMemberUpdateInputSchema).optional(),
   payGrades: z.array(PayGradeUpdateInputSchema).optional(),
   locations: z.array(LocationUpdateInputSchema).optional(),
@@ -104,8 +85,15 @@ export const TeamUpdateInputSchema = TeamSchema.pick({
 export type TeamUpdateInputType = z.infer<typeof TeamUpdateInputSchema>
 
 export const TeamOutputSchema = TeamSchema.extend({
-  teamMembers: z.array(TeamMemberSchema),
+  // teamMembers: z.array(TeamMemberSchema),
   country: CountrySchema.nullable(),
 })
 
 export type TeamOutput = z.infer<typeof TeamOutputSchema>
+
+export const UserTeamSchema = TeamOutputSchema.extend({
+  teamMemberRole: TeamMemberRoleSchema,
+  teamMembersCount: z.number(),
+})
+
+export type UserTeam = z.infer<typeof UserTeamSchema>

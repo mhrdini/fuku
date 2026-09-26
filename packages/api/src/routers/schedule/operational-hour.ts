@@ -115,6 +115,19 @@ export const operationalHourRouter = {
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if (Object.entries(input.operationalHours).length === 0) {
+        await ctx.db.operationalHour.updateMany({
+          where: {
+            teamId: input.teamId,
+          },
+          data: {
+            deletedAt: new Date(),
+            deletedById: ctx.session.user.id,
+          },
+        })
+        return
+      }
+
       for (const [day, oh] of Object.entries(input.operationalHours)) {
         const weekday = parseInt(day) as Weekday
 

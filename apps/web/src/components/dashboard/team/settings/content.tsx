@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 import { TeamUpdateInputSchema } from '@fuku/api/schemas'
 import { useTranslation } from '@fuku/i18n/react'
@@ -50,18 +50,14 @@ export function TeamSettingsContent() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-  const params = useParams()
-  const slug = params?.slug as string
   const router = useRouter()
 
   const { data: team, isPending } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
   })
 
   const form = useForm<TeamSettingsFormType>({
     defaultValues: {
-      id: team?.id || '',
       name: team?.name || '',
       country: team?.country || undefined,
       description: team?.description || null,
@@ -77,14 +73,13 @@ export function TeamSettingsContent() {
   useEffect(() => {
     if (team) {
       form.reset({
-        id: team.id,
         name: team.name,
         country: team.country,
         description: team.description,
         timeZone: team.timeZone,
       })
     }
-  }, [team])
+  }, [form, team])
 
   const { mutateAsync: updateTeam, isPending: isSaving } = useMutation({
     ...trpc.team.update.mutationOptions(),
@@ -92,7 +87,7 @@ export function TeamSettingsContent() {
       form.reset(form.getValues())
       queryClient.invalidateQueries(trpc.user.getSidebarState.queryOptions())
       queryClient.invalidateQueries(
-        trpc.team.bySlug.queryOptions({ slug: data!.slug }),
+        trpc.team.byPublicId.queryOptions({ publicId: data!.publicId }),
       )
       toast.success(t('team'), {
         description: t('changesSaved', 'Changes saved!'),
@@ -153,7 +148,7 @@ export function TeamSettingsContent() {
     if (!team)
       return
     try {
-      await deleteTeam({ id: team.id })
+      await deleteTeam()
     } catch {
       // TODO: handle errors
     }

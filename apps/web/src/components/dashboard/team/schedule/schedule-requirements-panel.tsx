@@ -13,14 +13,14 @@ import { ScheduleRequirements } from '../../schedule-requirements'
 export function ScheduleRequirementsPanel({
   teamId,
 }: {
-  teamId: string
+  teamId: string | undefined
 }) {
   const { t } = useTranslation()
   const trpc = useTRPC()
   const [open, setOpen] = useState(false)
 
   const { data: operationalHours } = useQuery({
-    ...trpc.operationalHour.list.queryOptions({ teamId }),
+    ...trpc.operationalHour.list.queryOptions({ teamId: teamId! }),
     enabled: !!teamId,
   })
 

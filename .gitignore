@@ -7,6 +7,7 @@ node_modules
 
 # testing
 coverage
+.vitest/
 
 # next.js
 .next/
@@ -45,12 +46,10 @@ packages/db/dist
 .venv/
 __pycache__/
 .ipynb_checkpoints/
-
 *.pyc
 *.egg-info
 *.ipynb
 packages/solver/src/**/*.json
 
+# runtime files
 *.generated.ts
-project.inlang/
-packages/ui/src/components/ui-old

@@ -1,7 +1,5 @@
 'use client'
 
-import { useParams } from 'next/navigation'
-
 import { useTranslation } from '@fuku/i18n/react'
 import {
   AlertDialogAction,
@@ -25,13 +23,6 @@ export function RemoveMemberAlertDialog() {
 
   const { editingId: currentTeamMemberId } = useDialogStore()
 
-  const params = useParams()
-  const slug = params?.slug as string
-  const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
-  })
-
   const { data: teamMember, isPending: isLoadingTeamMember } = useQuery({
     ...trpc.teamMember.byId.queryOptions({
       id: currentTeamMemberId!,
@@ -52,7 +43,7 @@ export function RemoveMemberAlertDialog() {
         data,
       )
       queryClient.invalidateQueries(
-        trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
+        trpc.teamMember.listIds.queryOptions({}),
       )
       toast.success(t('teamMember'), {
         description: t(
@@ -79,7 +70,7 @@ export function RemoveMemberAlertDialog() {
         queryKey: trpc.teamMember.byId.queryKey({ id: data.id }),
       })
       queryClient.invalidateQueries(
-        trpc.teamMember.listIds.queryOptions({ teamId: team?.id ?? '' }),
+        trpc.teamMember.listIds.queryOptions({}),
       )
       const toastId = toast(t('teamMember'), {
         description: t(
@@ -102,7 +93,7 @@ export function RemoveMemberAlertDialog() {
     if (!currentTeamMemberId)
       return
     try {
-      await removeMember({ id: currentTeamMemberId, teamId: team?.id ?? '' })
+      await removeMember({ id: currentTeamMemberId })
     } catch {
       // Handled in onError
     }

@@ -1,6 +1,6 @@
 model Team {
   id          String  @id @default(uuid())
-  slug        String  @unique
+  publicId    String  @unique @map("public_id")
   name        String
   description String?
 
@@ -78,6 +78,7 @@ model TeamMember {
   deletedById String?   @map("deleted_by_id")
   rules       Rule[]
 
+  @@unique([teamId, userId])
   @@index([teamId])
   @@index([payGradeId])
   @@index([deletedAt])

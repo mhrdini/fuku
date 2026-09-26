@@ -1,32 +1,44 @@
 import { redirect } from 'next/navigation'
 
+import { resolveActiveTeam } from '@fuku/api'
 import { db } from '@fuku/db'
 
 import { getSession } from '~/auth/server'
-import { prefetch, trpc } from '~/trpc/server'
 
 export default async function TeamLayout({
   children,
   params,
 }: {
   children: React.ReactNode
-  params: Promise<{ username: string, slug: string }>
+  params: Promise<{ username: string, publicId: string }>
 }) {
   const session = await getSession()
-  const { username, slug } = await params
-  if (!session || session.user.username !== username)
-    redirect(`/login`)
+  const { username, publicId } = await params
+
+  if (!session || session.user.username !== username) {
+    redirect('/login')
+  }
 
   const team = await db.team.findFirst({
     where: {
-      slug,
+      publicId,
+      deletedAt: null,
       teamMembers: {
-        some: { userId: session.user.id },
+        some: {
+          userId: session.user.id,
+          deletedAt: null,
+        },
       },
     },
   })
 
   if (!team) {
+    const nextTeam = await resolveActiveTeam({ db, userId: session.user.id })
+
+    if (nextTeam) {
+      redirect(`/${username}/team/${nextTeam.publicId}`)
+    }
+
     redirect(`/${username}`)
   }
 
@@ -34,8 +46,5 @@ export default async function TeamLayout({
     where: { id: session.user.id },
     data: { lastActiveTeamId: team.id },
   })
-
-  prefetch({ ...trpc.team.bySlug.queryOptions({ slug }), initialData: team })
-
   return <>{children}</>
 }

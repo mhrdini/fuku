@@ -14,7 +14,7 @@ export const OperationalHourCreateInputSchema = OperationalHourSchema.omit({
   updatedAt: true,
   deletedById: true,
 }).extend({
-  deletedAt: z.date().nullable(),
+  deletedAt: z.date().nullish(),
 })
 
 export type OperationalHourCreateInput = z.infer<

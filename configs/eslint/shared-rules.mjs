@@ -61,6 +61,7 @@ export const sharedRules = [
   // --- misc rule tweaks ---
   {
     rules: {
+      'react/set-state-in-effect': 'off',
       'react-refresh/only-export-components': 'off',
       'no-irregular-whitespace': 'off',
       'no-unused-vars': 'off',
@@ -71,15 +72,11 @@ export const sharedRules = [
       'antfu/no-top-level-await': ['off'],
       'node/prefer-global/process': ['off'],
       'node/no-process-env': ['off'],
-      // Watch this one on Next.js apps: it'll flag PascalCase components
-      // (Button.tsx) and bracketed dynamic routes ([id].tsx) unless you're
-      // already fully kebab-case. Everything's still just a warning either
-      // way (see onlyWarn above), so it's cheap to try and drop if noisy.
       'unicorn/filename-case': [
         'error',
         {
           case: 'kebabCase',
-          ignore: ['README.md'],
+          ignore: ['README.md', /^__tests__$/, /^\[.*\]$/],
         },
       ],
     },

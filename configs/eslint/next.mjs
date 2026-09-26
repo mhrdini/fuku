@@ -16,11 +16,13 @@ export default antfu(
     pnpm: true,
     typescript: true,
     react: true,
+    nextjs: true,
 
     stylistic: {
       indent: 2,
       quotes: 'single',
       semi: false,
+      jsx: true,
     },
 
     // keep Prettier for css/html/markdown; JS/TS/JSX still go through

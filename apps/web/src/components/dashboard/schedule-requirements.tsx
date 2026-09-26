@@ -91,7 +91,7 @@ export function ScheduleRequirements({ teamId, autoUpdateOnChange = true }: { te
   const initialisedTeamIdRef = useRef<string | null>(null)
 
   const { data: teamMemberCount } = useQuery({
-    ...trpc.teamMember.countActive.queryOptions({ teamId }),
+    ...trpc.teamMember.countActive.queryOptions(),
   })
 
   const { data: operationalHours, isSuccess: hoursFetched } = useQuery({

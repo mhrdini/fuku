@@ -98,6 +98,7 @@ export const locationRouter = {
         data: {
           ...(input.name !== undefined ? { name: input.name } : {}),
           ...(input.address !== undefined ? { address: input.address } : {}),
+          ...(input.color !== undefined ? { color: input.color } : {}),
         },
       })
       return updated

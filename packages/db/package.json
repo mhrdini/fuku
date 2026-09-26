@@ -2,7 +2,10 @@
   "name": "@fuku/db",
   "version": "1.0.0",
   "exports": {
-    ".": "./src/client.ts"
+    ".": "./src/client.ts",
+    "./enums": "./src/enums.ts",
+    "./testing": "./src/testing/database.ts",
+    "./testing/factories": "./src/testing/factories/index.ts"
   },
   "prisma": {
     "schema": "./prisma"
@@ -26,6 +29,7 @@
     "@prisma/client": "catalog:"
   },
   "devDependencies": {
+    "@faker-js/faker": "catalog:",
     "@fuku/config-eslint": "workspace:*",
     "@fuku/config-typescript": "workspace:*",
     "@types/node": "catalog:",

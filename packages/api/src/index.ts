@@ -11,3 +11,6 @@ export { appRouter } from './routers/app'
 // tRPC exports
 export { createTRPCContext } from './trpc'
 export type { RouterInputs, RouterOutputs }
+
+// Helper exports
+export { resolveActiveTeam } from './utils/resolve-active-team'

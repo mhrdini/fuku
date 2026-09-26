@@ -105,7 +105,7 @@ export function splitCellKey(cellKey: string) {
   return { teamMemberId, date }
 }
 
-export function parseCellKey(cellKey: string, asString: boolean = false) {
+export function parseCellKey(cellKey: string) {
   const { teamMemberId, date } = splitCellKey(cellKey)
   return {
     teamMemberId,
