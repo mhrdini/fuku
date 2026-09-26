@@ -80,7 +80,7 @@ export function CreatePayGradeFormSheet() {
         shouldValidate: false,
       })
     }
-  }, [id, team?.id])
+  }, [form, id, team?.id])
 
   const { mutateAsync: createPayGrade, isPending } = useMutation({
     ...trpc.payGrade.create.mutationOptions(),

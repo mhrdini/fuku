@@ -60,7 +60,7 @@ export function ScheduleRow({
       target && target.type === 'cell'
         ? cellMap.get(target.id as string)?.schedulerAssignments[0]
         : null,
-    [target],
+    [cellMap, target],
   )
 
   return (

@@ -655,12 +655,12 @@ function TeamMemberSheet({
   // stored in the db
   const form = useForm<TeamMemberFormType>({
     defaultValues: {
-      id: crypto.randomUUID(),
+      id: '',
       familyName: '',
       givenNames: '',
       teamMemberRole: 'STAFF',
       rateMultiplier: 1,
-      teamId: crypto.randomUUID(),
+      teamId: '',
     },
     resolver: zodResolver(TeamMemberFormSchema),
   })
@@ -688,7 +688,7 @@ function TeamMemberSheet({
     } else {
       form.reset()
     }
-  }, [editingIndex, open])
+  }, [editingIndex, fields, form, open])
 
   const submitTeamMember = async (values: TeamMemberFormType) => {
     if (editingIndex !== null) {

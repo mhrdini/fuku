@@ -66,11 +66,11 @@ function RulePanelItem({
   }
 
   const handleDuplicateRule = () => {
-    const { id, ...rest } = rule
+    const { id: _id, ...rest } = rule
     const newRule = {
       ...rest,
       ruleConditions: ruleConditions.map(
-        ({ id, ruleId, ...condition }) => condition,
+        ({ id: _id, ruleId: _ruleId, ...condition }) => condition,
       ),
     }
     createRule(newRule as RuleCreateInput)

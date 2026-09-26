@@ -6,9 +6,9 @@ import Stepper from '~/components/ui/stepper'
 export function useStepper(steps: Step[]) {
   const [index, setIndex] = useState(0)
 
-  const currentStep = () => {
-    return steps[index]
-  }
+  // const currentStep = () => {
+  //   return steps[index]
+  // }
 
   const prevStep = () => {
     setIndex(index => index - 1)

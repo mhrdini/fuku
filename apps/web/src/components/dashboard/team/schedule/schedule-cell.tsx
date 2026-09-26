@@ -59,7 +59,7 @@ export function ScheduleCell({
 
   const assignments = useMemo(
     () => cellData && cellData.schedulerAssignments,
-    [cellData?.schedulerAssignments],
+    [cellData],
   )
 
   const unavailability = useMemo(() => {
@@ -70,7 +70,7 @@ export function ScheduleCell({
         && DateTime.fromJSDate(ua.date).hasSame(DateTime.fromJSDate(date), 'day'),
     )
     return unavailability ? (unavailability as UnavailabilityOutput) : null
-  }, [cellData?.schedulerUnavailabilities])
+  }, [cellData?.schedulerUnavailabilities, cellKey])
 
   const handleCreateAssignment = () => {
     const getDefaultShiftTypeId = eligibleShifts.keys().next().value!
@@ -85,10 +85,10 @@ export function ScheduleCell({
     }
   }
 
-  const hasAssignments = useMemo(
-    () => (cellData && cellData?.schedulerAssignments.length > 0) || false,
-    [cellData?.schedulerAssignments],
-  )
+  // const hasAssignments = useMemo(
+  //   () => (cellData && cellData?.schedulerAssignments.length > 0) || false,
+  //   [cellData?.schedulerAssignments],
+  // )
 
   const previewAssignmentCellKey = useMemo(
     () =>

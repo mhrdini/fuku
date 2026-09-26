@@ -22,16 +22,16 @@ export function ScheduleFooter() {
 
   const handleClearShifts = useCallback(() => {
     setSchedulerAssignments([])
-  }, [])
+  }, [setSchedulerAssignments])
 
   const handleClearUnavailabilities = useCallback(() => {
     setSchedulerUnavailabilities([])
-  }, [])
+  }, [setSchedulerUnavailabilities])
 
   const handleClearAll = useCallback(() => {
     setSchedulerAssignments([])
     setSchedulerUnavailabilities([])
-  }, [])
+  }, [setSchedulerAssignments, setSchedulerUnavailabilities])
 
   return (
     <div className='flex items-center justify-end gap-2'>

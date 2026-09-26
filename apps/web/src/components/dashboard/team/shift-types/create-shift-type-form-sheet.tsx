@@ -82,7 +82,7 @@ export function CreateShiftTypeFormSheet() {
         shouldValidate: false,
       })
     }
-  }, [id, team?.id])
+  }, [form, id, team?.id])
 
   const { mutateAsync: createShiftType, isPending } = useMutation({
     ...trpc.shiftType.create.mutationOptions(),

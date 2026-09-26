@@ -35,7 +35,6 @@ function EditableCellInner<
 >({
   row,
   columnName,
-  editingCell,
   setEditingCell,
   onSave,
   children,
@@ -45,8 +44,8 @@ function EditableCellInner<
     row[columnName] === null ? '' : String(row[columnName]),
   )
 
-  const isEditing
-    = editingCell?.rowId === row.id && editingCell?.columnKey === columnName
+  // const isEditing
+  //   = editingCell?.rowId === row.id && editingCell?.columnKey === columnName
 
   const cancelChanges = () => {
     setValue(row[columnName] === null ? '' : String(row[columnName]))
