@@ -23,9 +23,9 @@ export function TeamOverviewSkeleton() {
       {/* Schedule requirements */}
       <div className='flex flex-col gap-2 @[50rem]/main:w-fit'>
         <div className='flex flex-col gap-2'>
-          {Array.from({ length: 7 }).map((_, index) => (
+          {Array.from({ length: 7 }).map(number => (
             <div
-              key={index}
+              key={`skeleton_${number as number}`}
               className='flex p-0 gap-2 @[50rem]/main:grid @[50rem]/main:grid-cols-5 @[50rem]/main:grid-rows-2 @[50rem]/main:items-start'
             >
               {/* Weekday */}

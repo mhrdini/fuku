@@ -70,7 +70,7 @@ export function useSidebarMenu(team: UserTeam | null): MenuGroup[] {
 }
 
 export function useNavigationMenu(username: string | null, team: UserTeam | null): Menu[] {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const menu = useMemo(() => {
     if (!username || !team)
       return []
@@ -119,7 +119,7 @@ export function useNavigationMenu(username: string | null, team: UserTeam | null
         icon: CalendarIcon,
       },
     ]
-  }, [username, team, i18n.resolvedLanguage])
+  }, [username, team, t])
 
   return menu
 }

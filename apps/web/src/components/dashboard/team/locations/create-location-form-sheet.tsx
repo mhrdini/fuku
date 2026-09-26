@@ -69,7 +69,7 @@ export function CreateLocationFormSheet() {
         shouldValidate: false,
       })
     }
-  }, [id, team?.id])
+  }, [form, id, team?.id])
 
   const { mutateAsync: createLocation, isPending } = useMutation({
     ...trpc.location.create.mutationOptions(),

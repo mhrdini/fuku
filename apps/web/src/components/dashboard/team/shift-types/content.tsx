@@ -35,6 +35,7 @@ import {
 } from '@tanstack/react-table'
 import { EllipsisIcon, PlusIcon, TrashIcon } from 'lucide-react'
 
+import type { PayGradeOutput } from '@fuku/api/schemas'
 import type {
   ColumnDef,
 } from '@tanstack/react-table'
@@ -191,91 +192,7 @@ export function TeamShiftTypesContent() {
     {
       accessorKey: 'eligiblePayGrades',
       header: 'Pay Grades',
-      cell: ({ row }) => {
-        const anchor = useComboboxAnchor()
-        return (
-          <Combobox
-            multiple
-            items={payGrades ?? []}
-            value={row.original.eligiblePayGrades.map(pg => pg.payGradeId)}
-            onValueChange={(ids: string[]) => {
-              const connectPayGrades = ids.filter(
-                id =>
-                  !row.original.eligiblePayGrades.some(
-                    epg => epg.payGradeId === id,
-                  ),
-              )
-              const disconnectPayGrades = row.original.eligiblePayGrades
-                .filter(epg => !ids.includes(epg.payGradeId))
-                .map(epg => epg.payGradeId)
-
-              updateShiftType({
-                id: row.original.id,
-                connectPayGrades,
-                disconnectPayGrades,
-              })
-            }}
-          >
-            <ComboboxChips ref={anchor} className='w-[300px] min-w-0'>
-              <ComboboxValue>
-                {(ids: string[]) => (
-                  <>
-                    {ids.map((id) => {
-                      const pg = payGrades?.find(pg => pg.id === id)
-                      if (!pg)
-                        return null
-
-                      return <ComboboxChip key={id}>{pg.name}</ComboboxChip>
-                    })}
-                    <ComboboxChipsInput />
-                  </>
-                )}
-              </ComboboxValue>
-            </ComboboxChips>
-            <ComboboxContent anchor={anchor}>
-              <ComboboxEmpty>
-                {t('noPayGradesFound', 'No pay grades found.')}
-              </ComboboxEmpty>
-              <ComboboxList>
-                {item => (
-                  <ComboboxItem key={item.id} value={item.id}>
-                    {item.name}
-                  </ComboboxItem>
-                )}
-              </ComboboxList>
-              <ComboboxSeparator className='m-0' />
-              <div className='flex w-full flex-row justify-between'>
-                <Button
-                  variant='link'
-                  className='text-muted-foreground hover:text-foreground px-3 text-center hover:no-underline'
-                  type='button'
-                  onClick={() =>
-                    updateShiftType({
-                      id: row.original.id,
-                      connectPayGrades: payGrades?.map(pg => pg.id) ?? [],
-                    })}
-                >
-                  {t('selectAll', 'Select all')}
-                </Button>
-                <Button
-                  variant='link'
-                  className='text-muted-foreground hover:text-foreground px-3 text-center hover:no-underline'
-                  type='button'
-                  onClick={() =>
-                    updateShiftType({
-                      id: row.original.id,
-                      disconnectPayGrades: row.original.eligiblePayGrades.map(
-                        epg => epg.payGradeId,
-                      ),
-                    })}
-                >
-                  {t('clearAll', 'Clear all')}
-                </Button>
-              </div>
-            </ComboboxContent>
-          </Combobox>
-        )
-      },
+      cell: ({ row }) => <EligiblePayGradesCell shiftType={row.original} payGrades={payGrades} onUpdate={updateShiftType} />,
     },
   ]
 
@@ -350,5 +267,118 @@ export function TeamShiftTypesContent() {
         </Button>
       </div>
     </div>
+  )
+}
+
+function EligiblePayGradesCell({
+  shiftType,
+  payGrades,
+  onUpdate,
+}: {
+  shiftType: ShiftTypeUI
+  payGrades: PayGradeOutput[] | undefined
+  onUpdate: (input: {
+    id: string
+    connectPayGrades?: string[]
+    disconnectPayGrades?: string[]
+  }) => void
+}) {
+  const { t } = useTranslation()
+  const anchor = useComboboxAnchor()
+
+  return (
+    <Combobox
+      multiple
+      items={payGrades ?? []}
+      value={shiftType.eligiblePayGrades.map(pg => pg.payGradeId)}
+      onValueChange={(ids: string[]) => {
+        const connectPayGrades = ids.filter(
+          id =>
+            !shiftType.eligiblePayGrades.some(
+              epg => epg.payGradeId === id,
+            ),
+        )
+
+        const disconnectPayGrades = shiftType.eligiblePayGrades
+          .filter(epg => !ids.includes(epg.payGradeId))
+          .map(epg => epg.payGradeId)
+
+        onUpdate({
+          id: shiftType.id,
+          connectPayGrades,
+          disconnectPayGrades,
+        })
+      }}
+    >
+      <ComboboxChips ref={anchor} className='w-[300px] min-w-0'>
+        <ComboboxValue>
+          {(ids: string[]) => (
+            <>
+              {ids.map((id) => {
+                const payGrade = payGrades?.find(pg => pg.id === id)
+
+                if (!payGrade) {
+                  return null
+                }
+
+                return (
+                  <ComboboxChip key={id}>
+                    {payGrade.name}
+                  </ComboboxChip>
+                )
+              })}
+
+              <ComboboxChipsInput />
+            </>
+          )}
+        </ComboboxValue>
+      </ComboboxChips>
+
+      <ComboboxContent anchor={anchor}>
+        <ComboboxEmpty>
+          {t('noPayGradesFound', 'No pay grades found.')}
+        </ComboboxEmpty>
+
+        <ComboboxList>
+          {item => (
+            <ComboboxItem key={item.id} value={item.id}>
+              {item.name}
+            </ComboboxItem>
+          )}
+        </ComboboxList>
+
+        <ComboboxSeparator className='m-0' />
+
+        <div className='flex w-full flex-row justify-between'>
+          <Button
+            variant='link'
+            className='text-muted-foreground hover:text-foreground px-3 text-center hover:no-underline'
+            type='button'
+            onClick={() =>
+              onUpdate({
+                id: shiftType.id,
+                connectPayGrades: payGrades?.map(pg => pg.id) ?? [],
+              })}
+          >
+            {t('selectAll', 'Select all')}
+          </Button>
+
+          <Button
+            variant='link'
+            className='text-muted-foreground hover:text-foreground px-3 text-center hover:no-underline'
+            type='button'
+            onClick={() =>
+              onUpdate({
+                id: shiftType.id,
+                disconnectPayGrades: shiftType.eligiblePayGrades.map(
+                  epg => epg.payGradeId,
+                ),
+              })}
+          >
+            {t('clearAll', 'Clear all')}
+          </Button>
+        </div>
+      </ComboboxContent>
+    </Combobox>
   )
 }

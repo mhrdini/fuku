@@ -79,7 +79,6 @@ export function ScheduleTeamMemberHeaderCell({
     resetFilteredPayGrades,
     togglePayGrade,
   },
-  derivedData: { payGradeMap },
   teamMemberGroupBySort: {
     groupByKey,
     setGroupByKey,
@@ -95,7 +94,7 @@ export function ScheduleTeamMemberHeaderCell({
   const resetAll = useCallback(() => {
     resetFilteredPayGrades()
     resetGroupBySort()
-  }, [])
+  }, [resetFilteredPayGrades, resetGroupBySort])
 
   return (
     <div className='border-input bg-background sticky top-0 left-0 z-40 flex items-center gap-2 border-r border-b p-2'>

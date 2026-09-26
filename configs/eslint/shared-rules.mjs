@@ -61,6 +61,7 @@ export const sharedRules = [
   // --- misc rule tweaks ---
   {
     rules: {
+      'react/set-state-in-effect': 'off',
       'react-refresh/only-export-components': 'off',
       'no-irregular-whitespace': 'off',
       'no-unused-vars': 'off',
