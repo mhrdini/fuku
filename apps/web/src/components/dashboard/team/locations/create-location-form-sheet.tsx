@@ -2,8 +2,6 @@
 
 import { useEffect } from 'react'
 
-import { useParams } from 'next/navigation'
-
 import {
   LocationCreateInputSchema,
 } from '@fuku/api/schemas'
@@ -49,16 +47,10 @@ export function CreateLocationFormSheet() {
   const title = t('createNewLocation', 'Create New Location')
   const { id, closeSheet } = useSheetStore()
 
-  const params = useParams()
-  const slug = params?.slug as string
-
   const queryClient = useQueryClient()
   const trpc = useTRPC()
   const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({
-      slug,
-    }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
   })
 
   const form = useForm<LocationCreateFormType>({

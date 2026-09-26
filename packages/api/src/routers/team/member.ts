@@ -94,8 +94,15 @@ export const teamMemberRouter = {
     .input(TeamMemberCreateInputSchema)
     .mutation(async ({ input, ctx }) => {
       const { username, ...data } = input
-
       let userId: string | null = null
+
+      if (data.teamMemberRole === 'ADMIN' && !username) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Admin team member must be linked to a user',
+        })
+      }
+
       if (username) {
         const user = await ctx.db.user.findUnique({
           where: {
@@ -113,19 +120,25 @@ export const teamMemberRouter = {
           })
         }
 
-        if (user.memberships.some(membership => membership.teamId === ctx.activeTeamId)) {
+        if (
+          user.memberships.some(
+            membership => membership.teamId === ctx.activeTeamId,
+          )
+        ) {
           throw new TRPCError({
             code: 'BAD_REQUEST',
             message: `User "${username}" already has member in team`,
           })
         }
 
-        // it only updates last active team of linked user (as the current team)
-        // iff the linked user === the session/calling user, i.e. the user creating the member
-        if (user.id === ctx.session.user.id) {
-          await ctx.db.user.update({
+        userId = user.id
+      }
+
+      return ctx.db.$transaction(async (tx) => {
+        if (userId === ctx.session.user.id) {
+          await tx.user.update({
             where: {
-              id: user.id,
+              id: userId,
             },
             data: {
               lastActiveTeamId: ctx.activeTeamId,
@@ -133,19 +146,34 @@ export const teamMemberRouter = {
           })
         }
 
-        userId = user.id
-      }
+        const teamMember = await tx.teamMember.create({
+          data: {
+            ...data,
+            teamId: ctx.activeTeamId,
+            userId,
+          },
+          include: {
+            payGrade: true,
+            user: true,
+          },
+        })
 
-      return ctx.db.teamMember.create({
-        data: {
-          ...data,
-          teamId: ctx.activeTeamId,
-          userId,
-        },
-        include: {
-          payGrade: true,
-          user: true,
-        },
+        if (data.teamMemberRole === 'ADMIN') {
+          await tx.team.update({
+            where: {
+              id: ctx.activeTeamId,
+            },
+            data: {
+              adminUsers: {
+                connect: {
+                  id: userId!,
+                },
+              },
+            },
+          })
+        }
+
+        return teamMember
       })
     }),
 

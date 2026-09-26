@@ -119,6 +119,15 @@ const teamScopedMiddleware = authMiddleware.unstable_pipe(
     })
 
     if (!membership) {
+      await ctx.db.user.update({
+        where: {
+          id: ctx.session.user.id,
+        },
+        data: {
+          lastActiveTeamId: null,
+        },
+      })
+
       throw new TRPCError({
         code: 'FORBIDDEN',
         message: 'You do not have access to the active team',

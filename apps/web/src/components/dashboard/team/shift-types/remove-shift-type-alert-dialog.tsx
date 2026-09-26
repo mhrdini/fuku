@@ -1,7 +1,5 @@
 'use client'
 
-import { useParams } from 'next/navigation'
-
 import { useTranslation } from '@fuku/i18n/react'
 import {
   AlertDialogAction,
@@ -22,11 +20,8 @@ export function RemoveShiftTypeAlertDialog() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-  const params = useParams()
-  const slug = params?.slug as string
   const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
   })
 
   const { editingId: currentShiftTypeId } = useDialogStore()

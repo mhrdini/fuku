@@ -77,12 +77,12 @@ export function DashboardSidebar({ username }: { username: string }) {
     router.push(`/${username}/team/new`)
   }
 
-  const onSelectTeam = async (id: string, slug: string) => {
+  const onSelectTeam = async (id: string, publicId: string) => {
     if (id === activeTeamId)
       return
     setActiveTeamId(id)
     await setLastActiveTeam({ teamId: id })
-    router.push(`/${username}/team/${slug}`)
+    router.push(`/${username}/team/${publicId}`)
   }
 
   const teamsHeader
@@ -130,11 +130,9 @@ export function DashboardSidebar({ username }: { username: string }) {
                     {sidebarState.activeTeam.name}
                   </span>
                   <span className='truncate text-xs'>
-                    {sidebarState.activeTeam.teamMembers.length}
-                    {` ${
-                      sidebarState.activeTeam.teamMembers.length === 1
-                        ? 'member'
-                        : 'members'}`}
+                    {t('teamMembersCounter', {
+                      count: sidebarState.activeTeam.teamMembersCount,
+                    })}
                   </span>
                 </div>
                 <ChevronsUpDownIcon className='ml-auto' />
@@ -150,7 +148,7 @@ export function DashboardSidebar({ username }: { username: string }) {
             {sidebarState.teams.map(team => (
               <DropdownMenuItem
                 key={team.id}
-                onClick={() => onSelectTeam(team.id, team.slug)}
+                onClick={() => onSelectTeam(team.id, team.publicId)}
               >
                 {team.name}
                 {sidebarState.activeTeam?.id === team.id && (

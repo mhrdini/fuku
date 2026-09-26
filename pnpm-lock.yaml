@@ -5412,7 +5412,7 @@ packages:
     deprecated: Deprecated and no longer maintained. Use @conventional-changelog/git-client instead.
     hasBin: true
 
-  github-slugger@2.0.0:
+  github-publicIdger@2.0.0:
     resolution: {integrity: sha512-IaOQ9puYtjrkq7Y0Ygl9KDZnrf/aiUJYUpVf89y8kyaxbRG7Y1SrX/jaumrv81vc61+kiMempujsM3Yw7w5qcw==}
 
   glob-parent@5.1.2:
@@ -8765,7 +8765,7 @@ snapshots:
     dependencies:
       '@eslint/core': 1.2.1
       '@eslint/plugin-kit': 0.7.3
-      github-slugger: 2.0.0
+      github-publicIdger: 2.0.0
       mdast-util-from-markdown: 2.0.3
       mdast-util-frontmatter: 2.0.1
       mdast-util-gfm: 3.1.0
@@ -12530,7 +12530,7 @@ snapshots:
       - conventional-commits-filter
       - conventional-commits-parser
 
-  github-slugger@2.0.0: {}
+  github-publicIdger@2.0.0: {}
 
   glob-parent@5.1.2:
     dependencies:
