@@ -29,7 +29,6 @@ import {
   CommandItem,
   CommandList,
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
@@ -81,7 +80,6 @@ import {
   LayersIcon,
   PencilIcon,
   PlusIcon,
-  ShieldIcon,
   SlidersHorizontalIcon,
   Trash2Icon,
   UserRoundPlusIcon,
@@ -96,7 +94,6 @@ import {
 } from 'react-hook-form'
 import { toast } from 'sonner'
 
-import type { TeamCreateInput } from '@fuku/api/schemas'
 import type {
   SubmitErrorHandler,
   SubmitHandler,
@@ -116,7 +113,7 @@ import { useTRPC } from '~/trpc/client'
 
 const TeamCreateFormSchema = TeamCreateInputSchema
 
-type TeamCreateFormType = TeamCreateInput
+type TeamCreateFormType = z.infer<typeof TeamCreateFormSchema>
 
 const BasicInfoSectionSchema = TeamCreateFormSchema.pick({
   name: true,
@@ -246,7 +243,7 @@ export default function NewTeamPage() {
     onSuccess: (data) => {
       setOpenTeamSelect(false)
       queryClient.invalidateQueries(trpc.user.getSidebarState.queryOptions())
-      router.push(`/${session?.user.username}/team/${data.slug}`)
+      router.push(`/${session?.user.username}/team/${data.publicId}`)
       toast.success(t('team'), {
         description: t('nameHasBeenCreated', '{{name}} has been created.', {
           name: data.name,
@@ -516,7 +513,7 @@ function TeamMembersSection() {
                           <PencilIcon />
                           {t('edit', 'Edit')}
                         </DropdownMenuItem>
-                        <DropdownMenuCheckboxItem
+                        {/* <DropdownMenuCheckboxItem
                           disabled={index === 0}
                           checked={field.teamMemberRole === 'ADMIN'}
                           onCheckedChange={checked =>
@@ -532,7 +529,7 @@ function TeamMembersSection() {
                         >
                           <ShieldIcon />
                           {t('makeAdmin', 'Make admin')}
-                        </DropdownMenuCheckboxItem>
+                        </DropdownMenuCheckboxItem> */}
                       </DropdownMenuGroup>
                       <DropdownMenuSeparator />
                       <DropdownMenuGroup>
@@ -561,7 +558,7 @@ function TeamMembersSection() {
                                   {payGradeFields.map(pg => (
                                     <DropdownMenuRadioItem
                                       key={pg.id}
-                                      value={pg.id}
+                                      value={pg.id!}
                                       onSelect={() => {
                                         const index
                                           = teamMemberFields.findIndex(

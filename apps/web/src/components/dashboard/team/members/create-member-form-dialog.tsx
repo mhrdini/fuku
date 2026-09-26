@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react'
 
-import { useParams } from 'next/navigation'
-
 import {
   TeamMemberCreateInputSchema,
 } from '@fuku/api/schemas'
@@ -13,7 +11,6 @@ import {
   AlertDialog,
   AlertDialogTrigger,
   Button,
-  Checkbox,
   Command,
   CommandEmpty,
   CommandGroup,
@@ -69,14 +66,10 @@ export function CreateMemberFormDialog() {
   const { closeDialog, createMemberDraft, setCreateMemberDraft, clearCreateMemberDraft } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
 
-  const params = useParams()
-  const slug = params?.slug as string
-
   const queryClient = useQueryClient()
   const trpc = useTRPC()
   const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
   })
 
   const form = useForm<TeamMemberCreateFormType>({
@@ -364,7 +357,7 @@ export function CreateMemberFormDialog() {
                 )}
               </Field>
             </div>
-            <Controller
+            {/* <Controller
               name='teamMemberRole'
               control={form.control}
               render={({ field }) => (
@@ -387,7 +380,7 @@ export function CreateMemberFormDialog() {
                   </FieldLabel>
                 </Field>
               )}
-            />
+            /> */}
 
             <FieldSeparator />
             <Controller

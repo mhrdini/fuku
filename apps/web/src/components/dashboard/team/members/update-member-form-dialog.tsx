@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react'
 
-import { useParams } from 'next/navigation'
-
 import {
   TeamMemberUpdateInputSchema,
 } from '@fuku/api/schemas'
@@ -64,11 +62,8 @@ export function UpdateMemberFormDialog() {
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-  const params = useParams()
-  const slug = params?.slug as string
   const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
   })
 
   const {
@@ -357,6 +352,30 @@ export function UpdateMemberFormDialog() {
                 )}
               </Field>
             </div>
+            {/* <Controller
+              name='teamMemberRole'
+              control={form.control}
+              render={({ field }) => (
+                <Field orientation='horizontal'>
+                  <Checkbox
+                    checked={field.value === TeamMemberRoleValues.ADMIN}
+                    id='form-create-member-is-admin'
+                    onCheckedChange={checked =>
+                      field.onChange(
+                        checked
+                          ? TeamMemberRoleValues.ADMIN
+                          : TeamMemberRoleValues.STAFF,
+                      )}
+                  />
+                  <FieldLabel
+                    htmlFor='form-create-member-is-admin'
+                    className='font-normal'
+                  >
+                    {t('setAsTeamAdmin', 'Set as team admin')}
+                  </FieldLabel>
+                </Field>
+              )}
+            /> */}
             <FieldSeparator />
             <Controller
               name='username'

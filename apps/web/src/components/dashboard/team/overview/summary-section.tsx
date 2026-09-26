@@ -60,7 +60,7 @@ function SummaryCard<T>({
             )
           : (
               <div
-                className='text-muted-foreground text-sm'
+                className='text-muted-foreground'
                 aria-description={t('noItems', 'no items')}
               >
                 —
@@ -85,18 +85,17 @@ export function SummarySection() {
   const { t } = useTranslation()
   const session = useSession()
   const params = useParams()
-  const slug = params.slug as string
+  const publicId = params.publicId as string
 
   const router = useRouter()
   const trpc = useTRPC()
 
   const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
   })
 
   const handleGenerateSchedule = async () => {
-    router.push(`/${session?.user.username}/team/${slug}/schedule`)
+    router.push(`/${session?.user.username}/team/${publicId}/schedule`)
   }
 
   const [
@@ -170,19 +169,19 @@ export function SummarySection() {
   }, [shiftTypeQueries])
 
   const onManageMembers = () => {
-    router.push(`/${session?.user.username}/team/${slug}/members`)
+    router.push(`/${session?.user.username}/team/${publicId}/members`)
   }
 
   const onManageLocations = () => {
-    router.push(`/${session?.user.username}/team/${slug}/locations`)
+    router.push(`/${session?.user.username}/team/${publicId}/locations`)
   }
 
   const onManageShiftTypes = () => {
-    router.push(`/${session?.user.username}/team/${slug}/shift-types`)
+    router.push(`/${session?.user.username}/team/${publicId}/shift-types`)
   }
 
   const onManagePayGrades = () => {
-    router.push(`/${session?.user.username}/team/${slug}/pay-grades`)
+    router.push(`/${session?.user.username}/team/${publicId}/pay-grades`)
   }
 
   const teamMembersSummary = (
@@ -191,7 +190,7 @@ export function SummarySection() {
       items={members}
       renderItem={member => (
         <div key={member.id} className='flex items-center justify-between'>
-          <div className='flex items-center gap-1 text-sm'>
+          <div className='flex items-center gap-1'>
             {member.givenNames}
             {' '}
             {member.familyName}
@@ -247,7 +246,7 @@ export function SummarySection() {
             />
             <span>{st.name}</span>
           </Badge>
-          <div className='text-muted-foreground text-sm'>
+          <div className='text-muted-foreground'>
             {t('starttimeEndtime', '{{startTime}} - {{endTime}}', {
               startTime: st.startTime,
               endTime: st.endTime,

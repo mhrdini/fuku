@@ -2,8 +2,6 @@
 
 import { useCallback, useMemo } from 'react'
 
-import { useParams } from 'next/navigation'
-
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Badge,
@@ -55,12 +53,8 @@ function getMultiSortIcon(column: Column<any, any>) {
 export default function TeamMembersContent() {
   const { t } = useTranslation()
   const trpc = useTRPC()
-  const params = useParams()
-  // const username = params?.username as string
-  const slug = params?.slug as string
   const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
   })
 
   const { openDialog, openAlertDialog } = useDialogStore()

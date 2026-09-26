@@ -5,7 +5,7 @@ import { TeamSchema } from './team'
 describe('teamSchema', () => {
   const valid = {
     id: '11111111-1111-1111-1111-111111111111',
-    slug: 'main-cafe',
+    publicId: 'main-cafe',
     name: 'Main Café',
     description: null,
     createdAt: new Date('2026-01-01'),

@@ -219,6 +219,8 @@
   "teammemberid_val": "{{teamMemberId}}_{{val}}",
   "teamMember": "Team Member",
   "teamMembers": "Team Members",
+  "teamMembersCounter_one": "{{count}} member",
+  "teamMembersCounter_other": "{{count}} members",
   "teamName": "Team Name",
   "testUser": "Test User",
   "thereAreNoChangesToSave": "There are no changes to save.",

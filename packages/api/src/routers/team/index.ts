@@ -2,7 +2,7 @@ import { TRPCError } from '@trpc/server'
 import { customAlphabet } from 'nanoid'
 import * as z from 'zod/v4'
 
-import type { UserTeam } from '../../schemas'
+import type { TeamOutput, UserTeam } from '../../schemas'
 import type { TRPCRouterRecord } from '@trpc/server'
 
 import {
@@ -13,47 +13,18 @@ import {
 import {
   protectedProcedure,
   teamAdminProcedure,
-  teamScopedProcedure,
 } from '../../trpc'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 8)
 
 export const teamRouter = {
-  byId: teamScopedProcedure
+  byId: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const team = await ctx.db.team.findFirst({
         where: {
           id: input.id,
           deletedAt: null,
-        },
-        include: {
-          teamMembers: {
-            where: { deletedAt: null },
-          },
-        },
-      })
-
-      if (!team) {
-        throw new TRPCError({ code: 'NOT_FOUND' })
-      }
-
-      return team
-    }),
-
-  bySlug: teamScopedProcedure
-    .input(z.object({ slug: z.string().min(1) }))
-    .query(async ({ ctx, input }) => {
-      const team = await ctx.db.team.findFirst({
-        where: {
-          id: ctx.activeTeamId,
-          slug: input.slug,
-          deletedAt: null,
-        },
-        include: {
-          teamMembers: {
-            where: { deletedAt: null },
-          },
         },
       })
 
@@ -64,6 +35,82 @@ export const teamRouter = {
       return TeamOutputSchema.parse(team)
     }),
 
+  byPublicId: protectedProcedure
+    .input(z.object({ publicId: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findFirst({
+        where: {
+          publicId: input.publicId,
+          deletedAt: null,
+        },
+      })
+
+      if (!team) {
+        throw new TRPCError({ code: 'NOT_FOUND' })
+      }
+      return TeamOutputSchema.parse(team)
+    }),
+
+  getActiveTeam: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.db.user.findUnique({
+      where: {
+        id: ctx.session.user.id,
+      },
+      select: {
+        lastActiveTeamId: true,
+      },
+    })
+
+    if (user?.lastActiveTeamId) {
+      const activeTeam = await ctx.db.team.findFirst({
+        where: {
+          id: user.lastActiveTeamId,
+          deletedAt: null,
+          teamMembers: {
+            some: {
+              userId: ctx.session.user.id,
+              deletedAt: null,
+            },
+          },
+        },
+      })
+
+      if (activeTeam) {
+        return TeamOutputSchema.parse(activeTeam)
+      }
+    }
+
+    const nextTeam = await ctx.db.team.findFirst({
+      where: {
+        deletedAt: null,
+        AND: [
+          {
+            teamMembers: {
+              some: {
+                userId: ctx.session.user.id,
+                deletedAt: null,
+              },
+            },
+          },
+        ],
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    })
+
+    await ctx.db.user.update({
+      where: {
+        id: ctx.session.user.id,
+      },
+      data: {
+        lastActiveTeamId: nextTeam?.id ?? null,
+      },
+    })
+
+    return nextTeam ? TeamOutputSchema.parse(nextTeam) : null
+  }),
+
   getAllOwned: protectedProcedure.query(async ({ ctx }) => {
     const teams = await ctx.db.team.findMany({
       where: {
@@ -72,31 +119,23 @@ export const teamRouter = {
         },
         deletedAt: null,
       },
-      include: {
-        teamMembers: {
-          where: { deletedAt: null },
-        },
+      orderBy: {
+        createdAt: 'asc',
       },
     })
 
-    return teams
+    const parsedTeams: TeamOutput[] = teams.map(team =>
+      TeamOutputSchema.parse(team),
+    )
+
+    return parsedTeams
   }),
 
   getUserTeams: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.db.user.findUnique({
       where: { id: ctx.session.user.id },
       select: {
-        ownedTeams: {
-          where: { deletedAt: null },
-          select: {
-            id: true,
-            slug: true,
-            name: true,
-            description: true,
-            teamMembers: true,
-            createdAt: true,
-          },
-        },
+        lastActiveTeamId: true,
         memberships: {
           where: {
             deletedAt: null,
@@ -106,14 +145,28 @@ export const teamRouter = {
             team: {
               select: {
                 id: true,
-                slug: true,
+                publicId: true,
                 name: true,
                 description: true,
-                teamMembers: true,
                 createdAt: true,
+                updatedAt: true,
+                deletedAt: true,
+                deletedById: true,
+                timeZone: true,
+                country: true,
+                _count: {
+                  select: {
+                    teamMembers: {
+                      where: { deletedAt: null },
+                    },
+                  },
+                },
               },
             },
             teamMemberRole: true,
+          },
+          orderBy: {
+            createdAt: 'asc',
           },
         },
       },
@@ -123,55 +176,35 @@ export const teamRouter = {
       return []
     }
 
-    const owned: UserTeam[] = user.ownedTeams.map(team => ({
-      id: team.id,
-      slug: team.slug,
-      name: team.name,
-      description: team.description,
-      teamMembers: team.teamMembers,
-      createdAt: team.createdAt,
-      role: 'ADMIN',
-    }))
-
-    const member: UserTeam[] = user.memberships
+    const memberships = user.memberships
       .filter(m => m.team)
-      .map(m => ({
-        id: m.team?.id ?? '',
-        slug: m.team!.slug,
-        name: m.team!.name,
-        description: m.team!.description,
-        teamMembers: m.team!.teamMembers,
-        createdAt: m.team!.createdAt,
-        role: m.teamMemberRole,
-      }))
+      .map((m) => {
+        const { _count, ...data } = m.team
 
-    const byId = new Map<string, UserTeam>()
+        return ({
+          ...data,
+          teamMembersCount: m.team._count.teamMembers,
+          teamMemberRole: m.teamMemberRole,
+        }) as UserTeam
+      })
 
-    for (const team of member) {
-      byId.set(team.id, team)
-    }
-
-    for (const team of owned) {
-      byId.set(team.id, team)
-    }
-
-    return [...byId.values()]
+    return memberships
   }),
 
   create: protectedProcedure
     .input(TeamCreateInputSchema)
     .mutation(async ({ input, ctx }) => {
-      let slug: string
+      let publicId: string
 
       while (true) {
         const candidate = nanoid()
 
         const existing = await ctx.db.team.findUnique({
-          where: { slug: candidate },
+          where: { publicId: candidate },
         })
 
         if (!existing) {
-          slug = candidate
+          publicId = candidate
           break
         }
       }
@@ -184,7 +217,7 @@ export const teamRouter = {
 
       const newTeam = await ctx.db.team.create({
         data: {
-          slug,
+          publicId,
           name: input.name,
           description: input.description,
           timeZone: input.timeZone,

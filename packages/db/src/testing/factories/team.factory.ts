@@ -11,8 +11,8 @@ export async function createTeam(
   return testDb.team.create({
     data: {
       name: faker.lorem.words(2),
-      slug: faker.lorem.slug(),
-      timeZone: faker.date.timeZone(),
+      publicId: faker.string.nanoid(8),
+      timeZone: 'UTC',
       adminUsers: {
         connect: {
           id: userId,
@@ -33,9 +33,6 @@ export async function createTeam(
         },
       },
       ...overrides,
-    },
-    include: {
-      teamMembers: true,
     },
   })
 }
