@@ -1,6 +1,7 @@
 import { testDb } from '@fuku/db/testing'
 
 import type { Session } from '@fuku/auth'
+import type { SchedulerService } from '@fuku/scheduling'
 
 import { createTestAuthApi } from './auth'
 import { createTestSchedulerService } from './scheduler'
@@ -9,6 +10,7 @@ import { createTestSchedulerService } from './scheduler'
 export function createTestContext(
   options: {
     session?: Session | null
+    schedulerService?: SchedulerService
   } = {},
 ) {
   const session = options.session ?? null
@@ -17,7 +19,8 @@ export function createTestContext(
     authApi: createTestAuthApi(session),
     session,
     db: testDb,
-    schedulerService: createTestSchedulerService(),
+    schedulerService:
+      options.schedulerService ?? createTestSchedulerService(),
   }
 }
 
