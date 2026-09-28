@@ -146,18 +146,20 @@ describe('pay grade', () => {
         session: createSessionContext(user),
       })
       const payGradeA = await createPayGrade(team.id)
-      await createPayGrade(team.id)
-      await createPayGrade(team.id)
-      const limit = 2
+      const payGradeB = await createPayGrade(team.id)
+      const payGradeC = await createPayGrade(team.id)
+      const limit = 3
       const payGrades = await caller.payGrade.list({
         teamId: team.id,
         limit,
       })
       expect(payGrades).toHaveLength(limit)
-      expect(payGrades).toContainEqual(
-        expect.objectContaining({
-          id: payGradeA.id,
-        }),
+      expect(payGrades).toStrictEqual(
+        [
+          expect.objectContaining({ id: payGradeA.id }),
+          expect.objectContaining({ id: payGradeB.id }),
+          expect.objectContaining({ id: payGradeC.id }),
+        ],
       )
     })
 
