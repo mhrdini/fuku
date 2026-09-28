@@ -7,7 +7,7 @@ import { testDb } from '../database'
 export async function createPayGrade(teamId: string, overrides: Partial<Omit<Prisma.PayGradeUncheckedCreateInput, 'teamId'>> = {}) {
   return testDb.payGrade.create({
     data: {
-      name: faker.person.jobType(),
+      name: faker.string.alpha(),
       baseRate: faker.number.int(),
       teamId,
       ...overrides,
