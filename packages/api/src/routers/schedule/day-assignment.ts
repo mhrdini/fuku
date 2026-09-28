@@ -1,6 +1,7 @@
 import { TRPCError } from '@trpc/server'
 import * as z from 'zod/v4'
 
+import type { DayAssignmentOutput } from '../../schemas/day-assignment'
 import type { TRPCRouterRecord } from '@trpc/server'
 
 import { DayAssignmentOutputSchema } from '../../schemas/day-assignment'
@@ -38,7 +39,7 @@ export const dayAssignmentRouter = {
       }
 
       // start and end dates already in UTC
-      const assignments = await ctx.db.dayAssignment.findMany({
+      const assignments: DayAssignmentOutput[] = await ctx.db.dayAssignment.findMany({
         where: {
           teamMemberId: { in: team.teamMembers.map(tm => tm.id) },
           date: {
@@ -47,7 +48,11 @@ export const dayAssignmentRouter = {
           },
         },
         include: {
-          shiftAssignment: true,
+          shiftAssignment: {
+            include: {
+              workHour: true,
+            },
+          },
           leaveAssignment: true,
         },
       })
