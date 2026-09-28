@@ -1,0 +1,51 @@
+import userEvent from '@testing-library/user-event'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { render, screen } from '~/test/utils'
+
+import { LogOutButton } from './log-out-button'
+
+const { signOut, push } = vi.hoisted(() => ({
+  signOut: vi.fn(),
+  push: vi.fn(),
+}))
+
+vi.mock('~/auth/client', () => ({
+  authClient: {
+    signOut,
+  },
+}))
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push,
+  }),
+}))
+
+describe('logOutButton', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    signOut.mockResolvedValue(undefined)
+  })
+
+  it('renders the log out button', () => {
+    render(<LogOutButton />)
+
+    expect(
+      screen.getByRole('button', { name: 'Log out' }),
+    ).toBeInTheDocument()
+  })
+
+  it('signs out and redirects to the home page', async () => {
+    const user = userEvent.setup()
+
+    render(<LogOutButton />)
+
+    await user.click(
+      screen.getByRole('button', { name: 'Log out' }),
+    )
+
+    expect(signOut).toHaveBeenCalledOnce()
+    expect(push).toHaveBeenCalledWith('/')
+  })
+})
