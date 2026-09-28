@@ -1,5 +1,5 @@
 import { testDb } from '@fuku/db/testing'
-import { createTeam, createTeamMember, createUser } from '@fuku/db/testing/factories'
+import { createPayGrade, createTeam, createTeamMember, createUser } from '@fuku/db/testing/factories'
 import { describe, expect, it } from 'vitest'
 
 import { createCaller } from '../helpers/caller'
@@ -1353,15 +1353,7 @@ describe('team', () => {
     it('deletes pay grades', async () => {
       const user = await createUser()
       const team = await createTeam(user.id)
-
-      await testDb.payGrade.create({
-        data: {
-          teamId: team.id,
-          name: 'Standard',
-          baseRate: 1200,
-        },
-      })
-
+      await createPayGrade(team.id)
       const caller = createCaller({
         session: createSessionContext(user),
       })
