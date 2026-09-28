@@ -1,7 +1,8 @@
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { render, screen } from '~/test/utils'
+import { render } from '~/test/utils'
 
 import { LogOutButton } from './log-out-button'
 
