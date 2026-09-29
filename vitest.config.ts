@@ -46,11 +46,12 @@ export default defineConfig({
       },
 
       {
+        root: 'apps/web',
         test: {
           name: 'web',
-          include: ['apps/web/**/*.test.{ts,tsx}'],
+          include: ['src/**/*.test.{ts,tsx}'],
           environment: 'jsdom',
-          setupFiles: ['apps/web/src/test/setup.ts'],
+          setupFiles: ['src/test/setup.ts'],
         },
       },
     ],

@@ -76,7 +76,7 @@ export const sharedRules = [
         'error',
         {
           case: 'kebabCase',
-          ignore: ['README.md', /^__tests__$/, /^\[.*\]$/],
+          ignore: ['README.md', /^__tests__$/, /^\[.*\]$/, /^__mocks__$/],
         },
       ],
     },
