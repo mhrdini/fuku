@@ -34,7 +34,7 @@ export function Breadcrumbs() {
   const segments = pathname.split('/').filter(Boolean)
   const trpc = useTRPC()
 
-  const { data: team } = useQuery({
+  const { data: team, isSuccess } = useQuery({
     ...trpc.team.getActiveTeam.queryOptions(),
     refetchOnWindowFocus: false,
   })
@@ -124,7 +124,7 @@ export function Breadcrumbs() {
                         'flex w-max cursor-default items-center gap-2 whitespace-nowrap',
                       )}
                     >
-                      {team ? (crumb.label) : <Skeleton className='h-4 w-9' />}
+                      {!isSuccess ? <Skeleton className='h-4 w-9' /> : team ? (crumb.label) : null}
                     </BreadcrumbPage>
                   )
                 : (

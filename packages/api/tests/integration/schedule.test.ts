@@ -11,7 +11,7 @@ describe('schedule', () => {
       const user = await createUser()
 
       const result = {
-        teamId: 'team-id',
+        teamId: 'team-1',
         period: {
           start: '2026-01-01',
           end: '2026-01-31',
@@ -30,7 +30,7 @@ describe('schedule', () => {
       })
 
       const input = {
-        teamId: 'team-id',
+        teamId: 'team-1',
         start: '2026-01-01',
         end: '2026-01-31',
         timeZone: 'Asia/Tokyo',
