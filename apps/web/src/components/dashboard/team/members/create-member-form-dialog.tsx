@@ -345,7 +345,7 @@ export function CreateMemberFormDialog() {
                   id='form-create-member-rate-multiplier'
                   type='number'
                   step='0.01'
-                  min='1'
+                  min='0'
                   aria-invalid={!!form.formState.errors.rateMultiplier}
                   placeholder={t('rateMultiplier', 'Rate Multiplier')}
                   autoComplete='off'
