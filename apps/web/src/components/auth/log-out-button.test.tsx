@@ -1,3 +1,4 @@
+import i18n from '@fuku/i18n/client'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -33,7 +34,7 @@ describe('logOutButton', () => {
     render(<LogOutButton />)
 
     expect(
-      screen.getByRole('button', { name: 'Log out' }),
+      screen.getByRole('button', { name: i18n.t('logOut') }),
     ).toBeInTheDocument()
   })
 
@@ -43,7 +44,7 @@ describe('logOutButton', () => {
     render(<LogOutButton />)
 
     await user.click(
-      screen.getByRole('button', { name: 'Log out' }),
+      screen.getByRole('button', { name: i18n.t('logOut') }),
     )
 
     expect(signOut).toHaveBeenCalledOnce()
