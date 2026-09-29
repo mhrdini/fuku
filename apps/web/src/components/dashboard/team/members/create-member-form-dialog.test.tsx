@@ -1,6 +1,7 @@
 import i18n from '@fuku/i18n/client'
-import { act, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { toast } from 'sonner'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { DialogManager } from '~/components/providers/dialog-manager'
@@ -8,8 +9,41 @@ import { DialogId } from '~/lib/dialog'
 import { useDialogStore } from '~/store/dialog.store'
 import { render } from '~/test/utils'
 
-const { getActiveTeam, payGrade, teamMember } = vi.hoisted(() => ({
-  getActiveTeam: vi.fn(),
+const resolvedActiveTeam = {
+  id: 'team-1',
+}
+
+const resolvedTeamMember = {
+  id: 'member-1',
+}
+
+const resolvedPayGrades = [
+  {
+    id: 'pg-id-1',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    name: 'Manager',
+    description: null,
+    teamId: 'team-1',
+    baseRate: 1000,
+    eligibleShiftTypes: [],
+  },
+  {
+    id: 'pg-id-2',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    name: 'Employee',
+    description: null,
+    teamId: 'team-1',
+    baseRate: 500,
+    eligibleShiftTypes: [],
+  },
+]
+
+const { team, payGrade, teamMember } = vi.hoisted(() => ({
+  team: {
+    getActiveTeam: vi.fn(),
+  },
   payGrade: {
     list: vi.fn(),
   },
@@ -24,7 +58,7 @@ vi.mock('~/trpc/client', () => ({
       getActiveTeam: {
         queryOptions: () => ({
           queryKey: ['team', 'getActiveTeam'],
-          queryFn: getActiveTeam,
+          queryFn: team.getActiveTeam,
         }),
       },
     },
@@ -46,81 +80,18 @@ vi.mock('~/trpc/client', () => ({
   }),
 }))
 
-vi.mock('@fuku/ui/components', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@fuku/ui/components')>()
-
-  return {
-    ...actual,
-    Command: ({ children }: { children: React.ReactNode }) => (
-      <div>{children}</div>
-    ),
-    CommandEmpty: ({ children }: { children: React.ReactNode }) => (
-      <div>{children}</div>
-    ),
-    CommandGroup: ({ children }: { children: React.ReactNode }) => (
-      <div>{children}</div>
-    ),
-    CommandList: ({ children }: { children: React.ReactNode }) => (
-      <div>{children}</div>
-    ),
-    CommandItem: ({
-      children,
-      onSelect,
-    }: {
-      children: React.ReactNode
-      onSelect?: (value: string) => void
-    }) => (
-      <button
-        type='button'
-        onClick={() => onSelect?.('pg-id-1')}
-      >
-        {children}
-      </button>
-    ),
-  }
-})
-
 describe('createMemberFormDialog', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    getActiveTeam.mockResolvedValue({
-      id: 'team-id',
-    })
+    team.getActiveTeam.mockResolvedValue(resolvedActiveTeam)
+    payGrade.list.mockResolvedValue(resolvedPayGrades)
+    teamMember.create.mockResolvedValue(resolvedTeamMember)
 
-    payGrade.list.mockResolvedValue([
-      {
-        id: 'pg-id-1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        name: 'Manager',
-        description: null,
-        teamId: 'team-id',
-        baseRate: 1000,
-        eligibleShiftTypes: [],
-      },
-      {
-        id: 'pg-id-2',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        name: 'Employee',
-        description: null,
-        teamId: 'team-id',
-        baseRate: 500,
-        eligibleShiftTypes: [],
-      },
-    ])
-
-    teamMember.create.mockResolvedValue({
-      id: 'member-id',
-    })
-
-    act(() => {
-      useDialogStore.setState({
-        open: true,
-        isAlert: false,
-        id: DialogId.CREATE_TEAM_MEMBER,
-      })
+    useDialogStore.setState({
+      open: true,
+      isAlert: false,
+      id: DialogId.CREATE_TEAM_MEMBER,
     })
   })
 
@@ -297,12 +268,109 @@ describe('createMemberFormDialog', () => {
           givenNames: 'Test',
           familyName: 'User',
           teamMemberRole: 'STAFF',
-          teamId: 'team-id',
+          teamId: 'team-1',
           rateMultiplier: 1,
           payGradeId: 'pg-id-1',
         }),
         expect.anything(),
       )
     })
+  })
+
+  it('closes the form after successful submission', async () => {
+    const user = userEvent.setup()
+
+    render(<DialogManager />)
+
+    await user.type(
+      screen.getByRole('textbox', {
+        name: i18n.t('givenNames', 'Given Name(s)'),
+      }),
+      'Test',
+    )
+
+    await user.type(
+      screen.getByRole('textbox', {
+        name: i18n.t('lastName', 'Last Name'),
+      }),
+      'User',
+    )
+
+    await user.click(
+      screen.getByRole('combobox', {
+        name: i18n.t('payGrade', 'Pay Grade'),
+      }),
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Manager',
+      }),
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: i18n.t('create', 'Create'),
+      }),
+    )
+
+    await waitFor(() => {
+      expect(useDialogStore.getState().open).toBe(false)
+    })
+  })
+
+  it('shows an error when creating the member fails', async () => {
+    teamMember.create.mockRejectedValue(
+      new Error('Username already exists'),
+    )
+
+    const user = userEvent.setup()
+
+    render(<DialogManager />)
+
+    await user.type(
+      screen.getByRole('textbox', {
+        name: i18n.t('givenNames', 'Given Name(s)'),
+      }),
+      'Test',
+    )
+
+    await user.type(
+      screen.getByRole('textbox', {
+        name: i18n.t('lastName', 'Last Name'),
+      }),
+      'User',
+    )
+
+    await user.click(
+      screen.getByRole('combobox', {
+        name: i18n.t('payGrade', 'Pay Grade'),
+      }),
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Manager',
+      }),
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: i18n.t('create', 'Create'),
+      }),
+    )
+
+    await waitFor(() => {
+      expect(teamMember.create).toHaveBeenCalled()
+    })
+
+    expect(toast.error).toHaveBeenCalledWith(
+      i18n.t('error'),
+      expect.objectContaining({
+        description: expect.stringContaining('Username already exists'),
+      }),
+    )
+
+    expect(useDialogStore.getState().open).toBe(true)
   })
 })
