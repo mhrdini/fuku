@@ -12,10 +12,16 @@ import { CreateShiftTypeFormSheet } from '../dashboard/team/shift-types/create-s
 export function SheetManager() {
   const { open, id, closeSheet } = useSheetStore()
 
-  const handleClose = () => closeSheet()
+  // const handleClose = () => closeSheet()
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      closeSheet()
+    }
+  }
 
   return (
-    <Sheet open={open} onOpenChange={handleClose} modal={false}>
+    <Sheet open={open} onOpenChange={handleOpenChange} modal={false}>
       <SheetContent side='right'>
         {id === SheetId.CREATE_LOCATION && <CreateLocationFormSheet />}
         {id === SheetId.CREATE_SHIFT_TYPE && <CreateShiftTypeFormSheet />}

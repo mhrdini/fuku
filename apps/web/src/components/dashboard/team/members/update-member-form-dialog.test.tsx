@@ -113,7 +113,7 @@ describe('updateMemberFormDialog', () => {
     })
   })
 
-  it('shows the form', async () => {
+  it('shows the dialog form', async () => {
     render(<DialogManager />)
 
     expect(
