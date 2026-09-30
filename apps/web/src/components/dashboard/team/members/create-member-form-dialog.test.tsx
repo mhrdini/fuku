@@ -19,7 +19,7 @@ const resolvedTeamMember = {
 
 const resolvedPayGrades = [
   {
-    id: 'pg-id-1',
+    id: 'pay-grade-1',
     createdAt: new Date(),
     updatedAt: new Date(),
     name: 'Manager',
@@ -29,7 +29,7 @@ const resolvedPayGrades = [
     eligibleShiftTypes: [],
   },
   {
-    id: 'pg-id-2',
+    id: 'pay-grade-2',
     createdAt: new Date(),
     updatedAt: new Date(),
     name: 'Employee',
@@ -95,7 +95,7 @@ describe('createMemberFormDialog', () => {
     })
   })
 
-  it('shows the form', async () => {
+  it('shows the dialog form', async () => {
     render(<DialogManager />)
 
     expect(
@@ -270,7 +270,7 @@ describe('createMemberFormDialog', () => {
           teamMemberRole: 'STAFF',
           teamId: 'team-1',
           rateMultiplier: 1,
-          payGradeId: 'pg-id-1',
+          payGradeId: 'pay-grade-1',
         }),
         expect.anything(),
       )

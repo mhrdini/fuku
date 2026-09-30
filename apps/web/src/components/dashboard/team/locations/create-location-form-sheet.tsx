@@ -44,7 +44,6 @@ type LocationCreateFormType = LocationCreateInput
 
 export function CreateLocationFormSheet() {
   const { t } = useTranslation()
-  const title = t('createNewLocation', 'Create New Location')
   const { id, closeSheet } = useSheetStore()
 
   const queryClient = useQueryClient()
@@ -112,15 +111,15 @@ export function CreateLocationFormSheet() {
     }
   }
 
-  const onError: SubmitErrorHandler<LocationCreateFormType> = (errors) => {
-    console.error('create location form errors:', errors)
-    console.error('create location form values:', form.getValues())
+  const onError: SubmitErrorHandler<LocationCreateFormType> = () => {
+    // console.error('create location form errors:', errors)
+    // console.error('create location form values:', form.getValues())
   }
 
   return (
     <>
       <SheetHeader>
-        <SheetTitle>{title}</SheetTitle>
+        <SheetTitle>{t('createNewLocation', 'Create New Location')}</SheetTitle>
       </SheetHeader>
       <form
         id='form-create-location'
@@ -135,7 +134,7 @@ export function CreateLocationFormSheet() {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor='form-create-location-name'>
-                    Name
+                    {t('name')}
                   </FieldLabel>
                   <Input
                     {...field}
@@ -177,7 +176,7 @@ export function CreateLocationFormSheet() {
           </FieldGroup>
         </FieldSet>
         <SheetFooter className='mt-auto'>
-          <LoadingButton form='form-create-location' loading={isPending}>
+          <LoadingButton type='submit' form='form-create-location' loading={isPending}>
             {t('createLocation', 'Create location')}
           </LoadingButton>
           {/* <SheetClose asChild>
