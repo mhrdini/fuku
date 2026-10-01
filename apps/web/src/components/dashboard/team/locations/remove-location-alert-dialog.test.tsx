@@ -67,7 +67,7 @@ vi.mock('~/trpc/client', () => ({
   }),
 }))
 
-describe('removeMemberAlertDialog', () => {
+describe('removeLocationAlertDialog', () => {
   beforeEach(() => {
     vi.resetAllMocks()
 
