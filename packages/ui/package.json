@@ -50,7 +50,6 @@
   },
   "devDependencies": {
     "@fuku/config-eslint": "workspace:*",
-
     "@fuku/config-typescript": "workspace:*",
     "@tailwindcss/cli": "catalog:",
     "@tailwindcss/postcss": "catalog:",

@@ -2,8 +2,6 @@
 
 import { useEffect } from 'react'
 
-import { useParams } from 'next/navigation'
-
 import {
   PayGradeCreateInputSchema,
 } from '@fuku/api/schemas'
@@ -56,11 +54,8 @@ export function CreatePayGradeFormSheet() {
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-  const params = useParams()
-  const slug = params?.slug as string
   const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
   })
 
   const { data: shiftTypes } = useQuery({
@@ -85,7 +80,7 @@ export function CreatePayGradeFormSheet() {
         shouldValidate: false,
       })
     }
-  }, [id, team?.id])
+  }, [form, id, team?.id])
 
   const { mutateAsync: createPayGrade, isPending } = useMutation({
     ...trpc.payGrade.create.mutationOptions(),

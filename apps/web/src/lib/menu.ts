@@ -45,22 +45,22 @@ export function useSidebarMenu(team: UserTeam | null): MenuGroup[] {
           label: t('team', 'Team'),
           menus: [
             {
-              href: `/${username}/team/${team.slug}`,
+              href: `/${username}/team/${team.publicId}`,
               label: t('overview', 'Overview'),
               icon: Users2Icon,
             },
             {
-              href: `/${username}/team/${team.slug}/schedule`,
+              href: `/${username}/team/${team.publicId}/schedule`,
               label: t('schedule', 'Schedule'),
               icon: CalendarIcon,
             },
             {
-              href: `/${username}/team/${team.slug}/members`,
+              href: `/${username}/team/${team.publicId}/members`,
               label: t('members', 'Members'),
               icon: UserCircle2Icon,
             },
             {
-              href: `/${username}/team/${team.slug}/settings`,
+              href: `/${username}/team/${team.publicId}/settings`,
               label: t('settings', 'Settings'),
               icon: CogIcon,
             },
@@ -70,7 +70,7 @@ export function useSidebarMenu(team: UserTeam | null): MenuGroup[] {
 }
 
 export function useNavigationMenu(username: string | null, team: UserTeam | null): Menu[] {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const menu = useMemo(() => {
     if (!username || !team)
       return []
@@ -83,43 +83,43 @@ export function useNavigationMenu(username: string | null, team: UserTeam | null
         submenus: [
           {
             label: t('overview', 'Overview'),
-            href: `/${username}/team/${team.slug}`,
+            href: `/${username}/team/${team.publicId}`,
             icon: Users2Icon,
           },
           {
             label: t('members', 'Members'),
-            href: `/${username}/team/${team.slug}/members`,
+            href: `/${username}/team/${team.publicId}/members`,
             icon: UserCircle2Icon,
           },
           {
             label: t('payGrades', 'Pay Grades'),
-            href: `/${username}/team/${team.slug}/pay-grades`,
+            href: `/${username}/team/${team.publicId}/pay-grades`,
             icon: BadgeDollarSignIcon,
           },
           {
             label: t('shiftTypes', 'Shift Types'),
-            href: `/${username}/team/${team.slug}/shift-types`,
+            href: `/${username}/team/${team.publicId}/shift-types`,
             icon: ClockIcon,
           },
           {
             label: t('locations', 'Locations'),
-            href: `/${username}/team/${team.slug}/locations`,
+            href: `/${username}/team/${team.publicId}/locations`,
             icon: MapPinIcon,
           },
           {
             label: t('settings', 'Settings'),
-            href: `/${username}/team/${team.slug}/settings`,
+            href: `/${username}/team/${team.publicId}/settings`,
             icon: CogIcon,
           },
         ],
       },
       {
         label: t('schedule', 'Schedule'),
-        href: `/${username}/team/${team.slug}/schedule`,
+        href: `/${username}/team/${team.publicId}/schedule`,
         icon: CalendarIcon,
       },
     ]
-  }, [username, team, i18n.resolvedLanguage])
+  }, [username, team, t])
 
   return menu
 }

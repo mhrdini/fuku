@@ -71,7 +71,7 @@ export function ScheduleAssignmentCard({
 
   const shiftType = useMemo(() => {
     return shiftTypeMap.get(assignment.shiftTypeId)
-  }, [assignment.shiftTypeId])
+  }, [assignment.shiftTypeId, shiftTypeMap])
 
   return (
     <div

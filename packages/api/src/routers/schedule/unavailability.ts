@@ -2,7 +2,10 @@ import * as z from 'zod/v4'
 
 import type { TRPCRouterRecord } from '@trpc/server'
 
-import { UnavailabilityCreateInputSchema } from '../../schemas'
+import {
+  UnavailabilityCreateInputSchema,
+  UnavailabilityOutputSchema,
+} from '../../schemas'
 import { protectedProcedure } from '../../trpc'
 
 export const unavailabilityRouter = {
@@ -14,6 +17,7 @@ export const unavailabilityRouter = {
         end: z.date(),
       }),
     )
+    .output(z.array(UnavailabilityOutputSchema))
     .query(async ({ ctx, input }) => {
       const { teamId, start, end } = input
 
@@ -32,14 +36,18 @@ export const unavailabilityRouter = {
 
       return unavailabilities.map(unavailability => ({
         ...unavailability,
-        reason: unavailability.reason ?? undefined,
+        reason: unavailability.reason ?? null,
       }))
     }),
+
   create: protectedProcedure
     .input(UnavailabilityCreateInputSchema)
+    .output(UnavailabilityOutputSchema)
     .mutation(async ({ ctx, input }) => {
+      const { reason, ...data } = input
+
       const unavailability = await ctx.db.unavailability.create({
-        data: input,
+        data: { ...data, ...(reason && { reason }) },
       })
 
       return unavailability
@@ -47,6 +55,9 @@ export const unavailabilityRouter = {
 
   createMany: protectedProcedure
     .input(z.array(UnavailabilityCreateInputSchema))
+    .output(z.object({
+      count: z.number(),
+    }))
     .mutation(async ({ ctx, input }) => {
       const unavailabilities = await ctx.db.unavailability.createMany({
         data: input,
@@ -62,6 +73,7 @@ export const unavailabilityRouter = {
         id: z.string(),
       }),
     )
+    .output(UnavailabilityOutputSchema)
     .mutation(async ({ ctx, input }) => {
       const { id } = input
 
@@ -71,6 +83,7 @@ export const unavailabilityRouter = {
         },
       })
     }),
+
   delete: protectedProcedure
     .input(
       z.object({
@@ -78,6 +91,9 @@ export const unavailabilityRouter = {
         date: z.date(),
       }),
     )
+    .output(z.object({
+      count: z.number(),
+    }))
     .mutation(async ({ ctx, input }) => {
       const { teamMemberId, date } = input
 

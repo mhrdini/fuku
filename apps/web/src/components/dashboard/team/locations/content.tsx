@@ -2,8 +2,6 @@
 
 import { useState } from 'react'
 
-import { useParams } from 'next/navigation'
-
 import { useTranslation } from '@fuku/i18n/react'
 import {
   Button,
@@ -40,8 +38,6 @@ import { useTRPC } from '~/trpc/client'
 
 export function TeamLocationsContent() {
   const { t } = useTranslation()
-  const params = useParams()
-  const slug = params.slug as string
   const queryClient = useQueryClient()
   const trpc = useTRPC()
 
@@ -51,8 +47,7 @@ export function TeamLocationsContent() {
   } | null>(null)
 
   const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
   })
 
   const { data: locations } = useQuery({

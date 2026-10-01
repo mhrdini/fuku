@@ -1,5 +1,6 @@
 {
   "name": "fuku",
+  "type": "module",
   "private": true,
   "packageManager": "pnpm@10.12.4",
   "engines": {
@@ -8,25 +9,39 @@
   "scripts": {
     "prebuild": "tsx/scripts/generate-countries.ts",
     "build": "dotenv -e .env.${NODE_ENV:-production} -- turbo run build",
-    "db:migrate:deploy": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:deploy",
+
+    "up:dev": "dotenv -e .env.${NODE_ENV:-development} -- docker compose -p fuku-dev -f docker-compose.development.yml --env-file .env.development up -d",
+    "down:dev": "dotenv -e .env.${NODE_ENV:-development} -- docker compose -p fuku-dev -f docker-compose.development.yml --env-file .env.development down",
+    "up:test": "docker compose -p fuku-test -f docker-compose.test.yml --env-file .env.test up -d",
+    "down:test": "docker compose -p fuku-test -f docker-compose.test.yml --env-file .env.test down",
+
+    "db:generate": "pnpm --filter @fuku/db exec prisma generate",
     "db:migrate:dev": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:dev",
-    "db:migrate:dev:auto": "dotenv -e i.env.${NODE_ENV:-development} -- turbo run db:migrate:dev:auto",
-    "db:push": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:push",
-    "db:seed": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:seed",
+    "db:migrate:dev:auto": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:dev:auto",
+    "db:migrate:dev:deploy": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:deploy",
+    "db:push:dev": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:push",
     "db:seed:dev": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:seed:dev",
-    "db:reset": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:reset",
-    "up:dev": "dotenv -e .env.${NODE_ENV:-development} -- docker compose -f docker-compose.development.yml --env-file .env.development up -d",
-    "down:dev": "dotenv -e .env.${NODE_ENV:-development} -- docker compose -f docker-compose.development.yml --env-file .env.development down",
+    "db:reset:dev": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:reset",
+
+    "db:migrate:test": "dotenv -e .env.test -- turbo run db:migrate:deploy",
+
     "clean": "find . -type d \\( -name \"node_modules\" -o -name \".next\" -o -name \".turbo\" -o -name \"dist\" \\) -prune -exec rm -rf '{}' + && find . -name \"pnpm-lock.yaml\" -type f -delete",
     "clean:install": "pnpm clean && pnpm install -r",
+
     "predev": "tsx scripts/generate-countries.ts",
     "dev": "dotenv -e .env.${NODE_ENV:-development} -- turbo run dev",
+
     "commit": "printf '' > .git/COMMIT_EDITMSG && git-cz",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "generate": "turbo run generate",
     "lint": "turbo run lint",
     "prepare": "husky",
-    "barrels": "node scripts/generate-barrels.js"
+    "barrels": "node scripts/generate-barrels.cjs",
+
+    "test": "pnpm db:generate && dotenv -e .env.test -- vitest",
+    "test:run": "pnpm db:generate && dotenv -e .env.test -- vitest run",
+    "test:coverage": "pnpm db:generate && dotenv -e .env.test -- vitest run --coverage",
+    "test:e2e": "pnpm db:generate && dotenv -e .env.test -- turbo run test:e2e"
   },
   "peerDependencies": {
     "inquirer": "catalog:"
@@ -37,9 +52,9 @@
     "@commitlint/cz-commitlint": "catalog:",
     "@eslint-react/eslint-plugin": "catalog:",
     "@fuku/config-eslint": "workspace:*",
-
     "@fuku/config-typescript": "workspace:*",
     "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "barrelsby": "catalog:",
     "commitizen": "catalog:",
     "dotenv": "catalog:",
@@ -49,11 +64,13 @@
     "eslint-plugin-react-refresh": "catalog:",
     "husky": "catalog:",
     "i18n-iso-countries": "catalog:",
+    "jsdom": "catalog:",
     "lint-staged": "catalog:",
     "prettier": "catalog:",
     "tsx": "catalog:",
     "turbo": "catalog:",
-    "validate-branch-name": "catalog:"
+    "validate-branch-name": "catalog:",
+    "vitest": "catalog:"
   },
   "validate-branch-name": {
     "pattern": "^(main|staging|docs){1}$|^(feat|fix|hotfix|release|chore)/.+$",
@@ -61,7 +78,7 @@
   },
   "lint-staged": {
     "**/*.{js,ts,jsx,tsx,css,html}": [
-      "eslint --fix"
+      "eslint --fix --max-warnings=0"
     ]
   },
   "config": {

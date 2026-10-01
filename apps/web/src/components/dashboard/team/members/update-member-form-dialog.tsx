@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react'
 
-import { useParams } from 'next/navigation'
-
 import {
   TeamMemberUpdateInputSchema,
 } from '@fuku/api/schemas'
@@ -64,11 +62,8 @@ export function UpdateMemberFormDialog() {
 
   const queryClient = useQueryClient()
   const trpc = useTRPC()
-  const params = useParams()
-  const slug = params?.slug as string
   const { data: team } = useQuery({
-    ...trpc.team.bySlug.queryOptions({ slug: slug! }),
-    enabled: !!slug,
+    ...trpc.team.getActiveTeam.queryOptions(),
   })
 
   const {
@@ -122,10 +117,7 @@ export function UpdateMemberFormDialog() {
         {
           ...teamMember,
           id: currentTeamMemberId,
-          userId: teamMember.user?.id || null,
-          user: teamMember.user || null,
-          payGrade: teamMember.payGrade || null,
-          username: teamMember.user?.username || '',
+          username: teamMember.user?.username ?? '',
         },
         {
           keepDirty: false,
@@ -170,7 +162,10 @@ export function UpdateMemberFormDialog() {
       return
     }
     try {
-      await updateMember(data)
+      await updateMember({
+        ...data,
+        username: data.username ?? null,
+      })
     } catch {
       // Handled in onError
     }
@@ -286,11 +281,6 @@ export function UpdateMemberFormDialog() {
                                       shouldTouch: true,
                                       shouldDirty: true,
                                     })
-                                    form.setValue('payGrade', pg, {
-                                      shouldValidate: true,
-                                      shouldTouch: true,
-                                      shouldDirty: true,
-                                    })
                                     setPayGradeOpen(false)
                                   }}
                                 >
@@ -362,6 +352,30 @@ export function UpdateMemberFormDialog() {
                 )}
               </Field>
             </div>
+            {/* <Controller
+              name='teamMemberRole'
+              control={form.control}
+              render={({ field }) => (
+                <Field orientation='horizontal'>
+                  <Checkbox
+                    checked={field.value === TeamMemberRoleValues.ADMIN}
+                    id='form-create-member-is-admin'
+                    onCheckedChange={checked =>
+                      field.onChange(
+                        checked
+                          ? TeamMemberRoleValues.ADMIN
+                          : TeamMemberRoleValues.STAFF,
+                      )}
+                  />
+                  <FieldLabel
+                    htmlFor='form-create-member-is-admin'
+                    className='font-normal'
+                  >
+                    {t('setAsTeamAdmin', 'Set as team admin')}
+                  </FieldLabel>
+                </Field>
+              )}
+            /> */}
             <FieldSeparator />
             <Controller
               name='username'
@@ -373,6 +387,7 @@ export function UpdateMemberFormDialog() {
                   </FieldLabel>
                   <Input
                     {...field}
+                    value={field.value as string | undefined}
                     id='form-update-member-username'
                     aria-invalid={fieldState.invalid}
                     placeholder={t('usernameOptional', 'Username (optional)')}
