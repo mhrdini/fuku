@@ -12,22 +12,23 @@ const resolvedActiveTeam = {
   id: 'team-1',
 }
 
-const resolvedPayGrade = {
-  id: 'pay-grade-1',
+const resolvedShiftType = {
+  id: 'shift-type-1',
   name: 'Cafe',
-  address: '1 Main Rd',
+  startTime: '09:00',
+  endTime: '17:00',
   teamId: resolvedActiveTeam.id,
-  color: '#000000',
 }
 
-const { team, payGrade } = vi.hoisted(() => ({
+const { team, shiftType } = vi.hoisted(() => ({
   team: {
     getActiveTeam: vi.fn(),
   },
-  payGrade: {
+  shiftType: {
     byId: vi.fn(),
     restore: vi.fn(),
     delete: vi.fn(),
+    listIds: vi.fn(),
   },
 }))
 
@@ -41,66 +42,67 @@ vi.mock('~/trpc/client', () => ({
         }),
       },
     },
-    payGrade: {
+    shiftType: {
       byId: {
         queryOptions: ({ id }: { id: string }) => ({
-          queryKey: ['payGrade', 'byId', id],
-          queryFn: payGrade.byId,
+          queryKey: ['shiftType', 'byId', id],
+          queryFn: shiftType.byId,
         }),
-        queryKey: ({ id }: { id: string }) => [
-          'payGrade',
-          'byId',
-          id,
-        ],
       },
       restore: {
         mutationOptions: () => ({
-          mutationFn: payGrade.restore,
+          mutationFn: shiftType.restore,
         }),
       },
       delete: {
         mutationOptions: () => ({
-          mutationFn: payGrade.delete,
+          mutationFn: shiftType.delete,
+        }),
+      },
+      listIds: {
+        queryOptions: ({ teamId }: { teamId: string }) => ({
+          queryKey: ['shiftType', 'listIds', teamId],
+          queryFn: shiftType.listIds,
         }),
       },
     },
   }),
 }))
 
-describe('removePayGradeAlertDialog', () => {
+describe('removeShiftTypeAlertDialog', () => {
   beforeEach(() => {
     vi.resetAllMocks()
 
     team.getActiveTeam.mockResolvedValue(resolvedActiveTeam)
-    payGrade.byId.mockResolvedValue(resolvedPayGrade)
-    payGrade.restore.mockResolvedValue(resolvedPayGrade)
-    payGrade.delete.mockResolvedValue(resolvedPayGrade)
+    shiftType.byId.mockResolvedValue(resolvedShiftType)
+    shiftType.restore.mockResolvedValue(resolvedShiftType)
+    shiftType.delete.mockResolvedValue(resolvedShiftType)
 
     useDialogStore.setState({
       open: true,
       isAlert: true,
-      id: DialogId.REMOVE_PAY_GRADE,
-      editingId: 'pay-grade-1',
+      id: DialogId.REMOVE_SHIFT_TYPE,
+      editingId: 'shift-type-1',
     })
   })
 
   it('shows the alert dialog', () => {
     render(<DialogManager />)
 
-    expect(screen.getByRole('heading', { name: i18n.t('removePayGrade') })).toBeVisible()
+    expect(screen.getByRole('heading', { name: i18n.t('removeShiftType') })).toBeVisible()
     expect(screen.getByRole('button', { name: i18n.t('cancel') })).toBeVisible()
     expect(screen.getByRole('button', { name: i18n.t('remove') })).toBeVisible()
   })
 
-  it('deletes pay grade', async () => {
+  it('deletes shift type', async () => {
     render(<DialogManager />)
 
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: i18n.t('remove') }))
 
-    expect(payGrade.delete).toHaveResolvedWith(
+    expect(shiftType.delete).toHaveResolvedWith(
       expect.objectContaining({
-        ...resolvedPayGrade,
+        ...resolvedShiftType,
       }),
     )
   })
@@ -113,7 +115,7 @@ describe('removePayGradeAlertDialog', () => {
 
     expect(
       screen.queryByRole('heading', {
-        name: i18n.t('removePayGrade'),
+        name: i18n.t('removeShiftType'),
       }),
     ).not.toBeInTheDocument()
   })
