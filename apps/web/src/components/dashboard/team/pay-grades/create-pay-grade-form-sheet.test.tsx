@@ -12,6 +12,16 @@ const resolvedActiveTeam = {
   id: 'team-1',
 }
 
+const resolvedShiftTypes = [
+  {
+    id: 'shift-type-1',
+    name: 'Cafe',
+    startTime: '09:00',
+    endTime: '17:00',
+    teamId: resolvedActiveTeam.id,
+  },
+]
+
 const resolvedPayGrade = {
   id: 'pay-grade-1',
   name: 'Cafe',
@@ -65,6 +75,7 @@ describe('createPayGradeFormSheet', () => {
     vi.resetAllMocks()
 
     team.getActiveTeam.mockResolvedValue(resolvedActiveTeam)
+    shiftType.list.mockResolvedValue(resolvedShiftTypes)
     payGrade.create.mockResolvedValue(resolvedPayGrade)
 
     useSheetStore.setState({
@@ -82,10 +93,6 @@ describe('createPayGradeFormSheet', () => {
 
     expect(screen.getByRole('textbox', {
       name: i18n.t('name'),
-    }))
-
-    expect(screen.getByRole('spinbutton', {
-      name: i18n.t('baseRate'),
     }))
 
     expect(screen.getByRole('spinbutton', {
