@@ -20,7 +20,7 @@ import { useScheduleStore } from '~/store/schedule.store'
 import { useTRPC } from '~/trpc/client'
 
 type ScheduleMutationsProps = {
-  team: TeamOutput | undefined
+  team: TeamOutput | null | undefined
   start: Date
   end: Date
 }
