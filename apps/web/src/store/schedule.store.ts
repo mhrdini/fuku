@@ -121,6 +121,7 @@ export const useScheduleStore = create<
               id: crypto.randomUUID(),
               teamMemberId,
               date,
+              reason: null,
             },
           ],
         })),

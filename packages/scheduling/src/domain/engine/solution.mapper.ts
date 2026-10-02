@@ -65,11 +65,12 @@ export class SolutionMapper {
     const totalSlotsFilled = assignments.length
 
     // coverage
-    const coveragePerDay: number[] = Array.from({ length: this.totalDays }).fill(0)
+    const coveragePerDay = Array.from<number>({
+      length: this.totalDays,
+    }).fill(0)
 
     for (const assignment of assignments) {
       const dayIndex = getDaysDifference(this.ctx.period.start, assignment.date)
-
       coveragePerDay[dayIndex]++
     }
 
