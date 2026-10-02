@@ -12,7 +12,8 @@
     "BASE_URL",
     "AUTH_SECRET",
     "NEXT_PUBLIC_AUTH_URL",
-    "PRODUCTION_URL"
+    "PRODUCTION_URL",
+    "CI"
   ],
   "tasks": {
     "build": {

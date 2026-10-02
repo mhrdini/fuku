@@ -16,6 +16,7 @@
     "down:test": "docker compose -p fuku-test -f docker-compose.test.yml --env-file .env.test down",
 
     "db:generate": "pnpm --filter @fuku/db exec prisma generate",
+
     "db:migrate:dev": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:dev",
     "db:migrate:dev:auto": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:dev:auto",
     "db:migrate:dev:deploy": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:migrate:deploy",
@@ -24,6 +25,7 @@
     "db:reset:dev": "dotenv -e .env.${NODE_ENV:-development} -- turbo run db:reset",
 
     "db:migrate:test": "dotenv -e .env.test -- turbo run db:migrate:deploy",
+    "db:seed:test": "dotenv -e .env.test -- pnpm --filter web exec tsx e2e/seed.ts",
 
     "clean": "find . -type d \\( -name \"node_modules\" -o -name \".next\" -o -name \".turbo\" -o -name \"dist\" \\) -prune -exec rm -rf '{}' + && find . -name \"pnpm-lock.yaml\" -type f -delete",
     "clean:install": "pnpm clean && pnpm install -r",

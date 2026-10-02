@@ -94,16 +94,17 @@ export function useRuleEditor({
   const updateRuleCondition = async (
     condition: RuleConditionUpdateInput,
   ): Promise<RuleConditionOutput> => {
-    // TODO: Fix IS_HOLIDAY error: Types of property 'field' are incompatible.
+    const updated = await mutateRuleCondition('update', condition)
+
     setRuleConditions(prev => ({
       ...prev,
-      [condition.ruleId]: prev[condition.ruleId].map(c =>
-        c.id === condition.id ? { ...c, ...condition } : c,
+      [updated.ruleId]: prev[updated.ruleId].map(c =>
+        c.id === updated.id ? updated : c,
       ),
     }))
-    return await mutateRuleCondition('update', condition)
-  }
 
+    return updated
+  }
   const deleteRuleCondition = async (
     conditionId: string,
   ): Promise<RuleConditionOutput> => {
