@@ -14,6 +14,7 @@ import {
   Button,
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -79,7 +80,7 @@ export function UserAuthForm({
     if (isRegister) {
       await authClient.signUp.email(data as RegisterSchemaType, {
         onError: (ctx) => {
-          form.setError('root', { message: ctx.error.message })
+          form.setError('root', { message: t(ctx.error.code) })
         },
         onSuccess: () => {
           router.push(`/${data.username}`)
@@ -88,7 +89,7 @@ export function UserAuthForm({
     } else {
       await authClient.signIn.username(data as LoginSchemaType, {
         onError: (ctx) => {
-          form.setError('root', { message: ctx.error.message })
+          form.setError('root', { message: t(ctx.error.code) })
         },
         onSuccess: () => {
           router.push(`/${data.username}`)
@@ -106,6 +107,8 @@ export function UserAuthForm({
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <CardDescription>
+          </CardDescription>
           <form id='form-user-auth' onSubmit={form.handleSubmit(onSubmit)}>
             <FieldSet>
               <FieldGroup>
