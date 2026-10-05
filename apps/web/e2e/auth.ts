@@ -1,12 +1,8 @@
-import { expect, test as setup } from '@playwright/test'
-
-import { seedE2E } from './seed'
+import { expect, test as setup } from './fixtures'
 
 const authFile = 'playwright/.auth/user.json'
 
 setup('authenticate', async ({ page }) => {
-  await seedE2E()
-
   await page.goto('/login')
 
   await page.getByLabel('Username').fill('testuser')

@@ -43,7 +43,8 @@
     "test": "pnpm db:generate && dotenv -e .env.test -- vitest",
     "test:run": "pnpm db:generate && dotenv -e .env.test -- vitest run",
     "test:coverage": "pnpm db:generate && dotenv -e .env.test -- vitest run --coverage",
-    "test:e2e": "pnpm db:generate && dotenv -e .env.test -- turbo run test:e2e"
+    "test:e2e": "pnpm db:generate && dotenv -e .env.test -- turbo run test:e2e",
+    "test:e2e:ui": "pnpm db:generate && dotenv -e .env.test -- turbo run test:e2e:ui"
   },
   "peerDependencies": {
     "inquirer": "catalog:"
