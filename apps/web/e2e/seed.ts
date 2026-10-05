@@ -1,6 +1,6 @@
 import { db } from '@fuku/db'
 
-const TEST_USER = {
+export const TEST_USER = {
   name: 'Test User',
   username: 'testuser',
   email: 'test@example.com',
@@ -8,9 +8,12 @@ const TEST_USER = {
 } as const
 
 export async function seedE2E() {
-  const existingUser = await db.user.findUnique({
+  const existingUser = await db.user.findFirst({
     where: {
-      email: TEST_USER.email,
+      OR: [
+        { email: TEST_USER.email },
+        { username: TEST_USER.username },
+      ],
     },
   })
 

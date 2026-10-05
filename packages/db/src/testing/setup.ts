@@ -6,8 +6,8 @@ import {
   testDb,
 } from './database'
 
-beforeAll(() => {
-  migrateTestDatabase()
+beforeAll(async () => {
+  await migrateTestDatabase()
 })
 
 afterEach(async () => {

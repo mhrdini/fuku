@@ -21,6 +21,9 @@ export function initAuth<
       requireEmailVerification: false,
       autoSignIn: true,
     },
+    rateLimit: {
+      enabled: process.env.BETTER_AUTH_RATE_LIMIT !== 'false',
+    },
     baseURL: options.baseUrl,
     secret: options.secret,
     plugins: [

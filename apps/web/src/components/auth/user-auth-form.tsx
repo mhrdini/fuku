@@ -116,7 +116,7 @@ export function UserAuthForm({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor='form-user-auth-name'>
-                          Name
+                          {t('name')}
                         </FieldLabel>
                         <Input
                           {...field}

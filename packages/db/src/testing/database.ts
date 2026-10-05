@@ -21,7 +21,7 @@ export const testDb
 
 globalForPrisma.testDb = testDb
 
-export function migrateTestDatabase() {
+export async function migrateTestDatabase() {
   execSync('pnpm --filter @fuku/db exec prisma migrate deploy', {
     env: process.env,
     stdio: 'inherit',
