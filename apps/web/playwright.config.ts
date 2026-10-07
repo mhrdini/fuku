@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: './e2e',
 
   fullyParallel: false,
-  workers: 1,
+  workers: process.env.CI ?? 1,
 
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -17,15 +17,15 @@ export default defineConfig({
 
   projects: [
     {
-      name: 'setup',
-      testMatch: /global\.setup\.ts/,
+      name: 'db-setup',
+      testMatch: /db\.setup\.ts/,
     },
     {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
       },
-      dependencies: ['setup'],
+      dependencies: ['db-setup'],
     },
   ],
 
