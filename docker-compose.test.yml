@@ -1,4 +1,3 @@
-# docker-compose.test.yml
 volumes:
   database-test:
     driver: local
