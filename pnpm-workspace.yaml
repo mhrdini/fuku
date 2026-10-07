@@ -2,10 +2,6 @@ linkWorkspacePackages: true
 minimumReleaseAgeExcludePrune: true
 trustPolicy: no-downgrade
 
-publicHoistPattern:
-  - '@ianvs/prettier-plugin-sort-imports'
-  - prettier-plugin-tailwindcss
-
 shellEmulator: true
 
 packages:

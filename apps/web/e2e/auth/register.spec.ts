@@ -57,7 +57,7 @@ test.describe('register', () => {
       .click()
 
     await expect(page).toHaveURL('/register')
-    expect(page.getByText('Username is already taken. Please try another.')).toBeVisible()
+    await expect(page.getByText(i18n.t('USERNAME_IS_ALREADY_TAKEN_PLEASE_TRY_ANOTHER'))).toBeVisible()
   })
 
   test('a user cannot register with an existing email', async ({ page }) => {
@@ -73,6 +73,6 @@ test.describe('register', () => {
       .click()
 
     await expect(page).toHaveURL('/register')
-    await expect(page.getByText('User already exists. Use another email.')).toBeVisible()
+    await expect(page.getByText(i18n.t('USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL'))).toBeVisible()
   })
 })
