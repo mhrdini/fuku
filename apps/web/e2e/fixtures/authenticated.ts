@@ -1,16 +1,19 @@
 import { resetDatabase } from '@fuku/db/testing'
+import { createTeam } from '@fuku/db/testing/factories'
 import { test as base, expect } from '@playwright/test'
 
 import { seedE2E, TEST_USER } from '../seed'
 
 type Fixtures = {
-  e2eDatabase: void
+  authenticatedUser: Awaited<ReturnType<typeof seedE2E>>
+  team: Awaited<ReturnType<typeof createTeam>>
 }
 
 export const test = base.extend<Fixtures>({
-  e2eDatabase: [async ({ page }, use) => {
+  authenticatedUser: [async ({ page }, registerFixture) => {
     await resetDatabase()
-    await seedE2E()
+
+    const user = await seedE2E()
 
     const response = await page.request.post('/api/auth/sign-in/username', {
       data: {
@@ -25,8 +28,14 @@ export const test = base.extend<Fixtures>({
       )
     }
 
-    await use()
+    await registerFixture(user)
   }, { auto: true }],
+
+  team: async ({ authenticatedUser }, registerFixture) => {
+    const team = await createTeam(authenticatedUser.id)
+
+    await registerFixture(team)
+  },
 })
 
 export { expect }

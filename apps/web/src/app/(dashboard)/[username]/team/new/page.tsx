@@ -1423,7 +1423,7 @@ function ShiftTypesSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange} modal={false}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className='flex flex-col gap-6'>
         <SheetHeader>
           <SheetTitle>{t('shiftTypes', 'Shift Types')}</SheetTitle>

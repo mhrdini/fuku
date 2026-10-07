@@ -18,7 +18,7 @@ export async function seedE2E() {
   })
 
   if (existingUser) {
-    return
+    return existingUser
   }
 
   const response = await fetch(
@@ -39,4 +39,16 @@ export async function seedE2E() {
       `Failed to seed E2E user: ${response.status} ${body}`,
     )
   }
+
+  const user = await db.user.findUnique({
+    where: {
+      email: TEST_USER.email,
+    },
+  })
+
+  if (!user) {
+    throw new Error('Failed to find E2E user after registration')
+  }
+
+  return user
 }

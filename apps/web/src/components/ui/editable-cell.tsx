@@ -82,11 +82,14 @@ function EditableCellInner<
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape')
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      e.preventDefault()
       cancelChanges()
-    else if (e.key === 'Enter')
-      saveChanges()
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      await saveChanges()
+    }
   }
 
   return (

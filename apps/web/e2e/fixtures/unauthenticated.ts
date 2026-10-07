@@ -9,11 +9,11 @@ type Fixtures = {
 
 export const test = base.extend<Fixtures>({
   // eslint-disable-next-line no-empty-pattern
-  e2eDatabase: [async ({}, use) => {
+  e2eDatabase: [async ({}, registerFixture) => {
     await resetDatabase()
     await seedE2E()
 
-    await use()
+    await registerFixture()
   }, { auto: true }],
 })
 

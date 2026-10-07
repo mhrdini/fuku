@@ -30,7 +30,7 @@ export function DialogManager() {
 
   return (
     <>
-      <Dialog open={open && !isAlert} onOpenChange={handleClose}>
+      <Dialog open={open && !isAlert} onOpenChange={handleClose} modal={false}>
         <DialogContent showCloseButton={false}>
           {id === DialogId.CREATE_TEAM_MEMBER && <CreateMemberFormDialog />}
           {id === DialogId.UPDATE_TEAM_MEMBER && <UpdateMemberFormDialog />}
