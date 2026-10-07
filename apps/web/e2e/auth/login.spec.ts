@@ -1,6 +1,6 @@
 import i18n from '@fuku/i18n/client'
 
-import { expect, test } from '../fixtures'
+import { expect, test } from '../fixtures/unauthenticated'
 import { TEST_USER } from '../seed'
 
 test.describe('login', () => {
