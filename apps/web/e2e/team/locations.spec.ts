@@ -15,7 +15,9 @@ const UPDATED_LOCATION = {
 }
 
 test.describe('locations', () => {
-  test.beforeEach(async ({ page, authenticatedUser, team }) => {
+  test.beforeEach(async ({ page, authenticatedUser, teams }) => {
+    const team = teams[1]
+
     await page.goto(
       `/${authenticatedUser.username}/team/${team.publicId}/locations`,
     )
@@ -50,7 +52,7 @@ test.describe('locations', () => {
 
     await page
       .getByRole('button', { name: i18n.t('createLocation') })
-      .click()
+      .dispatchEvent('click')
 
     const row = page.locator('tr[data-slot="table-row"]').last()
     await expect(row).toBeVisible()

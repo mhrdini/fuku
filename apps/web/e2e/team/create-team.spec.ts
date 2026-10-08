@@ -1,7 +1,6 @@
 import i18n from '@fuku/i18n/client'
 
 import { expect, test } from '../fixtures/authenticated'
-import { TEST_USER } from '../seed'
 
 const TEAM = {
   name: 'Test Team',
@@ -11,12 +10,13 @@ const TEAM = {
 }
 
 test.describe('create team', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto(`/${TEST_USER.username}/team/new`)
+  test.beforeEach(async ({ page, authenticatedUser }) => {
+    await page.goto(`/${authenticatedUser.username}/team/new`)
   })
 
   test('a user can create a team after filling all required input and gets redirected to the team overview page', async ({
     page,
+    authenticatedUser,
   }) => {
     await expect(
       page.getByRole('heading', { name: i18n.t('createANewTeam') }),
@@ -44,7 +44,7 @@ test.describe('create team', () => {
     // Team Members
     // The current authenticated user is automatically added as ADMIN.
     await expect(
-      page.getByText(TEST_USER.name, { exact: false }),
+      page.getByText(authenticatedUser.name, { exact: false }),
     ).toBeVisible()
 
     await page.getByRole('button', { name: i18n.t('next') }).click()
@@ -54,13 +54,14 @@ test.describe('create team', () => {
 
     await expect(page).toHaveURL(
       new RegExp(
-        `/${TEST_USER.username}/team/[A-Za-z0-9_-]+$`,
+        `/${authenticatedUser.username}/team/[A-Za-z0-9_-]+$`,
       ),
     )
   })
 
   test('a user cannot create a team without filling all required input', async ({
     page,
+    authenticatedUser,
   }) => {
     // Required Basic Info fields are initially empty.
     await expect(page.locator('#form-new-team-name')).toHaveValue('')
@@ -100,7 +101,7 @@ test.describe('create team', () => {
 
     // No team should have been created.
     await expect(page).toHaveURL(
-      new RegExp(`/${TEST_USER.username}/team/new`),
+      new RegExp(`/${authenticatedUser.username}/team/new`),
     )
   })
 })

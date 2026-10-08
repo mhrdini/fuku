@@ -1,3 +1,4 @@
+import { db } from '@fuku/db'
 import { resetDatabase } from '@fuku/db/testing'
 import { createTeam } from '@fuku/db/testing/factories'
 import { test as base, expect } from '@playwright/test'
@@ -6,7 +7,7 @@ import { seedE2E, TEST_USER } from '../seed'
 
 type Fixtures = {
   authenticatedUser: Awaited<ReturnType<typeof seedE2E>>
-  team: Awaited<ReturnType<typeof createTeam>>
+  teams: Array<Awaited<ReturnType<typeof createTeam>>>
 }
 
 export const test = base.extend<Fixtures>({
@@ -31,10 +32,20 @@ export const test = base.extend<Fixtures>({
     await registerFixture(user)
   }, { auto: true }],
 
-  team: async ({ authenticatedUser }, registerFixture) => {
-    const team = await createTeam(authenticatedUser.id)
+  teams: async ({ authenticatedUser }, registerFixture) => {
+    const teamB = await createTeam(authenticatedUser.id)
+    const teamA = await createTeam(authenticatedUser.id)
 
-    await registerFixture(team)
+    await db.user.update({
+      where: {
+        id: authenticatedUser.id,
+      },
+      data: {
+        lastActiveTeamId: teamA.id,
+      },
+    })
+
+    await registerFixture([teamA, teamB])
   },
 })
 
