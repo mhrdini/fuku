@@ -57,7 +57,7 @@ import { DiscardChangesAlertDialogContent } from '../../discard-changes-alert-di
 
 export function UpdateMemberFormDialog() {
   const { t } = useTranslation()
-  const { editingId: currentTeamMemberId, closeDialog, discardOpen, toggleDiscardDialog, setIsDirty } = useDialogStore()
+  const { editingId: currentTeamMemberId, closeDialog, discardOpen, setDiscardOpen, setIsDirty } = useDialogStore()
   const [payGradeOpen, setPayGradeOpen] = useState(false)
 
   const queryClient = useQueryClient()
@@ -177,7 +177,7 @@ export function UpdateMemberFormDialog() {
   }
 
   const cancelButton = (
-    <Button variant='outline' className='ml-auto'>
+    <Button type='button' variant='outline' className='ml-auto'>
       {t('cancel', 'Cancel')}
     </Button>
   )
@@ -330,13 +330,13 @@ export function UpdateMemberFormDialog() {
                 data-invalid={!!form.formState.errors.rateMultiplier}
                 className='col-span-1'
               >
-                <FieldLabel htmlFor='form-create-member-rate-multiplier'>
+                <FieldLabel htmlFor='form-update-member-rate-multiplier'>
                   {t('multiplier', 'Multiplier')}
                 </FieldLabel>
 
                 <Input
                   {...rateMultiplierField.inputProps}
-                  id='form-create-member-rate-multiplier'
+                  id='form-update-member-rate-multiplier'
                   type='number'
                   step='0.01'
                   min='0'
@@ -359,7 +359,7 @@ export function UpdateMemberFormDialog() {
                 <Field orientation='horizontal'>
                   <Checkbox
                     checked={field.value === TeamMemberRoleValues.ADMIN}
-                    id='form-create-member-is-admin'
+                    id='form-update-member-is-admin'
                     onCheckedChange={checked =>
                       field.onChange(
                         checked
@@ -368,7 +368,7 @@ export function UpdateMemberFormDialog() {
                       )}
                   />
                   <FieldLabel
-                    htmlFor='form-create-member-is-admin'
+                    htmlFor='form-update-member-is-admin'
                     className='font-normal'
                   >
                     {t('setAsTeamAdmin', 'Set as team admin')}
@@ -404,7 +404,7 @@ export function UpdateMemberFormDialog() {
 
             <Field orientation='horizontal'>
               <FieldError errors={[form.formState.errors.root]} />
-              <AlertDialog open={discardOpen} onOpenChange={toggleDiscardDialog}>
+              <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
                 {form.formState.isDirty
                   ? (
                       <>
@@ -419,6 +419,7 @@ export function UpdateMemberFormDialog() {
                     )}
               </AlertDialog>
               <LoadingButton
+                type='submit'
                 loading={isPending}
                 disabled={!teamMember || !payGrades || !form.formState.isDirty}
               >

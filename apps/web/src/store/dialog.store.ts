@@ -35,6 +35,7 @@ type DialogStore = DialogOptions & FormOptions & {
   openAlertDialog: (options: DialogOptions) => void
   closeDialog: () => void
   toggleDiscardDialog: () => void
+  setDiscardOpen: (open: boolean) => void
 }
 
 export const useDialogStore = create<DialogStore>(set => ({
@@ -64,4 +65,5 @@ export const useDialogStore = create<DialogStore>(set => ({
   createMemberDraft: null,
   setCreateMemberDraft: (draft: TeamMemberDraft) => set(({ createMemberDraft: draft })),
   clearCreateMemberDraft: () => set({ createMemberDraft: null }),
+  setDiscardOpen: (open: boolean) => set(({ discardOpen: open })),
 }))

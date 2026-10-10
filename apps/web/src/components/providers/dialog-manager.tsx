@@ -18,19 +18,23 @@ import { RemovePayGradeAlertDialog } from '../dashboard/team/pay-grades/remove-p
 import { RemoveShiftTypeAlertDialog } from '../dashboard/team/shift-types/remove-shift-type-alert-dialog'
 
 export function DialogManager() {
-  const { open, id, isAlert, isDirty, closeDialog, toggleDiscardDialog } = useDialogStore()
+  const { open, id, isAlert, isDirty, closeDialog, setDiscardOpen } = useDialogStore()
 
-  const handleClose = () => {
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen)
+      return
+
     if (id === DialogId.UPDATE_TEAM_MEMBER && isDirty) {
-      toggleDiscardDialog()
+      setDiscardOpen(true)
       return
     }
+
     closeDialog()
   }
 
   return (
     <>
-      <Dialog open={open && !isAlert} onOpenChange={handleClose} modal={false}>
+      <Dialog open={open && !isAlert} onOpenChange={handleOpenChange} modal={false}>
         <DialogContent showCloseButton={false}>
           {id === DialogId.CREATE_TEAM_MEMBER && <CreateMemberFormDialog />}
           {id === DialogId.UPDATE_TEAM_MEMBER && <UpdateMemberFormDialog />}

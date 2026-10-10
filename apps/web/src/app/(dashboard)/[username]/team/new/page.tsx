@@ -486,7 +486,7 @@ function TeamMembersSection() {
                             name: pg.name,
                             baseRate: pg.baseRate * field.rateMultiplier,
                           })
-                        : 'Unassigned'
+                        : t('unassigned')
                     })()}
                   </ItemDescription>
                 </ItemContent>
