@@ -185,7 +185,7 @@ export default function TeamMembersContent() {
         cell: info =>
           info.getValue<number>()
             ? `${info.getValue<number>()}`
-            : 'N/A',
+            : t('notAvailable'),
       },
     ],
     [onRemoveMember, onUpdateMember, t],

@@ -24,7 +24,7 @@ export function toTeamMemberUI(m: NonNullable<TeamMemberOutput>): TeamMemberUI {
       givenNames: m.givenNames,
       familyName: m.familyName,
     }),
-    payGradeName: m.payGrade?.name ?? 'Unassigned',
+    payGradeName: m.payGrade?.name ?? i18next.t('unassigned'),
     baseRate: m.payGrade?.baseRate ?? null,
     effectiveRate: m.payGrade ? m.payGrade.baseRate * m.rateMultiplier : null,
     username: m.user ? m.user.username : null,

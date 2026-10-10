@@ -347,6 +347,8 @@
   "USERNAME_TOO_LONG": "ユーザー名が長すぎます",
   "INVALID_USERNAME": "ユーザー名が正しくありません",
   "INVALID_DISPLAY_USERNAME": "表示用ユーザー名が正しくありません",
-  "USERNAME_IS_IMMUTABLE": "ユーザー名は変更できません"
+  "USERNAME_IS_IMMUTABLE": "ユーザー名は変更できません",
 
+  "unassigned": "未割り当て",
+  "notAvailable": "該当なし"
 }
